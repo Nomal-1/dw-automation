@@ -4,6 +4,7 @@ import { AttackMovesMenu } from "./apps/attack-moves-menu.js";
 import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
 import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
+import { TranslationImportMenu } from "./apps/translation-import-menu.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -31,6 +32,18 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  // dungeonworld-ko(한글화 모듈)가 설치되어 있으면, 아래의 무브/주문 이름 설정들을
+  // 그 모듈의 번역 데이터 기준으로 한 번에 자동 채워주는 도구. 실제 값 변경은
+  // lib/translation-import.js에서 이뤄지고, 이 메뉴는 실행 버튼만 제공한다.
+  game.settings.registerMenu(MODULE_ID, "translationImportMenu", {
+    name: "DWAUTO.Settings.TranslationImportMenu.Name",
+    label: "DWAUTO.Settings.TranslationImportMenu.Label",
+    hint: "DWAUTO.Settings.TranslationImportMenu.Hint",
+    icon: "fas fa-language",
+    type: TranslationImportMenu,
+    restricted: true
   });
 
   // Hack & Slash/Volley처럼 선택지 없이 성공·부분성공 시 항상 데미지를 굴리는

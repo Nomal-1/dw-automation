@@ -1,0 +1,18 @@
+<form class="dwauto-translation-import">
+  <p class="notes">{{hint}}</p>
+
+  {{#if active}}
+  <p class="notes dwauto-detected"><i class="fas fa-check-circle"></i> {{detected}}</p>
+  {{else}}
+  <p class="notes dwauto-warning"><i class="fas fa-exclamation-triangle"></i> {{inactiveWarning}}</p>
+  {{/if}}
+
+  <footer class="sheet-footer flexrow">
+    <button type="button" data-action="run-import" {{#unless active}}disabled{{/unless}}>
+      <i class="fas fa-language"></i> {{localize "DWAUTO.TranslationImport.RunButton"}}
+    </button>
+    <button type="button" data-action="close-menu">
+      <i class="fas fa-times"></i> {{localize "DWAUTO.TranslationImport.Close"}}
+    </button>
+  </footer>
+</form>

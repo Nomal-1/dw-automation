@@ -138,3 +138,11 @@
 .dwauto-commune-penalty:hover {
   filter: brightness(1.15);
 }
+
+.dwauto-detected {
+  color: #4caf50;
+}
+
+.dwauto-warning {
+  color: #e0a030;
+}
