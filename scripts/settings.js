@@ -1,5 +1,7 @@
 import { MODULE_ID, SETTINGS } from "./constants.js";
 import { TagSettingsMenu } from "./apps/tag-settings-menu.js";
+import { AttackMovesMenu } from "./apps/attack-moves-menu.js";
+import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -29,6 +31,9 @@ export function registerSettings() {
     default: true
   });
 
+  // Hack & Slash/Volley처럼 선택지 없이 성공·부분성공 시 항상 데미지를 굴리는
+  // 단순한 무브 이름 목록. Backstab/Called Shot처럼 선택지에 따라 거동이 달라지는
+  // 무브는 아래 "특수 공격 무브" 설정에서 별도로 관리한다.
   game.settings.register(MODULE_ID, SETTINGS.MELEE_MOVE_NAMES, {
     name: "DWAUTO.Settings.MeleeMoveNames.Name",
     hint: "DWAUTO.Settings.MeleeMoveNames.Hint",
@@ -86,6 +91,26 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.TagMenu.Hint",
     icon: "fas fa-tags",
     type: TagSettingsMenu,
+    restricted: true
+  });
+
+  // 선택지에 종속되어 데미지 여부/사격 여부가 결과 등급마다 다른 무브(Backstab,
+  // Called Shot 등). 컴펜디엄 원본 ID로는 자동 인식이 안 되는 시스템도 있어서
+  // (캐릭터 생성 시 무브 아이템을 매번 새로 만들고 출처 플래그를 안 남기는 경우),
+  // 근접/사격 무브 이름 설정과 같은 방식으로 이름 기반 표를 GM이 직접 관리한다.
+  game.settings.register(MODULE_ID, SETTINGS.SPECIAL_ATTACK_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_SPECIAL_ATTACK_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "attackMovesMenu", {
+    name: "DWAUTO.Settings.AttackMovesMenu.Name",
+    label: "DWAUTO.Settings.AttackMovesMenu.Label",
+    hint: "DWAUTO.Settings.AttackMovesMenu.Hint",
+    icon: "fas fa-hand-fist",
+    type: AttackMovesMenu,
     restricted: true
   });
 }

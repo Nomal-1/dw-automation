@@ -1,6 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { TAG_CATALOG } from "../data/tag-catalog.js";
-import { KNOWN_ATTACK_MOVES, DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
+import { DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -287,11 +287,21 @@ function onCreateChatMessage(message, options, userId) {
 
   const moveItem = findMoveItem(actor, title);
 
-  // 1) 알려진 공격 무브(Hack & Slash / Volley / Backstab / Called Shot)인지
-  //    무브 아이템의 _id로 먼저 확인한다 — 번역되어도 안 깨진다.
-  let behavior = moveItem ? KNOWN_ATTACK_MOVES[moveItem.id] : null;
+  // 1) "특수 공격 무브" 설정 표(Backstab/Called Shot처럼 선택지에 따라 거동이
+  //    달라지는 무브)에 이름이 등록되어 있는지 먼저 확인한다.
+  const specialMoves = game.settings.get(MODULE_ID, SETTINGS.SPECIAL_ATTACK_MOVES);
+  const special = specialMoves.find((m) => m.name === title);
+  let behavior = special
+    ? {
+        ranged: special.ranged,
+        damageOnPartial: special.damageOnPartial,
+        damageOnSuccess: special.damageOnSuccess,
+        choiceGatesDamage: special.gatesDamage
+      }
+    : null;
 
-  // 2) 카탈로그에 없으면 기존처럼 설정에 등록된 이름 목록으로 폴백한다.
+  // 2) 없으면 근접/사격 무브 이름 목록(Hack & Slash/Volley류, 선택지 없이 항상
+  //    데미지를 굴리는 단순한 무브)으로 폴백한다.
   if (!behavior) {
     const meleeNames = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
     const rangedNames = splitCommaList(SETTINGS.RANGED_MOVE_NAMES);

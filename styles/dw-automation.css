@@ -87,3 +87,29 @@
   font-size: 0.85rem;
   opacity: 0.85;
 }
+
+.dwauto-attack-moves-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.dwauto-attack-moves-table th,
+.dwauto-attack-moves-table td {
+  padding: 4px 6px;
+  text-align: center;
+  border-bottom: 1px solid rgba(120, 46, 34, 0.4);
+}
+
+.dwauto-attack-moves-table th:first-child,
+.dwauto-attack-moves-table td:first-child {
+  text-align: left;
+}
+
+.dwauto-attack-moves-table input[type="text"] {
+  width: 100%;
+}
+
+.dwauto-remove-row {
+  color: #b03a2e;
+}

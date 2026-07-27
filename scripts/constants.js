@@ -8,5 +8,6 @@ export const SETTINGS = {
   RANGED_MOVE_NAMES: "rangedMoveNames",
   MELEE_WEAPON_TAGS: "meleeWeaponTags",
   RANGED_WEAPON_TAGS: "rangedWeaponTags",
-  ENABLED_DAMAGE_TAGS: "enabledDamageTags"
+  ENABLED_DAMAGE_TAGS: "enabledDamageTags",
+  SPECIAL_ATTACK_MOVES: "specialAttackMoves"
 };

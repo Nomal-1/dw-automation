@@ -13,15 +13,15 @@
       },
       "EnableAttackAssistant": {
         "Name": "Enable Attack Damage Automation",
-        "Hint": "On a success or partial success for a melee (Hack & Slash, Backstab) or ranged (Volley, Called Shot) move, asks whether to roll damage and automatically deducts consumables like ammo. Backstab/Called Shot are recognized by the move item's own compendium ID, so they work even if not listed below."
+        "Hint": "On a success or partial success, asks whether to roll damage and automatically deducts consumables like ammo. Which moves trigger this is managed in the name lists below and the Special Attack Moves setting."
       },
       "MeleeMoveNames": {
-        "Name": "Melee Move Names (for custom moves)",
-        "Hint": "Besides the moves already auto-recognized (Hack & Slash, Backstab), add the name of any homebrew melee attack move here (comma separated)."
+        "Name": "Melee Move Names",
+        "Hint": "Melee moves like Hack & Slash that always roll damage on success/partial with no choices involved (comma separated). Adjust this if a translation module renamed the move. Moves whose behavior depends on a choice (like Backstab) are managed separately in Special Attack Moves."
       },
       "RangedMoveNames": {
-        "Name": "Ranged Move Names (for custom moves)",
-        "Hint": "Besides the moves already auto-recognized (Volley, Called Shot), add the name of any homebrew ranged attack move here (comma separated). Moves in this list also trigger the ammo consumption prompt."
+        "Name": "Ranged Move Names",
+        "Hint": "Ranged moves like Volley that always roll damage on success/partial with no choices involved (comma separated). These also trigger the ammo consumption prompt. Moves whose behavior depends on a choice (like Called Shot) are managed separately in Special Attack Moves."
       },
       "MeleeWeaponTags": {
         "Name": "Melee Weapon Tags",
@@ -35,6 +35,11 @@
         "Name": "Damage Tag Automation",
         "Label": "Edit Tag List",
         "Hint": "Individually toggle which weapon tags are automatically applied when rolling damage."
+      },
+      "AttackMovesMenu": {
+        "Name": "Special Attack Moves",
+        "Label": "Edit Special Attack Moves",
+        "Hint": "Register/edit attack moves whose damage depends on a choice, like Backstab or Called Shot, by name, ranged flag, and behavior. Defaults to the English names (Backstab, Called Shot); edit the name field if your game uses a translated name."
       }
     },
     "Npc": {
@@ -113,6 +118,16 @@
       "Hint": "If a checked tag is present on the weapon, its raw text is shown in the damage roll message. Tags marked \"auto-applied by the damage buttons\" (damage bonus / piercing / ignores armor) are picked up by Dungeon World's own full/half/double/heal damage-apply buttons when clicked — the system reads the message text itself; this module doesn't calculate anything. Those buttons apply to whichever tokens are selected on the canvas (not targeted), and require the Dungeon World system setting \"Enable Damage Buttons\" to be on (default: on). Tags marked \"shown as a note only\" (Forceful/Messy) have no system automation, so they're just displayed for the GM to judge.",
       "SelectAll": "Select All",
       "SelectNone": "Select None"
+    },
+    "AttackMoves": {
+      "Title": "Special Attack Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Check \"Ranged\" to also trigger the ammo consumption prompt. Check \"Choice gates damage\" to only roll damage when the player picks a choice containing a damage die (e.g. [[1d6]]) — this is Backstab's behavior. Leave it unchecked if the choices are just flavor and damage is decided purely by the partial/success checkboxes below — this is Called Shot's behavior.",
+      "Name": "Move Name",
+      "Ranged": "Ranged",
+      "GatesDamage": "Choice Gates Damage",
+      "DamageOnPartial": "Damage on Partial",
+      "DamageOnSuccess": "Damage on Success",
+      "AddRow": "Add Row"
     }
   }
 }

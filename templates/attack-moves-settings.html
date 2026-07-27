@@ -1,0 +1,34 @@
+<form class="dwauto-attack-moves">
+  <p class="notes">{{hint}}</p>
+
+  <table class="dwauto-attack-moves-table">
+    <thead>
+      <tr>
+        <th>{{localize "DWAUTO.AttackMoves.Name"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.Ranged"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.GatesDamage"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.DamageOnPartial"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.DamageOnSuccess"}}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows}}
+      <tr>
+        <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
+        <td><input type="checkbox" name="rows.{{@index}}.ranged" {{checked this.ranged}}></td>
+        <td><input type="checkbox" name="rows.{{@index}}.gatesDamage" {{checked this.gatesDamage}}></td>
+        <td><input type="checkbox" name="rows.{{@index}}.damageOnPartial" {{checked this.damageOnPartial}}></td>
+        <td><input type="checkbox" name="rows.{{@index}}.damageOnSuccess" {{checked this.damageOnSuccess}}></td>
+        <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <button type="button" data-action="add-row"><i class="fas fa-plus"></i> {{localize "DWAUTO.AttackMoves.AddRow"}}</button>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-save"></i> {{localize "SETTINGS.Save"}}</button>
+  </footer>
+</form>
