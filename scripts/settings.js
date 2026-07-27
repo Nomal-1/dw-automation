@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "./constants.js";
+import { TagSettingsMenu } from "./apps/tag-settings-menu.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -44,5 +45,36 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Volley"
+  });
+
+  // 근접/사격 판정 기준: 무기의 태그(tagsString)에 아래 목록 중 하나라도
+  // 포함되어 있으면 사격 무기로, 아니면 근접 무기로 취급한다.
+  // 던전월드 기본 무기는 근접이 hand/close/reach, 사격이 near/far 태그를 쓰므로
+  // 기본값은 "near, far".
+  game.settings.register(MODULE_ID, SETTINGS.RANGED_WEAPON_TAGS, {
+    name: "DWAUTO.Settings.RangedWeaponTags.Name",
+    hint: "DWAUTO.Settings.RangedWeaponTags.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "near, far"
+  });
+
+  // 데미지 굴림에 자동 반영할 태그 목록. 체크박스 UI(TagSettingsMenu)에서 편집하며,
+  // 여기 저장되는 값은 태그 카탈로그(data/tag-catalog.js)의 key 배열이다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLED_DAMAGE_TAGS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: ["damageBonus", "piercing", "ignoresArmor", "forceful", "messy"]
+  });
+
+  game.settings.registerMenu(MODULE_ID, "tagSettingsMenu", {
+    name: "DWAUTO.Settings.TagMenu.Name",
+    label: "DWAUTO.Settings.TagMenu.Label",
+    hint: "DWAUTO.Settings.TagMenu.Hint",
+    icon: "fas fa-tags",
+    type: TagSettingsMenu,
+    restricted: true
   });
 }

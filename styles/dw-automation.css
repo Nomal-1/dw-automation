@@ -53,23 +53,21 @@
   flex: 1;
 }
 
-.dwauto-damage-buttons {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.dwauto-damage-buttons .dwauto-apply-damage {
-  flex: 1;
-  padding: 4px 6px;
+.dwauto-raw-tags {
+  margin: 4px 0 0;
   font-size: 0.8rem;
-  border-radius: 4px;
-  border: 1px solid #782e22;
-  background: #7a2e2e;
-  color: #fff;
-  cursor: pointer;
+  font-family: monospace;
+  opacity: 0.8;
 }
 
-.dwauto-damage-buttons .dwauto-apply-damage:hover {
-  filter: brightness(1.15);
+.dwauto-tag-notes {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.dwauto-tag-bulk {
+  display: flex;
+  gap: 8px;
 }

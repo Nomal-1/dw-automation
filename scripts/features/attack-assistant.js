@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { TAG_CATALOG } from "../data/tag-catalog.js";
 
 // "Hack & Slash" / "Volley" 채팅 카드의 구조 (dungeonworld/templates/chat/chat-move.html):
 //   <section><div class="... chat-card move-card" data-actor-id="...">
@@ -6,7 +7,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 //     <div class="row result success|partial|failure">...</div>
 // 번역 모듈로 무브 이름이 바뀐 테이블이면 설정에서 이름을 맞춰주면 된다.
 
-function getConfiguredNames(settingKey) {
+function splitCommaList(settingKey) {
   return game.settings
     .get(MODULE_ID, settingKey)
     .split(",")
@@ -14,40 +15,73 @@ function getConfiguredNames(settingKey) {
     .filter(Boolean);
 }
 
-function parseTagDamageBonus(item) {
-  const tagsString = item.system?.tagsString ?? "";
-  const match = tagsString.match(/(\d+)\s*damage/i);
-  return match ? parseInt(match[1], 10) : 0;
+// 근접/사격 판정: 무기 태그(tagsString)에 설정된 키워드(기본값 "near, far")가
+// 하나라도 포함되어 있으면 사격 무기로 취급한다. 던전월드 기본 무기는 근접이
+// hand/close/reach, 사격이 near/far 태그를 쓰는 관례를 이용한 것으로, 무기 자체에
+// "근접"/"사격"을 구분하는 별도 필드가 있는 게 아니다. 이 키워드 목록은
+// 모듈 설정(사격 공격 판정 태그)에서 직접 편집할 수 있다.
+function isRangedWeapon(item) {
+  const tags = (item.system?.tagsString ?? "").toLowerCase();
+  const rangedKeywords = splitCommaList(SETTINGS.RANGED_WEAPON_TAGS).map((k) => k.toLowerCase());
+  return rangedKeywords.some((keyword) => tags.includes(keyword));
 }
 
 function isAmmoItem(item) {
   return /ammo/i.test(item.system?.tagsString ?? "");
 }
 
-function isRangedWeapon(item) {
-  const tags = (item.system?.tagsString ?? "").toLowerCase();
-  return tags.includes("near") || tags.includes("far");
+// 모듈 설정(태그 자동 반영 목록)에서 켜둔 태그만 검사한다.
+// "raw" 타입은 매칭된 태그 원문(예: "1 piercing", "+1 damage")을 그대로 반환한다 —
+// 이 문자열을 채팅 메시지에 노출시켜 두면, 던전월드 시스템의 네이티브 피해 적용
+// 버튼(전체/절반/두배/치유)이 클릭 시 메시지 텍스트를 정규식으로 훑어서 알아서
+// 관통/방어구무시/데미지보너스를 반영해준다(dungeonworld/module/chat.js의
+// _chatActionDamage 참고). 그래서 여기서는 절대 수식에 더하면 안 된다 — 더하면
+// 버튼을 눌렀을 때 이중으로 반영된다.
+// "note" 타입은 시스템이 자동화해주지 않는 서술형 태그라 참고 문구로만 보여준다.
+function getTagDisplay(weapon) {
+  const enabled = game.settings.get(MODULE_ID, SETTINGS.ENABLED_DAMAGE_TAGS);
+  const tagsString = weapon.system?.tagsString ?? "";
+
+  const rawTags = [];
+  const notes = [];
+
+  for (const tag of TAG_CATALOG) {
+    if (!enabled.includes(tag.key)) continue;
+    const match = tagsString.match(tag.pattern);
+    if (!match) continue;
+
+    if (tag.effect === "raw") {
+      rawTags.push(match[0]);
+    } else {
+      notes.push(game.i18n.format(tag.noteKey, { n: match[1] ?? "" }));
+    }
+  }
+
+  return { rawTags, notes };
 }
 
 async function rollDamage(actor, weapon, dmgMod) {
   const die = actor.system.attributes?.damage?.value || "d6";
   const miscBonus = actor.system.attributes?.damage?.misc || "";
-  const tagBonus = parseTagDamageBonus(weapon);
 
   let formula = die;
   if (miscBonus) formula += `+${miscBonus}`;
-  if (tagBonus) formula += `+${tagBonus}`;
   if (dmgMod) formula += `+${dmgMod}`;
 
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
 
+  const { rawTags, notes } = getTagDisplay(weapon);
+
   const flavor = `
     <h3>${game.i18n.format("DWAUTO.Attack.DamageFlavor", { weapon: weapon.name })}</h3>
-    <div class="dwauto-damage-buttons">
-      <button type="button" class="dwauto-apply-damage" data-op="full">${game.i18n.localize("DWAUTO.Attack.ApplyFull")}</button>
-      <button type="button" class="dwauto-apply-damage" data-op="half">${game.i18n.localize("DWAUTO.Attack.ApplyHalf")}</button>
-      <button type="button" class="dwauto-apply-damage" data-op="double">${game.i18n.localize("DWAUTO.Attack.ApplyDouble")}</button>
+    ${rawTags.length ? `<p class="dwauto-raw-tags">${rawTags.join(", ")}</p>` : ""}
+    ${notes.length ? `<ul class="dwauto-tag-notes"><li>${notes.join("</li><li>")}</li></ul>` : ""}
+    <div class="chat-damage-buttons">
+      <button type="button" class="button damage full-damage" data-action="damage" title="${game.i18n.localize("DWAUTO.Attack.ApplyFullTitle")}"><i class="fas fa-user-minus"></i></button>
+      <button type="button" class="button damage half-damage" data-action="half-damage" title="${game.i18n.localize("DWAUTO.Attack.ApplyHalfTitle")}"><i class="fas fa-user-minus"></i> 1/2</button>
+      <button type="button" class="button damage double-damage" data-action="double-damage" title="${game.i18n.localize("DWAUTO.Attack.ApplyDoubleTitle")}"><i class="fas fa-user-minus"></i> 2X</button>
+      <button type="button" class="button heal heal-damage" data-action="heal" title="${game.i18n.localize("DWAUTO.Attack.ApplyHealTitle")}"><i class="fas fa-user-plus"></i></button>
     </div>
   `;
 
@@ -189,8 +223,8 @@ function onCreateChatMessage(message, options, userId) {
   if (!actor) return;
 
   const title = card.find(".cell__title").first().text().trim();
-  const meleeNames = getConfiguredNames(SETTINGS.MELEE_MOVE_NAMES);
-  const rangedNames = getConfiguredNames(SETTINGS.RANGED_MOVE_NAMES);
+  const meleeNames = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
+  const rangedNames = splitCommaList(SETTINGS.RANGED_MOVE_NAMES);
   if (!meleeNames.includes(title) && !rangedNames.includes(title)) return;
 
   const resultRow = card.find(".row.result");
@@ -199,26 +233,6 @@ function onCreateChatMessage(message, options, userId) {
   promptDamageRoll(actor);
 }
 
-function onApplyDamageClick(event, message) {
-  const op = event.currentTarget.dataset.op;
-  const total = message.rolls?.[0]?.total ?? 0;
-  const targets = Array.from(game.user.targets);
-
-  if (targets.length === 0) {
-    ui.notifications.warn(game.i18n.localize("DWAUTO.Attack.NoTargets"));
-    return;
-  }
-
-  for (const token of targets) {
-    token.actor?.applyDamage?.(total, { op });
-  }
-}
-
-function onRenderChatMessage(message, html) {
-  html.find(".dwauto-apply-damage").on("click", (event) => onApplyDamageClick(event, message));
-}
-
 export function registerAttackAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
-  Hooks.on("renderChatMessage", onRenderChatMessage);
 }

@@ -1,0 +1,23 @@
+<form class="dwauto-tag-settings">
+  <p class="notes">{{hint}}</p>
+
+  <div class="form-group dwauto-tag-bulk">
+    <button type="button" data-action="select-all"><i class="fas fa-check-square"></i> {{localize "DWAUTO.TagSettings.SelectAll"}}</button>
+    <button type="button" data-action="select-none"><i class="fas fa-square"></i> {{localize "DWAUTO.TagSettings.SelectNone"}}</button>
+  </div>
+
+  <hr>
+
+  {{#each tags}}
+  <div class="form-group">
+    <label>
+      <input type="checkbox" name="{{key}}" {{checked checked}}>
+      {{label}}
+    </label>
+  </div>
+  {{/each}}
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-save"></i> {{localize "SETTINGS.Save"}}</button>
+  </footer>
+</form>

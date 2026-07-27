@@ -22,6 +22,15 @@
       "RangedMoveNames": {
         "Name": "Ranged Move Names",
         "Hint": "Move names (comma separated) that should trigger the damage prompt as a ranged attack. These also trigger the ammo consumption prompt."
+      },
+      "RangedWeaponTags": {
+        "Name": "Ranged Weapon Tags",
+        "Hint": "If a weapon's tags contain any of these keywords (comma separated), it's treated as ranged. Weapons have no explicit melee/ranged field; this relies on the Dungeon World convention that melee weapons use hand/close/reach and ranged weapons use near/far. Default: near, far."
+      },
+      "TagMenu": {
+        "Name": "Damage Tag Automation",
+        "Label": "Edit Tag List",
+        "Hint": "Individually toggle which weapon tags are automatically applied when rolling damage."
       }
     },
     "Npc": {
@@ -57,10 +66,35 @@
       "AmmoConsumed": "{name} x{count} consumed (remaining: {remaining})",
       "Remaining": "remaining",
       "DamageFlavor": "{weapon} Damage",
-      "ApplyFull": "Apply Full Damage",
-      "ApplyHalf": "Apply Half Damage",
-      "ApplyDouble": "Apply Double Damage",
-      "NoTargets": "No targeted tokens to apply damage to."
+      "ApplyFullTitle": "Apply full damage to selected tokens (Dungeon World system feature)",
+      "ApplyHalfTitle": "Apply half damage to selected tokens (Dungeon World system feature)",
+      "ApplyDoubleTitle": "Apply double damage to selected tokens (Dungeon World system feature)",
+      "ApplyHealTitle": "Apply healing to selected tokens (Dungeon World system feature)"
+    },
+    "Tags": {
+      "DamageBonus": {
+        "Label": "+N damage (e.g. +1 damage) — auto-applied by the damage buttons"
+      },
+      "Piercing": {
+        "Label": "N piercing (e.g. 1 piercing) — auto-applied by the damage buttons (reduces armor)"
+      },
+      "IgnoresArmor": {
+        "Label": "Ignores Armor — auto-applied by the damage buttons"
+      },
+      "Forceful": {
+        "Label": "Forceful — shown as a note only",
+        "Note": "Forceful: you can knock them back or off their feet"
+      },
+      "Messy": {
+        "Label": "Messy — shown as a note only",
+        "Note": "Messy: forces a losing side into a hard choice"
+      }
+    },
+    "TagSettings": {
+      "Title": "Damage Tag Automation",
+      "Hint": "If a checked tag is present on the weapon, its raw text is shown in the damage roll message. Tags marked \"auto-applied by the damage buttons\" (damage bonus / piercing / ignores armor) are picked up by Dungeon World's own full/half/double/heal damage-apply buttons when clicked — the system reads the message text itself; this module doesn't calculate anything. Those buttons apply to whichever tokens are selected on the canvas (not targeted), and require the Dungeon World system setting \"Enable Damage Buttons\" to be on (default: on). Tags marked \"shown as a note only\" (Forceful/Messy) have no system automation, so they're just displayed for the GM to judge.",
+      "SelectAll": "Select All",
+      "SelectNone": "Select None"
     }
   }
 }

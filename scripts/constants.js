@@ -5,5 +5,7 @@ export const SETTINGS = {
   ENABLE_MONSTER_GENERATOR: "enableMonsterGenerator",
   ENABLE_ATTACK_ASSISTANT: "enableAttackAssistant",
   MELEE_MOVE_NAMES: "meleeMoveNames",
-  RANGED_MOVE_NAMES: "rangedMoveNames"
+  RANGED_MOVE_NAMES: "rangedMoveNames",
+  RANGED_WEAPON_TAGS: "rangedWeaponTags",
+  ENABLED_DAMAGE_TAGS: "enabledDamageTags"
 };
