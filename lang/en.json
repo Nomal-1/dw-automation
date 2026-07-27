@@ -1,0 +1,66 @@
+{
+  "DWAUTO": {
+    "Cancel": "Cancel",
+    "Confirm": "Confirm",
+    "Settings": {
+      "EnableNpcGenerator": {
+        "Name": "Enable NPC Generator",
+        "Hint": "Adds a tab to NPC sheets that randomly rolls a name, instinct, and trait."
+      },
+      "EnableMonsterGenerator": {
+        "Name": "Enable Monster Stat Generator",
+        "Hint": "Adds a tab to NPC sheets that randomly rolls a damage die, armor, HP, and coin."
+      },
+      "EnableAttackAssistant": {
+        "Name": "Enable Attack Damage Automation",
+        "Hint": "On a success or partial success for a melee (Hack & Slash) or ranged (Volley) move, asks whether to roll damage and automatically deducts consumables like ammo."
+      },
+      "MeleeMoveNames": {
+        "Name": "Melee Move Names",
+        "Hint": "Move names (comma separated) that should trigger the damage prompt as a melee attack. Adjust this if a translation module renamed the move."
+      },
+      "RangedMoveNames": {
+        "Name": "Ranged Move Names",
+        "Hint": "Move names (comma separated) that should trigger the damage prompt as a ranged attack. These also trigger the ammo consumption prompt."
+      }
+    },
+    "Npc": {
+      "TabLabel": "Random Gen",
+      "RollButton": "Roll Name · Instinct · Trait",
+      "RollButtonTitle": "Randomly re-roll this NPC's name, instinct, and trait. Can be repeated any number of times.",
+      "Instinct": "Instinct",
+      "Trait": "Trait",
+      "Generated": "NPC generated: {name}"
+    },
+    "Monster": {
+      "TabLabel": "Monster Stats",
+      "RollButton": "Roll Damage · Armor · HP · Coin",
+      "RollButtonTitle": "Randomly re-roll this NPC's damage die, armor, HP, and coin.",
+      "DamageDie": "Damage Die",
+      "Armor": "Armor",
+      "Hp": "HP",
+      "Coin": "Coin",
+      "Generated": "Monster stats generated: {name}"
+    },
+    "Attack": {
+      "ConfirmTitle": "Roll Damage",
+      "ConfirmContent": "<b>{name}</b>'s attack succeeded. Roll damage?",
+      "WeaponDialogTitle": "Choose Weapon",
+      "WeaponLabel": "Which weapon did you attack with?",
+      "ModLabel": "Damage Modifier",
+      "RollButton": "Roll Damage",
+      "NoWeapons": "{name} has no weapon equipment; skipping the damage roll.",
+      "AmmoDialogTitle": "Consume Ammo",
+      "AmmoItemLabel": "Which ammo are you using?",
+      "AmmoCountLabel": "How many will you use?",
+      "AmmoSkip": "Don't consume",
+      "AmmoConsumed": "{name} x{count} consumed (remaining: {remaining})",
+      "Remaining": "remaining",
+      "DamageFlavor": "{weapon} Damage",
+      "ApplyFull": "Apply Full Damage",
+      "ApplyHalf": "Apply Half Damage",
+      "ApplyDouble": "Apply Double Damage",
+      "NoTargets": "No targeted tokens to apply damage to."
+    }
+  }
+}

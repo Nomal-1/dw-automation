@@ -1,0 +1,66 @@
+{
+  "DWAUTO": {
+    "Cancel": "취소",
+    "Confirm": "확인",
+    "Settings": {
+      "EnableNpcGenerator": {
+        "Name": "NPC 자동 생성 사용",
+        "Hint": "NPC 시트에 이름·본능·재주를 무작위로 채워주는 탭을 추가합니다."
+      },
+      "EnableMonsterGenerator": {
+        "Name": "몬스터 스탯 자동 생성 사용",
+        "Hint": "NPC 시트에 데미지 다이스·방어구·HP·코인을 무작위로 채워주는 탭을 추가합니다."
+      },
+      "EnableAttackAssistant": {
+        "Name": "공격 데미지 자동 굴림 사용",
+        "Hint": "근접(Hack & Slash)/사격(Volley) 무브 성공·부분 성공 시 데미지를 굴릴지 물어보고, 화살 등 소모품을 자동으로 차감합니다."
+      },
+      "MeleeMoveNames": {
+        "Name": "근접 공격 무브 이름",
+        "Hint": "데미지 자동 굴림을 트리거할 근접 무브 이름(쉼표로 여러 개 구분). 번역 모듈로 무브 이름이 바뀌었다면 여기서 맞춰주세요."
+      },
+      "RangedMoveNames": {
+        "Name": "사격 공격 무브 이름",
+        "Hint": "데미지 자동 굴림을 트리거할 사격 무브 이름(쉼표로 여러 개 구분). 이 목록에 해당하면 화살 소모 확인도 함께 진행됩니다."
+      }
+    },
+    "Npc": {
+      "TabLabel": "랜덤생성",
+      "RollButton": "이름 · 본능 · 재주 무작위 생성",
+      "RollButtonTitle": "이 NPC의 이름, 본능, 재주를 무작위로 다시 생성합니다. 몇 번이든 반복할 수 있습니다.",
+      "Instinct": "본능",
+      "Trait": "재주",
+      "Generated": "NPC 생성 완료: {name}"
+    },
+    "Monster": {
+      "TabLabel": "몬스터 스탯",
+      "RollButton": "데미지 · 방어구 · HP · 코인 무작위 생성",
+      "RollButtonTitle": "이 NPC의 데미지 다이스, 방어구, HP, 소지금을 무작위로 다시 생성합니다.",
+      "DamageDie": "데미지 다이스",
+      "Armor": "방어구",
+      "Hp": "HP",
+      "Coin": "코인",
+      "Generated": "몬스터 스탯 생성 완료: {name}"
+    },
+    "Attack": {
+      "ConfirmTitle": "데미지 굴림",
+      "ConfirmContent": "<b>{name}</b>의 공격이 성공했습니다. 데미지를 굴릴까요?",
+      "WeaponDialogTitle": "공격 장비 선택",
+      "WeaponLabel": "어떤 장비로 공격하셨나요?",
+      "ModLabel": "데미지 수정치",
+      "RollButton": "데미지 굴림",
+      "NoWeapons": "{name}에게 장착된 무기 장비가 없어 데미지 굴림을 건너뜁니다.",
+      "AmmoDialogTitle": "화살 소모",
+      "AmmoItemLabel": "어떤 화살(탄약)을 사용하시나요?",
+      "AmmoCountLabel": "몇 발을 소모하시겠습니까?",
+      "AmmoSkip": "소모하지 않음",
+      "AmmoConsumed": "{name} {count}개 소모 (남은 수량: {remaining})",
+      "Remaining": "남은 수량",
+      "DamageFlavor": "{weapon} 데미지",
+      "ApplyFull": "전체 피해 적용",
+      "ApplyHalf": "절반 피해 적용",
+      "ApplyDouble": "두 배 피해 적용",
+      "NoTargets": "피해를 적용할 대상(타겟)이 지정되지 않았습니다."
+    }
+  }
+}
