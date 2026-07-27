@@ -2,11 +2,20 @@ import { registerSettings } from "./settings.js";
 import { registerNpcGenerator } from "./features/npc-generator.js";
 import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
+import { registerSpellcastingAssistant } from "./features/spellcasting.js";
+import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
 
 Hooks.once("init", () => {
   registerSettings();
 });
 
+// game.dungeonworld.ItemDw(및 다른 시스템/모듈이 등록해두는 전역들)가 전부
+// 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.
+Hooks.once("ready", () => {
+  registerSpellcastingWrapper();
+});
+
 registerNpcGenerator();
 registerMonsterGenerator();
 registerAttackAssistant();
+registerSpellcastingAssistant();

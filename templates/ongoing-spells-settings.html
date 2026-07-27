@@ -1,0 +1,34 @@
+<form class="dwauto-ongoing-spells">
+  <p class="notes">{{hint}}</p>
+
+  <table class="dwauto-attack-moves-table">
+    <thead>
+      <tr>
+        <th>{{localize "DWAUTO.OngoingSpells.Name"}}</th>
+        <th>{{localize "DWAUTO.OngoingSpells.CastPenalty"}}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows}}
+      <tr>
+        <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
+        <td>
+          <select name="rows.{{@index}}.castPenalty">
+            {{#each this.options}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </td>
+        <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <button type="button" data-action="add-row"><i class="fas fa-plus"></i> {{localize "DWAUTO.AttackMoves.AddRow"}}</button>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-save"></i> {{localize "SETTINGS.Save"}}</button>
+  </footer>
+</form>

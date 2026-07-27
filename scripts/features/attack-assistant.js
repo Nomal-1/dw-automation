@@ -4,6 +4,7 @@ import { DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -137,6 +138,57 @@ function promptAmmo(ammoItems) {
   });
 }
 
+// Wizard의 Spell Augmentation: 지속 중인 주문을 하나 소모해서 그 레벨만큼
+// 데미지를 추가한다. 이 무브가 없거나 지속 중인 주문이 없으면 그냥 0을 반환한다
+// (물어보지 않고 조용히 넘어감).
+async function promptSpellAugmentation(actor) {
+  const moveNames = splitCommaList(SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES);
+  const hasMove = actor.items.some((i) => i.type === "move" && moveNames.includes(i.name));
+  if (!hasMove) return 0;
+
+  const active = getActiveOngoingSpells(actor);
+  if (active.length === 0) return 0;
+
+  return new Promise((resolve) => {
+    const options = active.map((s) => `<option value="${s.itemId}">${s.name}</option>`).join("");
+
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.SpellAugmentation.Title"),
+      content: `
+        <p>${game.i18n.localize("DWAUTO.SpellAugmentation.Content")}</p>
+        <form>
+          <div class="form-group">
+            <select name="spell">${options}</select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        yes: {
+          label: game.i18n.localize("DWAUTO.SpellAugmentation.Use"),
+          callback: async (html) => {
+            const itemId = html.find('[name="spell"]').val();
+            const spellItem = actor.items.get(itemId);
+            const level = Number(spellItem?.system?.spellLevel) || 0;
+            await removeActiveOngoingSpell(actor, itemId);
+            announceActionApplied(
+              actor,
+              game.i18n.localize("DWAUTO.SpellAugmentation.Title"),
+              game.i18n.format("DWAUTO.SpellAugmentation.Applied", { spell: spellItem?.name ?? "?", level })
+            );
+            resolve(level);
+          }
+        },
+        no: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve(0)
+        }
+      },
+      default: "no",
+      close: () => resolve(0)
+    }).render(true);
+  });
+}
+
 async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   let consumed = null;
 
@@ -147,7 +199,10 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
     }
   }
 
-  await rollDamage(actor, weapon, dmgMod, extraDice);
+  const augBonus = await promptSpellAugmentation(actor);
+  const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
+
+  await rollDamage(actor, weapon, finalDmgMod, extraDice);
 
   if (consumed && consumed.ammoCount > 0) {
     const ammoItem = actor.items.get(consumed.ammoItemId);
@@ -319,9 +374,9 @@ function onCreateChatMessage(message, options, userId) {
     behavior = { ...DEFAULT_ATTACK_BEHAVIOR, ranged: isRangedName };
   }
 
-  if (info.isExtreme) {
-    announceActionApplied(actor, title, game.i18n.localize("DWAUTO.ExtremeSuccess.Detected"));
-  }
+  // 극단적 성공(12+) 여부는 info.isExtreme로 계속 감지는 하되, 아직 이걸
+  // 소비하는 무브(Superior Warrior 등)가 없어서 채팅에 별도로 알리지는 않는다.
+  // 데미지 굴림 확인 다이얼로그 문구에만 반영한다 (promptDamageRoll 참고).
 
   const shouldDamage = result === "success" ? behavior.damageOnSuccess : behavior.damageOnPartial;
   const hasChoices = moveItem && getMoveChoiceData(moveItem, result).options.length > 0;

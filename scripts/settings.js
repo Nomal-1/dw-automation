@@ -2,6 +2,8 @@ import { MODULE_ID, SETTINGS } from "./constants.js";
 import { TagSettingsMenu } from "./apps/tag-settings-menu.js";
 import { AttackMovesMenu } from "./apps/attack-moves-menu.js";
 import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
+import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
+import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -112,5 +114,75 @@ export function registerSettings() {
     icon: "fas fa-hand-fist",
     type: AttackMovesMenu,
     restricted: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSpellcastingAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSpellcastingAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  // Cast a Spell류 무브 이름(클레릭/위저드가 이름이 다를 수 있음, 쉼표 구분).
+  game.settings.register(MODULE_ID, SETTINGS.CAST_SPELL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CastSpellMoveNames.Name",
+    hint: "DWAUTO.Settings.CastSpellMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Cast A Spell, Cast a Spell"
+  });
+
+  // 지속형 주문 데이터베이스. 체크박스 UI(OngoingSpellsMenu)에서 편집한다.
+  game.settings.register(MODULE_ID, SETTINGS.ONGOING_SPELLS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_ONGOING_SPELLS
+  });
+
+  game.settings.registerMenu(MODULE_ID, "ongoingSpellsMenu", {
+    name: "DWAUTO.Settings.OngoingSpellsMenu.Name",
+    label: "DWAUTO.Settings.OngoingSpellsMenu.Label",
+    hint: "DWAUTO.Settings.OngoingSpellsMenu.Hint",
+    icon: "fas fa-hourglass-half",
+    type: OngoingSpellsMenu,
+    restricted: true
+  });
+
+  // Wizard의 Spell Augmentation("지속 중인 주문을 하나 소모해 그 레벨만큼
+  // 데미지 추가")은 위 지속 주문 추적 기능을 그대로 재사용한다
+  // (attack-assistant.js 참고).
+  game.settings.register(MODULE_ID, SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SpellAugmentationMoveNames.Name",
+    hint: "DWAUTO.Settings.SpellAugmentationMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Spell Augmentation"
+  });
+
+  // Cast a Spell 부분성공(7-9)의 3개 선택지 중 "주문 회수"/"다음 기원까지 -1"이
+  // 몇 번째인지. 텍스트로 판별하면 번역되었을 때 깨지므로 숫자로 직접 지정한다.
+  // 던전월드 기본 클레릭/위저드 문구 기준 순서는 1=원치 않는 주목, 2=-1 페널티,
+  // 3=주문 회수 이며, 0으로 두면 해당 효과를 적용하지 않는다.
+  game.settings.register(MODULE_ID, SETTINGS.CAST_PARTIAL_REVOKE_INDEX, {
+    name: "DWAUTO.Settings.CastPartialRevokeIndex.Name",
+    hint: "DWAUTO.Settings.CastPartialRevokeIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 3
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CAST_PARTIAL_PENALTY_INDEX, {
+    name: "DWAUTO.Settings.CastPartialPenaltyIndex.Name",
+    hint: "DWAUTO.Settings.CastPartialPenaltyIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 2
   });
 }

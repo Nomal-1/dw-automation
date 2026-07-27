@@ -113,3 +113,28 @@
 .dwauto-remove-row {
   color: #b03a2e;
 }
+
+.dwauto-ongoing-badge {
+  background: #4a2e7a !important;
+  color: #fff !important;
+  cursor: pointer;
+}
+
+.dwauto-ongoing-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-commune-penalty {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #4a2e7a;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.dwauto-commune-penalty:hover {
+  filter: brightness(1.15);
+}

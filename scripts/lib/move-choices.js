@@ -57,7 +57,8 @@ export function getMoveChoiceData(moveItem, result) {
 
 /**
  * 선택지 다이얼로그를 띄운다. 정확히 count개를 고를 때까지 다시 띄운다.
- * onConfirm(selectedOptionHtmls: string[])
+ * onConfirm(selectedOptionHtmls: string[], selectedIndexes: number[]) — indexes는
+ * 1부터 시작한다(설정 화면에서 GM이 "몇 번째 선택지"라고 지정할 때와 맞추기 위함).
  */
 export function promptChoiceSelection({ title, instruction, options, count, onConfirm, onCancel }) {
   const inputType = count === 1 ? "radio" : "checkbox";
@@ -85,8 +86,9 @@ export function promptChoiceSelection({ title, instruction, options, count, onCo
             promptChoiceSelection({ title, instruction, options, count, onConfirm, onCancel });
             return;
           }
-          const selected = checked.map((_, el) => options[Number(el.value)]).get();
-          onConfirm(selected);
+          const selectedIndexes = checked.map((_, el) => Number(el.value) + 1).get();
+          const selected = selectedIndexes.map((i) => options[i - 1]);
+          onConfirm(selected, selectedIndexes);
         }
       },
       cancel: {

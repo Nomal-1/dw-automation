@@ -40,6 +40,31 @@
         "Name": "Special Attack Moves",
         "Label": "Edit Special Attack Moves",
         "Hint": "Register/edit attack moves whose damage depends on a choice, like Backstab or Called Shot, by name, ranged flag, and behavior. Defaults to the English names (Backstab, Called Shot); edit the name field if your game uses a translated name."
+      },
+      "EnableSpellcastingAssistant": {
+        "Name": "Enable Spellcasting Assistant",
+        "Hint": "On a success or partial success for a Cast a Spell-type move, asks which prepared spell was used, tracks ongoing spells, and applies a penalty to the next casting."
+      },
+      "CastSpellMoveNames": {
+        "Name": "Cast Spell Move Names",
+        "Hint": "The Cleric/Wizard \"Cast a Spell\" move names (comma separated, translated if applicable). Defaults to the English originals (Cast A Spell, Cast a Spell)."
+      },
+      "OngoingSpellsMenu": {
+        "Name": "Ongoing Spells",
+        "Label": "Edit Ongoing Spells",
+        "Hint": "Register/edit which spells affect future spellcasting rolls while maintained, by name and penalty type. Spells not listed are treated as one-shot."
+      },
+      "SpellAugmentationMoveNames": {
+        "Name": "Spell Augmentation Move Names",
+        "Hint": "Move names (comma separated) that let the caster end an ongoing spell to add its level to damage dealt. Only asked when the actor has this move and an active ongoing spell."
+      },
+      "CastPartialRevokeIndex": {
+        "Name": "Cast Spell Partial - Revoke Option Number",
+        "Hint": "Which numbered choice in the Cast a Spell partial-success list is \"the spell is revoked (unusable until you commune/prepare spells again)\"? Position 3 in the default Dungeon World text. Set to 0 to disable this effect."
+      },
+      "CastPartialPenaltyIndex": {
+        "Name": "Cast Spell Partial - Penalty Option Number",
+        "Hint": "Which numbered choice in the Cast a Spell partial-success list is \"-1 to cast a spell until you commune/prepare spells again\"? Position 2 in the default Dungeon World text. Set to 0 to disable this effect."
       }
     },
     "Npc": {
@@ -130,6 +155,40 @@
       "PartialPickCount": "Partial Pick Count",
       "SuccessPickCount": "Success Pick Count",
       "AddRow": "Add Row"
+    },
+    "Spell": {
+      "NoPrepared": "{name} has no prepared spells; skipping.",
+      "ChooseTitle": "Choose Spell",
+      "ChooseLabel": "Which spell did you cast?",
+      "NowOngoing": "Now ongoing (penalty: {penalty})",
+      "CastBlocked": "{name} cannot cast a spell right now due to an active ongoing spell.",
+      "OngoingBadgeTitle": "Click to ask whether to end this ongoing spell",
+      "OngoingBadge": "Ongoing",
+      "EndTitle": "End Ongoing Spell",
+      "EndContent": "End the \"{name}\" spell?",
+      "PartialChoiceInstruction": "That was a partial success. Choose one outcome.",
+      "Revoked": "The spell is revoked (unusable until you commune/prepare spells again — unprepared)",
+      "CommunePenaltyApplied": "-1 to cast a spell until you commune/prepare spells again (cumulative)",
+      "CommunePenaltyBanner": "-{amount} to cast a spell until you commune/prepare spells again (click to clear manually — commune automation isn't built yet)",
+      "ClearCommunePenaltyTitle": "Clear Commune Penalty",
+      "ClearCommunePenaltyContent": "Clear this penalty now, representing that you've communed/prepared spells?"
+    },
+    "OngoingSpells": {
+      "Title": "Ongoing Spells",
+      "Hint": "Register spells that affect future spellcasting rolls while maintained. Enter the name exactly as it appears in your game (translated, if applicable).",
+      "Name": "Spell Name",
+      "CastPenalty": "Cast Penalty",
+      "Penalty": {
+        "none": "None (just ongoing)",
+        "minus1": "-1 (while maintained)",
+        "blocked": "Cannot cast"
+      }
+    },
+    "SpellAugmentation": {
+      "Title": "Spell Augmentation",
+      "Content": "End one of your ongoing spells to add its level to this damage?",
+      "Use": "Use",
+      "Applied": "Ended \"{spell}\" for +{level} damage"
     }
   }
 }
