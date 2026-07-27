@@ -70,6 +70,19 @@
         "Name": "Auto-fill from Translation Module",
         "Label": "Open Auto-fill Tool",
         "Hint": "If the Nomal-1/dungeonworld-ko Korean translation module is installed, fill in the move/spell name settings above using its translation data instead of typing them by hand."
+      },
+      "EnableHitTriggerAssistant": {
+        "Name": "Enable Hit-Taken Automation",
+        "Hint": "When a player character's HP is about to drop, asks whether to negate the damage using a move like Armor Mastery or Bloody Aegis (at the cost of armor or a debility) before the HP change is applied. Which moves qualify is managed in the Hit-Taken Moves setting below."
+      },
+      "HitTriggerMovesMenu": {
+        "Name": "Hit-Taken Moves",
+        "Label": "Edit Hit-Taken Moves",
+        "Hint": "Register/edit moves that can negate incoming damage at a cost, by name and effect (lower armor by 1, or take a debility of your choice). \"Grants +1 forward\" is for moves like Armored Perfection that also grant a bonus on top of negating the damage."
+      },
+      "IndomitableMoveNames": {
+        "Name": "Indomitable Move Names",
+        "Hint": "Move names (comma separated) that grant +1 forward whenever the character takes a new debility, for any reason (including from Bloody Aegis)."
       }
     },
     "Npc": {
@@ -197,12 +210,35 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
       "Close": "Close",
       "Done": "Auto-fill complete: {matched} matched, {unmatched} not found (left unchanged)."
+    },
+    "HitTriggerMoves": {
+      "Title": "Hit-Taken Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, or take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared).",
+      "Name": "Move Name",
+      "Effect": "Effect",
+      "EffectOption": {
+        "armor": "Lower armor by 1",
+        "debility": "Take a debility"
+      },
+      "GrantsForward": "Grants +1 forward",
+      "AddRow": "Add Row"
+    },
+    "HitTrigger": {
+      "PromptTitle": "Negate Damage?",
+      "PromptContent": "<b>{name}</b> is about to take {damage} damage. Negate it using one of these moves?",
+      "TakeDamage": "Take the damage",
+      "DebilityInstruction": "Choose a debility to take instead.",
+      "DebilityApplied": "Took the \"{debility}\" debility",
+      "ArmorApplied": "Damage negated (armor now {armor})",
+      "ArmorAppliedForward": "Damage negated (armor now {armor}), +1 forward",
+      "ArmorDestroyed": "{name}'s armor has reached 0 — remember to remove/destroy the depleted armor or shield on the sheet.",
+      "IndomitableApplied": "+1 forward"
     }
   }
 }

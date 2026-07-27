@@ -4,6 +4,7 @@ import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
 import { registerSpellcastingAssistant } from "./features/spellcasting.js";
 import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
+import { registerHitTriggerAssistant } from "./features/hit-trigger.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -19,3 +20,4 @@ registerNpcGenerator();
 registerMonsterGenerator();
 registerAttackAssistant();
 registerSpellcastingAssistant();
+registerHitTriggerAssistant();

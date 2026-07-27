@@ -5,6 +5,8 @@ import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
 import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 import { TranslationImportMenu } from "./apps/translation-import-menu.js";
+import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
+import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -197,5 +199,46 @@ export function registerSettings() {
     config: true,
     type: Number,
     default: 2
+  });
+
+  // Fighter Armor Mastery/Armored Perfection, Paladin Bloody Aegis처럼 "피해를
+  // 입기 직전에 그 피해를 무효화하는 대신 대가를 치르는" 무브들. preUpdateActor
+  // 훅으로 HP 감소를 가로채서 물어보고, 승낙하면 장갑을 낮추거나(armor) 약화를
+  // 하나 선택하게(debility) 한다. 자세한 설계는 features/hit-trigger.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_HIT_TRIGGER_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableHitTriggerAssistant.Name",
+    hint: "DWAUTO.Settings.EnableHitTriggerAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_HIT_TRIGGER_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "hitTriggerMovesMenu", {
+    name: "DWAUTO.Settings.HitTriggerMovesMenu.Name",
+    label: "DWAUTO.Settings.HitTriggerMovesMenu.Label",
+    hint: "DWAUTO.Settings.HitTriggerMovesMenu.Hint",
+    icon: "fas fa-shield-halved",
+    type: HitTriggerMovesMenu,
+    restricted: true
+  });
+
+  // Paladin Indomitable: 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인
+  // 불문) +1 forward를 받는다. 위의 무효화 테이블과 달리 선택지가 없는
+  // 단순 반응형 무브라 근접/사격 무브 이름 설정과 같은 쉼표 목록으로 관리한다.
+  game.settings.register(MODULE_ID, SETTINGS.INDOMITABLE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.IndomitableMoveNames.Name",
+    hint: "DWAUTO.Settings.IndomitableMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Indomitable"
   });
 }

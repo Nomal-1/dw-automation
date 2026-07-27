@@ -118,5 +118,15 @@ export async function runTranslationImport() {
   const ongoingSpells = game.settings.get(MODULE_ID, SETTINGS.ONGOING_SPELLS);
   await game.settings.set(MODULE_ID, SETTINGS.ONGOING_SPELLS, translateRows(spellMap, ongoingSpells, stats));
 
+  const hitTriggerMoves = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES, translateRows(moveMap, hitTriggerMoves, stats));
+
+  const indomitableNames = game.settings.get(MODULE_ID, SETTINGS.INDOMITABLE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.INDOMITABLE_MOVE_NAMES,
+    translateCommaList(moveMap, indomitableNames, stats)
+  );
+
   return stats;
 }

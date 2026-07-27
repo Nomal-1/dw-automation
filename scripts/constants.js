@@ -15,5 +15,8 @@ export const SETTINGS = {
   ONGOING_SPELLS: "ongoingSpells",
   SPELL_AUGMENTATION_MOVE_NAMES: "spellAugmentationMoveNames",
   CAST_PARTIAL_REVOKE_INDEX: "castPartialRevokeIndex",
-  CAST_PARTIAL_PENALTY_INDEX: "castPartialPenaltyIndex"
+  CAST_PARTIAL_PENALTY_INDEX: "castPartialPenaltyIndex",
+  ENABLE_HIT_TRIGGER_ASSISTANT: "enableHitTriggerAssistant",
+  HIT_TRIGGER_MOVES: "hitTriggerMoves",
+  INDOMITABLE_MOVE_NAMES: "indomitableMoveNames"
 };
