@@ -13,19 +13,23 @@
       },
       "EnableAttackAssistant": {
         "Name": "공격 데미지 자동 굴림 사용",
-        "Hint": "근접(Hack & Slash)/사격(Volley) 무브 성공·부분 성공 시 데미지를 굴릴지 물어보고, 화살 등 소모품을 자동으로 차감합니다."
+        "Hint": "근접(Hack & Slash, Backstab)/사격(Volley, Called Shot) 무브 성공·부분 성공 시 데미지를 굴릴지 물어보고, 화살 등 소모품을 자동으로 차감합니다. Backstab/Called Shot은 무브 아이템의 원본 ID로 자동 인식되어 아래 이름 목록에 없어도 동작합니다."
       },
       "MeleeMoveNames": {
-        "Name": "근접 공격 무브 이름",
-        "Hint": "데미지 자동 굴림을 트리거할 근접 무브 이름(쉼표로 여러 개 구분). 번역 모듈로 무브 이름이 바뀌었다면 여기서 맞춰주세요."
+        "Name": "근접 공격 무브 이름 (그 외 커스텀 무브용)",
+        "Hint": "Hack & Slash/Backstab처럼 이미 자동 인식되는 무브 외에, 홈브루 근접 공격 무브가 있다면 그 이름을 여기 추가하세요(쉼표로 여러 개 구분)."
       },
       "RangedMoveNames": {
-        "Name": "사격 공격 무브 이름",
-        "Hint": "데미지 자동 굴림을 트리거할 사격 무브 이름(쉼표로 여러 개 구분). 이 목록에 해당하면 화살 소모 확인도 함께 진행됩니다."
+        "Name": "사격 공격 무브 이름 (그 외 커스텀 무브용)",
+        "Hint": "Volley/Called Shot처럼 이미 자동 인식되는 무브 외에, 홈브루 사격 공격 무브가 있다면 그 이름을 여기 추가하세요(쉼표로 여러 개 구분). 이 목록에 해당하면 화살 소모 확인도 함께 진행됩니다."
+      },
+      "MeleeWeaponTags": {
+        "Name": "근접 무기 판정 태그",
+        "Hint": "무기의 태그(tagsString)에 이 목록 중 하나라도 포함되어 있으면 근접 무기로 판정합니다(쉼표로 여러 개 구분). 무기 자체에 '근접/사격' 구분 필드는 없고, 던전월드 기본 무기가 근접에는 hand/close/reach 태그를 쓰는 관례를 이용한 판정입니다. 이 목록과 사격 판정 태그 어느 쪽에도 안 걸리는 무기는 데미지 굴림 시 무기 목록에서 제외되지 않습니다."
       },
       "RangedWeaponTags": {
         "Name": "사격 무기 판정 태그",
-        "Hint": "무기의 태그(tagsString)에 이 목록 중 하나라도 포함되어 있으면 사격 무기로 판정합니다(쉼표로 여러 개 구분). 무기 자체에 '근접/사격' 구분 필드는 없고, 던전월드 기본 무기가 근접에는 hand/close/reach, 사격에는 near/far 태그를 쓰는 관례를 이용한 판정입니다. 그래서 기본값은 near, far 입니다."
+        "Hint": "무기의 태그(tagsString)에 이 목록 중 하나라도 포함되어 있으면 사격 무기로 판정합니다(쉼표로 여러 개 구분). 던전월드 기본 무기는 사격에 near/far 태그를 쓰는 관례를 이용한 판정입니다. 그래서 기본값은 near, far 입니다."
       },
       "TagMenu": {
         "Name": "데미지 태그 자동 반영 설정",
@@ -51,9 +55,23 @@
       "Coin": "코인",
       "Generated": "몬스터 스탯 생성 완료: {name}"
     },
+    "ActionApplied": "\"{move}\" 액션 적용!",
+    "Choice": {
+      "Instruction": "선택지 중 {count}개를 골라주세요.",
+      "WrongCount": "정확히 {count}개를 선택해야 합니다."
+    },
+    "Hold": {
+      "Gained": "Hold {hold} 획득",
+      "SpendInstruction": "Hold를 소모해서 선택지를 골라주세요. (현재 Hold {hold})",
+      "Spent": "\"{choice}\" 적용, Hold 1 소모 (남은 Hold {remaining})"
+    },
+    "ExtremeSuccess": {
+      "Detected": "극단적 성공 감지! (12+, 성공이면서 동시에 극단적 성공)"
+    },
     "Attack": {
       "ConfirmTitle": "데미지 굴림",
       "ConfirmContent": "<b>{name}</b>의 공격이 성공했습니다. 데미지를 굴릴까요?",
+      "ConfirmContentExtreme": "<b>{name}</b>의 공격이 극단적으로 성공했습니다(12+)! 데미지를 굴릴까요?",
       "WeaponDialogTitle": "공격 장비 선택",
       "WeaponLabel": "어떤 장비로 공격하셨나요?",
       "ModLabel": "데미지 수정치",

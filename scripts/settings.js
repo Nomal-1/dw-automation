@@ -48,9 +48,20 @@ export function registerSettings() {
   });
 
   // 근접/사격 판정 기준: 무기의 태그(tagsString)에 아래 목록 중 하나라도
-  // 포함되어 있으면 사격 무기로, 아니면 근접 무기로 취급한다.
+  // 포함되어 있으면 각각 근접/사격 무기로 취급한다. 두 목록에 다 안 걸리는
+  // 무기는 데미지 굴림 시 무기 목록에서 제외되지 않도록 폴백 처리한다
+  // (attack-assistant.js의 promptWeaponChoice 참고).
   // 던전월드 기본 무기는 근접이 hand/close/reach, 사격이 near/far 태그를 쓰므로
-  // 기본값은 "near, far".
+  // 기본값은 그에 맞춰뒀다.
+  game.settings.register(MODULE_ID, SETTINGS.MELEE_WEAPON_TAGS, {
+    name: "DWAUTO.Settings.MeleeWeaponTags.Name",
+    hint: "DWAUTO.Settings.MeleeWeaponTags.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "hand, close, reach"
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.RANGED_WEAPON_TAGS, {
     name: "DWAUTO.Settings.RangedWeaponTags.Name",
     hint: "DWAUTO.Settings.RangedWeaponTags.Hint",

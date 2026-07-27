@@ -71,3 +71,19 @@
   display: flex;
   gap: 8px;
 }
+
+.dwauto-choice-option label {
+  display: block;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+
+.dwauto-action-applied {
+  border-left: 3px solid #7a2e2e;
+  padding-left: 6px;
+}
+
+.dwauto-action-detail {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}

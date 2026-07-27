@@ -13,19 +13,23 @@
       },
       "EnableAttackAssistant": {
         "Name": "Enable Attack Damage Automation",
-        "Hint": "On a success or partial success for a melee (Hack & Slash) or ranged (Volley) move, asks whether to roll damage and automatically deducts consumables like ammo."
+        "Hint": "On a success or partial success for a melee (Hack & Slash, Backstab) or ranged (Volley, Called Shot) move, asks whether to roll damage and automatically deducts consumables like ammo. Backstab/Called Shot are recognized by the move item's own compendium ID, so they work even if not listed below."
       },
       "MeleeMoveNames": {
-        "Name": "Melee Move Names",
-        "Hint": "Move names (comma separated) that should trigger the damage prompt as a melee attack. Adjust this if a translation module renamed the move."
+        "Name": "Melee Move Names (for custom moves)",
+        "Hint": "Besides the moves already auto-recognized (Hack & Slash, Backstab), add the name of any homebrew melee attack move here (comma separated)."
       },
       "RangedMoveNames": {
-        "Name": "Ranged Move Names",
-        "Hint": "Move names (comma separated) that should trigger the damage prompt as a ranged attack. These also trigger the ammo consumption prompt."
+        "Name": "Ranged Move Names (for custom moves)",
+        "Hint": "Besides the moves already auto-recognized (Volley, Called Shot), add the name of any homebrew ranged attack move here (comma separated). Moves in this list also trigger the ammo consumption prompt."
+      },
+      "MeleeWeaponTags": {
+        "Name": "Melee Weapon Tags",
+        "Hint": "If a weapon's tags contain any of these keywords (comma separated), it's treated as melee. Weapons have no explicit melee/ranged field; this relies on the Dungeon World convention that melee weapons use hand/close/reach. A weapon matching neither this list nor Ranged Weapon Tags still shows up in the weapon picker (it isn't excluded)."
       },
       "RangedWeaponTags": {
         "Name": "Ranged Weapon Tags",
-        "Hint": "If a weapon's tags contain any of these keywords (comma separated), it's treated as ranged. Weapons have no explicit melee/ranged field; this relies on the Dungeon World convention that melee weapons use hand/close/reach and ranged weapons use near/far. Default: near, far."
+        "Hint": "If a weapon's tags contain any of these keywords (comma separated), it's treated as ranged. Dungeon World's convention is that ranged weapons use near/far. Default: near, far."
       },
       "TagMenu": {
         "Name": "Damage Tag Automation",
@@ -51,9 +55,23 @@
       "Coin": "Coin",
       "Generated": "Monster stats generated: {name}"
     },
+    "ActionApplied": "\"{move}\" action applied!",
+    "Choice": {
+      "Instruction": "Choose {count} from the options below.",
+      "WrongCount": "You must select exactly {count}."
+    },
+    "Hold": {
+      "Gained": "Gained Hold {hold}",
+      "SpendInstruction": "Spend Hold to pick an option. (Current Hold: {hold})",
+      "Spent": "Applied \"{choice}\", spent 1 Hold (remaining: {remaining})"
+    },
+    "ExtremeSuccess": {
+      "Detected": "Extreme success detected! (12+, both a success and an extreme success)"
+    },
     "Attack": {
       "ConfirmTitle": "Roll Damage",
       "ConfirmContent": "<b>{name}</b>'s attack succeeded. Roll damage?",
+      "ConfirmContentExtreme": "<b>{name}</b>'s attack was an extreme success (12+)! Roll damage?",
       "WeaponDialogTitle": "Choose Weapon",
       "WeaponLabel": "Which weapon did you attack with?",
       "ModLabel": "Damage Modifier",

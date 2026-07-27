@@ -6,6 +6,7 @@ export const SETTINGS = {
   ENABLE_ATTACK_ASSISTANT: "enableAttackAssistant",
   MELEE_MOVE_NAMES: "meleeMoveNames",
   RANGED_MOVE_NAMES: "rangedMoveNames",
+  MELEE_WEAPON_TAGS: "meleeWeaponTags",
   RANGED_WEAPON_TAGS: "rangedWeaponTags",
   ENABLED_DAMAGE_TAGS: "enabledDamageTags"
 };
