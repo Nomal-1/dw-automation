@@ -186,6 +186,9 @@ function onPreUpdateActor(actor, changes, options, userId) {
   // 그 플레이어가 따로 접속해 있다면 소켓으로 넘긴다.
   const decidingUser = findDecidingUser(actor);
   if (decidingUser && decidingUser.id !== game.user.id) {
+    console.log(
+      `${MODULE_ID} | hit-trigger: relaying prompt for ${actor.name} (damage ${damage}) to ${decidingUser.name} via socket`
+    );
     game.socket.emit(SOCKET_NAME, {
       type: "hitTriggerRequest",
       targetUserId: decidingUser.id,
@@ -196,6 +199,7 @@ function onPreUpdateActor(actor, changes, options, userId) {
       options
     });
   } else {
+    console.log(`${MODULE_ID} | hit-trigger: no other connected owner found for ${actor.name}, prompting locally`);
     promptHitTrigger(actor, candidates, damage, changes, options);
   }
   return false;
@@ -203,9 +207,14 @@ function onPreUpdateActor(actor, changes, options, userId) {
 
 function onSocketEvent(data) {
   if (data?.type !== "hitTriggerRequest") return;
+  console.log(`${MODULE_ID} | hit-trigger: socket event received`, data);
   if (data.targetUserId !== game.user.id) return;
   const actor = game.actors.get(data.actorId);
-  if (!actor) return;
+  if (!actor) {
+    console.warn(`${MODULE_ID} | hit-trigger: actor ${data.actorId} not found on this client`);
+    return;
+  }
+  console.log(`${MODULE_ID} | hit-trigger: showing prompt for ${actor.name}`);
   promptHitTrigger(actor, data.candidates, data.damage, data.changes, data.options);
 }
 
