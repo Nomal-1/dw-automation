@@ -5,6 +5,8 @@ import { registerAttackAssistant } from "./features/attack-assistant.js";
 import { registerSpellcastingAssistant } from "./features/spellcasting.js";
 import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
 import { registerHitTriggerAssistant } from "./features/hit-trigger.js";
+import { registerHealingAssistant } from "./features/healing.js";
+import { registerMoveUpgradeAssistant } from "./features/move-upgrades.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -21,3 +23,5 @@ registerMonsterGenerator();
 registerAttackAssistant();
 registerSpellcastingAssistant();
 registerHitTriggerAssistant();
+registerHealingAssistant();
+registerMoveUpgradeAssistant();

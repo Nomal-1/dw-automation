@@ -128,5 +128,22 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, indomitableNames, stats)
   );
 
+  // 치유 무브 표는 무브(Lay On Hands)와 주문(Cure Light/Moderate/Critical
+  // Wounds, Heal) 이름이 섞여 있어서 두 맵을 합쳐서 찾는다.
+  const combinedMap = new Map([...moveMap, ...spellMap]);
+  const healingMoves = game.settings.get(MODULE_ID, SETTINGS.HEALING_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.HEALING_MOVES, translateRows(combinedMap, healingMoves, stats));
+
+  const hospitallerMoves = game.settings.get(MODULE_ID, SETTINGS.HOSPITALLER_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.HOSPITALLER_MOVES, translateRows(moveMap, hospitallerMoves, stats));
+
+  // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
+  const moveUpgrades = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
+  const translatedUpgrades = moveUpgrades.map((row) => ({
+    upgradeName: translateOne(moveMap, row.upgradeName, stats),
+    replacesName: translateOne(moveMap, row.replacesName, stats)
+  }));
+  await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, translatedUpgrades);
+
   return stats;
 }

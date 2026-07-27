@@ -6,6 +6,11 @@ import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 import { TranslationImportMenu } from "./apps/translation-import-menu.js";
 import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
+import { HealingMovesMenu } from "./apps/healing-moves-menu.js";
+import { HospitallerMovesMenu } from "./apps/hospitaller-moves-menu.js";
+import { DEFAULT_HEALING_MOVES, DEFAULT_HOSPITALLER_MOVES } from "./data/healing-moves.js";
+import { MoveUpgradesMenu } from "./apps/move-upgrades-menu.js";
+import { DEFAULT_MOVE_UPGRADES } from "./data/move-upgrades.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 
 export function registerSettings() {
@@ -240,5 +245,78 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Indomitable"
+  });
+
+  // 치유 자동화: Lay On Hands, Cure Light/Moderate/Critical Wounds, Heal 등
+  // 치유를 발동시키는 무브/주문을 이름·치유량 공식으로 관리한다. 자세한 설계는
+  // features/healing.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_HEALING_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableHealingAssistant.Name",
+    hint: "DWAUTO.Settings.EnableHealingAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HEALING_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_HEALING_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "healingMovesMenu", {
+    name: "DWAUTO.Settings.HealingMovesMenu.Name",
+    label: "DWAUTO.Settings.HealingMovesMenu.Label",
+    hint: "DWAUTO.Settings.HealingMovesMenu.Hint",
+    icon: "fas fa-heart",
+    type: HealingMovesMenu,
+    restricted: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HOSPITALLER_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_HOSPITALLER_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "hospitallerMovesMenu", {
+    name: "DWAUTO.Settings.HospitallerMovesMenu.Name",
+    label: "DWAUTO.Settings.HospitallerMovesMenu.Label",
+    hint: "DWAUTO.Settings.HospitallerMovesMenu.Hint",
+    icon: "fas fa-hand-holding-heart",
+    type: HospitallerMovesMenu,
+    restricted: true
+  });
+
+  // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전
+  // 단계 무브(치료사)를 자동으로 삭제한다. 대상 쌍은 던전월드 8개 기본 직업
+  // 컴펜디엄의 requiresMove 필드를 전수 조사해서 기본값으로 채워뒀다. 자세한
+  // 설계는 features/move-upgrades.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_MOVE_UPGRADE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableMoveUpgradeAssistant.Name",
+    hint: "DWAUTO.Settings.EnableMoveUpgradeAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.MOVE_UPGRADES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_MOVE_UPGRADES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "moveUpgradesMenu", {
+    name: "DWAUTO.Settings.MoveUpgradesMenu.Name",
+    label: "DWAUTO.Settings.MoveUpgradesMenu.Label",
+    hint: "DWAUTO.Settings.MoveUpgradesMenu.Hint",
+    icon: "fas fa-arrow-up-right-dots",
+    type: MoveUpgradesMenu,
+    restricted: true
   });
 }

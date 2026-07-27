@@ -8,6 +8,7 @@ import {
   getActiveOngoingSpells,
   COMMUNE_PENALTY_FLAG
 } from "../lib/ongoing-spells-state.js";
+import { handleSpellHeal } from "./healing.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -91,6 +92,8 @@ function promptSpellChoice(actor, result, moveItem) {
             const penaltyLabel = game.i18n.localize(`DWAUTO.OngoingSpells.Penalty.${config.castPenalty}`);
             announceActionApplied(actor, spell.name, game.i18n.format("DWAUTO.Spell.NowOngoing", { penalty: penaltyLabel }));
           }
+
+          await handleSpellHeal(actor, spell);
 
           if (result === "partial") {
             promptPartialConsequence(actor, moveItem, spell);

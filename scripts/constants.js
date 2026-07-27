@@ -18,5 +18,10 @@ export const SETTINGS = {
   CAST_PARTIAL_PENALTY_INDEX: "castPartialPenaltyIndex",
   ENABLE_HIT_TRIGGER_ASSISTANT: "enableHitTriggerAssistant",
   HIT_TRIGGER_MOVES: "hitTriggerMoves",
-  INDOMITABLE_MOVE_NAMES: "indomitableMoveNames"
+  INDOMITABLE_MOVE_NAMES: "indomitableMoveNames",
+  ENABLE_HEALING_ASSISTANT: "enableHealingAssistant",
+  HEALING_MOVES: "healingMoves",
+  HOSPITALLER_MOVES: "hospitallerMoves",
+  ENABLE_MOVE_UPGRADE_ASSISTANT: "enableMoveUpgradeAssistant",
+  MOVE_UPGRADES: "moveUpgrades"
 };

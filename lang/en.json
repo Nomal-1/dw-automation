@@ -83,6 +83,29 @@
       "IndomitableMoveNames": {
         "Name": "Indomitable Move Names",
         "Hint": "Move names (comma separated) that grant +1 forward whenever the character takes a new debility, for any reason (including from Bloody Aegis)."
+      },
+      "EnableHealingAssistant": {
+        "Name": "Enable Healing Automation",
+        "Hint": "On a success or partial success for a healing move (Lay On Hands), or when a healing spell (Cure Light/Moderate/Critical Wounds, Heal) is cast via the Cast a Spell flow, asks who to heal and rolls (or asks for) the amount, then applies it. The recipient can be anyone the healer at least has observer access to (handy for narratively-ambiguous allies/enemies); if the healer doesn't have full access, an online GM is asked to approve before it's applied. Which moves/spells qualify is managed in the Healing Moves setting below."
+      },
+      "HealingMovesMenu": {
+        "Name": "Healing Moves",
+        "Label": "Edit Healing Moves",
+        "Hint": "Register/edit moves and spells that heal, by name and how to determine the amount: automatically (reads the spell's own roll formula, or an inline dice notation like [[1d8]] in the move's own text), a custom formula you type in, or \"up to max HP\" (prompts for a number, for Heal). Check \"Transfer to self on partial\" for moves like Lay On Hands whose partial-success result transfers the healing (or disease) to the healer instead."
+      },
+      "HospitallerMovesMenu": {
+        "Name": "Hospitaller Moves",
+        "Label": "Edit Hospitaller Moves",
+        "Hint": "Register moves like Hospitaller/Perfect Hospitaller that add extra healing whenever the character heals someone else (not themselves), by name and bonus dice formula."
+      },
+      "EnableMoveUpgradeAssistant": {
+        "Name": "Enable Move Upgrade Automation",
+        "Hint": "When a character learns an advanced move that upgrades an earlier one (e.g. Perfect Hospitaller upgrading Hospitaller), automatically removes the earlier move from the sheet. Which pairs count is managed in the Move Upgrades setting below."
+      },
+      "MoveUpgradesMenu": {
+        "Name": "Move Upgrades",
+        "Label": "Edit Move Upgrades",
+        "Hint": "Register pairs of moves where learning the first one automatically removes the second. Pre-filled with all 43 such pairs found across the 8 core classes' compendium data (each advanced move's own \"requires\" field)."
       }
     },
     "Npc": {
@@ -210,7 +233,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -239,6 +262,54 @@
       "ArmorAppliedForward": "Damage negated (armor now {armor}), +1 forward",
       "ArmorDestroyed": "{name}'s armor has reached 0 — remember to remove/destroy the depleted armor or shield on the sheet.",
       "IndomitableApplied": "+1 forward"
+    },
+    "HealingMoves": {
+      "Title": "Healing Moves",
+      "Hint": "Enter the move/spell name exactly as it appears in your game (translated, if applicable). \"Automatic\" reads the spell's own roll formula, or an inline dice notation in the move's own success/partial text; fall back to \"Custom formula\" if that fails (e.g. under translation) or the move doesn't have one. \"Up to max HP\" prompts for a number instead of rolling (for Heal). Check \"Transfer to self on partial\" only for moves whose own partial result explicitly transfers the healing/harm to the healer (Lay On Hands).",
+      "Name": "Move/Spell Name",
+      "FormulaMode": "Amount",
+      "FormulaModeOption": {
+        "auto": "Automatic",
+        "custom": "Custom formula",
+        "max": "Up to max HP"
+      },
+      "CustomFormula": "Custom Formula",
+      "TransferToSelfOnPartial": "Transfer to Self on Partial",
+      "AddRow": "Add Row"
+    },
+    "HospitallerMoves": {
+      "Title": "Hospitaller Moves",
+      "Hint": "Register moves that add extra healing whenever the character heals someone else (not themselves). Enter the name exactly as it appears in your game (translated, if applicable).",
+      "Name": "Move Name",
+      "BonusFormula": "Bonus Formula",
+      "AddRow": "Add Row"
+    },
+    "Healing": {
+      "TargetTitle": "Choose Recipient",
+      "TargetLabel": "Who are you healing?",
+      "Self": "self",
+      "MaxAmountTitle": "Healing Amount",
+      "MaxAmountInstruction": "How many points do you want to heal (up to your max HP of {max})?",
+      "RollFlavor": "{name} Healing",
+      "HospitallerFlavor": "{name} Bonus Healing",
+      "Applied": "Healed {target} for {amount}",
+      "Transferred": "The healing (or affliction) transfers to you: -{amount} HP",
+      "NoFormula": "Couldn't determine a healing formula for \"{name}\"; set one manually in the Healing Moves setting.",
+      "NoGmOnline": "No GM is currently online to approve healing \"{name}\" (you don't have permission to modify it directly).",
+      "PermissionTitle": "Approve Healing?",
+      "PermissionContent": "<b>{healer}</b> wants to heal <b>{target}</b> for {amount} using \"{item}\", but only has observer access to that character/creature. Allow it?",
+      "PermissionAllow": "Allow",
+      "PermissionDeny": "Deny",
+      "PermissionDenied": "The GM didn't approve healing \"{name}\"."
+    },
+    "MoveUpgrades": {
+      "Title": "Move Upgrades",
+      "Hint": "Enter both names exactly as they appear in your game (translated, if applicable). When a character gains a move item matching \"Upgrade Move\", any move on the same actor matching \"Replaced Move\" is deleted automatically.",
+      "UpgradeName": "Upgrade Move",
+      "ReplacesName": "Replaced Move"
+    },
+    "MoveUpgrade": {
+      "Replaced": "Automatically removed the earlier move \"{old}\""
     }
   }
 }
