@@ -7,6 +7,11 @@ import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/de
 // 이 플래그가 있는 갱신은 우리 훅이 다시 가로채지 않는다(무한 루프 방지).
 const SKIP_FLAG = "dwautoSkipHitTrigger";
 
+// 데미지를 적용하는 사람(GM 등)이 아니라, 그 피해를 받는 캐릭터의 소유
+// 플레이어가 무효화 여부를 결정해야 하므로 소켓으로 그 플레이어의 클라이언트에
+// 대화상자를 띄운다.
+const SOCKET_NAME = `module.${MODULE_ID}`;
+
 function splitCommaList(settingKey) {
   return game.settings
     .get(MODULE_ID, settingKey)
@@ -141,6 +146,16 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
   }).render(true);
 }
 
+// 이 액터를 자신의 캐릭터로 지정해둔 접속 중인 플레이어를 우선 찾고, 없으면
+// 소유권(OWNER)을 가진 접속 중인 플레이어를 찾는다. 그런 플레이어가 아무도
+// 없으면(예: GM 혼자 테스트하는 상황) null을 반환하고, 이 경우 지금 갱신을
+// 시작한 클라이언트에서 바로 물어본다 — 결정권자가 아예 없는 것보다는 낫다.
+function findDecidingUser(actor) {
+  const assigned = game.users.find((u) => u.active && !u.isGM && u.character?.id === actor.id);
+  if (assigned) return assigned;
+  return game.users.find((u) => u.active && !u.isGM && actor.testUserPermission(u, "OWNER")) ?? null;
+}
+
 function onPreUpdateActor(actor, changes, options, userId) {
   if (options[SKIP_FLAG]) return true;
   if (game.system.id !== "dungeonworld") return true;
@@ -165,8 +180,33 @@ function onPreUpdateActor(actor, changes, options, userId) {
   // 적용하거나 대체 효과를 적용한다. preUpdate 훅은 반환값을 동기적으로만
   // 확인하므로(비동기 함수는 항상 Promise를 반환해 false로 인식되지 않는다)
   // 이 함수 자체는 async로 선언하지 않고, 아래 호출은 기다리지 않는다.
-  promptHitTrigger(actor, candidates, damage, changes, options);
+  //
+  // 무효화 여부는 피해를 "주는" 사람(지금 이 갱신을 시작한 클라이언트, 보통
+  // GM)이 아니라 피해를 "받는" 캐릭터의 소유 플레이어가 결정해야 하므로,
+  // 그 플레이어가 따로 접속해 있다면 소켓으로 넘긴다.
+  const decidingUser = findDecidingUser(actor);
+  if (decidingUser && decidingUser.id !== game.user.id) {
+    game.socket.emit(SOCKET_NAME, {
+      type: "hitTriggerRequest",
+      targetUserId: decidingUser.id,
+      actorId: actor.id,
+      candidates,
+      damage,
+      changes,
+      options
+    });
+  } else {
+    promptHitTrigger(actor, candidates, damage, changes, options);
+  }
   return false;
+}
+
+function onSocketEvent(data) {
+  if (data?.type !== "hitTriggerRequest") return;
+  if (data.targetUserId !== game.user.id) return;
+  const actor = game.actors.get(data.actorId);
+  if (!actor) return;
+  promptHitTrigger(actor, data.candidates, data.damage, data.changes, data.options);
 }
 
 // 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인 불문) Indomitable을
@@ -199,4 +239,7 @@ function onUpdateActor(actor, changes, options, userId) {
 export function registerHitTriggerAssistant() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
+  Hooks.once("ready", () => {
+    game.socket.on(SOCKET_NAME, onSocketEvent);
+  });
 }
