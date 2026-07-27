@@ -99,8 +99,18 @@ export function promptChoiceSelection({ title, instruction, options, count, onCo
   }).render(true);
 }
 
-/** 선택된 옵션 텍스트 중 인라인 굴림 표기([[1d6]] 등)가 있으면 그 식을 뽑아준다. */
+/**
+ * 선택된 옵션 텍스트 안에 있는 주사위 표기를 뽑아준다.
+ * 원문은 [[1d6]] 처럼 Foundry 인라인 굴림 문법을 쓰지만, 번역판은 그 서식을
+ * 안 살리고 "+1d6을 줍니다"처럼 평문으로만 남기는 경우가 있어 그것도 지원한다.
+ * "1d6" 같은 표기 자체는 언어와 무관하게 그대로 남으므로 번역에도 안전하다.
+ */
 export function extractInlineRoll(optionHtml) {
-  const match = optionHtml.match(/\[\[\s*\/?(?:r|roll)?\s*([^\]|]+?)\s*\]\]/i);
-  return match ? match[1].trim() : null;
+  const text = $("<div>").html(optionHtml ?? "").text();
+
+  const bracketed = text.match(/\[\[\s*\/?(?:r|roll)?\s*([^\]|]+?)\s*\]\]/i);
+  if (bracketed) return bracketed[1].trim();
+
+  const bare = text.match(/\d+d\d+/i);
+  return bare ? bare[0] : null;
 }

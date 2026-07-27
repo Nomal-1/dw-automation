@@ -226,16 +226,24 @@ async function promptDamageRoll(actor, ranged, isExtreme) {
   promptWeaponChoice(actor, ranged);
 }
 
-// 무브 아이템의 choices를 보여주고, 고른 선택지 안에 인라인 굴림(예: [[1d6]])이
+// 무브 자체의 "Choose N" 문구로 개수를 추정해보되(getMoveChoiceData), 설정
+// 표에서 GM이 직접 지정한 개수(overrideCount)가 있으면 그걸 우선한다 — 번역되면
+// "Choose N" 문구 자체가 사라져서 자동 추정이 안 통하는 경우가 있기 때문이다.
+function resolvePickCount(autoCount, overrideCount) {
+  if (Number.isFinite(overrideCount) && overrideCount > 0) return overrideCount;
+  return autoCount || 1;
+}
+
+// 무브 아이템의 choices를 보여주고, 고른 선택지 안에 주사위 표기(1d6, [[1d6]] 등)가
 // 있으면 그 값을 보너스 데미지로 붙여서 무기 데미지 굴림까지 이어간다
 // (Backstab: "통상적인 피해 +1d6을 줍니다"를 골랐을 때만 데미지를 굴림).
-function handleGatedChoiceAttack(actor, moveItem, result, ranged) {
+function handleGatedChoiceAttack(actor, moveItem, result, ranged, overrideCount) {
   const { options, count } = getMoveChoiceData(moveItem, result);
 
   promptChoiceSelection({
     title: moveItem.name,
     options,
-    count,
+    count: resolvePickCount(count, overrideCount),
     onConfirm: (selected) => {
       announceActionApplied(actor, moveItem.name, selected.join(", "));
 
@@ -250,7 +258,7 @@ function handleGatedChoiceAttack(actor, moveItem, result, ranged) {
 // 무브의 choices가 데미지 여부를 좌우하지 않는 경우(Called Shot: 선택지는
 // 머리/팔/다리 같은 연출용이고, 데미지는 결과 등급만으로 결정됨). 선택지를
 // 먼저 보여주고, 그 뒤 필요하면 원래 데미지 굴림 절차로 이어간다.
-function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage, isExtreme) {
+function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage, isExtreme, overrideCount) {
   const { options, count } = getMoveChoiceData(moveItem, result);
 
   const proceed = () => {
@@ -265,7 +273,7 @@ function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage,
   promptChoiceSelection({
     title: moveItem.name,
     options,
-    count,
+    count: resolvePickCount(count, overrideCount),
     onConfirm: (selected) => {
       announceActionApplied(actor, moveItem.name, selected.join(", "));
       proceed();
@@ -296,7 +304,8 @@ function onCreateChatMessage(message, options, userId) {
         ranged: special.ranged,
         damageOnPartial: special.damageOnPartial,
         damageOnSuccess: special.damageOnSuccess,
-        choiceGatesDamage: special.gatesDamage
+        choiceGatesDamage: special.gatesDamage,
+        pickCount: result === "success" ? special.successPickCount : special.partialPickCount
       }
     : null;
 
@@ -318,9 +327,9 @@ function onCreateChatMessage(message, options, userId) {
   const hasChoices = moveItem && getMoveChoiceData(moveItem, result).options.length > 0;
 
   if (hasChoices && behavior.choiceGatesDamage) {
-    handleGatedChoiceAttack(actor, moveItem, result, behavior.ranged);
+    handleGatedChoiceAttack(actor, moveItem, result, behavior.ranged, behavior.pickCount);
   } else if (hasChoices) {
-    handleFlavorChoiceAttack(actor, moveItem, result, behavior.ranged, shouldDamage, info.isExtreme);
+    handleFlavorChoiceAttack(actor, moveItem, result, behavior.ranged, shouldDamage, info.isExtreme, behavior.pickCount);
   } else if (shouldDamage) {
     promptDamageRoll(actor, behavior.ranged, info.isExtreme);
   }

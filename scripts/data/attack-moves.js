@@ -8,14 +8,34 @@
 //
 // - ranged: 사격 무기 취급 여부 (화살 소모 확인 트리거)
 // - damageOnPartial / damageOnSuccess: 그 결과 등급에서 무기 데미지를 굴리는지
-// - gatesDamage: true면 choices 중 인라인 굴림(예: [[1d6]])이 포함된 선택지를
-//   골랐을 때만 무기 데미지를 굴린다(Backstab). false면 choices는 부가 연출
-//   선택지일 뿐이고 데미지 굴림 여부는 damageOnPartial/damageOnSuccess로만
+// - gatesDamage: true면 choices 중 주사위 표기(예: 1d6, [[1d6]])가 포함된
+//   선택지를 골랐을 때만 무기 데미지를 굴린다(Backstab). false면 choices는
+//   부가 연출 선택지일 뿐이고 데미지 굴림 여부는 damageOnPartial/damageOnSuccess로만
 //   결정된다(Called Shot: 선택지는 머리/팔/다리 연출용이고 성공 시엔 항상
 //   데미지를 준다).
+// - partialPickCount / successPickCount: 그 등급에서 선택지를 몇 개 골라야
+//   하는지. 무브 자체의 "Choose N" 문구를 읽어서 자동 판별해보긴 하지만, 그
+//   문구도 번역되면(예: "다음 중 둘을 고릅니다") 못 읽으므로 여기 직접 숫자로
+//   지정해두는 쪽이 확실하다.
 export const DEFAULT_SPECIAL_ATTACK_MOVES = [
-  { name: "Backstab", ranged: false, gatesDamage: true, damageOnPartial: true, damageOnSuccess: true },
-  { name: "Called Shot", ranged: true, gatesDamage: false, damageOnPartial: false, damageOnSuccess: true }
+  {
+    name: "Backstab",
+    ranged: false,
+    gatesDamage: true,
+    damageOnPartial: true,
+    damageOnSuccess: true,
+    partialPickCount: 1,
+    successPickCount: 2
+  },
+  {
+    name: "Called Shot",
+    ranged: true,
+    gatesDamage: false,
+    damageOnPartial: false,
+    damageOnSuccess: true,
+    partialPickCount: 1,
+    successPickCount: 1
+  }
 ];
 
 // 단순 이름 목록(모듈 설정의 근접/사격 무브 이름)에 매칭된 무브의 기본 거동.

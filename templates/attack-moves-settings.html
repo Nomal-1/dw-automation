@@ -9,6 +9,8 @@
         <th>{{localize "DWAUTO.AttackMoves.GatesDamage"}}</th>
         <th>{{localize "DWAUTO.AttackMoves.DamageOnPartial"}}</th>
         <th>{{localize "DWAUTO.AttackMoves.DamageOnSuccess"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.PartialPickCount"}}</th>
+        <th>{{localize "DWAUTO.AttackMoves.SuccessPickCount"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -20,6 +22,8 @@
         <td><input type="checkbox" name="rows.{{@index}}.gatesDamage" {{checked this.gatesDamage}}></td>
         <td><input type="checkbox" name="rows.{{@index}}.damageOnPartial" {{checked this.damageOnPartial}}></td>
         <td><input type="checkbox" name="rows.{{@index}}.damageOnSuccess" {{checked this.damageOnSuccess}}></td>
+        <td><input type="number" min="0" name="rows.{{@index}}.partialPickCount" value="{{this.partialPickCount}}"></td>
+        <td><input type="number" min="0" name="rows.{{@index}}.successPickCount" value="{{this.successPickCount}}"></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}

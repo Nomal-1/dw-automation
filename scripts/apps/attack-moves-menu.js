@@ -1,7 +1,15 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 
 function blankRow() {
-  return { name: "", ranged: false, gatesDamage: false, damageOnPartial: true, damageOnSuccess: true };
+  return {
+    name: "",
+    ranged: false,
+    gatesDamage: false,
+    damageOnPartial: true,
+    damageOnSuccess: true,
+    partialPickCount: 1,
+    successPickCount: 1
+  };
 }
 
 function normalizeRow(raw) {
@@ -10,7 +18,9 @@ function normalizeRow(raw) {
     ranged: !!raw?.ranged,
     gatesDamage: !!raw?.gatesDamage,
     damageOnPartial: !!raw?.damageOnPartial,
-    damageOnSuccess: !!raw?.damageOnSuccess
+    damageOnSuccess: !!raw?.damageOnSuccess,
+    partialPickCount: Math.max(0, parseInt(raw?.partialPickCount, 10) || 0),
+    successPickCount: Math.max(0, parseInt(raw?.successPickCount, 10) || 0)
   };
 }
 

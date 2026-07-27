@@ -121,12 +121,14 @@
     },
     "AttackMoves": {
       "Title": "Special Attack Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Check \"Ranged\" to also trigger the ammo consumption prompt. Check \"Choice gates damage\" to only roll damage when the player picks a choice containing a damage die (e.g. [[1d6]]) — this is Backstab's behavior. Leave it unchecked if the choices are just flavor and damage is decided purely by the partial/success checkboxes below — this is Called Shot's behavior.",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Check \"Ranged\" to also trigger the ammo consumption prompt. Check \"Choice gates damage\" to only roll damage when the player picks a choice containing a damage die (e.g. 1d6) — this is Backstab's behavior. Leave it unchecked if the choices are just flavor and damage is decided purely by the partial/success checkboxes — this is Called Shot's behavior. The partial/success pick counts try to auto-detect the move's own \"Choose N\" text, but that text disappears under translation, so specifying the number here directly is more reliable.",
       "Name": "Move Name",
       "Ranged": "Ranged",
       "GatesDamage": "Choice Gates Damage",
       "DamageOnPartial": "Damage on Partial",
       "DamageOnSuccess": "Damage on Success",
+      "PartialPickCount": "Partial Pick Count",
+      "SuccessPickCount": "Success Pick Count",
       "AddRow": "Add Row"
     }
   }
