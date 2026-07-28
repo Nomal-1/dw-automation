@@ -39,12 +39,20 @@ function getUpgradeRowFor(moveName) {
   return table.find((row) => row.upgradeName === moveName) ?? null;
 }
 
+// 무브 업그레이드 표에 등록되어 있으면 그 표의 번역된 replacesName을 그대로
+// 쓴다(있으면 항상 우선 — GM이 직접 관리하는 데이터라 컴펜디엄의
+// requiresMove 필드 유무와 무관하게 신뢰할 수 있다). 표에 없을 때만
+// system.requiresMove(항상 영문 원본)를 보고, 번역 데이터에서 찾은 이름
+// 또는 영문 원본을 대신 보여준다. 둘 다 없으면(선행조건 자체가 없는 무브)
+// null을 반환해서 아무것도 덧붙이지 않는다.
 function buildInfoLine(moveDoc, nameMap) {
-  const requiresEnglish = moveDoc.system?.requiresMove;
-  if (!requiresEnglish) return null;
-
   const upgradeRow = getUpgradeRowFor(moveDoc.name);
+  const requiresEnglish = moveDoc.system?.requiresMove;
+
+  if (!upgradeRow && !requiresEnglish) return null;
+
   const requiresDisplay = upgradeRow?.replacesName || nameMap.get(requiresEnglish) || requiresEnglish;
+  if (!requiresDisplay) return null;
 
   const messageKey = upgradeRow ? "DWAUTO.LevelUpInfo.Replaces" : "DWAUTO.LevelUpInfo.RequiresOnly";
   return game.i18n.format(messageKey, { requires: requiresDisplay });
@@ -72,12 +80,19 @@ async function enrichDialog(html) {
   }
 }
 
+// 시스템의 레벨업 대화상자는 별도 클래스/id가 없는 평범한 Dialog라서, 안에
+// 무브 선택 체크박스(data-type="move")가 있는지로 감지한다 — Dialog 인스턴스의
+// 내부 프로퍼티(제목 등)에 기대는 것보다 안전하다. enrichDialog는 실패해도
+// "Error detected in module" 배너가 뜨지 않도록 이 함수 안에서 잡아서
+// console.error로만 남긴다.
 function onRenderDialog(app, html) {
   if (game.system.id !== "dungeonworld") return;
   if (!isEnabled()) return;
-  if (app.data?.title !== "Level Up") return;
+  if (!html.find('input[data-type="move"]').length) return;
 
-  enrichDialog(html);
+  enrichDialog(html).catch((err) => {
+    console.error(`${MODULE_ID} | level-up-info: failed to annotate level-up dialog`, err);
+  });
 }
 
 export function registerLevelUpInfo() {
