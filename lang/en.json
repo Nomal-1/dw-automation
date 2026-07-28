@@ -78,7 +78,7 @@
       "HitTriggerMovesMenu": {
         "Name": "Hit-Taken Moves",
         "Label": "Edit Hit-Taken Moves",
-        "Hint": "Register/edit moves that can negate incoming damage at a cost, by name and effect (lower armor by 1, or take a debility of your choice). \"Grants +1 forward\" is for moves like Armored Perfection that also grant a bonus on top of negating the damage."
+        "Hint": "Register/edit moves that can negate incoming damage at a cost, by name and effect (lower armor by 1, or take a debility of your choice). Choosing \"lower armor by 1\" asks which equipped armor item takes the durability hit, reducing its armor tag by 1 (destroying it if it hits 0) — if nothing is equipped, only the character's armor value is lowered. \"Grants +1 forward\" is for moves like Armored Perfection that also grant a bonus on top of negating the damage."
       },
       "IndomitableMoveNames": {
         "Name": "Indomitable Move Names",
@@ -316,6 +316,10 @@
       "ArmorApplied": "Damage negated (armor now {armor})",
       "ArmorAppliedForward": "Damage negated (armor now {armor}), +1 forward",
       "ArmorDestroyed": "{name}'s armor has reached 0 — remember to remove/destroy the depleted armor or shield on the sheet.",
+      "ArmorItemPromptTitle": "Choose Equipment to Damage",
+      "ArmorItemPromptContent": "Which piece of armor takes the durability hit?",
+      "ArmorItemDamaged": "{item}'s armor tag reduced to {value}",
+      "ArmorItemDestroyed": "{item} was destroyed",
       "IndomitableApplied": "+1 forward",
       "ReductionPrompt": "Are you currently outnumbered (\"{name}\")? If so, this damage is reduced.",
       "ReductionApplied": "Damage reduced by {amount}"
@@ -451,7 +455,8 @@
       "TooltipTotal": "Total: {total}",
       "TooltipClickHint": "(Click to recalculate armor to this total)",
       "RecalcLabel": "Armor Recalculation",
-      "RecalcApplied": "Armor recalculated to {total}"
+      "RecalcApplied": "Armor recalculated to {total}",
+      "DestroyedSuffix": " (Destroyed)"
     }
   }
 }

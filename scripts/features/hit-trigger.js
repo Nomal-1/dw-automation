@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
 import { getShedCandidate, applyShed } from "./druid.js";
+import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -45,18 +46,81 @@ async function grantForward(actor) {
   await actor.update({ "system.attributes.forward.value": current + 1 });
 }
 
+// 무효화를 위해 어느 방어구의 내구도를 깎을지 물어본다. 후보가 하나도 없으면
+// (장착 중인 방어구가 없으면) null을 반환해서 아이템 손상 없이 장갑 수치만
+// 깎도록 한다.
+function promptArmorItemChoice(items) {
+  return new Promise((resolve) => {
+    const options = items.map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
+
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.HitTrigger.ArmorItemPromptTitle"),
+      content: `
+        <form>
+          <p>${game.i18n.localize("DWAUTO.HitTrigger.ArmorItemPromptContent")}</p>
+          <div class="form-group">
+            <select name="item">${options}</select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => resolve(html.find('[name="item"]').val())
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve(undefined)
+        }
+      },
+      default: "ok",
+      close: () => resolve(undefined)
+    }).render(true);
+  });
+}
+
+// Armor Mastery/Armored Perfection: 무효화하는 대신, 실제로 장착 중인 방어구
+// 하나를 골라 그 아이템의 장갑 태그를 1 깎고(0이 되면 태그를 없애고 이름에
+// "(파괴됨)"을 붙임) 캐릭터의 장갑 수치도 1 내린다. 태그를 바꾼 뒤 장갑
+// 재계산(armor-assistant.js)을 다시 부르지는 않는다 — 재계산을 하면 방금
+// 깎은 손상이 바로 다시 합산되어 사라져버리기 때문에, 장갑 수치는 여기서
+// 직접 -1 한다.
+//
+// 장착 중인 방어구가 아예 없으면 아이템 선택 없이 장갑 수치만 깎는다.
+// 방어구가 있는데 선택을 취소하면(대화상자 닫기 포함) 이 무효화 자체를
+// 취소한 것으로 보고 null을 반환한다 — 호출부가 원래 피해를 그대로
+// 적용한다.
 async function applyArmorNegation(actor, row, damage) {
+  const equippedArmor = getEquippedArmorItems(actor);
+  let itemDetail = "";
+
+  if (equippedArmor.length > 0) {
+    const itemId = await promptArmorItemChoice(equippedArmor);
+    if (itemId === undefined) return null;
+
+    const item = actor.items.get(itemId);
+    if (item) {
+      const result = await damageArmorItem(item);
+      itemDetail = result.destroyed
+        ? game.i18n.format("DWAUTO.HitTrigger.ArmorItemDestroyed", { item: result.itemName })
+        : game.i18n.format("DWAUTO.HitTrigger.ArmorItemDamaged", { item: result.itemName, value: result.newValue });
+    }
+  }
+
   const current = Number(actor.system.attributes?.ac?.value) || 0;
   const next = Math.max(0, current - 1);
   await actor.update({ "system.attributes.ac.value": next });
   if (row.grantsForward) await grantForward(actor);
 
   const detailKey = row.grantsForward ? "DWAUTO.HitTrigger.ArmorAppliedForward" : "DWAUTO.HitTrigger.ArmorApplied";
-  announceActionApplied(actor, row.name, game.i18n.format(detailKey, { damage, armor: next }));
+  const detail = game.i18n.format(detailKey, { damage, armor: next }) + (itemDetail ? `<br>${itemDetail}` : "");
+  announceActionApplied(actor, row.name, detail);
 
   if (next === 0) {
     ui.notifications.warn(game.i18n.format("DWAUTO.HitTrigger.ArmorDestroyed", { name: actor.name }));
   }
+
+  return true;
 }
 
 function promptDebilityChoice(actor, row) {
@@ -149,7 +213,8 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
           } else if (row.effect === "shed") {
             await applyShed(actor, damage);
           } else {
-            await applyArmorNegation(actor, row, damage);
+            const applied = await applyArmorNegation(actor, row, damage);
+            if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           }
         }
       },

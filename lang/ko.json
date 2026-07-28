@@ -78,7 +78,7 @@
       "HitTriggerMovesMenu": {
         "Name": "피격 시 무효화 무브 설정",
         "Label": "피격 시 무효화 무브 편집",
-        "Hint": "들어오는 피해를 대가를 치르고 무효화할 수 있는 무브를 이름·효과로 등록/수정합니다. 효과는 '장갑 1 감소' 또는 '약화 하나 선택'입니다. 'forward +1 부여'는 방어의 비법처럼 무효화에 성공하면 추가 보너스까지 주는 무브에 체크하세요."
+        "Hint": "들어오는 피해를 대가를 치르고 무효화할 수 있는 무브를 이름·효과로 등록/수정합니다. 효과는 '장갑 1 감소' 또는 '약화 하나 선택'입니다. '장갑 1 감소'를 선택하면 장착 중인 방어구 중 어느 것의 내구도를 깎을지 물어보고, 그 아이템의 장갑 태그를 1 줄이거나(0이 되면 아이템을 파괴 처리) 장착 중인 방어구가 없으면 캐릭터의 장갑 수치만 낮춥니다. 'forward +1 부여'는 방어의 비법처럼 무효화에 성공하면 추가 보너스까지 주는 무브에 체크하세요."
       },
       "IndomitableMoveNames": {
         "Name": "불굴 무브 이름",
@@ -316,6 +316,10 @@
       "ArmorApplied": "피해가 무효화되었습니다 (장갑 {armor})",
       "ArmorAppliedForward": "피해가 무효화되었습니다 (장갑 {armor}), forward +1",
       "ArmorDestroyed": "{name}의 장갑이 0이 되었습니다 — 시트에서 파괴된 갑옷/방패를 정리해주세요.",
+      "ArmorItemPromptTitle": "내구도를 깎을 장비 선택",
+      "ArmorItemPromptContent": "어느 방어구의 내구도를 깎으시겠습니까?",
+      "ArmorItemDamaged": "{item}의 장갑 태그가 {value}로 줄었습니다",
+      "ArmorItemDestroyed": "{item}이(가) 파괴되었습니다",
       "IndomitableApplied": "forward +1",
       "ReductionPrompt": "지금 숫적으로 열세이신가요 (\"{name}\")? 그렇다면 이번 피해가 줄어듭니다.",
       "ReductionApplied": "피해가 {amount}만큼 줄어들었습니다"
@@ -451,7 +455,8 @@
       "TooltipTotal": "합계: {total}",
       "TooltipClickHint": "(클릭하면 이 합계로 장갑 값을 다시 계산합니다)",
       "RecalcLabel": "장갑 재계산",
-      "RecalcApplied": "장갑을 {total}로 재계산했습니다"
+      "RecalcApplied": "장갑을 {total}로 재계산했습니다",
+      "DestroyedSuffix": " (파괴됨)"
     }
   }
 }
