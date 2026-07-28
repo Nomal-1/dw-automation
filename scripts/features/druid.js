@@ -6,6 +6,7 @@ import { promptHealTarget, applyHealAmount } from "./healing.js";
 
 const BALANCE_FLAG = "druidBalance";
 const SHAPESHIFT_FLAG = "druidShapeshift";
+const SHAPESHIFT_ACTIVATED_FLAG = "druidShapeshiftActivated";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -35,8 +36,17 @@ export function hasBalance(actor) {
   return isEnabled() && Boolean(getBalanceMove(actor));
 }
 
+// 변신 탭은 "드루이드로 만들어졌다"가 아니라 "변신 액션을 실제로 한 번이라도
+// 굴렸다"를 기준으로 나타난다 — 드루이드는 변신을 시작 무브로 갖고 있어서
+// 캐릭터를 만들자마자 소유 여부만으로 판단하면 클래스만 보고 뜨는 것처럼
+// 보이지만, 다른 직업이 멀티클래스 등으로 이 무브를 나중에 얻어도 그
+// 액션을 실제로 사용하는 순간 똑같이 탭이 생기게 하기 위함이다.
+function isShapeshiftActivated(actor) {
+  return Boolean(actor.getFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG));
+}
+
 export function hasShapeshifter(actor) {
-  return isEnabled() && Boolean(getShapeshifterMove(actor));
+  return isEnabled() && isShapeshiftActivated(actor) && Boolean(getShapeshifterMove(actor));
 }
 
 function getBalance(actor) {
@@ -244,6 +254,10 @@ function onCreateChatMessage(message, options, userId) {
 
   const shapeshifterNames = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
   if (!shapeshifterNames.includes(title)) return;
+
+  if (!isShapeshiftActivated(actor)) {
+    actor.setFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG, true);
+  }
 
   const moveItem = findMoveItem(actor, title);
   if (moveItem) handleHoldMove(actor, moveItem, result);
