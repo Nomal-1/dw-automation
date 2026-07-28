@@ -487,6 +487,26 @@ function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// 던전월드 시트의 무브 목록 템플릿은 그 무브가 rollType이나 rollFormula를
+// 가진 경우에만 ".item-meta.tags" 컨테이너를 그려준다(굴림 방식을 보여주는
+// 태그 칩 자리라서). Smite/Exterminatus류처럼 굴림 없이 그냥 발동하는
+// 패시브 무브는 rollType/rollFormula가 둘 다 비어 있어서 이 컨테이너 자체가
+// 없다 — 그래서 배지를 붙일 자리가 없으면 템플릿이 원래 넣었을 위치(이름
+// 바로 뒤)에 직접 만들어 붙인다.
+function getOrCreateTagsContainer($item) {
+  const existing = $item.find(".item-meta.tags");
+  if (existing.length) return existing.first();
+
+  const $created = $('<div class="item-meta tags"></div>');
+  const $name = $item.find(".item-name");
+  if ($name.length) {
+    $name.after($created);
+  } else {
+    $item.prepend($created);
+  }
+  return $created;
+}
+
 // 캐릭터 시트의 무브 목록에 "자동 아니오" 토글 배지를 붙인다. 클릭할 때마다
 // 켜짐/꺼짐이 바뀌고, 켜져 있으면 데미지를 굴릴 때 그 무브는 물어보지 않고
 // 바로 noFormula를 적용한다(척살이 도망친 적을 쫓는 동안 매번 "아니오"를
@@ -509,8 +529,7 @@ function onRenderActorSheet(app, html) {
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
     if (!$item.length) continue;
 
-    const $tags = $item.find(".item-meta.tags");
-    if (!$tags.length) continue;
+    const $tags = getOrCreateTagsContainer($item);
 
     const designated = designations.includes(row.name);
 
