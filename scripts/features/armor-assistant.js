@@ -111,8 +111,7 @@ function getModifierBreakdown(actor) {
   const contributions = [];
   const formshaper = getFormshaperArmorContribution(actor);
   if (formshaper) contributions.push(formshaper);
-  const underdog = getOutnumberedArmorContribution(actor);
-  if (underdog) contributions.push(underdog);
+  contributions.push(...getOutnumberedArmorContribution(actor));
   return contributions;
 }
 

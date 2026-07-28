@@ -2,22 +2,26 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 
-// Thief Underdog(오기)/Serious Underdog(투지): "숫적으로 열세일 때 장갑
-// +N"이라는 조건부 보너스. 실제 원문은 다음과 같다.
-//   Underdog: 열세일 때만 +1 장갑(그 외엔 보너스 없음)
-//   Serious Underdog: 항상 +1 장갑, 열세일 때는 +1 대신 +2
-// "지금 열세인가"는 씬의 적대 토큰 수로 자동 판정할 수 없는 서사적 정보라,
-// 액터 플래그로 된 토글로 관리한다: 캐릭터 시트에서 직접 켜고 끌 수 있고,
-// "피격 때마다 묻기"가 켜져 있으면 맞을 때마다 hit-trigger.js가 Y/N으로
-// 다시 확인해서 상태가 바뀌면 이 토글도 같이 갱신한다.
+// "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
+// 이름/평소 보너스/조건 충족 시 보너스로 이루어진 일반 표라 GM이 서로 무관한
+// 여러 무브를 자유롭게 등록할 수 있다. 예:
+//   Underdog(오기): 조건 미충족(0) / 조건 충족(1) — "숫적으로 열세일 때"
+//   Serious Underdog(투지): 조건 미충족(1) / 조건 충족(2) — "숫적으로 열세일 때"
+//   나무껍질류: 조건 미충족(0) / 조건 충족(1) — "땅에 발이 닿아있을 때" 등
+// "그 조건이 지금 충족되었는가"는 씬 정보로 자동 판정할 수 없는 서사적
+// 판단이라, 무브별로 독립된(액터 플래그를 무브 _id로 나눈) 토글로 관리한다:
+// 캐릭터 시트에서 무브마다 따로 켜고 끌 수 있고, 무브별로 "피격 때마다
+// 묻기"가 켜져 있으면 맞을 때마다 hit-trigger.js가 그 무브에 대해서만 Y/N으로
+// 다시 확인해서 상태가 바뀌면 그 토글도 같이 갱신한다. 한 액터가 이런 무브를
+// 여러 개 동시에 가져도(예: 멀티클래스) 서로 완전히 독립적으로 동작한다.
 //
-// 이 토글은 armor-assistant.js의 장갑 재계산에 "지금 활성 보정"으로
-// 반영되고(Formshaper와 같은 방식), 토글이 실제로 바뀌는 순간에는 재계산을
-// 다시 부르는 대신 장갑 수치를 그 자리에서 ±1 직접 조정한다 — 오기든
-// 투지든 열세/열세아님 사이의 차이는 항상 정확히 1이기 때문에(오기: 0↔1,
-// 투지: 1↔2) 어느 무브인지 몰라도 ±1로 충분하다.
-const OUTNUMBERED_FLAG = "underdogOutnumbered";
-const ASK_EACH_HIT_FLAG = "underdogAskEachHit";
+// 이 토글들은 armor-assistant.js의 장갑 재계산에 "지금 활성 보정"으로 함께
+// 반영되고, 토글이 실제로 바뀌는 순간에는 재계산을 다시 부르는 대신 그 무브의
+// 두 상태(평소/조건 충족) 사이의 실제 보너스 차이만큼만 장갑 수치를 그
+// 자리에서 직접 조정한다(무브마다 차이가 다를 수 있어 더 이상 ±1로 고정하지
+// 않는다).
+const CONDITION_ACTIVE_FLAG = "underdogConditionActive"; // { [moveId]: boolean }
+const ASK_EACH_HIT_FLAG = "underdogAskEachHit"; // { [moveId]: boolean }, 기본값 true
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_HIT_TRIGGER_ASSISTANT);
@@ -27,101 +31,128 @@ function getRows() {
   return game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
 }
 
-function getOwnedRow(actor) {
+// 액터가 실제로 가진 모든 조건부 장갑 무브 행을 찾는다(무브별로 독립적이므로
+// 첫 번째 하나만 찾던 이전 방식과 달리 전부 반환한다).
+function getOwnedRows(actor) {
+  const owned = [];
   for (const row of getRows()) {
     const move = actor.items.find((i) => i.type === "move" && i.name === row.name);
-    if (move) return { row, move };
+    if (move) owned.push({ row, move });
   }
-  return null;
+  return owned;
 }
 
-export function isOutnumbered(actor) {
-  return Boolean(actor.getFlag(MODULE_ID, OUTNUMBERED_FLAG));
+// v0.22.x까지는 액터당 하나의 boolean 플래그(무브 하나만 지원)였다. 이미
+// 그 상태로 저장된 세계를 위해, 아직 무브별 맵으로 바뀌지 않은(boolean 그대로인)
+// 경우 그 값을 그대로 켜짐/꺼짐으로 취급한다(그 시점엔 실제로 무브가 하나뿐이었
+// 으므로 안전하다). 토글을 다시 누르면 자동으로 무브별 맵 형태로 바뀐다.
+export function isConditionActive(actor, moveId) {
+  const flag = actor.getFlag(MODULE_ID, CONDITION_ACTIVE_FLAG);
+  if (typeof flag === "boolean") return flag;
+  return Boolean(flag?.[moveId]);
 }
 
-function shouldAskEachHit(actor) {
-  return actor.getFlag(MODULE_ID, ASK_EACH_HIT_FLAG) ?? true;
+function shouldAskEachHit(actor, moveId) {
+  const flag = actor.getFlag(MODULE_ID, ASK_EACH_HIT_FLAG);
+  if (typeof flag === "boolean") return flag;
+  return flag?.[moveId] ?? true;
 }
 
-// armor-assistant.js의 장갑 재계산이 호출한다. 지금 열세 토글 상태에 맞는
-// 보너스(오기: 0 또는 1, 투지: 1 또는 2)를 돌려준다. 열세가 아니라 보너스가
-// 0이어도 "이 무브가 지금 아무것도 안 주고 있다"는 걸 보여주기 위해 그대로
-// 반환한다(합계에는 영향 없음).
+async function setConditionActive(actor, moveId, active) {
+  const current = actor.getFlag(MODULE_ID, CONDITION_ACTIVE_FLAG);
+  const base = typeof current === "object" && current !== null ? current : {};
+  await actor.setFlag(MODULE_ID, CONDITION_ACTIVE_FLAG, { ...base, [moveId]: active });
+}
+
+async function setAskEachHit(actor, moveId, ask) {
+  const current = actor.getFlag(MODULE_ID, ASK_EACH_HIT_FLAG);
+  const base = typeof current === "object" && current !== null ? current : {};
+  await actor.setFlag(MODULE_ID, ASK_EACH_HIT_FLAG, { ...base, [moveId]: ask });
+}
+
+// armor-assistant.js의 장갑 재계산이 호출한다. 액터가 가진 모든 조건부 장갑
+// 무브 각각의 현재 토글 상태에 맞는 보너스를 배열로 돌려준다(무브가 없으면
+// 빈 배열). 조건 미충족이라 보너스가 0이어도 "이 무브가 지금 아무것도 안
+// 주고 있다"는 걸 보여주기 위해 그대로 포함한다(합계에는 영향 없음).
 export function getOutnumberedArmorContribution(actor) {
-  if (!isEnabled()) return null;
-  const owned = getOwnedRow(actor);
-  if (!owned) return null;
-
-  const amount = isOutnumbered(actor) ? owned.row.outnumberedBonus : owned.row.baseBonus;
-  return { source: owned.move.name, amount: Number(amount) || 0 };
+  if (!isEnabled()) return [];
+  return getOwnedRows(actor).map(({ row, move }) => ({
+    source: move.name,
+    amount: Number(isConditionActive(actor, move.id) ? row.outnumberedBonus : row.baseBonus) || 0
+  }));
 }
 
-// hit-trigger.js가 피격 훅에서 호출한다. "피격 때마다 묻기"가 꺼져 있으면
-// 물어보지 않고 지금 토글 상태를 그대로 유지한다(null 반환).
+// hit-trigger.js가 피격 훅에서 호출한다. "피격 때마다 묻기"가 켜진 무브들만
+// 후보로 돌려준다(무브마다 독립적이므로 여러 개일 수 있다).
 export function getOutnumberedAskCandidate(actor) {
-  if (!isEnabled()) return null;
-  const owned = getOwnedRow(actor);
-  if (!owned) return null;
-  if (!shouldAskEachHit(actor)) return null;
-  return { moveName: owned.move.name };
+  if (!isEnabled()) return [];
+  return getOwnedRows(actor)
+    .filter(({ move }) => shouldAskEachHit(actor, move.id))
+    .map(({ move }) => ({ moveId: move.id, moveName: move.name }));
 }
 
-// 열세 여부 답(수동 토글 클릭이든, 피격 때마다 묻기의 Y/N 답이든)을
-// 반영한다. 실제로 상태가 바뀐 경우에만 장갑을 조정한다 — 같은 답이
-// 반복되면(예: 계속 열세 상태) 아무것도 하지 않는다. hit-trigger.js가
-// { changed, newArmor }를 보고 "지금 이 피격"의 피해량을 새 장갑 기준으로
-// 다시 계산할지 판단한다.
-export async function applyOutnumberedAnswer(actor, moveName, nowOutnumbered) {
+// 조건 충족 여부 답(수동 토글 클릭이든, 피격 때마다 묻기의 Y/N 답이든)을
+// 반영한다. 실제로 상태가 바뀐 경우에만 장갑을 조정한다. 이 무브의
+// 평소/조건 충족 보너스 차이만큼만 조정하므로(더 이상 ±1 고정 아님) 무브마다
+// 다른 보너스 폭을 정확히 반영한다. hit-trigger.js가 { changed, newArmor }를
+// 보고 "지금 이 피격"의 피해량을 새 장갑 기준으로 다시 계산할지 판단한다.
+export async function applyOutnumberedAnswer(actor, moveId, moveName, nowActive) {
   const currentArmor = Number(actor.system.attributes?.ac?.value) || 0;
-  const wasOutnumbered = isOutnumbered(actor);
-  if (wasOutnumbered === nowOutnumbered) return { changed: false, newArmor: currentArmor };
+  const wasActive = isConditionActive(actor, moveId);
+  if (wasActive === nowActive) return { changed: false, newArmor: currentArmor };
 
-  await actor.setFlag(MODULE_ID, OUTNUMBERED_FLAG, nowOutnumbered);
+  const row = getRows().find((r) => r.name === moveName);
+  const delta = row
+    ? (nowActive ? row.outnumberedBonus : row.baseBonus) - (wasActive ? row.outnumberedBonus : row.baseBonus)
+    : nowActive
+      ? 1
+      : -1;
 
-  const next = Math.max(0, currentArmor + (nowOutnumbered ? 1 : -1));
+  await setConditionActive(actor, moveId, nowActive);
+
+  const next = Math.max(0, currentArmor + delta);
   await actor.update({ "system.attributes.ac.value": next });
 
-  const messageKey = nowOutnumbered ? "DWAUTO.Underdog.BecameOutnumbered" : "DWAUTO.Underdog.NoLongerOutnumbered";
+  const messageKey = nowActive ? "DWAUTO.Underdog.BecameOutnumbered" : "DWAUTO.Underdog.NoLongerOutnumbered";
   announceActionApplied(actor, moveName, game.i18n.format(messageKey, { armor: next }));
 
   return { changed: true, newArmor: next };
 }
 
 function renderBadges(actor, html) {
-  const owned = getOwnedRow(actor);
-  if (!owned) return;
+  for (const { move } of getOwnedRows(actor)) {
+    const $item = html.find(`.item[data-item-id="${move.id}"]`);
+    if (!$item.length) continue;
 
-  const $item = html.find(`.item[data-item-id="${owned.move.id}"]`);
-  if (!$item.length) return;
+    const $tags = getOrCreateTagsContainer($item);
 
-  const $tags = getOrCreateTagsContainer($item);
+    if (!$tags.find(".dwauto-underdog-outnumbered-badge").length) {
+      const active = isConditionActive(actor, move.id);
+      const $badge = $(
+        `<a class="tag dwauto-underdog-outnumbered-badge${active ? " dwauto-underdog-on" : ""}" title="${game.i18n.localize("DWAUTO.Underdog.OutnumberedToggleTitle")}">${game.i18n.localize(active ? "DWAUTO.Underdog.OutnumberedOn" : "DWAUTO.Underdog.OutnumberedOff")}</a>`
+      );
+      $tags.append($badge);
 
-  if (!$tags.find(".dwauto-underdog-outnumbered-badge").length) {
-    const outnumbered = isOutnumbered(actor);
-    const $badge = $(
-      `<a class="tag dwauto-underdog-outnumbered-badge${outnumbered ? " dwauto-underdog-on" : ""}" title="${game.i18n.localize("DWAUTO.Underdog.OutnumberedToggleTitle")}">${game.i18n.localize(outnumbered ? "DWAUTO.Underdog.OutnumberedOn" : "DWAUTO.Underdog.OutnumberedOff")}</a>`
-    );
-    $tags.append($badge);
+      $badge.on("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await applyOutnumberedAnswer(actor, move.id, move.name, !active);
+      });
+    }
 
-    $badge.on("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      await applyOutnumberedAnswer(actor, owned.move.name, !outnumbered);
-    });
-  }
+    if (!$tags.find(".dwauto-underdog-ask-badge").length) {
+      const ask = shouldAskEachHit(actor, move.id);
+      const $askBadge = $(
+        `<a class="tag dwauto-underdog-ask-badge${ask ? " dwauto-underdog-on" : ""}" title="${game.i18n.localize("DWAUTO.Underdog.AskEachHitTitle")}">${game.i18n.localize(ask ? "DWAUTO.Underdog.AskEachHitOn" : "DWAUTO.Underdog.AskEachHitOff")}</a>`
+      );
+      $tags.append($askBadge);
 
-  if (!$tags.find(".dwauto-underdog-ask-badge").length) {
-    const ask = shouldAskEachHit(actor);
-    const $askBadge = $(
-      `<a class="tag dwauto-underdog-ask-badge${ask ? " dwauto-underdog-on" : ""}" title="${game.i18n.localize("DWAUTO.Underdog.AskEachHitTitle")}">${game.i18n.localize(ask ? "DWAUTO.Underdog.AskEachHitOn" : "DWAUTO.Underdog.AskEachHitOff")}</a>`
-    );
-    $tags.append($askBadge);
-
-    $askBadge.on("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      await actor.setFlag(MODULE_ID, ASK_EACH_HIT_FLAG, !ask);
-    });
+      $askBadge.on("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await setAskEachHit(actor, move.id, !ask);
+      });
+    }
   }
 }
 

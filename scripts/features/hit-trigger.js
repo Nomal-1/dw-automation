@@ -3,7 +3,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
 import { getShedCandidate, applyShed } from "./druid.js";
 import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
-import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isOutnumbered } from "./underdog.js";
+import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive } from "./underdog.js";
 import { findDecidingUser } from "../lib/deciding-user.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
@@ -252,22 +252,25 @@ function recalculateDamageForNewArmor(damage, options, newArmor) {
 }
 
 // preUpdateActor(로컬이든 소켓으로 넘겨받았든)가 이미 원래 HP 갱신을 막아둔
-// 뒤 호출된다. Underdog류(오기/투지)의 "피격 때마다 묻기"가 켜져 있으면
-// 먼저 "숫적으로 열세인지"를 Y/N으로 확인한다. 답에 따라 상태가 실제로
-// 바뀌면 토글과 장갑을 갱신하고, 바뀐 장갑 기준으로 이번 피해량 자체를
-// 다시 계산한다(recalculateDamageForNewArmor). 그 다음 무효화 무브(Armor
-// Mastery/Bloody Aegis류)가 있으면 원래 promptHitTrigger로 이어간다. 없으면
-// (재계산된) 피해량 그대로 HP 갱신을 다시 적용한다.
-async function handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidate }) {
+// 뒤 호출된다. 조건부 장갑 보너스 무브(오기/투지, 나무껍질류 등)들 중
+// "피격 때마다 묻기"가 켜진 것들을 무브별로 하나씩 순서대로 Y/N 확인한다.
+// (한 액터가 이런 무브를 여러 개 가져도 서로 독립적으로 물어본다.) 답에 따라
+// 상태가 실제로 바뀌면 그 무브의 토글과 장갑을 갱신하고, 매번 최신 장갑
+// 기준으로 이번 피해량 자체를 다시 계산한다(recalculateDamageForNewArmor는
+// 항상 원래 피해량+역산한 원본값을 기준으로 다시 계산하므로 여러 번 불러도
+// 누적 오차 없이 항상 정확하다). 그 다음 무효화 무브(Armor Mastery/Bloody
+// Aegis류)가 있으면 원래 promptHitTrigger로 이어간다. 없으면 (재계산된)
+// 피해량 그대로 HP 갱신을 다시 적용한다.
+async function handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidates }) {
   let finalDamage = damage;
 
-  if (outnumberedCandidate) {
-    const nowOutnumbered = await Dialog.confirm({
-      title: outnumberedCandidate.moveName,
-      content: `<p>${game.i18n.format("DWAUTO.Underdog.AskPrompt", { name: outnumberedCandidate.moveName })}</p>`,
-      defaultYes: isOutnumbered(actor)
+  for (const candidate of outnumberedCandidates ?? []) {
+    const nowActive = await Dialog.confirm({
+      title: candidate.moveName,
+      content: `<p>${game.i18n.format("DWAUTO.Underdog.AskPrompt", { name: candidate.moveName })}</p>`,
+      defaultYes: isConditionActive(actor, candidate.moveId)
     });
-    const { changed, newArmor } = await applyOutnumberedAnswer(actor, outnumberedCandidate.moveName, nowOutnumbered);
+    const { changed, newArmor } = await applyOutnumberedAnswer(actor, candidate.moveId, candidate.moveName, nowActive);
 
     if (changed) {
       const recalculated = recalculateDamageForNewArmor(damage, options, newArmor);
@@ -275,7 +278,7 @@ async function handleIncomingDamage({ actor, damage, changes, options, candidate
         finalDamage = recalculated;
         announceActionApplied(
           actor,
-          outnumberedCandidate.moveName,
+          candidate.moveName,
           game.i18n.format("DWAUTO.Underdog.DamageRecalculated", { damage: finalDamage })
         );
       }
@@ -310,8 +313,8 @@ function onPreUpdateActor(actor, changes, options, userId) {
   if (damage <= 0) return true;
 
   const candidates = getHitTriggerCandidates(actor);
-  const outnumberedCandidate = getOutnumberedAskCandidate(actor);
-  if (candidates.length === 0 && !outnumberedCandidate) return true;
+  const outnumberedCandidates = getOutnumberedAskCandidate(actor);
+  if (candidates.length === 0 && outnumberedCandidates.length === 0) return true;
 
   // 여기서 갱신을 막고(false 반환), 대화상자 결과에 따라 원래 변경사항을 다시
   // 적용하거나 대체 효과를 적용한다. preUpdate 훅은 반환값을 동기적으로만
@@ -331,14 +334,14 @@ function onPreUpdateActor(actor, changes, options, userId) {
       targetUserId: decidingUser.id,
       actorId: actor.id,
       candidates,
-      outnumberedCandidate,
+      outnumberedCandidates,
       damage,
       changes,
       options
     });
   } else {
     console.log(`${MODULE_ID} | hit-trigger: no other connected owner found for ${actor.name}, prompting locally`);
-    handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidate });
+    handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidates });
   }
   return false;
 }
@@ -359,7 +362,7 @@ function onSocketEvent(data) {
     changes: data.changes,
     options: data.options,
     candidates: data.candidates,
-    outnumberedCandidate: data.outnumberedCandidate
+    outnumberedCandidates: data.outnumberedCandidates
   });
 }
 

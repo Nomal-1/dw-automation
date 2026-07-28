@@ -110,7 +110,7 @@
       "DamageReductionMovesMenu": {
         "Name": "Conditional Armor Bonus Moves",
         "Label": "Edit Conditional Armor Bonus Moves",
-        "Hint": "Register moves like Underdog/Serious Underdog that grant an armor bonus while outnumbered, by name, base bonus, and outnumbered bonus. Each character's outnumbered/not-outnumbered toggle (see the move's sheet badges) decides which applies, and the armor recalculation button reflects it."
+        "Hint": "Register moves like Underdog/Serious Underdog (outnumbered) or Bark Skin (feet on the ground) that grant an armor bonus based on a condition independent of any other move/state, by name, base bonus, and bonus when the condition is met. Each move gets its own independent per-character toggle (see the move's sheet badges), and the armor recalculation button reflects all of them."
       },
       "ConditionalDamageMovesMenu": {
         "Name": "Conditional Damage Moves",
@@ -328,10 +328,10 @@
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Base Bonus\" is the armor bonus always granted while not outnumbered (e.g. Serious Underdog's constant +1); \"Outnumbered Bonus\" is granted instead while outnumbered. Whether the character currently counts as outnumbered is tracked by a per-character toggle (features/underdog.js) and feeds into the armor recalculation button.",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Only use this for moves whose condition is independent of any other move/state (e.g. being outnumbered, having your feet on the ground) — not conditions tied to something like shapeshifting. \"Base Bonus\" is the armor bonus granted while the condition is not met; \"Bonus When Condition Met\" is granted instead while it is. Each move gets its own independent per-character toggle (on the move's sheet badge) that feeds into the armor recalculation button.",
       "Name": "Move Name",
       "BaseBonus": "Base Bonus",
-      "OutnumberedBonus": "Outnumbered Bonus"
+      "OutnumberedBonus": "Bonus When Condition Met"
     },
     "ConditionalDamageMoves": {
       "Title": "Conditional Damage Moves",
@@ -469,14 +469,14 @@
       "DestroyedSuffix": " (Destroyed)"
     },
     "Underdog": {
-      "AskPrompt": "Are you currently outnumbered (\"{name}\")?",
-      "BecameOutnumbered": "Now outnumbered (armor {armor})",
-      "NoLongerOutnumbered": "No longer outnumbered (armor {armor})",
+      "AskPrompt": "Do you currently meet \"{name}\"'s condition?",
+      "BecameOutnumbered": "Condition met (armor {armor})",
+      "NoLongerOutnumbered": "Condition no longer met (armor {armor})",
       "DamageRecalculated": "This hit's damage recalculated to {damage} using the new armor",
-      "OutnumberedToggleTitle": "Click to toggle whether you're currently outnumbered. Armor adjusts automatically if this actually changes.",
-      "OutnumberedOn": "Outnumbered",
-      "OutnumberedOff": "Not Outnumbered",
-      "AskEachHitTitle": "Click to toggle whether you're asked about outnumbered status on every hit. When off, the current toggle is kept as-is without asking.",
+      "OutnumberedToggleTitle": "Click to toggle whether this move's condition is currently met. Armor adjusts automatically if this actually changes.",
+      "OutnumberedOn": "Condition Met",
+      "OutnumberedOff": "Condition Not Met",
+      "AskEachHitTitle": "Click to toggle whether you're asked about this move's condition on every hit. When off, the current toggle is kept as-is without asking.",
       "AskEachHitOn": "Ask Each Hit: On",
       "AskEachHitOff": "Ask Each Hit: Off"
     },
