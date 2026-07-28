@@ -118,9 +118,47 @@ async function migrateBornOfTheSoilOut() {
   );
 }
 
+// v0.23.x 전수조사로 새로 찾은 "자유 기입형" 무브(팔라딘 Quest/Divine Favor,
+// 레인저 God Amidst The Wastes)를 이미 이 설정을 저장해둔 세계에도 반영한다.
+// 이미 목록에 있는 이름(영문이든 번역명이든)은 건드리지 않고, 없는 것만 한 번
+// 추가한다.
+async function migrateAddSurveyedNoteMoves() {
+  if (!game.user.isGM) return;
+
+  const NEW_DEFAULTS = ["Quest", "Divine Favor", "God Amidst The Wastes"];
+
+  const raw = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
+  const names = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const existing = new Set(names);
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const name of NEW_DEFAULTS) {
+    if (existing.has(name)) continue;
+    const translated = nameMap?.get(name);
+    if (translated && existing.has(translated)) continue;
+    toAdd.push(translated ?? name);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, [...names, ...toAdd].join(", "));
+  console.log(`${MODULE_ID} | note-moves: added newly-surveyed default(s) to Note-Taking Move Names`, toAdd);
+}
+
 export function registerNoteMoves() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
     migrateBornOfTheSoilOut();
+    migrateAddSurveyedNoteMoves();
   });
 }

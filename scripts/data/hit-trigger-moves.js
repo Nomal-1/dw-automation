@@ -12,12 +12,31 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Bloody Aegis", effect: "debility", grantsForward: false }
 ];
 
-// Thief Underdog(오기)/Serious Underdog(투지): "숫적으로 열세일 때 장갑
-// +N"이라는 조건부 장갑 보너스. 원문 기준 baseBonus(평소)/outnumberedBonus
-// (열세일 때)는 오기가 0/1, 투지가 1/2다 — 투지는 열세가 아니어도 항상
-// +1을 받는다는 점에 주의(features/underdog.js가 이 표를 읽어 실제 열세
-// 토글에 맞는 값을 armor-assistant.js의 장갑 재계산에 반영한다).
+// 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,
+// "다른 무브/상태에 의존하지 않는 독립적인 서사적 조건"으로 장갑을 주는
+// 무브들. 원문 근거:
+//   - Underdog(오기): "숫적으로 열세일 때 +1 장갑" (평소 0)
+//   - Serious Underdog(투지, Underdog 업그레이드): "항상 +1, 열세일 때 +2"
+//   - Unencumbered, Unharmed(바바리안): "짐이 Load 미만이고 갑옷도 방패도
+//     없으면 +1 장갑"
+//   - Barkskin(드루이드): "발이 땅에 닿아있으면 +1 장갑"
+//   - Divine Protection(클레릭): "갑옷도 방패도 없으면 +2 장갑"
+//   - Divine Armor(클레릭, Divine Protection 업그레이드): "...+3 장갑"
+// 조사 중 이름이 같은 "Divine Protection"이 팔라딘 쪽에도 있으나(퀘스트
+// 무브에 의존하는 별개 조건, 값은 우연히 동일) 여기 등록한 건 클레릭
+// 버전이다 — 어느 쪽이든 값이 같아 실제 동작에는 차이가 없다.
+//
+// 조사했지만 일부러 넣지 않은 것(다른 무브가 만든 "상태"에 의존해서
+// Formshaper와 같은 이유로 제외 — 독립적인 조건이 아님):
+//   - 팔라딘 Holy Protection/Divine Protection: "퀘스트 중일 때" (Quest 무브에
+//     종속)
+//   - 위저드 Arcane Ward/Arcane Armor: "1레벨 이상 주문을 준비해뒀을 때"
+//     (Prepare Spells 무브에 종속)
 export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
   { name: "Underdog", baseBonus: 0, outnumberedBonus: 1 },
-  { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2 }
+  { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2 },
+  { name: "Unencumbered, Unharmed", baseBonus: 0, outnumberedBonus: 1 },
+  { name: "Barkskin", baseBonus: 0, outnumberedBonus: 1 },
+  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2 },
+  { name: "Divine Armor", baseBonus: 0, outnumberedBonus: 3 }
 ];

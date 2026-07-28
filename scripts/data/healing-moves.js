@@ -23,7 +23,15 @@ export const DEFAULT_HEALING_MOVES = [
 // Paladin Hospitaller/Perfect Hospitaller: "아군을 치유할 때(자신 제외) 추가로
 // 이만큼 더 치유한다"는 수동형 보너스. 위 표의 무브로 남을 치유할 때마다
 // 이 무브를 갖고 있으면 자동으로 추가 굴림을 더한다.
+// Bard Healing Song/Healing Chorus는 전수조사로 찾은 같은 구조의 무브다
+// (원문: "Arcane Art로 치유할 때 +1d8"/"...+2d8"). 실제로는 Arcane Art로
+// 치유했을 때만 적용되는 문구지만, 이 모듈은 애초에 Hospitaller류를 "그
+// 캐릭터가 이 표의 무브로 남을 치유하면 무조건 보너스를 더한다"로 단순화해서
+// 구현해뒀다(어느 치유 무브로 치유했는지는 구분하지 않음) — 새 항목도 같은
+// 단순화를 그대로 따른다.
 export const DEFAULT_HOSPITALLER_MOVES = [
   { name: "Hospitaller", bonusFormula: "1d8" },
-  { name: "Perfect Hospitaller", bonusFormula: "2d8" }
+  { name: "Perfect Hospitaller", bonusFormula: "2d8" },
+  { name: "Healing Song", bonusFormula: "1d8" },
+  { name: "Healing Chorus", bonusFormula: "2d8" }
 ];

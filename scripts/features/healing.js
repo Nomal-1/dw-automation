@@ -2,6 +2,8 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { DEFAULT_HOSPITALLER_MOVES } from "../data/healing-moves.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // 관찰(Observer) 권한만 있는 대상(적인지 아군인지 애매한 NPC 등)도 치유
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
@@ -339,9 +341,43 @@ function onCreateChatMessage(message, options, userId) {
   });
 }
 
+// v0.23.x 전수조사로 찾은 Healing Song/Healing Chorus(바드)를 이미 설정해둔
+// 세계에도 반영한다. underdog.js의 같은 패턴 참고 — 이미 저장된 표에 없는
+// 이름만 번역 인지 상태로 한 번 추가한다.
+async function migrateAddSurveyedHospitallerDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.HOSPITALLER_MOVES);
+  const existingNames = new Set(rows.map((r) => r.name));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_HOSPITALLER_MOVES) {
+    if (existingNames.has(row.name)) continue;
+    const translated = nameMap?.get(row.name);
+    if (translated && existingNames.has(translated)) continue;
+    toAdd.push(translated ? { ...row, name: translated } : row);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.HOSPITALLER_MOVES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | healing: added ${toAdd.length} newly-surveyed default(s) to Hospitaller-style Moves`,
+    toAdd.map((r) => r.name)
+  );
+}
+
 export function registerHealingAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
+    migrateAddSurveyedHospitallerDefaults();
   });
 }

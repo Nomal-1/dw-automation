@@ -478,7 +478,7 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    default: "Deity, Apotheosis, Animal Companion"
+    default: "Deity, Apotheosis, Animal Companion, Quest, Divine Favor, God Amidst The Wastes"
   });
 
   // 대지의 아들/딸: 소유만으로 탭이 뜨는 다른 메모형 무브들과 달리, 실제로

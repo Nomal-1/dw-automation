@@ -1,6 +1,8 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
 // 이름/평소 보너스/조건 충족 시 보너스로 이루어진 일반 표라 GM이 서로 무관한
@@ -198,9 +200,47 @@ async function migrateLegacyAmountField() {
   );
 }
 
+// v0.23.x 전수조사로 새로 찾은 기본값(Unencumbered Unharmed, Barkskin, Divine
+// Protection/Armor 등)은 이미 세계를 설정해둔 GM에게는 그냥 코드 기본값을
+// 바꾸는 것만으로 반영되지 않는다(game.settings 기본값은 한 번도 저장된 적
+// 없는 세계에만 적용된다). 이미 저장된 표에 없는 이름만 골라 한 번 추가해준다
+// — GM이 이미 그 이름을 지웠었다 해도(이 조사 전부터 그 이름을 쓴 적이
+// 없으므로) 구분할 방법이 없어 그냥 다시 채워 넣는다. 이름은 번역 데이터가
+// 있으면 번역된 이름 기준으로 저장해서, 이미 번역된 세계에서도 즉시 매칭된다.
+async function migrateAddSurveyedDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
+  const existingNames = new Set(rows.map((r) => r.name));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_DAMAGE_REDUCTION_MOVES) {
+    if (existingNames.has(row.name)) continue;
+    const translated = nameMap?.get(row.name);
+    if (translated && existingNames.has(translated)) continue;
+    toAdd.push(translated ? { ...row, name: translated } : row);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | underdog: added ${toAdd.length} newly-surveyed default(s) to Conditional Armor Bonus Moves`,
+    toAdd.map((r) => r.name)
+  );
+}
+
 export function registerUnderdogAssistant() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
     migrateLegacyAmountField();
+    migrateAddSurveyedDefaults();
   });
 }
