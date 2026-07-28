@@ -7,42 +7,51 @@
 // 같은 액터가 갖고 있는 replacesName 무브를 자동으로 제거한다.
 //
 // 던전월드 룰에는 "대체"(이전 무브가 사라짐)뿐 아니라 "필요"(이전 무브는
-// 그대로 남고 그냥 전제조건으로만 쓰임) 관계도 있어서, deletesPrevious로
-// 구분한다. requiresMove 필드만으로는 어느 쪽인지 알 수 없어서(둘 다 그
-// 필드는 똑같이 채워짐) 기본값은 지금까지의 동작(전부 대체)과 같게
-// true로 채워뒀다 — 실제로 "필요" 관계인 쌍을 확인하면 설정에서 개별적으로
-// 체크를 풀어주면 된다.
-//
-// 이름은 requiresMove 필드(컴펜디엄 원문, 영어)를 그대로 기본값으로 채워뒀다.
-// 번역 모듈을 쓰는 게임이면 "번역 모듈에서 자동 채우기"로 두 칸 다 한글로
-// 바뀐다(둘 다 무브 이름이라 같은 방식으로 번역된다).
+// 그대로 남고 그냥 전제조건으로만 쓰임) 관계도 있다. 43쌍 전부 실제 무브
+// 원문(공식 컴펜디엄, asacolips-projects/dungeonworld 1.8.2)을 다시 읽어서
+// 확인했다 — 상위 무브의 효과가 이전 무브와 "같은 효과의 상위 버전"(주사위/
+// 수치만 커지거나 조건이 넓어짐)이면 대체, 완전히 다른 별개의 효과이거나
+// 텍스트에 "~에 더해(in addition to)"가 명시되어 있으면 필요로 분류했다.
+// 필요 관계로 확인된 쌍(9개):
+//   Anointed/Chosen One, Master/Prodigy — 텍스트에 "Chosen One/Prodigy에서
+//     고른 것에 더해" 라고 명시됨.
+//   Evil Eye/Seeing Red, Evidence Of Faith/Divine Favor, Enchanter's
+//     Soul/Enchanter, Protective Counter/Counterspell — 완전히 다른 효과.
+//   Greater First Aid/First Aid — 서로 다른 주문(가벼운/보통 상처 치료)을
+//     각각 로트로 만들어줘서 둘 다 유지해야 의미가 있음.
+//   Formshaper/Formcrafter — Formcrafter는 변신 중 능력치 보너스/페널티,
+//     Formshaper는 변신 중 장갑/피해 선택으로 서로 완전히 다른 효과(이
+//     모듈의 features/druid.js도 둘을 별개로 자동화하고 있어서, 여기서
+//     Formcrafter를 지워버리면 그 자동화가 깨진다).
+//   World-talker/Thing-talker — 대상 확장이 서로 다름(원소 vs 무생물).
+// 나머지 34쌍은 전부 "같은 효과의 상위 버전"이라 대체로 분류했다.
 export const DEFAULT_MOVE_UPGRADES = [
   { upgradeName: "Armored Perfection", replacesName: "Armor Mastery", deletesPrevious: true },
   { upgradeName: "Bloodthirsty", replacesName: "Merciless", deletesPrevious: true },
-  { upgradeName: "Evil Eye", replacesName: "Seeing Red", deletesPrevious: true },
+  { upgradeName: "Evil Eye", replacesName: "Seeing Red", deletesPrevious: false },
   { upgradeName: "Steel Hide", replacesName: "Iron Hide", deletesPrevious: true },
   { upgradeName: "Taste Of Blood", replacesName: "Scent Of Blood", deletesPrevious: true },
   { upgradeName: "Divine Authority", replacesName: "Voice Of Authority", deletesPrevious: true },
   { upgradeName: "Divine Protection", replacesName: "Holy Protection", deletesPrevious: true },
   { upgradeName: "Ever Onward", replacesName: "Charge!", deletesPrevious: true },
-  { upgradeName: "Evidence Of Faith", replacesName: "Divine Favor", deletesPrevious: true },
+  { upgradeName: "Evidence Of Faith", replacesName: "Divine Favor", deletesPrevious: false },
   { upgradeName: "Holy Smite", replacesName: "Smite", deletesPrevious: true },
   { upgradeName: "Impervious Defender", replacesName: "Staunch Defender", deletesPrevious: true },
   { upgradeName: "Perfect Hospitaller", replacesName: "Hospitaller", deletesPrevious: true },
   { upgradeName: "Tandem Strike", replacesName: "Setup Strike", deletesPrevious: true },
-  { upgradeName: "Anointed", replacesName: "Chosen One", deletesPrevious: true },
+  { upgradeName: "Anointed", replacesName: "Chosen One", deletesPrevious: false },
   { upgradeName: "Divine Armor", replacesName: "Divine Protection", deletesPrevious: true },
   { upgradeName: "Divine Invincibility", replacesName: "Divine Intervention", deletesPrevious: true },
   { upgradeName: "Greater Empower", replacesName: "Empower", deletesPrevious: true },
-  { upgradeName: "Greater First Aid", replacesName: "First Aid", deletesPrevious: true },
+  { upgradeName: "Greater First Aid", replacesName: "First Aid", deletesPrevious: false },
   { upgradeName: "Martyr", replacesName: "Penitent", deletesPrevious: true },
   { upgradeName: "Providence", replacesName: "Serenity", deletesPrevious: true },
   { upgradeName: "Arcane Armor", replacesName: "Arcane Ward", deletesPrevious: true },
-  { upgradeName: "Enchanter's Soul", replacesName: "Enchanter", deletesPrevious: true },
+  { upgradeName: "Enchanter's Soul", replacesName: "Enchanter", deletesPrevious: false },
   { upgradeName: "Greater Empowered Magic", replacesName: "Empowered Magic", deletesPrevious: true },
   { upgradeName: "Highly Logical", replacesName: "Logical", deletesPrevious: true },
-  { upgradeName: "Master", replacesName: "Prodigy", deletesPrevious: true },
-  { upgradeName: "Protective Counter", replacesName: "Counterspell", deletesPrevious: true },
+  { upgradeName: "Master", replacesName: "Prodigy", deletesPrevious: false },
+  { upgradeName: "Protective Counter", replacesName: "Counterspell", deletesPrevious: false },
   { upgradeName: "Alchemist", replacesName: "Brewer", deletesPrevious: true },
   { upgradeName: "Dirty Fighter", replacesName: "Cheap Shot", deletesPrevious: true },
   { upgradeName: "Extremely Cautious", replacesName: "Cautious", deletesPrevious: true },
@@ -58,6 +67,6 @@ export const DEFAULT_MOVE_UPGRADES = [
   { upgradeName: "Healing Chorus", replacesName: "Healing Song", deletesPrevious: true },
   { upgradeName: "Vicious Blast", replacesName: "Vicious Cacophony", deletesPrevious: true },
   { upgradeName: "Blood and Thunder", replacesName: "Red of Tooth and Claw", deletesPrevious: true },
-  { upgradeName: "Formshaper", replacesName: "Formcrafter", deletesPrevious: true },
-  { upgradeName: "World-talker", replacesName: "Thing-talker", deletesPrevious: true }
+  { upgradeName: "Formshaper", replacesName: "Formcrafter", deletesPrevious: false },
+  { upgradeName: "World-talker", replacesName: "Thing-talker", deletesPrevious: false }
 ];

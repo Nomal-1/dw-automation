@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
 
 function blankRow() {
   return { upgradeName: "", replacesName: "", deletesPrevious: true };
@@ -56,6 +57,21 @@ export class MoveUpgradesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    // 이 모듈이 실제 공식 무브 원문을 확인해서 정리해둔 영문 기본값(대체/필요
+    // 구분 포함)으로 표 전체를 되돌린다. 그 다음 "번역 모듈에서 자동
+    // 채우기"를 실행하면 이름만 번역되고 대체/필요 구분은 그대로 유지된다.
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.MoveUpgrades.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.MoveUpgrades.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_MOVE_UPGRADES);
       this.render();
     });
   }
