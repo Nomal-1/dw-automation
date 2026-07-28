@@ -217,6 +217,22 @@ async function setAutoNoLock(actor, moveName, locked) {
   await actor.setFlag(MODULE_ID, AUTO_NO_FLAG, next);
 }
 
+// 척살(Exterminatus)처럼 "적을 지정해야만" 효과 자체가 존재하는 무브
+// (requiresDesignation: true)를 위한 별도 플래그. 비지정 상태면 이 무브는
+// 질문도, 보너스도, 페널티도 전혀 없이 완전히 무시된다 — 아직 대상을
+// 선언하지 않았거나 이미 쓰러뜨려서 효과가 끝난 상태를 나타낸다.
+const DESIGNATION_FLAG = "conditionalDamageDesignated";
+
+function getDesignations(actor) {
+  return actor.getFlag(MODULE_ID, DESIGNATION_FLAG) ?? [];
+}
+
+async function setDesignation(actor, moveName, designated) {
+  const current = getDesignations(actor);
+  const next = designated ? Array.from(new Set([...current, moveName])) : current.filter((n) => n !== moveName);
+  await actor.setFlag(MODULE_ID, DESIGNATION_FLAG, next);
+}
+
 // Paladin Smite/Holy Smite/Exterminatus, Ranger Viper's Strike/Fangs처럼
 // "특정 조건을 만족하면 데미지 주사위를 추가로(또는 페널티로) 굴리는"
 // 무브들. 조건(퀘스트 중인지, 겸용 공격을 했는지 등)을 자동 판정할 수
@@ -229,8 +245,11 @@ async function promptConditionalDamageBonuses(actor) {
   if (owned.length === 0) return "";
 
   const locks = getAutoNoLocks(actor);
+  const designations = getDesignations(actor);
   let extra = "";
   for (const row of owned) {
+    if (row.requiresDesignation && !designations.includes(row.name)) continue;
+
     const confirmed = locks.includes(row.name)
       ? false
       : await Dialog.confirm({
@@ -242,13 +261,12 @@ async function promptConditionalDamageBonuses(actor) {
     const formula = confirmed ? row.yesFormula : row.noFormula;
     if (formula && formula.trim() && formula.trim() !== "0") {
       extra = appendTerm(extra, formula);
-      announceActionApplied(
-        actor,
-        row.name,
-        game.i18n.format(confirmed ? "DWAUTO.ConditionalDamage.Yes" : "DWAUTO.ConditionalDamage.No", {
-          formula: formula.trim()
-        })
-      );
+      const messageKey = confirmed
+        ? "DWAUTO.ConditionalDamage.Yes"
+        : row.requiresDesignation
+          ? "DWAUTO.ConditionalDamage.ReverseNo"
+          : "DWAUTO.ConditionalDamage.No";
+      announceActionApplied(actor, row.name, game.i18n.format(messageKey, { formula: formula.trim() }));
     }
   }
   return extra;
@@ -479,6 +497,7 @@ function onRenderActorSheet(app, html) {
 
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
   const locks = getAutoNoLocks(actor);
+  const designations = getDesignations(actor);
 
   for (const row of table) {
     const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
@@ -488,24 +507,46 @@ function onRenderActorSheet(app, html) {
     if (!$item.length) continue;
 
     const $tags = $item.find(".item-meta.tags");
-    if (!$tags.length || $tags.find(".dwauto-autono-badge").length) continue;
+    if (!$tags.length) continue;
 
-    const locked = locks.includes(row.name);
-    const noFormula = (row.noFormula || "").trim() || "0";
-    const label = locked
-      ? game.i18n.format("DWAUTO.ConditionalDamage.AutoNoOn", { formula: noFormula })
-      : game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoOff");
+    const designated = designations.includes(row.name);
 
-    const $badge = $(
-      `<a class="tag dwauto-autono-badge${locked ? " dwauto-autono-on" : ""}" title="${game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoTitle")}">${label}</a>`
-    );
-    $tags.append($badge);
+    // 척살처럼 대상 지정이 필요한 무브: 지정/비지정 배지를 붙인다.
+    // 비지정 상태에서는 이 무브 자체가 완전히 무시되므로, "자동 아니오"
+    // 배지는 지정된 상태에서만 의미가 있어 같이 붙인다.
+    if (row.requiresDesignation && !$tags.find(".dwauto-designation-badge").length) {
+      const $designationBadge = $(
+        `<a class="tag dwauto-designation-badge${designated ? " dwauto-designation-on" : ""}" title="${game.i18n.localize("DWAUTO.ConditionalDamage.DesignationTitle")}">${game.i18n.localize(designated ? "DWAUTO.ConditionalDamage.DesignationOn" : "DWAUTO.ConditionalDamage.DesignationOff")}</a>`
+      );
+      $tags.append($designationBadge);
 
-    $badge.on("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      await setAutoNoLock(actor, row.name, !locked);
-    });
+      $designationBadge.on("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await setDesignation(actor, row.name, !designated);
+      });
+    }
+
+    if (row.requiresDesignation && !designated) continue;
+
+    if (!$tags.find(".dwauto-autono-badge").length) {
+      const locked = locks.includes(row.name);
+      const noFormula = (row.noFormula || "").trim() || "0";
+      const label = locked
+        ? game.i18n.format("DWAUTO.ConditionalDamage.AutoNoOn", { formula: noFormula })
+        : game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoOff");
+
+      const $badge = $(
+        `<a class="tag dwauto-autono-badge${locked ? " dwauto-autono-on" : ""}" title="${game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoTitle")}">${label}</a>`
+      );
+      $tags.append($badge);
+
+      $badge.on("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await setAutoNoLock(actor, row.name, !locked);
+      });
+    }
   }
 }
 

@@ -115,7 +115,7 @@
       "ConditionalDamageMovesMenu": {
         "Name": "Conditional Damage Moves",
         "Label": "Edit Conditional Damage Moves",
-        "Hint": "Register moves like Smite/Holy Smite/Exterminatus or Viper's Strike/Fangs that add a dice bonus (or penalty) to a damage roll depending on a fictional condition that can't be auto-detected (being on a Quest, dual-wielding, etc.) — asked as Y/N when rolling damage. \"Yes\"/\"No\" formula are added to the roll; leave a formula blank or \"0\" to add nothing for that answer."
+        "Hint": "Register moves like Smite/Holy Smite/Exterminatus or Viper's Strike/Fangs that add a dice bonus (or penalty) to a damage roll depending on a fictional condition that can't be auto-detected (being on a Quest, dual-wielding, etc.) — asked as Y/N when rolling damage. \"Yes\"/\"No\" formula are added to the roll; leave a formula blank or \"0\" to add nothing for that answer. Check \"Requires Designation\" for moves like Exterminatus whose effect doesn't exist at all until a target is declared (adds a designated/not-designated toggle on the sheet; while not designated, the move is completely ignored)."
       },
       "SuperiorWarriorMoveNames": {
         "Name": "Superior Warrior Move Names",
@@ -290,15 +290,20 @@
       "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). When rolling damage, the player is asked Y/N whether the fictional condition applies, then the matching formula is added to the damage roll. Use a plain dice/number expression (e.g. \"1d4\", \"2d4\", \"-4\"); leave blank or \"0\" to add nothing for that answer.",
       "Name": "Move Name",
       "YesFormula": "If Yes",
-      "NoFormula": "If No"
+      "NoFormula": "If No",
+      "RequiresDesignation": "Requires Designation"
     },
     "ConditionalDamage": {
       "Prompt": "Does the condition for \"{name}\" apply to this attack?",
       "Yes": "{formula} (condition met)",
       "No": "{formula} (condition not met)",
+      "ReverseNo": "Reverse penalty triggered: {formula} (this attack wasn't against the designated target)",
       "AutoNoTitle": "Click to toggle whether this move's \"No\" answer is applied automatically without asking every time (handy while the condition clearly won't be met for a while, e.g. your marked enemy fled)",
       "AutoNoOn": "Auto {formula}",
-      "AutoNoOff": "Ask each time"
+      "AutoNoOff": "Ask each time",
+      "DesignationTitle": "Click to toggle whether a target has been designated. While not designated, this move does nothing at all (no prompt, no bonus, no penalty).",
+      "DesignationOn": "Target designated",
+      "DesignationOff": "No target designated"
     },
     "SuperiorWarrior": {
       "Applied": "Extreme success (12+): deal damage, avoid the enemy's attack, and impress/dismay/frighten it."

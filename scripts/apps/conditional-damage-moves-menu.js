@@ -1,14 +1,15 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 
 function blankRow() {
-  return { name: "", yesFormula: "", noFormula: "0" };
+  return { name: "", yesFormula: "", noFormula: "0", requiresDesignation: false };
 }
 
 function normalizeRow(raw) {
   return {
     name: (raw?.name ?? "").trim(),
     yesFormula: (raw?.yesFormula ?? "").trim(),
-    noFormula: (raw?.noFormula ?? "").trim()
+    noFormula: (raw?.noFormula ?? "").trim(),
+    requiresDesignation: raw?.requiresDesignation === true || raw?.requiresDesignation === "true"
   };
 }
 

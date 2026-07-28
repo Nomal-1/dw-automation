@@ -7,6 +7,7 @@
         <th>{{localize "DWAUTO.ConditionalDamageMoves.Name"}}</th>
         <th>{{localize "DWAUTO.ConditionalDamageMoves.YesFormula"}}</th>
         <th>{{localize "DWAUTO.ConditionalDamageMoves.NoFormula"}}</th>
+        <th>{{localize "DWAUTO.ConditionalDamageMoves.RequiresDesignation"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -16,6 +17,7 @@
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
         <td><input type="text" name="rows.{{@index}}.yesFormula" value="{{this.yesFormula}}" placeholder="1d4"></td>
         <td><input type="text" name="rows.{{@index}}.noFormula" value="{{this.noFormula}}" placeholder="0"></td>
+        <td><input type="checkbox" name="rows.{{@index}}.requiresDesignation" {{checked this.requiresDesignation}}></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}

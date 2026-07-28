@@ -156,6 +156,19 @@
   color: #fff !important;
 }
 
+.dwauto-designation-badge {
+  cursor: pointer;
+}
+
+.dwauto-designation-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-designation-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-warning {
   color: #e0a030;
 }
