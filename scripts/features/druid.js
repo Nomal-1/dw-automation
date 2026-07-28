@@ -181,6 +181,18 @@ async function revertFormshaperOnShapeshiftEnd(actor) {
   await actor.unsetFlag(MODULE_ID, FORMSHAPER_FLAG);
 }
 
+// armor-assistant.js의 장갑 재계산 버튼이 호출한다. Formshaper가 "장갑"
+// 선택인 상태로 변신 중일 때만 {source, amount} 보정 항목을 반환하고,
+// 그 외는 null을 반환한다(재계산 시 반영할 항목이 없다는 뜻).
+export function getFormshaperArmorContribution(actor) {
+  if (!isEnabled()) return null;
+  const move = getFormshaperMove(actor);
+  if (!move) return null;
+  if (!isShapeshiftActive(actor)) return null;
+  if (getFormshaperChoice(actor) !== "armor") return null;
+  return { source: move.name, amount: 1 };
+}
+
 // attack-assistant.js의 데미지 굴림에서 호출한다. Formshaper가 "피해" 선택인
 // 상태로 변신 중일 때만 1d4를 반환하고, 그 외(무브 없음/장갑 선택/변신 아님)는
 // 빈 문자열을 반환한다(변신 아닌 상태는 위 데미지 주사위 오버라이드와 같은

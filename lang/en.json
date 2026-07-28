@@ -157,6 +157,10 @@
       "NoteMoveNames": {
         "Name": "Note-Taking Move Names",
         "Hint": "Move names (comma separated) that get their own character-sheet tab (named after the move) with a free-text note area, for moves whose \"mechanic\" is really a narrative choice with no dice involved."
+      },
+      "EnableArmorAssistant": {
+        "Name": "Enable Armor Recalculation Button",
+        "Hint": "Turns the character sheet's 'Armor' label into a clickable button, like Damage. Clicking it overwrites the armor value with the sum of armor tags on currently equipped armor items, plus any currently active module modifiers (like Formshaper's 'armor' choice while shapeshifted). Hovering shows what goes into that total. The base system never auto-calculates armor — it's just a plain number field — so the field remains directly editable even with this button enabled."
       }
     },
     "Npc": {
@@ -441,6 +445,13 @@
     },
     "NoteMoves": {
       "NotesLabel": "Notes"
+    },
+    "Armor": {
+      "NoContributors": "No equipped armor and no currently active modifiers",
+      "TooltipTotal": "Total: {total}",
+      "TooltipClickHint": "(Click to recalculate armor to this total)",
+      "RecalcLabel": "Armor Recalculation",
+      "RecalcApplied": "Armor recalculated to {total}"
     }
   }
 }

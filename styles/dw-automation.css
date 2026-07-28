@@ -228,3 +228,11 @@
 .dwauto-warning {
   color: #e0a030;
 }
+
+.dwauto-armor-recalc {
+  cursor: pointer;
+}
+
+.dwauto-armor-recalc:hover {
+  filter: brightness(1.2);
+}

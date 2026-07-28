@@ -480,4 +480,18 @@ export function registerSettings() {
     type: String,
     default: "Deity, Apotheosis, Born of the Soil, Animal Companion"
   });
+
+  // 장갑(AC) 재계산 버튼: 캐릭터 시트의 '장갑' 라벨을 '피해'처럼 클릭 가능한
+  // 버튼으로 바꿔서, 누르면 지금 장착 중인 방어구의 장갑 태그 합 + 변신 중
+  // Formshaper 장갑 선택 같은 '현재 활성 보정'을 더해 장갑 값을 덮어쓴다.
+  // 마우스를 올리면 그 계산에 들어가는 항목을 미리 보여준다. 자세한 설계는
+  // features/armor-assistant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_ARMOR_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableArmorAssistant.Name",
+    hint: "DWAUTO.Settings.EnableArmorAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
 }

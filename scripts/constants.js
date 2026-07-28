@@ -35,5 +35,6 @@ export const SETTINGS = {
   DRUID_FORMCRAFTER_MOVE_NAMES: "druidFormcrafterMoveNames",
   DRUID_FORMSHAPER_MOVE_NAMES: "druidFormshaperMoveNames",
   ENABLE_NOTE_MOVES: "enableNoteMoves",
-  NOTE_MOVE_NAMES: "noteMoveNames"
+  NOTE_MOVE_NAMES: "noteMoveNames",
+  ENABLE_ARMOR_ASSISTANT: "enableArmorAssistant"
 };
