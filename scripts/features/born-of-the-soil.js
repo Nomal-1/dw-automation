@@ -11,6 +11,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 // 보여주고 땅을 고르게 한다(+ 직접입력). 목록을 하드코딩하지 않고 무브
 // 자체의 description에서 파싱하므로 번역 여부와 무관하게 항상 정확하다.
 const ACTIVATED_FLAG = "bornOfSoilActivated";
+const MOVE_ID_FLAG = "bornOfSoilMoveId";
 const LAND_FLAG = "bornOfSoilLand";
 const NOTES_FLAG = "bornOfSoilNotes";
 const CUSTOM_VALUE = "__dwauto_custom__";
@@ -98,14 +99,35 @@ async function activate(actor, moveItem) {
   if (!land) return;
 
   await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, true);
+  // 이름이 아니라 아이템 _id로 기억해둔다 — 번역/설정 상태가 나중에 바뀌어도
+  // (또는 활성화 당시 이름 매칭이 설정에 반영되기 전이었어도) 탭을 그릴 때
+  // 항상 정확히 이 무브를 다시 찾을 수 있다.
+  await actor.setFlag(MODULE_ID, MOVE_ID_FLAG, moveItem.id);
   await actor.setFlag(MODULE_ID, LAND_FLAG, land);
   announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.BornOfSoil.LandChosen", { land }));
+}
+
+// 설정("대지의 아들/딸 무브 이름")이 아직 번역 안 된 영문 기본값 그대로
+// 남아있어서(마이그레이션이 못 돌았거나 GM 클라이언트가 그 사이 한 번도
+// ready를 못 거친 경우 등) 실제 액터의 (번역된) 무브 이름과 안 맞을 수
+// 있다. 그 경우를 대비해, 설정값으로 매칭이 실패하면 지금 이 시점의
+// 번역 데이터로 다시 한번 확인한다.
+async function matchesBornOfTheSoil(title) {
+  const names = splitCommaList(SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
+  if (names.includes(title)) return true;
+
+  try {
+    const nameMap = await getMoveNameMap();
+    return nameMap.get("Born of the Soil") === title;
+  } catch (err) {
+    return false;
+  }
 }
 
 // 이 무브는 rollType이 없는 순수 서술형(선택) 무브라 채팅 카드에 성공/부분
 // 성공 같은 결과 등급이 없다(result가 null) — 이름만 맞으면 발동으로
 // 취급한다.
-function onCreateChatMessage(message, options, userId) {
+async function onCreateChatMessage(message, options, userId) {
   if (game.system.id !== "dungeonworld") return;
   if (!isEnabled()) return;
   if (userId !== game.user.id) return;
@@ -114,18 +136,21 @@ function onCreateChatMessage(message, options, userId) {
   if (!info) return;
   const { actor, title } = info;
 
-  const names = splitCommaList(SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
-  if (!names.includes(title)) return;
+  if (!(await matchesBornOfTheSoil(title))) return;
   if (isActivated(actor)) return;
 
   const moveItem = findMoveItem(actor, title);
-  if (!moveItem) return;
+  if (!moveItem) {
+    console.warn(`${MODULE_ID} | born-of-the-soil: matched title "${title}" but no move item with that exact name was found on ${actor.name}`);
+    return;
+  }
 
   activate(actor, moveItem);
 }
 
 async function resetBornOfSoil(actor) {
   await actor.unsetFlag(MODULE_ID, ACTIVATED_FLAG);
+  await actor.unsetFlag(MODULE_ID, MOVE_ID_FLAG);
   await actor.unsetFlag(MODULE_ID, LAND_FLAG);
   await actor.unsetFlag(MODULE_ID, NOTES_FLAG);
 }
@@ -166,8 +191,10 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
   if (!isActivated(actor)) return;
 
-  const names = splitCommaList(SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
-  const moveItem = actor.items.find((i) => i.type === "move" && names.includes(i.name));
+  // 이름이 아니라 활성화 당시 기억해둔 아이템 _id로 찾는다 — 그 사이 이름이
+  // 바뀌었거나(번역 자동 채우기 등) 설정이 아직 안 맞아도 항상 정확하다.
+  const moveId = actor.getFlag(MODULE_ID, MOVE_ID_FLAG);
+  const moveItem = moveId ? actor.items.get(moveId) : null;
   if (!moveItem) return;
 
   renderTab(actor, moveItem, html);

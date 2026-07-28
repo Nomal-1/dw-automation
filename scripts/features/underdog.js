@@ -134,6 +134,42 @@ function onRenderActorSheet(app, html) {
   renderBadges(actor, html);
 }
 
+// v0.16.0 전에는 이 표(당시 "피해 경감 무브")가 {name, amount} 구조였다.
+// 그 뒤 baseBonus/outnumberedBonus로 바뀌었는데, 이미 그 표를 저장해둔
+// 세계는 옛 amount 필드만 남아있어서(baseBonus/outnumberedBonus가 아예
+// 없어서) getOutnumberedArmorContribution이 항상 0을 돌려주고 있었다.
+// amount만으로는 어느 무브인지 알 수 없지만, 실제 기본값과 겹치는 값
+// 기준으로 안전하게 채워 넣는다(amount 1 -> 오기(0/1), amount 2 이상 ->
+// 투지류(amount-1/amount) — 투지는 원문상 열세가 아니어도 +1이 상시
+// 적용되는데 예전 데이터엔 그 구분이 아예 없었으므로 이 값이 최선이다).
+async function migrateLegacyAmountField() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
+  let changed = false;
+
+  const next = rows.map((row) => {
+    if (typeof row.baseBonus === "number" || typeof row.outnumberedBonus === "number") return row;
+    if (typeof row.amount !== "number") return row;
+
+    changed = true;
+    const outnumberedBonus = row.amount;
+    const baseBonus = row.amount >= 2 ? row.amount - 1 : 0;
+    const { amount, ...rest } = row;
+    return { ...rest, baseBonus, outnumberedBonus };
+  });
+
+  if (!changed) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, next);
+  console.log(
+    `${MODULE_ID} | underdog: migrated legacy "amount" field on Conditional Armor Bonus Moves to baseBonus/outnumberedBonus`
+  );
+}
+
 export function registerUnderdogAssistant() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateLegacyAmountField();
+  });
 }
