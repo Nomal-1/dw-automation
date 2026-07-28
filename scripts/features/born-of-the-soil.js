@@ -130,12 +130,19 @@ async function matchesBornOfTheSoil(title) {
 // console.error로만 남기도록 전체를 감싼다(진단을 위해서도, 다른 모듈이
 // 만든 채팅 메시지 처리에 지장을 주지 않기 위해서도).
 async function onCreateChatMessage(message, options, userId) {
+  // 임시 무조건 로그(원인 진단용) — 다른 조건 확인 전에 훅이 실제로 불리는지,
+  // 이 메시지가 어떤 내용인지부터 확인한다. 원인 확정되면 제거할 것.
+  console.log(
+    `${MODULE_ID} | born-of-the-soil: [DIAG] createChatMessage fired. userId=${userId} me=${game.user.id} system=${game.system.id} enabled=${isEnabled()} contentSnippet=`,
+    (message.content ?? "").slice(0, 200)
+  );
   try {
     if (game.system.id !== "dungeonworld") return;
     if (!isEnabled()) return;
     if (userId !== game.user.id) return;
 
     const info = getMoveCardInfo(message);
+    console.log(`${MODULE_ID} | born-of-the-soil: [DIAG] getMoveCardInfo result =`, info);
     if (!info) return;
     const { actor, title } = info;
 
