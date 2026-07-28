@@ -471,7 +471,11 @@
     },
     "LevelUpInfo": {
       "Replaces": "Requires: {requires} (automatically removed once you learn this)",
-      "RequiresOnly": "Requires: {requires} (stays on your sheet after you learn this)"
+      "RequiresOnly": "Requires: {requires} (stays on your sheet after you learn this)",
+      "MissingSectionTitle": "Upgrade Moves Missing Due to Translation",
+      "MissingSectionHint": "These upgrade moves aren't listed above because the system compares move names to check prerequisites, and translation makes that comparison fail even though the character already has the prerequisite. Click \"Learn\" to grant it directly — the existing automation will remove the earlier move it replaces.",
+      "LearnButton": "Learn",
+      "LearnApplied": "Learned \"{move}\""
     }
   }
 }

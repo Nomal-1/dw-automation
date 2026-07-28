@@ -471,7 +471,11 @@
     },
     "LevelUpInfo": {
       "Replaces": "선행 무브: {requires} (배우면 자동으로 대체되어 사라짐)",
-      "RequiresOnly": "선행 무브: {requires} (배워도 사라지지 않고 그대로 유지됨)"
+      "RequiresOnly": "선행 무브: {requires} (배워도 사라지지 않고 그대로 유지됨)",
+      "MissingSectionTitle": "번역 때문에 목록에 안 뜬 상위 무브",
+      "MissingSectionHint": "선행 무브를 이미 갖고 있는데도 이름 번역 차이 때문에 시스템이 인식하지 못해 위 목록에 나타나지 않은 상위 무브입니다. '배우기'를 누르면 바로 습득하고, 대체되는 이전 무브는 기존 자동화가 알아서 지웁니다.",
+      "LearnButton": "배우기",
+      "LearnApplied": "\"{move}\"을(를) 습득했습니다"
     }
   }
 }

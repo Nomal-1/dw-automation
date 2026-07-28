@@ -9,7 +9,10 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 export const TRANSLATION_MODULE_ID = "dungeonworld-ko";
 
 // 이 모듈이 자동화하는 8개 기본 직업 + 기본 무브 팩만 대상으로 한다.
-const MOVE_PACK_FILES = [
+// features/level-up-info.js도 이 파일명 목록에서 ".json"만 뗀 값을 컴펜디엄
+// 팩 id로 재사용한다(무브 데이터를 fetch가 아니라 game.packs에서 직접 읽을
+// 때도 같은 9개 팩이면 되므로).
+export const MOVE_PACK_FILES = [
   "dungeonworld.basic-moves.json",
   "dungeonworld.the-fighter-moves.json",
   "dungeonworld.the-cleric-moves.json",
