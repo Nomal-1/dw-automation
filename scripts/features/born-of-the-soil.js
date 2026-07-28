@@ -126,26 +126,37 @@ async function matchesBornOfTheSoil(title) {
 
 // 이 무브는 rollType이 없는 순수 서술형(선택) 무브라 채팅 카드에 성공/부분
 // 성공 같은 결과 등급이 없다(result가 null) — 이름만 맞으면 발동으로
-// 취급한다.
+// 취급한다. 여기서 뭔가 실패해도 "Error detected in module" 배너 대신
+// console.error로만 남기도록 전체를 감싼다(진단을 위해서도, 다른 모듈이
+// 만든 채팅 메시지 처리에 지장을 주지 않기 위해서도).
 async function onCreateChatMessage(message, options, userId) {
-  if (game.system.id !== "dungeonworld") return;
-  if (!isEnabled()) return;
-  if (userId !== game.user.id) return;
+  try {
+    if (game.system.id !== "dungeonworld") return;
+    if (!isEnabled()) return;
+    if (userId !== game.user.id) return;
 
-  const info = getMoveCardInfo(message);
-  if (!info) return;
-  const { actor, title } = info;
+    const info = getMoveCardInfo(message);
+    if (!info) return;
+    const { actor, title } = info;
 
-  if (!(await matchesBornOfTheSoil(title))) return;
-  if (isActivated(actor)) return;
+    console.log(`${MODULE_ID} | born-of-the-soil: chat card detected, title="${title}"`);
 
-  const moveItem = findMoveItem(actor, title);
-  if (!moveItem) {
-    console.warn(`${MODULE_ID} | born-of-the-soil: matched title "${title}" but no move item with that exact name was found on ${actor.name}`);
-    return;
+    if (!(await matchesBornOfTheSoil(title))) return;
+    console.log(`${MODULE_ID} | born-of-the-soil: title matched, actor=${actor.name}, activated=${isActivated(actor)}`);
+    if (isActivated(actor)) return;
+
+    const moveItem = findMoveItem(actor, title);
+    if (!moveItem) {
+      console.warn(
+        `${MODULE_ID} | born-of-the-soil: matched title "${title}" but no move item with that exact name was found on ${actor.name}`
+      );
+      return;
+    }
+
+    await activate(actor, moveItem);
+  } catch (err) {
+    console.error(`${MODULE_ID} | born-of-the-soil: onCreateChatMessage failed`, err);
   }
-
-  activate(actor, moveItem);
 }
 
 async function resetBornOfSoil(actor) {
@@ -185,19 +196,24 @@ function renderTab(actor, moveItem, html) {
 }
 
 function onRenderActorSheet(app, html) {
-  if (!isEnabled()) return;
+  try {
+    if (!isEnabled()) return;
 
-  const actor = app.actor;
-  if (actor.type !== "character") return;
-  if (!isActivated(actor)) return;
+    const actor = app.actor;
+    if (actor.type !== "character") return;
+    if (!isActivated(actor)) return;
 
-  // 이름이 아니라 활성화 당시 기억해둔 아이템 _id로 찾는다 — 그 사이 이름이
-  // 바뀌었거나(번역 자동 채우기 등) 설정이 아직 안 맞아도 항상 정확하다.
-  const moveId = actor.getFlag(MODULE_ID, MOVE_ID_FLAG);
-  const moveItem = moveId ? actor.items.get(moveId) : null;
-  if (!moveItem) return;
+    // 이름이 아니라 활성화 당시 기억해둔 아이템 _id로 찾는다 — 그 사이
+    // 이름이 바뀌었거나(번역 자동 채우기 등) 설정이 아직 안 맞아도 항상
+    // 정확하다.
+    const moveId = actor.getFlag(MODULE_ID, MOVE_ID_FLAG);
+    const moveItem = moveId ? actor.items.get(moveId) : null;
+    if (!moveItem) return;
 
-  renderTab(actor, moveItem, html);
+    renderTab(actor, moveItem, html);
+  } catch (err) {
+    console.error(`${MODULE_ID} | born-of-the-soil: onRenderActorSheet failed`, err);
+  }
 }
 
 // 이 설정은 v0.22.0에서 신설된 거라 세계 대부분에서 영문 기본값 그대로일
