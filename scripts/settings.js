@@ -478,7 +478,19 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    default: "Deity, Apotheosis, Born of the Soil, Animal Companion"
+    default: "Deity, Apotheosis, Animal Companion"
+  });
+
+  // 대지의 아들/딸: 소유만으로 탭이 뜨는 다른 메모형 무브들과 달리, 실제로
+  // 이 무브를 발동(클릭)해야 땅 선택 팝업이 뜨고 탭이 생긴다. 자세한 설계는
+  // features/born-of-the-soil.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BornOfTheSoilMoveNames.Name",
+    hint: "DWAUTO.Settings.BornOfTheSoilMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Born of the Soil"
   });
 
   // 장갑(AC) 재계산 버튼: 캐릭터 시트의 '장갑' 라벨을 '피해'처럼 클릭 가능한

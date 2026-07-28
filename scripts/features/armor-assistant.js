@@ -1,5 +1,4 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { announceActionApplied } from "../lib/announce.js";
 import { getFormshaperArmorContribution } from "./druid.js";
 import { getOutnumberedArmorContribution } from "./underdog.js";
 
@@ -145,10 +144,16 @@ function buildTooltip(actor) {
   return lines.join("\n");
 }
 
+// 장갑 재계산은 던전월드 공식 무브(액션)가 아니라 이 모듈이 제공하는
+// 도구라서, 다른 무브 자동화처럼 announceActionApplied의 "{move} 액션
+// 적용!" 문구를 쓰지 않고 그 자체로 완결된 문장 하나만 채팅에 남긴다.
 async function recalcArmor(actor) {
   const { total } = computeRecalculatedArmor(actor);
   await actor.update({ "system.attributes.ac.value": total });
-  announceActionApplied(actor, game.i18n.localize("DWAUTO.Armor.RecalcLabel"), game.i18n.format("DWAUTO.Armor.RecalcApplied", { total }));
+  ChatMessage.create({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: `<p class="dwauto-action-applied"><i class="fas fa-check-circle"></i> ${game.i18n.format("DWAUTO.Armor.RecalcApplied", { total })}</p>`
+  });
 }
 
 // 캐릭터 시트의 '장갑' 라벨(순정 시스템에서는 클릭이 안 되는 평범한 텍스트)을

@@ -531,16 +531,54 @@ export async function resetShapeshift(actor) {
 
 // 캐릭터 시트 공용 탭에 변신 상태 섹션을 그려 넣는다: 지정/비지정 배지 +
 // 동물 이름 표시 + GM이 자유롭게 적고 지울 수 있는 메모란.
+// Formcrafter가 지금 고른 보너스/페널티 능력치, Formshaper가 지금 고른
+// 장갑/피해 선택을 사람이 읽을 수 있는 한 줄로 만든다. 무브가 없거나
+// 아직 아무것도 고르지 않았으면(변신 중이 아니라 Formshaper 선택 자체가
+// 없는 경우 등) 그 줄 자체를 만들지 않는다.
+function buildFormcrafterSummaryLine(actor) {
+  const move = getFormcrafterMove(actor);
+  if (!move) return null;
+
+  const stats = getFormcrafterStats(actor);
+  if (!stats?.bonus) return game.i18n.format("DWAUTO.Druid.FormcrafterSummaryPending", { move: move.name });
+
+  const penaltyLabel = stats.penalty ? abilityLabel(stats.penalty) : game.i18n.localize("DWAUTO.Druid.FormcrafterPenaltyPending");
+  return game.i18n.format("DWAUTO.Druid.FormcrafterSummary", {
+    move: move.name,
+    bonus: abilityLabel(stats.bonus),
+    penalty: penaltyLabel
+  });
+}
+
+function buildFormshaperSummaryLine(actor) {
+  const move = getFormshaperMove(actor);
+  if (!move) return null;
+
+  const choice = getFormshaperChoice(actor);
+  if (!choice) return null;
+
+  const choiceLabel = game.i18n.localize(
+    choice === "armor" ? "DWAUTO.Druid.FormshaperArmorOption" : "DWAUTO.Druid.FormshaperDamageOption"
+  );
+  return game.i18n.format("DWAUTO.Druid.FormshaperSummary", { move: move.name, choice: choiceLabel });
+}
+
 export function renderShapeshiftSection($body, actor) {
   const state = getShapeshiftState(actor);
   const label = state.active
     ? game.i18n.format("DWAUTO.Druid.ShapeshiftActiveLabel", { animal: state.animalName || "?" })
     : game.i18n.localize("DWAUTO.Druid.ShapeshiftInactiveLabel");
 
+  const summaryLines = [buildFormcrafterSummaryLine(actor), buildFormshaperSummaryLine(actor)].filter(Boolean);
+  const summaryHtml = summaryLines.length
+    ? `<ul class="dwauto-shapeshift-summary">${summaryLines.map((line) => `<li>${line}</li>`).join("")}</ul>`
+    : "";
+
   const $section = $(`
     <div class="cell dwauto-druid-shapeshift">
       <h2 class="cell__title">${game.i18n.localize("DWAUTO.Druid.ShapeshiftTitle")}</h2>
       <a class="tag dwauto-shapeshift-badge${state.active ? " dwauto-shapeshift-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.ShapeshiftToggleTitle")}">${label}</a>
+      ${summaryHtml}
       <label class="cell__title dwauto-shapeshift-notes-label">${game.i18n.localize("DWAUTO.Druid.ShapeshiftNotesLabel")}</label>
       <textarea class="dwauto-shapeshift-notes" rows="3">${state.notes ?? ""}</textarea>
     </div>

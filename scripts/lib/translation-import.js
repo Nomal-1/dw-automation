@@ -197,6 +197,13 @@ export async function runTranslationImport() {
   const noteMoveNames = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, translateCommaList(moveMap, noteMoveNames, stats));
 
+  const bornOfTheSoilNames = game.settings.get(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES,
+    translateCommaList(moveMap, bornOfTheSoilNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

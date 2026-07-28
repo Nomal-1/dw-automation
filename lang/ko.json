@@ -152,11 +152,15 @@
       },
       "EnableNoteMoves": {
         "Name": "메모형 무브 사용",
-        "Hint": "신/신격/대지의 아들·딸/동물 상대처럼 주사위 대신 플레이어가 자유롭게 무언가를 정해야 하는(신의 이름과 영역, 결연된 지형, 동반 동물의 스탯 등) 무브에 대해, 그 무브 이름을 딴 탭을 만들어 무브 설명과 자유 메모란을 보여줍니다. 어떤 무브가 해당하는지는 아래 '메모형 무브 이름' 설정에서 관리합니다."
+        "Hint": "신/신격/동물 상대처럼 주사위 대신 플레이어가 자유롭게 무언가를 정해야 하는(신의 이름과 영역, 동반 동물의 스탯 등) 무브를 소유만 하고 있어도, 그 무브 이름을 딴 탭을 만들어 무브 설명과 자유 메모란을 보여줍니다. 어떤 무브가 해당하는지는 아래 '메모형 무브 이름' 설정에서 관리합니다. 대지의 아들/딸처럼 실제로 무브를 발동해야 선택지가 뜨는 경우는 이 설정이 아니라 별도 기능(features/born-of-the-soil.js)이 처리합니다."
       },
       "NoteMoveNames": {
         "Name": "메모형 무브 이름",
         "Hint": "캐릭터 시트에 그 무브 이름을 딴 전용 탭과 자유 메모란을 만들어줄 무브 이름(쉼표로 여러 개 구분). 주사위 없이 서사적 선택만 있는 무브에 씁니다."
+      },
+      "BornOfTheSoilMoveNames": {
+        "Name": "대지의 아들/딸 무브 이름",
+        "Hint": "실제로 이 무브를 발동하면(무브 목록에서 클릭) 무브 원문에 있는 땅 목록으로 선택 팝업을 띄우고(직접입력도 가능), 고른 뒤에 그 무브 이름을 딴 전용 탭이 생깁니다(쉼표로 여러 개 구분)."
       },
       "EnableArmorAssistant": {
         "Name": "장갑 재계산 버튼 사용",
@@ -448,7 +452,11 @@
       "FormcrafterPenaltyTitle": "Formcrafter: {name}의 페널티 능력치 선택 (마스터)",
       "FormcrafterPenaltyContent": "이 캐릭터가 변신 중 -1 온고잉을 받을 능력치를 고르세요.",
       "FormcrafterPenaltyApplied": "변신 중 {stat} 판정에 -1 온고잉이 적용됩니다",
-      "FormcrafterAskContent": "\"{name}\"에 어떤 능력치를 사용하시겠습니까? (Formcrafter 보너스/페널티 반영을 위해 먼저 확인합니다)"
+      "FormcrafterAskContent": "\"{name}\"에 어떤 능력치를 사용하시겠습니까? (Formcrafter 보너스/페널티 반영을 위해 먼저 확인합니다)",
+      "FormcrafterSummary": "{move}: {bonus} +1 / {penalty} -1",
+      "FormcrafterSummaryPending": "{move}: 아직 능력치를 고르지 않았습니다",
+      "FormcrafterPenaltyPending": "(마스터 선택 대기 중)",
+      "FormshaperSummary": "{move}: {choice} 적용 중"
     },
     "NoteMoves": {
       "NotesLabel": "메모"
@@ -457,8 +465,7 @@
       "NoContributors": "장착 중인 방어구도 없고 현재 활성 보정도 없습니다",
       "TooltipTotal": "합계: {total}",
       "TooltipClickHint": "(클릭하면 이 합계로 장갑 값을 다시 계산합니다)",
-      "RecalcLabel": "장갑 재계산",
-      "RecalcApplied": "장갑을 {total}로 재계산했습니다",
+      "RecalcApplied": "장갑 재계산 적용: {total}",
       "DestroyedSuffix": " (파괴됨)"
     },
     "Underdog": {
@@ -480,6 +487,13 @@
       "MissingSectionHint": "선행 무브를 이미 갖고 있는데도 이름 번역 차이 때문에 시스템이 인식하지 못해 위 목록에 나타나지 않은 상위 무브입니다. '배우기'를 누르면 바로 습득하고, 대체되는 이전 무브는 기존 자동화가 알아서 지웁니다.",
       "LearnButton": "배우기",
       "LearnApplied": "\"{move}\"을(를) 습득했습니다"
+    },
+    "BornOfSoil": {
+      "PromptTitle": "결연된 땅",
+      "PromptLabel": "결연된 땅의 이름을 알려주세요.",
+      "CustomOption": "직접 입력",
+      "LandChosen": "결연된 땅: {land}",
+      "LandLabel": "결연된 땅"
     }
   }
 }

@@ -215,6 +215,13 @@
   color: #fff !important;
 }
 
+.dwauto-shapeshift-summary {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
 .dwauto-shapeshift-notes-label {
   display: block;
   margin-top: 8px;
