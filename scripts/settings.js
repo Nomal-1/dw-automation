@@ -11,6 +11,10 @@ import { HospitallerMovesMenu } from "./apps/hospitaller-moves-menu.js";
 import { DEFAULT_HEALING_MOVES, DEFAULT_HOSPITALLER_MOVES } from "./data/healing-moves.js";
 import { MoveUpgradesMenu } from "./apps/move-upgrades-menu.js";
 import { DEFAULT_MOVE_UPGRADES } from "./data/move-upgrades.js";
+import { DamageReductionMovesMenu } from "./apps/damage-reduction-moves-menu.js";
+import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "./data/hit-trigger-moves.js";
+import { ConditionalDamageMovesMenu } from "./apps/conditional-damage-moves-menu.js";
+import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-moves.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 
 export function registerSettings() {
@@ -318,5 +322,58 @@ export function registerSettings() {
     icon: "fas fa-arrow-up-right-dots",
     type: MoveUpgradesMenu,
     restricted: true
+  });
+
+  // Thief Underdog/Serious Underdog: "숫적으로 열세일 때 장갑 +N"이라는
+  // 조건부 보너스. 숫적 열세 여부를 자동 판정할 수 없어서 피해를 입기
+  // 직전에 Y/N으로 물어본다(hit-trigger.js가 담당). 대가 없이 매번 적용되는
+  // 조건부 보너스라 위의 "피격 시 무효화 무브" 표와는 별도로 관리한다.
+  game.settings.register(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_DAMAGE_REDUCTION_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "damageReductionMovesMenu", {
+    name: "DWAUTO.Settings.DamageReductionMovesMenu.Name",
+    label: "DWAUTO.Settings.DamageReductionMovesMenu.Label",
+    hint: "DWAUTO.Settings.DamageReductionMovesMenu.Hint",
+    icon: "fas fa-shield",
+    type: DamageReductionMovesMenu,
+    restricted: true
+  });
+
+  // Paladin Smite/Holy Smite/Exterminatus, Ranger Viper's Strike/Fangs처럼
+  // "특정 조건을 만족하면 데미지 주사위를 추가로(또는 페널티로) 굴리는"
+  // 무브들. 조건을 자동 판정할 수 없어서 데미지를 굴릴 때마다 Y/N으로
+  // 묻는다. 자세한 설계는 features/attack-assistant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_CONDITIONAL_DAMAGE_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "conditionalDamageMovesMenu", {
+    name: "DWAUTO.Settings.ConditionalDamageMovesMenu.Name",
+    label: "DWAUTO.Settings.ConditionalDamageMovesMenu.Label",
+    hint: "DWAUTO.Settings.ConditionalDamageMovesMenu.Hint",
+    icon: "fas fa-dice",
+    type: ConditionalDamageMovesMenu,
+    restricted: true
+  });
+
+  // Fighter Superior Warrior: Hack & Slash에서 12+(극단적 성공)가 나오면
+  // 채팅에 별도로 알려준다. 극단적 성공 감지 자체는 Phase 1부터 이미 하고
+  // 있었지만(move-card.js의 isExtreme), 이걸 소비하는 무브가 없어서 지금까지
+  // 채팅 알림으로 연결되지 않았다.
+  game.settings.register(MODULE_ID, SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SuperiorWarriorMoveNames.Name",
+    hint: "DWAUTO.Settings.SuperiorWarriorMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Superior Warrior"
   });
 }

@@ -25,6 +25,11 @@ function getHitTriggerCandidates(actor) {
   return table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
 }
 
+function getDamageReductionRow(actor) {
+  const table = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
+  return table.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
+}
+
 async function grantForward(actor) {
   const current = Number(actor.system.attributes?.forward?.value) || 0;
   await actor.update({ "system.attributes.forward.value": current + 1 });
@@ -146,6 +151,47 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
   }).render(true);
 }
 
+function buildHpChange(originalChanges, actor, finalDamage) {
+  const oldHp = Number(actor.system.attributes?.hp?.value ?? 0);
+  const flat = foundry.utils.flattenObject(originalChanges);
+  flat["system.attributes.hp.value"] = Math.max(0, oldHp - finalDamage);
+  return flat;
+}
+
+// preUpdateActor(로컬이든 소켓으로 넘겨받았든)가 이미 원래 HP 갱신을 막아둔
+// 뒤 호출된다. Underdog류(damage-reduction) 무브가 있으면 먼저 "숫적으로
+// 열세인지" Y/N으로 물어서 피해 자체를 깎고, 그 다음 무효화 무브(Armor
+// Mastery/Bloody Aegis류)가 있으면 원래 promptHitTrigger로 이어간다. 둘 다
+// 없거나 무효화까지 다 끝나면, 조정된 최종 피해량으로 HP 갱신을 다시 적용한다.
+async function handleIncomingDamage({ actor, damage, changes, options, candidates, reductionRow }) {
+  let finalDamage = damage;
+
+  if (reductionRow) {
+    const confirmed = await Dialog.confirm({
+      title: reductionRow.name,
+      content: `<p>${game.i18n.format("DWAUTO.HitTrigger.ReductionPrompt", { name: reductionRow.name })}</p>`,
+      defaultYes: false
+    });
+    if (confirmed) {
+      finalDamage = Math.max(0, finalDamage - reductionRow.amount);
+      announceActionApplied(
+        actor,
+        reductionRow.name,
+        game.i18n.format("DWAUTO.HitTrigger.ReductionApplied", { amount: reductionRow.amount })
+      );
+    }
+  }
+
+  const adjustedChanges = buildHpChange(changes, actor, finalDamage);
+
+  if (finalDamage <= 0 || candidates.length === 0) {
+    await actor.update(adjustedChanges, { ...options, [SKIP_FLAG]: true });
+    return;
+  }
+
+  await promptHitTrigger(actor, candidates, finalDamage, adjustedChanges, options);
+}
+
 // 이 액터를 자신의 캐릭터로 지정해둔 접속 중인 플레이어를 우선 찾고, 없으면
 // 소유권(OWNER)을 가진 접속 중인 플레이어를 찾는다. 그런 플레이어가 아무도
 // 없으면(예: GM 혼자 테스트하는 상황) null을 반환하고, 이 경우 지금 갱신을
@@ -174,16 +220,17 @@ function onPreUpdateActor(actor, changes, options, userId) {
   if (damage <= 0) return true;
 
   const candidates = getHitTriggerCandidates(actor);
-  if (candidates.length === 0) return true;
+  const reductionRow = getDamageReductionRow(actor);
+  if (candidates.length === 0 && !reductionRow) return true;
 
   // 여기서 갱신을 막고(false 반환), 대화상자 결과에 따라 원래 변경사항을 다시
   // 적용하거나 대체 효과를 적용한다. preUpdate 훅은 반환값을 동기적으로만
   // 확인하므로(비동기 함수는 항상 Promise를 반환해 false로 인식되지 않는다)
   // 이 함수 자체는 async로 선언하지 않고, 아래 호출은 기다리지 않는다.
   //
-  // 무효화 여부는 피해를 "주는" 사람(지금 이 갱신을 시작한 클라이언트, 보통
-  // GM)이 아니라 피해를 "받는" 캐릭터의 소유 플레이어가 결정해야 하므로,
-  // 그 플레이어가 따로 접속해 있다면 소켓으로 넘긴다.
+  // 무효화/경감 여부는 피해를 "주는" 사람(지금 이 갱신을 시작한 클라이언트,
+  // 보통 GM)이 아니라 피해를 "받는" 캐릭터의 소유 플레이어가 결정해야
+  // 하므로, 그 플레이어가 따로 접속해 있다면 소켓으로 넘긴다.
   const decidingUser = findDecidingUser(actor);
   if (decidingUser && decidingUser.id !== game.user.id) {
     console.log(
@@ -194,13 +241,14 @@ function onPreUpdateActor(actor, changes, options, userId) {
       targetUserId: decidingUser.id,
       actorId: actor.id,
       candidates,
+      reductionRow,
       damage,
       changes,
       options
     });
   } else {
     console.log(`${MODULE_ID} | hit-trigger: no other connected owner found for ${actor.name}, prompting locally`);
-    promptHitTrigger(actor, candidates, damage, changes, options);
+    handleIncomingDamage({ actor, damage, changes, options, candidates, reductionRow });
   }
   return false;
 }
@@ -215,7 +263,14 @@ function onSocketEvent(data) {
     return;
   }
   console.log(`${MODULE_ID} | hit-trigger: showing prompt for ${actor.name}`);
-  promptHitTrigger(actor, data.candidates, data.damage, data.changes, data.options);
+  handleIncomingDamage({
+    actor,
+    damage: data.damage,
+    changes: data.changes,
+    options: data.options,
+    candidates: data.candidates,
+    reductionRow: data.reductionRow
+  });
 }
 
 // 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인 불문) Indomitable을

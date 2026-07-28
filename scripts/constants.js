@@ -23,5 +23,8 @@ export const SETTINGS = {
   HEALING_MOVES: "healingMoves",
   HOSPITALLER_MOVES: "hospitallerMoves",
   ENABLE_MOVE_UPGRADE_ASSISTANT: "enableMoveUpgradeAssistant",
-  MOVE_UPGRADES: "moveUpgrades"
+  MOVE_UPGRADES: "moveUpgrades",
+  DAMAGE_REDUCTION_MOVES: "damageReductionMoves",
+  CONDITIONAL_DAMAGE_MOVES: "conditionalDamageMoves",
+  SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames"
 };

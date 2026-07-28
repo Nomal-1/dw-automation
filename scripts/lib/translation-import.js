@@ -145,5 +145,26 @@ export async function runTranslationImport() {
   }));
   await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, translatedUpgrades);
 
+  const damageReductionMoves = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DAMAGE_REDUCTION_MOVES,
+    translateRows(moveMap, damageReductionMoves, stats)
+  );
+
+  const conditionalDamageMoves = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.CONDITIONAL_DAMAGE_MOVES,
+    translateRows(moveMap, conditionalDamageMoves, stats)
+  );
+
+  const superiorWarriorNames = game.settings.get(MODULE_ID, SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES,
+    translateCommaList(moveMap, superiorWarriorNames, stats)
+  );
+
   return stats;
 }

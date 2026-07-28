@@ -65,14 +65,25 @@ function getTagDisplay(weapon) {
   return { rawTags, notes };
 }
 
+// term이 이미 부호(+/-)로 시작하면 그대로 붙이고, 아니면 "+"를 붙여서 이어준다.
+// term이 비어 있으면 formula를 그대로 반환한다. 데미지 공식을 여러 출처(무기
+// 기본 다이스, 선택지 보너스, 조건부 보너스 등)에서 안전하게 이어붙이기 위한
+// 공용 헬퍼다.
+function appendTerm(formula, term) {
+  if (!term) return formula;
+  const t = String(term).trim();
+  if (!t) return formula;
+  return t.startsWith("+") || t.startsWith("-") ? `${formula}${t}` : `${formula}+${t}`;
+}
+
 async function rollDamage(actor, weapon, dmgMod, extraDice) {
   const die = actor.system.attributes?.damage?.value || "d6";
   const miscBonus = actor.system.attributes?.damage?.misc || "";
 
   let formula = die;
-  if (miscBonus) formula += `+${miscBonus}`;
-  if (extraDice) formula += `+${extraDice}`;
-  if (dmgMod) formula += `+${dmgMod}`;
+  formula = appendTerm(formula, miscBonus);
+  formula = appendTerm(formula, extraDice);
+  formula = appendTerm(formula, dmgMod);
 
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
@@ -189,6 +200,39 @@ async function promptSpellAugmentation(actor) {
   });
 }
 
+// Paladin Smite/Holy Smite/Exterminatus, Ranger Viper's Strike/Fangs처럼
+// "특정 조건을 만족하면 데미지 주사위를 추가로(또는 페널티로) 굴리는"
+// 무브들. 조건(퀘스트 중인지, 겸용 공격을 했는지 등)을 자동 판정할 수
+// 없어서 하나씩 Y/N으로 물어보고, 대답에 따라 yesFormula 또는 noFormula를
+// 데미지 공식에 이어붙인다. 해당 무브가 없으면 조용히 빈 문자열을 반환한다.
+async function promptConditionalDamageBonuses(actor) {
+  const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  if (owned.length === 0) return "";
+
+  let extra = "";
+  for (const row of owned) {
+    const confirmed = await Dialog.confirm({
+      title: row.name,
+      content: `<p>${game.i18n.format("DWAUTO.ConditionalDamage.Prompt", { name: row.name })}</p>`,
+      defaultYes: false
+    });
+
+    const formula = confirmed ? row.yesFormula : row.noFormula;
+    if (formula && formula.trim() && formula.trim() !== "0") {
+      extra = appendTerm(extra, formula);
+      announceActionApplied(
+        actor,
+        row.name,
+        game.i18n.format(confirmed ? "DWAUTO.ConditionalDamage.Yes" : "DWAUTO.ConditionalDamage.No", {
+          formula: formula.trim()
+        })
+      );
+    }
+  }
+  return extra;
+}
+
 async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   let consumed = null;
 
@@ -200,9 +244,11 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   }
 
   const augBonus = await promptSpellAugmentation(actor);
+  const conditionalExtra = await promptConditionalDamageBonuses(actor);
+  const finalExtraDice = appendTerm(extraDice || "", conditionalExtra);
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
 
-  await rollDamage(actor, weapon, finalDmgMod, extraDice);
+  await rollDamage(actor, weapon, finalDmgMod, finalExtraDice);
 
   if (consumed && consumed.ammoCount > 0) {
     const ammoItem = actor.items.get(consumed.ammoItemId);
@@ -374,9 +420,18 @@ function onCreateChatMessage(message, options, userId) {
     behavior = { ...DEFAULT_ATTACK_BEHAVIOR, ranged: isRangedName };
   }
 
-  // 극단적 성공(12+) 여부는 info.isExtreme로 계속 감지는 하되, 아직 이걸
-  // 소비하는 무브(Superior Warrior 등)가 없어서 채팅에 별도로 알리지는 않는다.
-  // 데미지 굴림 확인 다이얼로그 문구에만 반영한다 (promptDamageRoll 참고).
+  // 극단적 성공(12+)은 데미지 굴림 확인 다이얼로그 문구에 반영되고
+  // (promptDamageRoll 참고), Fighter Superior Warrior처럼 근접 무브의 12+를
+  // 소비하는 무브가 있으면 별도로 채팅에 알린다.
+  if (result === "success" && info.isExtreme && !behavior.ranged) {
+    const superiorWarriorNames = splitCommaList(SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
+    const superiorWarriorMove = actor.items.find(
+      (i) => i.type === "move" && superiorWarriorNames.includes(i.name)
+    );
+    if (superiorWarriorMove) {
+      announceActionApplied(actor, superiorWarriorMove.name, game.i18n.localize("DWAUTO.SuperiorWarrior.Applied"));
+    }
+  }
 
   const shouldDamage = result === "success" ? behavior.damageOnSuccess : behavior.damageOnPartial;
   const hasChoices = moveItem && getMoveChoiceData(moveItem, result).options.length > 0;
