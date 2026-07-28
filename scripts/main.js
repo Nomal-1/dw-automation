@@ -9,6 +9,7 @@ import { registerHealingAssistant } from "./features/healing.js";
 import { registerMoveUpgradeAssistant } from "./features/move-upgrades.js";
 import { registerDruidAssistant } from "./features/druid.js";
 import { registerClassInfoTab } from "./features/class-info-tab.js";
+import { registerNoteMoves } from "./features/note-moves.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -29,3 +30,4 @@ registerHealingAssistant();
 registerMoveUpgradeAssistant();
 registerDruidAssistant();
 registerClassInfoTab();
+registerNoteMoves();

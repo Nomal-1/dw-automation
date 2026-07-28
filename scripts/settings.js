@@ -406,4 +406,25 @@ export function registerSettings() {
     type: String,
     default: "Shapeshifter"
   });
+
+  // Cleric Deity/Apotheosis, Druid Born of the Soil, Ranger Animal Companion
+  // 처럼 이름/영역/증표 같은 걸 자유롭게 정해서 기록해두는 무브들. 자세한
+  // 설계는 features/note-moves.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_NOTE_MOVES, {
+    name: "DWAUTO.Settings.EnableNoteMoves.Name",
+    hint: "DWAUTO.Settings.EnableNoteMoves.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.NoteMoveNames.Name",
+    hint: "DWAUTO.Settings.NoteMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Deity, Apotheosis, Born of the Soil, Animal Companion"
+  });
 }

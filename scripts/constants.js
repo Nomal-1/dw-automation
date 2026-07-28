@@ -29,5 +29,7 @@ export const SETTINGS = {
   SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames",
   ENABLE_DRUID_ASSISTANT: "enableDruidAssistant",
   DRUID_BALANCE_MOVE_NAMES: "druidBalanceMoveNames",
-  DRUID_SHAPESHIFTER_MOVE_NAMES: "druidShapeshifterMoveNames"
+  DRUID_SHAPESHIFTER_MOVE_NAMES: "druidShapeshifterMoveNames",
+  ENABLE_NOTE_MOVES: "enableNoteMoves",
+  NOTE_MOVE_NAMES: "noteMoveNames"
 };

@@ -180,5 +180,8 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, druidShapeshifterNames, stats)
   );
 
+  const noteMoveNames = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, translateCommaList(moveMap, noteMoveNames, stats));
+
   return stats;
 }

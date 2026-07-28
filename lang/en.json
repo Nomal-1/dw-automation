@@ -132,6 +132,14 @@
       "DruidShapeshifterMoveNames": {
         "Name": "Druid Shapeshifter Move Names",
         "Hint": "Move names (comma separated) that, on a success or partial success, ask for the new animal form's name and mark the character as shapeshifted. Also auto-sets Hold from the move's own result text (e.g. \"Hold 3\")."
+      },
+      "EnableNoteMoves": {
+        "Name": "Enable Note-Taking Moves",
+        "Hint": "For moves like Deity/Apotheosis/Born of the Soil/Animal Companion that ask the player to freely define something (a god's name and domain, a bonded terrain, a companion's stats, etc.) rather than roll dice, adds a tab named after the move with its description and a free-text note area. Which moves qualify is managed in the Note-Taking Move Names setting below."
+      },
+      "NoteMoveNames": {
+        "Name": "Note-Taking Move Names",
+        "Hint": "Move names (comma separated) that get their own character-sheet tab (named after the move) with a free-text note area, for moves whose \"mechanic\" is really a narrative choice with no dice involved."
       }
     },
     "Npc": {
@@ -259,7 +267,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -390,6 +398,9 @@
       "ShapeshiftPromptLabel": "What animal form are you taking?",
       "ShapeshiftStarted": "Shapeshifted into: {animal}",
       "ShapeshiftReverted": "Reverted to natural form"
+    },
+    "NoteMoves": {
+      "NotesLabel": "Notes"
     }
   }
 }
