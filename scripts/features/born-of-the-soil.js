@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { injectActorTab } from "../lib/actor-tabs.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // Born of the Soil(대지의 아들/딸)은 다른 메모형 무브(신, 신격, 동물 상대)와
 // 달리 원문 설명 안에 "결연된 땅" 선택지 11개가 <ul><li>로 이미 들어있다.
@@ -172,7 +173,33 @@ function onRenderActorSheet(app, html) {
   renderTab(actor, moveItem, html);
 }
 
+// 이 설정은 v0.22.0에서 신설된 거라 세계 대부분에서 영문 기본값 그대로일
+// 것이다 — 그 상태로는 캐릭터가 실제로 갖고 있는 (번역된) 무브 이름과
+// 안 맞아서 클릭해도 아무 반응이 없다. GM이 손댄 적이 없는(정확히 기본값
+// 그대로인) 경우에 한해 한 번 자동으로 번역해준다. 이미 손을 댔다면
+// 건드리지 않는다.
+async function migrateNameToTranslation() {
+  if (!game.user.isGM) return;
+
+  const current = game.settings.get(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
+  if (current.trim() !== "Born of the Soil") return;
+
+  try {
+    const nameMap = await getMoveNameMap();
+    const translated = nameMap.get("Born of the Soil");
+    if (translated && translated !== current) {
+      await game.settings.set(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES, translated);
+      console.log(`${MODULE_ID} | born-of-the-soil: auto-translated move name to "${translated}"`);
+    }
+  } catch (err) {
+    // 실패해도 GM이 "번역 모듈에서 자동 채우기"로 나중에 채울 수 있다.
+  }
+}
+
 export function registerBornOfTheSoil() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateNameToTranslation();
+  });
 }

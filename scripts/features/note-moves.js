@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { injectActorTab } from "../lib/actor-tabs.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // Cleric Deity/Apotheosis, Druid Born of the Soil, Ranger Animal Companion처럼
 // "이름/영역/증표 같은 것을 자유롭게 정해서 기록해두는" 무브들. 던전월드
@@ -82,6 +83,44 @@ function onRenderActorSheet(app, html) {
   }
 }
 
+// 대지의 아들/딸은 v0.22.0부터 이 기능(소유만으로 탭 생성) 대신
+// features/born-of-the-soil.js(실제 발동해야 팝업+탭)로 옮겨갔다. 하지만
+// 그 전에 이미 "메모형 무브 이름" 설정을 저장해둔 세계는 그 값이 그대로
+// 남아있어서(기본값을 코드에서 바꿔도 이미 저장된 설정엔 영향이 없다),
+// 이 이름이 여전히 목록에 남아 예전처럼 소유만으로 탭이 뜬다. 세계 설정을
+// 딱 한 번 조용히 정리해서, 영문 기본값("Born of the Soil")과 지금
+// dungeonworld-ko가 알려주는 번역명을 둘 다 확인해 남아있으면 제거한다.
+async function migrateBornOfTheSoilOut() {
+  if (!game.user.isGM) return;
+
+  const raw = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
+  const names = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (names.length === 0) return;
+
+  const toRemove = new Set(["Born of the Soil"]);
+  try {
+    const nameMap = await getMoveNameMap();
+    const translated = nameMap.get("Born of the Soil");
+    if (translated) toRemove.add(translated);
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 기본값은 제거한다.
+  }
+
+  const next = names.filter((n) => !toRemove.has(n));
+  if (next.length === names.length) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, next.join(", "));
+  console.log(
+    `${MODULE_ID} | note-moves: removed Born of the Soil from Note-Taking Move Names (now handled by features/born-of-the-soil.js)`
+  );
+}
+
 export function registerNoteMoves() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateBornOfTheSoilOut();
+  });
 }
