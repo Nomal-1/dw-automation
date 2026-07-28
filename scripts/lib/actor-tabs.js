@@ -16,15 +16,38 @@ export function getActiveTab(actorId) {
 
 /**
  * 액터 시트의 primary 탭 그룹에 새 탭을 하나 추가한다.
+ *
+ * onReset을 넘기면(예: 특정 액션을 처음 사용해야 나타나는 탭) GM에게만
+ * 보이는 초기화 버튼을 탭 맨 위에 붙인다 — 이런 "액션을 쓰면 자동으로
+ * 생기는 탭"은 앞으로도 계속 생길 수 있어서, 되돌릴 방법을 매번 따로
+ * 만들지 않도록 여기 공용으로 마련해뒀다.
+ *
  * @returns {JQuery} 새로 추가된 탭 본문(.tab) 엘리먼트. 호출자가 내용을 채워 넣는다.
  */
-export function injectActorTab({ html, actor, tabKey, navLabel }) {
+export function injectActorTab({ html, actor, tabKey, navLabel, onReset }) {
   const $nav = html.find('.sheet-tabs[data-group="primary"]');
   const $navLink = $(`<a class="item" data-tab="${tabKey}">${navLabel}</a>`);
   $nav.append($navLink);
 
   const $tabBody = $(`<div class="tab dwauto-tab-body" data-group="primary" data-tab="${tabKey}"></div>`);
   html.find(".sheet-body").append($tabBody);
+
+  if (onReset && game.user.isGM) {
+    const $resetButton = $(
+      `<button type="button" class="dwauto-tab-reset">${game.i18n.localize("DWAUTO.ActorTab.ResetButton")}</button>`
+    );
+    $tabBody.append($resetButton);
+
+    $resetButton.on("click", async (event) => {
+      event.preventDefault();
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.ActorTab.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.ActorTab.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (confirmed) await onReset();
+    });
+  }
 
   if (getActiveTab(actor.id) === tabKey) {
     $nav.find(".item").removeClass("active");

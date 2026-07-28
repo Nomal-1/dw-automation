@@ -368,17 +368,19 @@
     "MoveUpgrade": {
       "Replaced": "Automatically removed the earlier move \"{old}\""
     },
-    "ClassInfo": {
-      "TabLabel": "Class Info"
+    "ActorTab": {
+      "ResetButton": "Reset",
+      "ResetConfirmTitle": "Reset Tab",
+      "ResetConfirmContent": "Reset this tab's state? The related action will need to be used again for the tab to reappear."
     },
     "Druid": {
       "BalanceGained": "Balance gained (current: {balance})",
-      "BalanceTitle": "Balance",
-      "BalanceCurrent": "Current Balance: {balance}",
-      "SpendButton": "Spend to Heal",
+      "BalanceBadge": "Balance: {balance}",
+      "BalanceBadgeTitle": "Click to spend Balance and heal someone.",
       "SpendTitle": "Spend Balance",
       "SpendInstruction": "How much Balance do you want to spend (up to {max})? Each point spent heals 1d4.",
       "BalanceRollFlavor": "Balance Healing ({amount}d4)",
+      "ShapeshiftTabLabel": "Shapeshift",
       "ShapeshiftTitle": "Shapeshift",
       "ShapeshiftToggleTitle": "Click to toggle shapeshift state. Turning it on will ask for the new form's animal name.",
       "ShapeshiftActiveLabel": "Shapeshifted ({animal})",

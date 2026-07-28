@@ -5,6 +5,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
+import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { incrementBalanceOnDamage } from "./druid.js";
 
 function splitCommaList(settingKey) {
@@ -485,26 +486,6 @@ function onCreateChatMessage(message, options, userId) {
   } else if (shouldDamage) {
     promptDamageRoll(actor, behavior.ranged, info.isExtreme);
   }
-}
-
-// 던전월드 시트의 무브 목록 템플릿은 그 무브가 rollType이나 rollFormula를
-// 가진 경우에만 ".item-meta.tags" 컨테이너를 그려준다(굴림 방식을 보여주는
-// 태그 칩 자리라서). Smite/Exterminatus류처럼 굴림 없이 그냥 발동하는
-// 패시브 무브는 rollType/rollFormula가 둘 다 비어 있어서 이 컨테이너 자체가
-// 없다 — 그래서 배지를 붙일 자리가 없으면 템플릿이 원래 넣었을 위치(이름
-// 바로 뒤)에 직접 만들어 붙인다.
-function getOrCreateTagsContainer($item) {
-  const existing = $item.find(".item-meta.tags");
-  if (existing.length) return existing.first();
-
-  const $created = $('<div class="item-meta tags"></div>');
-  const $name = $item.find(".item-name");
-  if ($name.length) {
-    $name.after($created);
-  } else {
-    $item.prepend($created);
-  }
-  return $created;
 }
 
 // 캐릭터 시트의 무브 목록에 "자동 아니오" 토글 배지를 붙인다. 클릭할 때마다

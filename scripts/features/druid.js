@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { handleHoldMove } from "../lib/hold.js";
+import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { promptHealTarget, applyHealAmount } from "./healing.js";
 
 const BALANCE_FLAG = "druidBalance";
@@ -30,10 +31,6 @@ function getShapeshifterMove(actor) {
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_DRUID_ASSISTANT);
-}
-
-export function hasBalance(actor) {
-  return isEnabled() && Boolean(getBalanceMove(actor));
 }
 
 // 변신 탭은 "드루이드로 만들어졌다"가 아니라 "변신 액션을 실제로 한 번이라도
@@ -185,21 +182,46 @@ async function revertShapeshift(actor) {
   announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
 }
 
-// 캐릭터 시트 공용 탭(class-info-tab.js)에 조화 예비 섹션을 그려 넣는다.
-export function renderBalanceSection($body, actor) {
-  const balance = getBalance(actor);
-  const $section = $(`
-    <div class="cell dwauto-druid-balance">
-      <h2 class="cell__title">${game.i18n.localize("DWAUTO.Druid.BalanceTitle")}</h2>
-      <p class="dwauto-druid-balance-count">${game.i18n.format("DWAUTO.Druid.BalanceCurrent", { balance })}</p>
-      <button type="button" class="dwauto-druid-spend" ${balance <= 0 ? "disabled" : ""}>
-        ${game.i18n.localize("DWAUTO.Druid.SpendButton")}
-      </button>
-    </div>
-  `);
+// 조화는 변신과 무관한 별개의 자원이라(다른 직업이 이 무브를 가져가도 그
+// 대로 작동해야 함) 변신 전용 탭에 넣지 않고, 무브 목록의 그 무브 이름
+// 옆에 예비량 배지로 바로 보여준다. 클릭하면 소모 절차로 이어진다.
+function renderBalanceBadge(actor, html) {
+  const move = getBalanceMove(actor);
+  if (!move) return;
 
-  $section.find(".dwauto-druid-spend").on("click", () => spendBalance(actor));
-  $body.append($section);
+  const $item = html.find(`.item[data-item-id="${move.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  if ($tags.find(".dwauto-balance-badge").length) return;
+
+  const balance = getBalance(actor);
+  const $badge = $(
+    `<a class="tag dwauto-balance-badge" title="${game.i18n.localize("DWAUTO.Druid.BalanceBadgeTitle")}">${game.i18n.format("DWAUTO.Druid.BalanceBadge", { balance })}</a>`
+  );
+  $tags.append($badge);
+
+  $badge.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await spendBalance(actor);
+  });
+}
+
+function onRenderActorSheet(app, html) {
+  if (!isEnabled()) return;
+
+  const actor = app.actor;
+  if (actor.type !== "character") return;
+
+  renderBalanceBadge(actor, html);
+}
+
+// 변신 탭의 GM 초기화 버튼에서 호출한다 — 변신 상태와 활성화 여부를 전부
+// 지워서, 다시 변신 무브를 굴려야 탭이 나타나는 상태로 되돌린다.
+export async function resetShapeshift(actor) {
+  await actor.unsetFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG);
+  await actor.unsetFlag(MODULE_ID, SHAPESHIFT_FLAG);
 }
 
 // 캐릭터 시트 공용 탭에 변신 상태 섹션을 그려 넣는다: 지정/비지정 배지 +
@@ -269,4 +291,5 @@ function onCreateChatMessage(message, options, userId) {
 
 export function registerDruidAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.on("renderActorSheet", onRenderActorSheet);
 }

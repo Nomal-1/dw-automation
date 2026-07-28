@@ -1,14 +1,12 @@
 import { injectActorTab } from "../lib/actor-tabs.js";
-import { hasBalance, hasShapeshifter, renderBalanceSection, renderShapeshiftSection } from "./druid.js";
+import { hasShapeshifter, renderShapeshiftSection, resetShapeshift } from "./druid.js";
 
-// 여러 직업별 기능(Druid Balance/Shapeshift, 나중에 Ranger 동반 동물 등)이
-// 캐릭터 시트에 각자 새 탭을 따로 만들면 탭이 난립하므로, 공용 탭 하나를
-// 여기서 만들고 각 기능은 "내가 그릴 내용이 있는지"만 판단해서 섹션을
-// 추가하는 식으로 합친다. 그릴 섹션이 하나도 없으면(그 클래스의 무브를
-// 하나도 안 갖고 있으면) 탭 자체를 만들지 않는다.
+// 지금은 드루이드 변신 상태만 여기 들어가지만, 나중에 다른 직업의 비슷한
+// "액션을 실제로 써야 나타나는 상태 탭"이 필요해지면 이 파일에 같은 방식
+// (조건 확인 -> 섹션 렌더러 추가)으로 보태면 된다. 그릴 섹션이 하나도
+// 없으면(관련 액션을 아직 한 번도 안 썼으면) 탭 자체를 만들지 않는다.
 function getSectionRenderers(actor) {
   const renderers = [];
-  if (hasBalance(actor)) renderers.push((body) => renderBalanceSection(body, actor));
   if (hasShapeshifter(actor)) renderers.push((body) => renderShapeshiftSection(body, actor));
   return renderers;
 }
@@ -25,8 +23,9 @@ function onRenderActorSheet(app, html) {
   const $body = injectActorTab({
     html,
     actor,
-    tabKey: "dwauto-class-info",
-    navLabel: game.i18n.localize("DWAUTO.ClassInfo.TabLabel")
+    tabKey: "dwauto-shapeshift",
+    navLabel: game.i18n.localize("DWAUTO.Druid.ShapeshiftTabLabel"),
+    onReset: () => resetShapeshift(actor)
   });
   $body.addClass("dwauto-tab");
 

@@ -368,17 +368,19 @@
     "MoveUpgrade": {
       "Replaced": "이전 단계 무브 \"{old}\"가 자동으로 제거되었습니다"
     },
-    "ClassInfo": {
-      "TabLabel": "클래스 정보"
+    "ActorTab": {
+      "ResetButton": "초기화",
+      "ResetConfirmTitle": "탭 초기화",
+      "ResetConfirmContent": "이 탭의 상태를 초기화하시겠습니까? 관련 액션을 다시 사용해야 탭이 다시 나타납니다."
     },
     "Druid": {
       "BalanceGained": "조화 예비를 얻었습니다 (현재: {balance})",
-      "BalanceTitle": "조화",
-      "BalanceCurrent": "현재 조화 예비: {balance}",
-      "SpendButton": "소모해서 치유",
+      "BalanceBadge": "조화 예비: {balance}",
+      "BalanceBadgeTitle": "클릭하면 조화 예비를 소모해서 남을 치유합니다.",
       "SpendTitle": "조화 예비 소모",
       "SpendInstruction": "조화 예비를 얼마나 소모하시겠습니까? (최대 {max}) 소모한 만큼 1d4씩 치유합니다.",
       "BalanceRollFlavor": "조화 치유 ({amount}d4)",
+      "ShapeshiftTabLabel": "변신",
       "ShapeshiftTitle": "변신",
       "ShapeshiftToggleTitle": "클릭하면 변신 상태를 켜고 끕니다. 켤 때는 변신할 동물 이름을 물어봅니다.",
       "ShapeshiftActiveLabel": "변신 중 ({animal})",

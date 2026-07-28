@@ -169,13 +169,22 @@
   color: #fff !important;
 }
 
-.dwauto-druid-balance,
 .dwauto-druid-shapeshift {
   margin-bottom: 12px;
 }
 
-.dwauto-druid-balance-count {
-  font-weight: bold;
+.dwauto-balance-badge {
+  cursor: pointer;
+}
+
+.dwauto-balance-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-tab-reset {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
 }
 
 .dwauto-shapeshift-badge {
