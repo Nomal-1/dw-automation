@@ -6,6 +6,7 @@
       <tr>
         <th>{{localize "DWAUTO.MoveUpgrades.UpgradeName"}}</th>
         <th>{{localize "DWAUTO.MoveUpgrades.ReplacesName"}}</th>
+        <th>{{localize "DWAUTO.MoveUpgrades.DeletesPrevious"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -14,6 +15,7 @@
       <tr>
         <td><input type="text" name="rows.{{@index}}.upgradeName" value="{{this.upgradeName}}"></td>
         <td><input type="text" name="rows.{{@index}}.replacesName" value="{{this.replacesName}}"></td>
+        <td><input type="checkbox" name="rows.{{@index}}.deletesPrevious" {{checked this.deletesPrevious}}></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}

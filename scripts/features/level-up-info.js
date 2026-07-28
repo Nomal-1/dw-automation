@@ -68,6 +68,11 @@ function getUpgradeRowFor(moveName) {
 // system.requiresMove(항상 영문 원본)를 보고, 번역 데이터에서 찾은 이름
 // 또는 영문 원본을 대신 보여준다. 둘 다 없으면(선행조건 자체가 없는 무브)
 // null을 반환해서 아무것도 덧붙이지 않는다.
+//
+// 표에 등록된 쌍이라도 deletesPrevious가 false("필요" 관계)면 배워도 이전
+// 무브가 사라지지 않으므로 "RequiresOnly" 문구를 쓴다 — 표에 아예 없어서
+// 시스템 필드로만 판단한 경우와 같은 문구다(둘 다 "그대로 유지된다"는
+// 점에서 실제로 같은 뜻이기 때문).
 function buildInfoLine(moveDoc, nameMap) {
   const upgradeRow = getUpgradeRowFor(moveDoc.name);
   const requiresEnglish = moveDoc.system?.requiresMove;
@@ -77,7 +82,8 @@ function buildInfoLine(moveDoc, nameMap) {
   const requiresDisplay = upgradeRow?.replacesName || nameMap.get(requiresEnglish) || requiresEnglish;
   if (!requiresDisplay) return null;
 
-  const messageKey = upgradeRow ? "DWAUTO.LevelUpInfo.Replaces" : "DWAUTO.LevelUpInfo.RequiresOnly";
+  const replaces = Boolean(upgradeRow) && upgradeRow.deletesPrevious !== false;
+  const messageKey = replaces ? "DWAUTO.LevelUpInfo.Replaces" : "DWAUTO.LevelUpInfo.RequiresOnly";
   return game.i18n.format(messageKey, { requires: requiresDisplay });
 }
 
@@ -123,7 +129,7 @@ async function findMissingEligibleUpgrades(actor, shownNames, docs) {
     if (shownNames.has(row.upgradeName)) continue;
 
     const moveDoc = docs.find((d) => d.name === row.upgradeName);
-    if (moveDoc) missing.push({ moveDoc, replacesName: row.replacesName });
+    if (moveDoc) missing.push({ moveDoc, replacesName: row.replacesName, deletesPrevious: row.deletesPrevious !== false });
   }
   return missing;
 }
@@ -134,11 +140,11 @@ function injectMissingUpgradesSection(html, actor, missing) {
 
   const items = missing
     .map(
-      ({ moveDoc, replacesName }) => `
+      ({ moveDoc, replacesName, deletesPrevious }) => `
         <li class="dwauto-missing-upgrade-item">
           <div class="selection-content">
             <h3>${moveDoc.name}</h3>
-            <p class="dwauto-upgrade-info"><i class="fas fa-arrow-up-right-dots"></i> ${game.i18n.format("DWAUTO.LevelUpInfo.Replaces", { requires: replacesName })}</p>
+            <p class="dwauto-upgrade-info"><i class="fas fa-arrow-up-right-dots"></i> ${game.i18n.format(deletesPrevious ? "DWAUTO.LevelUpInfo.Replaces" : "DWAUTO.LevelUpInfo.RequiresOnly", { requires: replacesName })}</p>
             <div>${moveDoc.system?.description ?? ""}</div>
             <button type="button" class="dwauto-learn-move" data-move-id="${moveDoc.id}">${game.i18n.localize("DWAUTO.LevelUpInfo.LearnButton")}</button>
           </div>

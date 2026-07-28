@@ -105,7 +105,7 @@
       "MoveUpgradesMenu": {
         "Name": "Move Upgrades",
         "Label": "Edit Move Upgrades",
-        "Hint": "Register pairs of moves where learning the first one automatically removes the second. Pre-filled with all 43 such pairs found across the 8 core classes' compendium data (each advanced move's own \"requires\" field)."
+        "Hint": "Register pairs of an upgrade move and its prerequisite move. With \"Removes Prerequisite\" checked, learning the upgrade automatically deletes the prerequisite; unchecked, the prerequisite stays (a \"requires\" relationship rather than a \"replaces\" one). Pre-filled with all 43 such pairs found across the 8 core classes' compendium data (each advanced move's own \"requires\" field), all with removal checked by default — uncheck any pair you find is actually a \"requires\" relationship."
       },
       "DamageReductionMovesMenu": {
         "Name": "Conditional Armor Bonus Moves",
@@ -393,9 +393,10 @@
     },
     "MoveUpgrades": {
       "Title": "Move Upgrades",
-      "Hint": "Enter both names exactly as they appear in your game (translated, if applicable). When a character gains a move item matching \"Upgrade Move\", any move on the same actor matching \"Replaced Move\" is deleted automatically.",
+      "Hint": "Enter both names exactly as they appear in your game (translated, if applicable). When a character gains a move item matching \"Upgrade Move\", any move on the same actor matching \"Prerequisite Move\" is deleted automatically — but only if \"Removes Prerequisite\" is checked.",
       "UpgradeName": "Upgrade Move",
-      "ReplacesName": "Replaced Move"
+      "ReplacesName": "Prerequisite Move",
+      "DeletesPrevious": "Removes Prerequisite"
     },
     "MoveUpgrade": {
       "Replaced": "Automatically removed the earlier move \"{old}\""

@@ -1,13 +1,14 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 
 function blankRow() {
-  return { upgradeName: "", replacesName: "" };
+  return { upgradeName: "", replacesName: "", deletesPrevious: true };
 }
 
 function normalizeRow(raw) {
   return {
     upgradeName: (raw?.upgradeName ?? "").trim(),
-    replacesName: (raw?.replacesName ?? "").trim()
+    replacesName: (raw?.replacesName ?? "").trim(),
+    deletesPrevious: raw?.deletesPrevious === true || raw?.deletesPrevious === "true"
   };
 }
 
