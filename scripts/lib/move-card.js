@@ -12,7 +12,13 @@ export function getMoveCardInfo(message) {
   const card = $(message.content).find(".chat-card.move-card").first();
   if (!card.length) return null;
 
-  const actor = game.actors.get(card.attr("data-actor-id"));
+  // 시스템 자체 버그: rolls.js가 주사위를 굴리는 분기에서만 templateData.actor를
+  // 채워서 data-actor-id에 넣어준다. 대지의 아들/딸처럼 rollType이 없는
+  // 서술형 무브는 이 분기를 안 타서 data-actor-id가 항상 빈 채로 렌더된다.
+  // message.speaker.actor(ChatMessage.getSpeaker)는 두 경우 모두 항상 채워지므로
+  // data-actor-id가 비었을 때 이걸로 대신 찾는다.
+  const actorId = card.attr("data-actor-id") || message.speaker?.actor;
+  const actor = game.actors.get(actorId);
   if (!actor) return null;
 
   const title = card.find(".cell__title").first().text().trim();
