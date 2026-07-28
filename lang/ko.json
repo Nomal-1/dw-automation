@@ -295,7 +295,10 @@
     "ConditionalDamage": {
       "Prompt": "이번 공격이 \"{name}\"의 조건을 충족합니까?",
       "Yes": "{formula} (조건 충족)",
-      "No": "{formula} (조건 미충족)"
+      "No": "{formula} (조건 미충족)",
+      "AutoNoTitle": "클릭하면 이 무브의 '아니오' 답변을 매번 묻지 않고 자동으로 적용할지 켜고 끕니다(맹세한 적이 도망쳐서 한동안 조건을 충족할 일이 없을 때 유용합니다).",
+      "AutoNoOn": "자동 {formula}",
+      "AutoNoOff": "매번 확인"
     },
     "SuperiorWarrior": {
       "Applied": "극단적 성공(12+): 피해를 주고, 상대의 공격을 피하며, 적을 감명시키거나 낙담시키거나 겁먹게 합니다."

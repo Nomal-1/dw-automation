@@ -200,23 +200,44 @@ async function promptSpellAugmentation(actor) {
   });
 }
 
+// 척살(Exterminatus)처럼 "조건 미충족" 쪽 페널티가 붙는 무브는, 맹세한 적이
+// 도망쳐서 한동안 다른 적만 상대하는 구간에 매번 "아니오"를 눌러야 해서
+// 번거롭다. 캐릭터 시트에 토글 배지를 하나 붙여서, 켜두면 그 무브는 물어보지
+// 않고 매번 자동으로 "아니오"(noFormula)를 적용한다. 실제 값은 액터 플래그로
+// 저장한다.
+const AUTO_NO_FLAG = "conditionalDamageAutoNo";
+
+function getAutoNoLocks(actor) {
+  return actor.getFlag(MODULE_ID, AUTO_NO_FLAG) ?? [];
+}
+
+async function setAutoNoLock(actor, moveName, locked) {
+  const current = getAutoNoLocks(actor);
+  const next = locked ? Array.from(new Set([...current, moveName])) : current.filter((n) => n !== moveName);
+  await actor.setFlag(MODULE_ID, AUTO_NO_FLAG, next);
+}
+
 // Paladin Smite/Holy Smite/Exterminatus, Ranger Viper's Strike/Fangs처럼
 // "특정 조건을 만족하면 데미지 주사위를 추가로(또는 페널티로) 굴리는"
 // 무브들. 조건(퀘스트 중인지, 겸용 공격을 했는지 등)을 자동 판정할 수
 // 없어서 하나씩 Y/N으로 물어보고, 대답에 따라 yesFormula 또는 noFormula를
 // 데미지 공식에 이어붙인다. 해당 무브가 없으면 조용히 빈 문자열을 반환한다.
+// "자동 아니오" 토글이 켜진 무브는 물어보지 않고 바로 noFormula를 적용한다.
 async function promptConditionalDamageBonuses(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
   const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
   if (owned.length === 0) return "";
 
+  const locks = getAutoNoLocks(actor);
   let extra = "";
   for (const row of owned) {
-    const confirmed = await Dialog.confirm({
-      title: row.name,
-      content: `<p>${game.i18n.format("DWAUTO.ConditionalDamage.Prompt", { name: row.name })}</p>`,
-      defaultYes: false
-    });
+    const confirmed = locks.includes(row.name)
+      ? false
+      : await Dialog.confirm({
+          title: row.name,
+          content: `<p>${game.i18n.format("DWAUTO.ConditionalDamage.Prompt", { name: row.name })}</p>`,
+          defaultYes: false
+        });
 
     const formula = confirmed ? row.yesFormula : row.noFormula;
     if (formula && formula.trim() && formula.trim() !== "0") {
@@ -445,6 +466,50 @@ function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// 캐릭터 시트의 무브 목록에 "자동 아니오" 토글 배지를 붙인다. 클릭할 때마다
+// 켜짐/꺼짐이 바뀌고, 켜져 있으면 데미지를 굴릴 때 그 무브는 물어보지 않고
+// 바로 noFormula를 적용한다(척살이 도망친 적을 쫓는 동안 매번 "아니오"를
+// 누르지 않아도 되도록).
+function onRenderActorSheet(app, html) {
+  if (game.system.id !== "dungeonworld") return;
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_ATTACK_ASSISTANT)) return;
+
+  const actor = app.actor;
+  if (actor.type !== "character") return;
+
+  const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
+  const locks = getAutoNoLocks(actor);
+
+  for (const row of table) {
+    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    if (!moveItem) continue;
+
+    const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
+    if (!$item.length) continue;
+
+    const $tags = $item.find(".item-meta.tags");
+    if (!$tags.length || $tags.find(".dwauto-autono-badge").length) continue;
+
+    const locked = locks.includes(row.name);
+    const noFormula = (row.noFormula || "").trim() || "0";
+    const label = locked
+      ? game.i18n.format("DWAUTO.ConditionalDamage.AutoNoOn", { formula: noFormula })
+      : game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoOff");
+
+    const $badge = $(
+      `<a class="tag dwauto-autono-badge${locked ? " dwauto-autono-on" : ""}" title="${game.i18n.localize("DWAUTO.ConditionalDamage.AutoNoTitle")}">${label}</a>`
+    );
+    $tags.append($badge);
+
+    $badge.on("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      await setAutoNoLock(actor, row.name, !locked);
+    });
+  }
+}
+
 export function registerAttackAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.on("renderActorSheet", onRenderActorSheet);
 }

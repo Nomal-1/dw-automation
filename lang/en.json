@@ -295,7 +295,10 @@
     "ConditionalDamage": {
       "Prompt": "Does the condition for \"{name}\" apply to this attack?",
       "Yes": "{formula} (condition met)",
-      "No": "{formula} (condition not met)"
+      "No": "{formula} (condition not met)",
+      "AutoNoTitle": "Click to toggle whether this move's \"No\" answer is applied automatically without asking every time (handy while the condition clearly won't be met for a while, e.g. your marked enemy fled)",
+      "AutoNoOn": "Auto {formula}",
+      "AutoNoOff": "Ask each time"
     },
     "SuperiorWarrior": {
       "Applied": "Extreme success (12+): deal damage, avoid the enemy's attack, and impress/dismay/frighten it."

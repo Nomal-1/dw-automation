@@ -143,6 +143,19 @@
   color: #4caf50;
 }
 
+.dwauto-autono-badge {
+  cursor: pointer;
+}
+
+.dwauto-autono-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-autono-on {
+  background: #9a3a2e !important;
+  color: #fff !important;
+}
+
 .dwauto-warning {
   color: #e0a030;
 }
