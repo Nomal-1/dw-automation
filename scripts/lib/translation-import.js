@@ -50,6 +50,13 @@ async function buildNameMap(files) {
   return map;
 }
 
+// features/level-up-info.js가 레벨업 창의 무브 선행조건(requiresMove, 항상
+// 영문 원본)을 화면에 표시할 번역명으로 바꿀 때 재사용한다. dungeonworld-ko가
+// 없거나 응답이 실패하면 빈 맵을 반환하고, 호출부가 영문 원본으로 대체 표시한다.
+export async function getMoveNameMap() {
+  return buildNameMap(MOVE_PACK_FILES);
+}
+
 function translateOne(map, rawName, stats) {
   const name = (rawName ?? "").trim();
   if (!name) return name;

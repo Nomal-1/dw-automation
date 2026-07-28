@@ -251,3 +251,11 @@
   background: #7a2e2e !important;
   color: #fff !important;
 }
+
+.dwauto-upgrade-info {
+  margin: 0 0 8px;
+  padding: 4px 8px;
+  border-left: 3px solid #4a2e7a;
+  background: rgba(74, 46, 122, 0.15);
+  font-size: 0.85rem;
+}

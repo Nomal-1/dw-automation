@@ -468,6 +468,10 @@
       "AskEachHitTitle": "클릭하면 피격 때마다 열세 여부를 다시 물어볼지 켜고 끕니다. 꺼두면 묻지 않고 지금 토글 상태를 그대로 유지합니다.",
       "AskEachHitOn": "피격 때마다 묻기: 켜짐",
       "AskEachHitOff": "피격 때마다 묻기: 꺼짐"
+    },
+    "LevelUpInfo": {
+      "Replaces": "선행 무브: {requires} (배우면 자동으로 대체되어 사라짐)",
+      "RequiresOnly": "선행 무브: {requires} (배워도 사라지지 않고 그대로 유지됨)"
     }
   }
 }

@@ -468,6 +468,10 @@
       "AskEachHitTitle": "Click to toggle whether you're asked about outnumbered status on every hit. When off, the current toggle is kept as-is without asking.",
       "AskEachHitOn": "Ask Each Hit: On",
       "AskEachHitOff": "Ask Each Hit: Off"
+    },
+    "LevelUpInfo": {
+      "Replaces": "Requires: {requires} (automatically removed once you learn this)",
+      "RequiresOnly": "Requires: {requires} (stays on your sheet after you learn this)"
     }
   }
 }

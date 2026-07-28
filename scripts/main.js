@@ -13,6 +13,7 @@ import { registerClassInfoTab } from "./features/class-info-tab.js";
 import { registerNoteMoves } from "./features/note-moves.js";
 import { registerArmorAssistant } from "./features/armor-assistant.js";
 import { registerUnderdogAssistant } from "./features/underdog.js";
+import { registerLevelUpInfo } from "./features/level-up-info.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -37,3 +38,4 @@ registerClassInfoTab();
 registerNoteMoves();
 registerArmorAssistant();
 registerUnderdogAssistant();
+registerLevelUpInfo();
