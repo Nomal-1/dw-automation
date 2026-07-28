@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
+import { getShedCandidate, applyShed } from "./druid.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -20,9 +21,18 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
+// Druid Shed(변신 중 피해를 무효화하며 변신 해제)는 설정 표가 아니라
+// druid.js가 관리하는 상태(변신 중인지)에 딸려 있어서, 매번 이 표 기반
+// 후보 목록에 조건부로 끼워 넣는다. 변신 중이 아니면 애초에 후보에
+// 들어가지 않는다(features/druid.js의 getShedCandidate 참고).
 function getHitTriggerCandidates(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
-  return table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  const candidates = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+
+  const shed = getShedCandidate(actor);
+  if (shed) candidates.push(shed);
+
+  return candidates;
 }
 
 function getDamageReductionRow(actor) {
@@ -136,6 +146,8 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
           if (row.effect === "debility") {
             const accepted = await promptDebilityChoice(actor, row);
             if (!accepted) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
+          } else if (row.effect === "shed") {
+            await applyShed(actor, damage);
           } else {
             await applyArmorNegation(actor, row, damage);
           }

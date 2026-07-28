@@ -183,5 +183,29 @@ export async function runTranslationImport() {
   const noteMoveNames = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, translateCommaList(moveMap, noteMoveNames, stats));
 
+  const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_DAMAGE_DIE_MOVES,
+    translateRows(moveMap, druidDamageDieMoves, stats)
+  );
+
+  const druidShedNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_SHED_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.DRUID_SHED_MOVE_NAMES, translateCommaList(moveMap, druidShedNames, stats));
+
+  const druidFormcrafterNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_FORMCRAFTER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_FORMCRAFTER_MOVE_NAMES,
+    translateCommaList(moveMap, druidFormcrafterNames, stats)
+  );
+
+  const druidFormshaperNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_FORMSHAPER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_FORMSHAPER_MOVE_NAMES,
+    translateCommaList(moveMap, druidFormshaperNames, stats)
+  );
+
   return stats;
 }

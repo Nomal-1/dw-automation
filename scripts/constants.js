@@ -30,6 +30,10 @@ export const SETTINGS = {
   ENABLE_DRUID_ASSISTANT: "enableDruidAssistant",
   DRUID_BALANCE_MOVE_NAMES: "druidBalanceMoveNames",
   DRUID_SHAPESHIFTER_MOVE_NAMES: "druidShapeshifterMoveNames",
+  DRUID_DAMAGE_DIE_MOVES: "druidDamageDieMoves",
+  DRUID_SHED_MOVE_NAMES: "druidShedMoveNames",
+  DRUID_FORMCRAFTER_MOVE_NAMES: "druidFormcrafterMoveNames",
+  DRUID_FORMSHAPER_MOVE_NAMES: "druidFormshaperMoveNames",
   ENABLE_NOTE_MOVES: "enableNoteMoves",
   NOTE_MOVE_NAMES: "noteMoveNames"
 };

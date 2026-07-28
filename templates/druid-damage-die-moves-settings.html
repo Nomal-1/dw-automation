@@ -1,0 +1,28 @@
+<form class="dwauto-druid-damage-die-moves">
+  <p class="notes">{{hint}}</p>
+
+  <table class="dwauto-attack-moves-table">
+    <thead>
+      <tr>
+        <th>{{localize "DWAUTO.DruidDamageDieMoves.Name"}}</th>
+        <th>{{localize "DWAUTO.DruidDamageDieMoves.DieSize"}}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows}}
+      <tr>
+        <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
+        <td><input type="number" name="rows.{{@index}}.dieSize" value="{{this.dieSize}}" min="1"></td>
+        <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <button type="button" data-action="add-row"><i class="fas fa-plus"></i> {{localize "DWAUTO.AttackMoves.AddRow"}}</button>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-save"></i> {{localize "SETTINGS.Save"}}</button>
+  </footer>
+</form>

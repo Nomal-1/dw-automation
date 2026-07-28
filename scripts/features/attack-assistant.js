@@ -6,7 +6,7 @@ import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../
 import { announceActionApplied } from "../lib/announce.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
-import { incrementBalanceOnDamage } from "./druid.js";
+import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBonus } from "./druid.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -79,12 +79,14 @@ function appendTerm(formula, term) {
 }
 
 async function rollDamage(actor, weapon, dmgMod, extraDice) {
-  const die = actor.system.attributes?.damage?.value || "d6";
+  let die = actor.system.attributes?.damage?.value || "d6";
+  die = applyDamageDieOverride(actor, die);
   const miscBonus = actor.system.attributes?.damage?.misc || "";
 
   let formula = die;
   formula = appendTerm(formula, miscBonus);
   formula = appendTerm(formula, extraDice);
+  formula = appendTerm(formula, getFormshaperDamageBonus(actor));
   formula = appendTerm(formula, dmgMod);
 
   const roll = new Roll(formula, actor.getRollData());

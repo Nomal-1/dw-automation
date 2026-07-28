@@ -8,6 +8,13 @@ import { promptHealTarget, applyHealAmount } from "./healing.js";
 const BALANCE_FLAG = "druidBalance";
 const SHAPESHIFT_FLAG = "druidShapeshift";
 const SHAPESHIFT_ACTIVATED_FLAG = "druidShapeshiftActivated";
+const FORMSHAPER_FLAG = "druidFormshaperChoice";
+const FORMCRAFTER_FLAG = "druidFormcrafterStats";
+const ABILITY_KEYS = ["str", "dex", "con", "int", "wis", "cha"];
+
+// Formcrafter의 마스터 쪽 능력치 선택을 요청하는 소켓 채널. hit-trigger.js/
+// healing.js와 같은 채널을 쓰고 type 값으로만 구분한다.
+const SOCKET_NAME = `module.${MODULE_ID}`;
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -27,6 +34,18 @@ function getBalanceMove(actor) {
 
 function getShapeshifterMove(actor) {
   return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES));
+}
+
+function getShedMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_SHED_MOVE_NAMES));
+}
+
+function getFormcrafterMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_FORMCRAFTER_MOVE_NAMES));
+}
+
+function getFormshaperMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_FORMSHAPER_MOVE_NAMES));
 }
 
 function isEnabled() {
@@ -54,6 +73,14 @@ function getShapeshiftState(actor) {
   return actor.getFlag(MODULE_ID, SHAPESHIFT_FLAG) ?? { active: false, animalName: "", notes: "" };
 }
 
+// Red of Tooth and Claw/Blood and Thunder/Shed/Formcrafter/Formshaper처럼
+// "변신 중"이어야만 뜻이 있는 무브들이 실제로 지금 변신 중인지 확인할 때
+// 쓴다. attack-assistant.js/hit-trigger.js/druid-roll-wrapper.js가 이 함수로
+// 선행 조건(변신 상태)을 확인한다.
+export function isShapeshiftActive(actor) {
+  return getShapeshiftState(actor).active === true;
+}
+
 // Fighter/Ranger 등 데미지를 굴리는 다른 무브와 달리 Balance는 "데미지를 줄
 // 때마다"라서, 특정 무브 하나가 아니라 attack-assistant.js의 데미지 굴림
 // 자체에 걸어둔다(무기 공격 자동화를 거치지 않는 피해는 범위 밖이다).
@@ -66,6 +93,225 @@ export async function incrementBalanceOnDamage(actor) {
   const next = getBalance(actor) + 1;
   await actor.setFlag(MODULE_ID, BALANCE_FLAG, next);
   announceActionApplied(actor, move.name, game.i18n.format("DWAUTO.Druid.BalanceGained", { balance: next }));
+}
+
+// Red of Tooth and Claw(d8)/Blood and Thunder(d10): 변신 중(적절한 동물 형태)
+// 일 때만 데미지 주사위가 커진다. 둘 다 갖고 있으면 더 큰 주사위를 쓴다.
+// attack-assistant.js의 데미지 굴림에서 기본 주사위를 정할 때 호출한다.
+function getOwnedDamageDieRows(actor) {
+  const table = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
+  return table
+    .map((row) => ({ ...row, move: actor.items.find((i) => i.type === "move" && i.name === row.name) }))
+    .filter((row) => row.move);
+}
+
+export function applyDamageDieOverride(actor, baseDie) {
+  if (!isEnabled()) return baseDie;
+
+  const owned = getOwnedDamageDieRows(actor);
+  if (owned.length === 0) return baseDie;
+
+  const best = owned.reduce((max, row) => (row.dieSize > (max?.dieSize ?? 0) ? row : max), null);
+
+  if (!isShapeshiftActive(actor)) {
+    announceActionApplied(actor, best.move.name, game.i18n.localize("DWAUTO.Druid.ShapeshiftRequiredNotApplied"));
+    return baseDie;
+  }
+
+  const overriddenDie = `d${best.dieSize}`;
+  announceActionApplied(actor, best.move.name, game.i18n.format("DWAUTO.Druid.DamageDieApplied", { die: overriddenDie }));
+  return overriddenDie;
+}
+
+// Formshaper: 변신할 때마다 장갑+1 또는 피해+1d4 중 하나를 고른다. 장갑
+// 선택은 변신 시작/해제 시점에 장갑 값을 직접 올렸다 내리고, 피해 선택은
+// attack-assistant.js의 데미지 굴림에서 소비한다.
+function promptFormshaperChoice() {
+  return new Promise((resolve) => {
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.Druid.FormshaperPromptTitle"),
+      content: `<p>${game.i18n.localize("DWAUTO.Druid.FormshaperPromptContent")}</p>`,
+      buttons: {
+        armor: {
+          label: game.i18n.localize("DWAUTO.Druid.FormshaperArmorOption"),
+          callback: () => resolve("armor")
+        },
+        damage: {
+          label: game.i18n.localize("DWAUTO.Druid.FormshaperDamageOption"),
+          callback: () => resolve("damage")
+        }
+      },
+      default: "armor",
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
+function getFormshaperChoice(actor) {
+  return actor.getFlag(MODULE_ID, FORMSHAPER_FLAG) ?? null;
+}
+
+async function applyFormshaperOnShapeshiftStart(actor) {
+  const move = getFormshaperMove(actor);
+  if (!move) return;
+
+  const choice = await promptFormshaperChoice();
+  if (!choice) return;
+  await actor.setFlag(MODULE_ID, FORMSHAPER_FLAG, choice);
+
+  if (choice === "armor") {
+    const current = Number(actor.system.attributes?.ac?.value) || 0;
+    const next = current + 1;
+    await actor.update({ "system.attributes.ac.value": next });
+    announceActionApplied(actor, move.name, game.i18n.format("DWAUTO.Druid.FormshaperArmorApplied", { armor: next }));
+  } else {
+    announceActionApplied(actor, move.name, game.i18n.localize("DWAUTO.Druid.FormshaperDamageApplied"));
+  }
+}
+
+async function revertFormshaperOnShapeshiftEnd(actor) {
+  const move = getFormshaperMove(actor);
+  if (!move) return;
+
+  if (getFormshaperChoice(actor) === "armor") {
+    const current = Number(actor.system.attributes?.ac?.value) || 0;
+    const next = Math.max(0, current - 1);
+    await actor.update({ "system.attributes.ac.value": next });
+  }
+  await actor.unsetFlag(MODULE_ID, FORMSHAPER_FLAG);
+}
+
+// attack-assistant.js의 데미지 굴림에서 호출한다. Formshaper가 "피해" 선택인
+// 상태로 변신 중일 때만 1d4를 반환하고, 그 외(무브 없음/장갑 선택/변신 아님)는
+// 빈 문자열을 반환한다(변신 아닌 상태는 위 데미지 주사위 오버라이드와 같은
+// 문구로 이미 알려주므로 여기서 또 알리지 않는다).
+export function getFormshaperDamageBonus(actor) {
+  if (!isEnabled()) return "";
+  const move = getFormshaperMove(actor);
+  if (!move) return "";
+  if (!isShapeshiftActive(actor)) return "";
+  if (getFormshaperChoice(actor) !== "damage") return "";
+
+  announceActionApplied(actor, move.name, game.i18n.localize("DWAUTO.Druid.FormshaperDamageBonusApplied"));
+  return "1d4";
+}
+
+function abilityLabel(key) {
+  return game.i18n.localize(`DW.${key.toUpperCase()}`);
+}
+
+function promptAbilityChoice(title, content) {
+  return new Promise((resolve) => {
+    const options = ABILITY_KEYS.map((key) => `<option value="${key}">${abilityLabel(key)}</option>`).join("");
+
+    new Dialog({
+      title,
+      content: `
+        <form>
+          <p>${content}</p>
+          <div class="form-group">
+            <select name="ability">${options}</select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => resolve(html.find('[name="ability"]').val())
+        },
+        cancel: { label: game.i18n.localize("DWAUTO.Cancel"), callback: () => resolve(null) }
+      },
+      default: "ok",
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
+// Formcrafter: 변신할 때 능력치 하나를 골라 +1 온고잉, 마스터가 고른
+// 능력치 하나에 -1 온고잉을 받는다(둘 다 변신 중에만). 실제 적용은
+// lib/druid-roll-wrapper.js가 무브 굴림 직전에 rollMod를 조정하는 방식으로
+// 한다 — "무엇으로 판정할지 그 자리에서 물어보는"(ask, 예: Defy Danger)
+// 무브는 어떤 능력치를 쓸지가 굴리기 직전엔 아직 정해지지 않아 자동화
+// 대상에서 제외된다(getFormcrafterRollModifier 주석 참고).
+export function getFormcrafterStats(actor) {
+  return actor.getFlag(MODULE_ID, FORMCRAFTER_FLAG) ?? null;
+}
+
+async function promptFormcrafterGmChoice(actor, moveName) {
+  const penalty = await promptAbilityChoice(
+    game.i18n.format("DWAUTO.Druid.FormcrafterPenaltyTitle", { name: actor.name }),
+    game.i18n.localize("DWAUTO.Druid.FormcrafterPenaltyContent")
+  );
+  if (!penalty) return;
+
+  const current = actor.getFlag(MODULE_ID, FORMCRAFTER_FLAG) ?? {};
+  await actor.setFlag(MODULE_ID, FORMCRAFTER_FLAG, { ...current, penalty });
+  announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.FormcrafterPenaltyApplied", { stat: abilityLabel(penalty) }));
+}
+
+async function applyFormcrafterOnShapeshiftStart(actor) {
+  const move = getFormcrafterMove(actor);
+  if (!move) return;
+
+  const bonus = await promptAbilityChoice(
+    game.i18n.localize("DWAUTO.Druid.FormcrafterBonusTitle"),
+    game.i18n.localize("DWAUTO.Druid.FormcrafterBonusContent")
+  );
+  if (!bonus) return;
+
+  await actor.setFlag(MODULE_ID, FORMCRAFTER_FLAG, { bonus, penalty: null });
+  announceActionApplied(actor, move.name, game.i18n.format("DWAUTO.Druid.FormcrafterBonusApplied", { stat: abilityLabel(bonus) }));
+
+  if (game.user.isGM) {
+    await promptFormcrafterGmChoice(actor, move.name);
+  } else {
+    game.socket.emit(SOCKET_NAME, { type: "formcrafterGmChoiceRequest", actorId: actor.id, moveName: move.name });
+  }
+}
+
+async function clearFormcrafterOnShapeshiftEnd(actor) {
+  if (!getFormcrafterMove(actor)) return;
+  await actor.unsetFlag(MODULE_ID, FORMCRAFTER_FLAG);
+}
+
+// lib/druid-roll-wrapper.js가 무브를 굴리기 직전마다 호출한다. 이 무브
+// 자체의 rollType(고정 능력치)이 지금 변신 중 보너스/페널티 능력치와
+// 일치하면 그만큼(+1/-1, 둘 다 겹치면 0으로 상쇄) rollMod에 얹을 값을
+// 반환한다.
+export function getFormcrafterRollModifier(actor, rollType) {
+  if (!isEnabled()) return 0;
+  if (!getFormcrafterMove(actor)) return 0;
+  if (!isShapeshiftActive(actor)) return 0;
+
+  const stats = getFormcrafterStats(actor);
+  if (!stats) return 0;
+
+  let mod = 0;
+  if (stats.bonus === rollType) mod += 1;
+  if (stats.penalty === rollType) mod -= 1;
+  return mod;
+}
+
+// Shed: 변신 중 피해를 입으면 변신을 풀어 그 피해를 무효화할 수 있다.
+// hit-trigger.js의 피격 시 무효화 후보 목록에 끼워 넣는 방식으로 동작한다
+// (자세한 설계는 features/hit-trigger.js 참고). 변신 중이 아니면 애초에
+// 후보로 잡히지 않는다 — 피격은 무브를 소유한 캐릭터가 전투 내내 계속
+// 겪는 흔한 이벤트라 다른 무브들과 달리 "조건 미충족" 채팅 알림을 매번
+// 띄우면 지나치게 시끄러워지므로 조용히 생략한다.
+export function getShedCandidate(actor) {
+  if (!isEnabled()) return null;
+  if (!isShapeshiftActive(actor)) return null;
+
+  const move = getShedMove(actor);
+  if (!move) return null;
+  return { name: move.name, effect: "shed" };
+}
+
+export async function applyShed(actor, damage) {
+  const move = getShedMove(actor);
+  const moveName = move?.name ?? "Shed";
+  await revertShapeshift(actor, { silent: true });
+  announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.ShedApplied", { damage }));
 }
 
 function promptSpendAmount(max) {
@@ -173,13 +419,20 @@ async function startShapeshift(actor) {
   const state = getShapeshiftState(actor);
   await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: true, animalName });
   announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.ShapeshiftStarted", { animal: animalName || "?" }));
+
+  await applyFormshaperOnShapeshiftStart(actor);
+  await applyFormcrafterOnShapeshiftStart(actor);
 }
 
-async function revertShapeshift(actor) {
+// Shed가 피해를 무효화하며 변신을 해제할 때는 { silent: true }로 호출해서
+// "변신 해제" 자체의 알림 대신 Shed 전용 알림만 남긴다(applyShed 참고).
+export async function revertShapeshift(actor, { silent = false } = {}) {
   const moveName = getShapeshifterMove(actor)?.name ?? "Shapeshifter";
   const state = getShapeshiftState(actor);
   await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: false });
-  announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
+  await revertFormshaperOnShapeshiftEnd(actor);
+  await clearFormcrafterOnShapeshiftEnd(actor);
+  if (!silent) announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
 }
 
 // 조화는 변신과 무관한 별개의 자원이라(다른 직업이 이 무브를 가져가도 그
@@ -217,9 +470,15 @@ function onRenderActorSheet(app, html) {
   renderBalanceBadge(actor, html);
 }
 
-// 변신 탭의 GM 초기화 버튼에서 호출한다 — 변신 상태와 활성화 여부를 전부
-// 지워서, 다시 변신 무브를 굴려야 탭이 나타나는 상태로 되돌린다.
+// 변신 탭의 GM 초기화 버튼에서 호출한다 — 변신 상태와 활성화 여부, 그리고
+// 여기 딸려 있는 Formshaper/Formcrafter 선택까지 전부 지워서, 다시 변신
+// 무브를 굴려야 탭이 나타나는 상태로 되돌린다.
 export async function resetShapeshift(actor) {
+  // Formshaper가 "장갑" 선택으로 올려둔 장갑 값이 있으면 먼저 원래대로
+  // 되돌린 뒤에 플래그를 지운다(그냥 플래그만 지우면 장갑 +1이 영구히
+  // 남는다).
+  await revertFormshaperOnShapeshiftEnd(actor);
+  await clearFormcrafterOnShapeshiftEnd(actor);
   await actor.unsetFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG);
   await actor.unsetFlag(MODULE_ID, SHAPESHIFT_FLAG);
 }
@@ -289,7 +548,23 @@ function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// 이 클라이언트가 GM이면 Formcrafter의 마스터 쪽 능력치 선택 요청을 받아
+// 대화상자를 띄운다(healing.js의 GM 승인 요청과 같은 방식 — 여러 GM이
+// 접속해 있으면 전부에게 뜬다).
+function onSocketEvent(data) {
+  if (data?.type !== "formcrafterGmChoiceRequest") return;
+  if (!game.user.isGM) return;
+
+  const actor = game.actors.get(data.actorId);
+  if (!actor) return;
+
+  promptFormcrafterGmChoice(actor, data.moveName);
+}
+
 export function registerDruidAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    game.socket.on(SOCKET_NAME, onSocketEvent);
+  });
 }

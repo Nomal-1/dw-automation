@@ -133,6 +133,23 @@
         "Name": "드루이드 변신 무브 이름",
         "Hint": "성공·부분성공 시 새로 변신할 동물 이름을 물어보고 변신 상태로 표시할 무브 이름(쉼표로 여러 개 구분). 무브 결과 문구(예: \"Hold 3\")를 읽어서 Hold도 자동으로 설정합니다."
       },
+      "DruidDamageDieMovesMenu": {
+        "Name": "드루이드 변신 데미지 주사위 설정",
+        "Label": "변신 데미지 주사위 편집",
+        "Hint": "Red of Tooth and Claw/Blood and Thunder처럼 변신 중 데미지 주사위를 키워주는 무브를 이름·주사위 크기로 등록합니다. 변신 중이 아니면 적용되지 않고, 대신 채팅에 '변신 상태가 아니므로 적용되지 않았음' 문구가 뜹니다."
+      },
+      "DruidShedMoveNames": {
+        "Name": "드루이드 Shed 무브 이름",
+        "Hint": "변신 중 피해를 입으면 변신을 풀어 그 피해를 무효화할 수 있는 무브 이름(쉼표로 여러 개 구분). 피격 시 무효화 대화상자의 선택지 중 하나로 뜨며, 변신 중이 아니면 아예 후보에 나타나지 않습니다."
+      },
+      "DruidFormcrafterMoveNames": {
+        "Name": "드루이드 Formcrafter 무브 이름",
+        "Hint": "변신할 때마다 능력치 하나(본인 선택)에 +1, 다른 능력치 하나(마스터 선택)에 -1 온고잉을 주는 무브 이름(쉼표로 여러 개 구분). 고정 능력치로 판정하는 무브(근접전 등)에만 자동 적용되며, Defy Danger처럼 그 자리에서 능력치를 고르는 무브는 자동화되지 않습니다 — 수동으로 반영해주세요."
+      },
+      "DruidFormshaperMoveNames": {
+        "Name": "드루이드 Formshaper 무브 이름",
+        "Hint": "변신할 때마다 장갑 +1 또는 피해 +1d4 중 하나를 고르게 하는 무브 이름(쉼표로 여러 개 구분)."
+      },
       "EnableNoteMoves": {
         "Name": "메모형 무브 사용",
         "Hint": "신/신격/대지의 아들·딸/동물 상대처럼 주사위 대신 플레이어가 자유롭게 무언가를 정해야 하는(신의 이름과 영역, 결연된 지형, 동반 동물의 스탯 등) 무브에 대해, 그 무브 이름을 딴 탭을 만들어 무브 설명과 자유 메모란을 보여줍니다. 어떤 무브가 해당하는지는 아래 '메모형 무브 이름' 설정에서 관리합니다."
@@ -376,6 +393,12 @@
     "MoveUpgrade": {
       "Replaced": "이전 단계 무브 \"{old}\"가 자동으로 제거되었습니다"
     },
+    "DruidDamageDieMoves": {
+      "Title": "드루이드 변신 데미지 주사위 설정",
+      "Hint": "무브 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. 변신 중(적절한 동물 형태)일 때만 데미지 굴림의 기본 주사위가 이 크기로 바뀝니다. 여러 무브를 동시에 갖고 있으면 가장 큰 주사위를 씁니다.",
+      "Name": "무브 이름",
+      "DieSize": "주사위 크기 (예: 8 → d8)"
+    },
     "ActorTab": {
       "ResetButton": "초기화",
       "ResetConfirmTitle": "탭 초기화",
@@ -397,7 +420,23 @@
       "ShapeshiftPromptTitle": "변신",
       "ShapeshiftPromptLabel": "어떤 동물로 변신하시겠습니까?",
       "ShapeshiftStarted": "변신했습니다: {animal}",
-      "ShapeshiftReverted": "본래 모습으로 돌아왔습니다"
+      "ShapeshiftReverted": "본래 모습으로 돌아왔습니다",
+      "ShapeshiftRequiredNotApplied": "변신 상태가 아니므로 적용되지 않았습니다",
+      "DamageDieApplied": "변신 중이라 데미지 주사위가 {die}로 적용되었습니다",
+      "ShedApplied": "변신을 해제하고 피해 {damage}를 무효화했습니다",
+      "FormshaperPromptTitle": "Formshaper",
+      "FormshaperPromptContent": "이번 변신에서 장갑 +1과 피해 +1d4 중 무엇을 선택하시겠습니까?",
+      "FormshaperArmorOption": "장갑 +1",
+      "FormshaperDamageOption": "피해 +1d4",
+      "FormshaperArmorApplied": "장갑 +1이 적용되었습니다 (현재 장갑 {armor})",
+      "FormshaperDamageApplied": "변신 중 데미지 굴림에 +1d4가 적용됩니다",
+      "FormshaperDamageBonusApplied": "+1d4",
+      "FormcrafterBonusTitle": "Formcrafter: 보너스 능력치 선택",
+      "FormcrafterBonusContent": "이번 변신 중 +1 온고잉을 받을 능력치를 고르세요.",
+      "FormcrafterBonusApplied": "변신 중 {stat} 판정에 +1 온고잉이 적용됩니다",
+      "FormcrafterPenaltyTitle": "Formcrafter: {name}의 페널티 능력치 선택 (마스터)",
+      "FormcrafterPenaltyContent": "이 캐릭터가 변신 중 -1 온고잉을 받을 능력치를 고르세요.",
+      "FormcrafterPenaltyApplied": "변신 중 {stat} 판정에 -1 온고잉이 적용됩니다"
     },
     "NoteMoves": {
       "NotesLabel": "메모"

@@ -13,6 +13,8 @@ import { MoveUpgradesMenu } from "./apps/move-upgrades-menu.js";
 import { DEFAULT_MOVE_UPGRADES } from "./data/move-upgrades.js";
 import { DamageReductionMovesMenu } from "./apps/damage-reduction-moves-menu.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "./data/hit-trigger-moves.js";
+import { DruidDamageDieMovesMenu } from "./apps/druid-damage-die-moves-menu.js";
+import { DEFAULT_DRUID_DAMAGE_DIE_MOVES } from "./data/druid-damage-die-moves.js";
 import { ConditionalDamageMovesMenu } from "./apps/conditional-damage-moves-menu.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-moves.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
@@ -405,6 +407,57 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Shapeshifter"
+  });
+
+  // 변신에 의존하는 상급 무브들. 전부 "변신 중"이 아니면 자동화 자체가
+  // 발동하지 않고, 대신 채팅에 "~가 없어 적용되지 않았음" 문구를 띄운다
+  // (Shed/Formcrafter는 예외 — 자세한 이유는 features/druid.js 참고).
+  // Red of Tooth and Claw/Blood and Thunder: 변신 중 데미지 주사위 상향.
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_DRUID_DAMAGE_DIE_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "druidDamageDieMovesMenu", {
+    name: "DWAUTO.Settings.DruidDamageDieMovesMenu.Name",
+    label: "DWAUTO.Settings.DruidDamageDieMovesMenu.Label",
+    hint: "DWAUTO.Settings.DruidDamageDieMovesMenu.Hint",
+    icon: "fas fa-paw",
+    type: DruidDamageDieMovesMenu,
+    restricted: true
+  });
+
+  // Shed: 변신 중 피해를 입으면 변신을 풀어 그 피해를 무효화할 수 있다.
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_SHED_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidShedMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidShedMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Shed"
+  });
+
+  // Formcrafter: 변신할 때 능력치 하나를 골라 +1 온고잉, 마스터가 고른
+  // 능력치 하나에 -1 온고잉(둘 다 변신 중에만 적용).
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_FORMCRAFTER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidFormcrafterMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidFormcrafterMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Formcrafter"
+  });
+
+  // Formshaper: 변신할 때 장갑+1 또는 피해+1d4 중 하나를 선택.
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_FORMSHAPER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidFormshaperMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidFormshaperMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Formshaper"
   });
 
   // Cleric Deity/Apotheosis, Druid Born of the Soil, Ranger Animal Companion

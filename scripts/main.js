@@ -4,6 +4,7 @@ import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
 import { registerSpellcastingAssistant } from "./features/spellcasting.js";
 import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
+import { registerDruidRollWrapper } from "./lib/druid-roll-wrapper.js";
 import { registerHitTriggerAssistant } from "./features/hit-trigger.js";
 import { registerHealingAssistant } from "./features/healing.js";
 import { registerMoveUpgradeAssistant } from "./features/move-upgrades.js";
@@ -19,6 +20,7 @@ Hooks.once("init", () => {
 // 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.
 Hooks.once("ready", () => {
   registerSpellcastingWrapper();
+  registerDruidRollWrapper();
 });
 
 registerNpcGenerator();
