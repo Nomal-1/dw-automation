@@ -232,33 +232,64 @@ function buildHpChange(originalChanges, actor, finalDamage) {
   return flat;
 }
 
+// 던전월드 시스템의 피해 적용 버튼(전체/절반/두배)은 실제로
+// actor.applyDamage()를 거치는데, 거기서 "이번에 장갑이 얼마를 깎아줬는지"
+// (options.dw.armor.reduced/piercing/value)를 update()의 옵션에 실어서
+// 넘겨준다. 그 덕분에 여기서 "장갑 적용 전 원래 피해량"을 역산할 수 있고
+// (damage + reduced), 열세 여부가 바뀌어 장갑이 바뀌면 그 새 장갑 기준으로
+// 이번 피해를 다시 계산해서 실제로 "바뀐 장갑으로 피해 적용"이 되게 한다.
+// options.dw.armor가 없으면(예: 시트에서 HP를 직접 고친 경우처럼 시스템의
+// 피해 적용 버튼을 거치지 않은 갱신) 역산할 근거가 없으므로 원래 피해량을
+// 그대로 쓴다.
+function recalculateDamageForNewArmor(damage, options, newArmor) {
+  const armorInfo = options?.dw?.armor;
+  if (!armorInfo) return null;
+
+  const rawAmount = damage + (Number(armorInfo.reduced) || 0);
+  const piercing = Number(armorInfo.piercing) || 0;
+  const newReduced = Math.max(newArmor - piercing, 0);
+  return Math.max(rawAmount - newReduced, 0);
+}
+
 // preUpdateActor(로컬이든 소켓으로 넘겨받았든)가 이미 원래 HP 갱신을 막아둔
 // 뒤 호출된다. Underdog류(오기/투지)의 "피격 때마다 묻기"가 켜져 있으면
-// 먼저 "숫적으로 열세인지"를 Y/N으로 확인해서 상태가 바뀌었으면 토글과
-// 장갑을 갱신한다(이 답은 지금 받는 피해 자체를 바꾸지 않는다 — 던전월드
-// 시스템의 피해 적용 버튼은 이미 그 전 장갑 값으로 피해를 깎아서 넘겨준
-// 상태이므로, 여기서 장갑을 조정해도 이번 피해엔 영향이 없고 다음 피격부터
-// 반영된다). 그 다음 무효화 무브(Armor Mastery/Bloody Aegis류)가 있으면
-// 원래 promptHitTrigger로 이어간다. 없으면 원래 피해량 그대로 HP 갱신을
-// 다시 적용한다.
+// 먼저 "숫적으로 열세인지"를 Y/N으로 확인한다. 답에 따라 상태가 실제로
+// 바뀌면 토글과 장갑을 갱신하고, 바뀐 장갑 기준으로 이번 피해량 자체를
+// 다시 계산한다(recalculateDamageForNewArmor). 그 다음 무효화 무브(Armor
+// Mastery/Bloody Aegis류)가 있으면 원래 promptHitTrigger로 이어간다. 없으면
+// (재계산된) 피해량 그대로 HP 갱신을 다시 적용한다.
 async function handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidate }) {
+  let finalDamage = damage;
+
   if (outnumberedCandidate) {
     const nowOutnumbered = await Dialog.confirm({
       title: outnumberedCandidate.moveName,
       content: `<p>${game.i18n.format("DWAUTO.Underdog.AskPrompt", { name: outnumberedCandidate.moveName })}</p>`,
       defaultYes: isOutnumbered(actor)
     });
-    await applyOutnumberedAnswer(actor, outnumberedCandidate.moveName, nowOutnumbered);
+    const { changed, newArmor } = await applyOutnumberedAnswer(actor, outnumberedCandidate.moveName, nowOutnumbered);
+
+    if (changed) {
+      const recalculated = recalculateDamageForNewArmor(damage, options, newArmor);
+      if (recalculated !== null) {
+        finalDamage = recalculated;
+        announceActionApplied(
+          actor,
+          outnumberedCandidate.moveName,
+          game.i18n.format("DWAUTO.Underdog.DamageRecalculated", { damage: finalDamage })
+        );
+      }
+    }
   }
 
-  const adjustedChanges = buildHpChange(changes, actor, damage);
+  const adjustedChanges = buildHpChange(changes, actor, finalDamage);
 
   if (candidates.length === 0) {
     await actor.update(adjustedChanges, { ...options, [SKIP_FLAG]: true });
     return;
   }
 
-  await promptHitTrigger(actor, candidates, damage, adjustedChanges, options);
+  await promptHitTrigger(actor, candidates, finalDamage, adjustedChanges, options);
 }
 
 function onPreUpdateActor(actor, changes, options, userId) {

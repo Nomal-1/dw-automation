@@ -461,6 +461,7 @@
       "AskPrompt": "Are you currently outnumbered (\"{name}\")?",
       "BecameOutnumbered": "Now outnumbered (armor {armor})",
       "NoLongerOutnumbered": "No longer outnumbered (armor {armor})",
+      "DamageRecalculated": "This hit's damage recalculated to {damage} using the new armor",
       "OutnumberedToggleTitle": "Click to toggle whether you're currently outnumbered. Armor adjusts automatically if this actually changes.",
       "OutnumberedOn": "Outnumbered",
       "OutnumberedOff": "Not Outnumbered",

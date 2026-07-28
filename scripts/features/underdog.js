@@ -68,19 +68,23 @@ export function getOutnumberedAskCandidate(actor) {
 
 // 열세 여부 답(수동 토글 클릭이든, 피격 때마다 묻기의 Y/N 답이든)을
 // 반영한다. 실제로 상태가 바뀐 경우에만 장갑을 조정한다 — 같은 답이
-// 반복되면(예: 계속 열세 상태) 아무것도 하지 않는다.
+// 반복되면(예: 계속 열세 상태) 아무것도 하지 않는다. hit-trigger.js가
+// { changed, newArmor }를 보고 "지금 이 피격"의 피해량을 새 장갑 기준으로
+// 다시 계산할지 판단한다.
 export async function applyOutnumberedAnswer(actor, moveName, nowOutnumbered) {
+  const currentArmor = Number(actor.system.attributes?.ac?.value) || 0;
   const wasOutnumbered = isOutnumbered(actor);
-  if (wasOutnumbered === nowOutnumbered) return;
+  if (wasOutnumbered === nowOutnumbered) return { changed: false, newArmor: currentArmor };
 
   await actor.setFlag(MODULE_ID, OUTNUMBERED_FLAG, nowOutnumbered);
 
-  const current = Number(actor.system.attributes?.ac?.value) || 0;
-  const next = Math.max(0, current + (nowOutnumbered ? 1 : -1));
+  const next = Math.max(0, currentArmor + (nowOutnumbered ? 1 : -1));
   await actor.update({ "system.attributes.ac.value": next });
 
   const messageKey = nowOutnumbered ? "DWAUTO.Underdog.BecameOutnumbered" : "DWAUTO.Underdog.NoLongerOutnumbered";
   announceActionApplied(actor, moveName, game.i18n.format(messageKey, { armor: next }));
+
+  return { changed: true, newArmor: next };
 }
 
 function renderBadges(actor, html) {

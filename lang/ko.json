@@ -461,6 +461,7 @@
       "AskPrompt": "지금 숫적으로 열세이신가요 (\"{name}\")?",
       "BecameOutnumbered": "열세 상태가 되었습니다 (장갑 {armor})",
       "NoLongerOutnumbered": "더 이상 열세가 아닙니다 (장갑 {armor})",
+      "DamageRecalculated": "바뀐 장갑 기준으로 이번 피해가 {damage}로 재계산되었습니다",
       "OutnumberedToggleTitle": "클릭하면 지금 열세인지 아닌지를 켜고 끕니다. 실제로 상태가 바뀌면 장갑도 함께 조정됩니다.",
       "OutnumberedOn": "열세",
       "OutnumberedOff": "열세 아님",
