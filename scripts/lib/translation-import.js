@@ -166,5 +166,19 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, superiorWarriorNames, stats)
   );
 
+  const druidBalanceNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_BALANCE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_BALANCE_MOVE_NAMES,
+    translateCommaList(moveMap, druidBalanceNames, stats)
+  );
+
+  const druidShapeshifterNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES,
+    translateCommaList(moveMap, druidShapeshifterNames, stats)
+  );
+
   return stats;
 }

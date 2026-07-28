@@ -169,6 +169,40 @@
   color: #fff !important;
 }
 
+.dwauto-druid-balance,
+.dwauto-druid-shapeshift {
+  margin-bottom: 12px;
+}
+
+.dwauto-druid-balance-count {
+  font-weight: bold;
+}
+
+.dwauto-shapeshift-badge {
+  display: inline-block;
+  cursor: pointer;
+  margin: 4px 0;
+}
+
+.dwauto-shapeshift-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-shapeshift-on {
+  background: #2e5a2e !important;
+  color: #fff !important;
+}
+
+.dwauto-shapeshift-notes-label {
+  display: block;
+  margin-top: 8px;
+}
+
+.dwauto-shapeshift-notes {
+  width: 100%;
+  resize: vertical;
+}
+
 .dwauto-warning {
   color: #e0a030;
 }

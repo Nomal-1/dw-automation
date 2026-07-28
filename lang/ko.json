@@ -120,6 +120,18 @@
       "SuperiorWarriorMoveNames": {
         "Name": "전쟁의 화신 무브 이름",
         "Hint": "근접 공격 무브가 극단적 성공(12+)을 거둘 때마다 채팅에 별도로 알려줄 무브 이름(쉼표로 여러 개 구분)."
+      },
+      "EnableDruidAssistant": {
+        "Name": "드루이드 보조 기능 사용",
+        "Hint": "드루이드 캐릭터 시트에 새 탭을 추가해서 조화(Balance) 예비(무기 공격 자동화로 데미지를 줄 때마다 쌓이고, 소모해서 남을 치유할 수 있음)와 변신 상태(현재 변신 여부·동물 이름·GM 메모란)를 보여줍니다."
+      },
+      "DruidBalanceMoveNames": {
+        "Name": "드루이드 조화 무브 이름",
+        "Hint": "이 모듈의 공격 자동화로 데미지를 줄 때마다 조화 예비 1을 얻는 무브 이름(쉼표로 여러 개 구분)."
+      },
+      "DruidShapeshifterMoveNames": {
+        "Name": "드루이드 변신 무브 이름",
+        "Hint": "성공·부분성공 시 새로 변신할 동물 이름을 물어보고 변신 상태로 표시할 무브 이름(쉼표로 여러 개 구분). 무브 결과 문구(예: \"Hold 3\")를 읽어서 Hold도 자동으로 설정합니다."
       }
     },
     "Npc": {
@@ -247,7 +259,7 @@
     },
     "TranslationImport": {
       "Title": "번역 모듈에서 자동 채우기",
-      "Hint": "Nomal-1/dungeonworld-ko 한글화 모듈에 들어있는 무브/주문 이름 번역 쌍을 읽어서, 이 모듈의 무브·주문 이름 설정(근접/사격 무브 이름, 주문 시전 무브 이름, 위력 전이 무브 이름, 특수 공격 무브, 지속 주문, 피격 시 무효화 무브, 불굴 무브 이름, 치유 무브, 치료사 계열 무브, 무브 업그레이드, 피해 경감 무브, 조건부 데미지 무브, 전쟁의 화신 무브 이름)을 자동으로 채웁니다. 번역 데이터에서 못 찾은 이름(써드파티 확장 무브, 이미 직접 고쳐둔 이름 등)은 그대로 둡니다.",
+      "Hint": "Nomal-1/dungeonworld-ko 한글화 모듈에 들어있는 무브/주문 이름 번역 쌍을 읽어서, 이 모듈의 무브·주문 이름 설정(근접/사격 무브 이름, 주문 시전 무브 이름, 위력 전이 무브 이름, 특수 공격 무브, 지속 주문, 피격 시 무효화 무브, 불굴 무브 이름, 치유 무브, 치료사 계열 무브, 무브 업그레이드, 피해 경감 무브, 조건부 데미지 무브, 전쟁의 화신 무브 이름, 드루이드 조화 무브 이름, 드루이드 변신 무브 이름)을 자동으로 채웁니다. 번역 데이터에서 못 찾은 이름(써드파티 확장 무브, 이미 직접 고쳐둔 이름 등)은 그대로 둡니다.",
       "Detected": "dungeonworld-ko 모듈이 감지되어 활성화되어 있습니다.",
       "InactiveWarning": "\"{moduleId}\" 모듈이 설치/활성화되어 있지 않아 자동으로 채울 수 없습니다.",
       "RunButton": "지금 자동 채우기 실행",
@@ -355,6 +367,27 @@
     },
     "MoveUpgrade": {
       "Replaced": "이전 단계 무브 \"{old}\"가 자동으로 제거되었습니다"
+    },
+    "ClassInfo": {
+      "TabLabel": "클래스 정보"
+    },
+    "Druid": {
+      "BalanceGained": "조화 예비를 얻었습니다 (현재: {balance})",
+      "BalanceTitle": "조화",
+      "BalanceCurrent": "현재 조화 예비: {balance}",
+      "SpendButton": "소모해서 치유",
+      "SpendTitle": "조화 예비 소모",
+      "SpendInstruction": "조화 예비를 얼마나 소모하시겠습니까? (최대 {max}) 소모한 만큼 1d4씩 치유합니다.",
+      "BalanceRollFlavor": "조화 치유 ({amount}d4)",
+      "ShapeshiftTitle": "변신",
+      "ShapeshiftToggleTitle": "클릭하면 변신 상태를 켜고 끕니다. 켤 때는 변신할 동물 이름을 물어봅니다.",
+      "ShapeshiftActiveLabel": "변신 중 ({animal})",
+      "ShapeshiftInactiveLabel": "본래 모습",
+      "ShapeshiftNotesLabel": "이 형태로 얻는 무브 (GM 메모)",
+      "ShapeshiftPromptTitle": "변신",
+      "ShapeshiftPromptLabel": "어떤 동물로 변신하시겠습니까?",
+      "ShapeshiftStarted": "변신했습니다: {animal}",
+      "ShapeshiftReverted": "본래 모습으로 돌아왔습니다"
     }
   }
 }

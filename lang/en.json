@@ -120,6 +120,18 @@
       "SuperiorWarriorMoveNames": {
         "Name": "Superior Warrior Move Names",
         "Hint": "Move names (comma separated) that announce in chat whenever a melee attack move reaches an extreme success (12+)."
+      },
+      "EnableDruidAssistant": {
+        "Name": "Enable Druid Assistant",
+        "Hint": "Adds a character sheet tab for Druids showing a Balance counter (gained whenever the character deals damage via the automated attack flow, spendable to heal someone) and Shapeshift state (active/inactive, current animal form, and a free-text note area for the GM)."
+      },
+      "DruidBalanceMoveNames": {
+        "Name": "Druid Balance Move Names",
+        "Hint": "Move names (comma separated) whose owner gains 1 Balance whenever they deal damage through this module's attack automation."
+      },
+      "DruidShapeshifterMoveNames": {
+        "Name": "Druid Shapeshifter Move Names",
+        "Hint": "Move names (comma separated) that, on a success or partial success, ask for the new animal form's name and mark the character as shapeshifted. Also auto-sets Hold from the move's own result text (e.g. \"Hold 3\")."
       }
     },
     "Npc": {
@@ -247,7 +259,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -355,6 +367,27 @@
     },
     "MoveUpgrade": {
       "Replaced": "Automatically removed the earlier move \"{old}\""
+    },
+    "ClassInfo": {
+      "TabLabel": "Class Info"
+    },
+    "Druid": {
+      "BalanceGained": "Balance gained (current: {balance})",
+      "BalanceTitle": "Balance",
+      "BalanceCurrent": "Current Balance: {balance}",
+      "SpendButton": "Spend to Heal",
+      "SpendTitle": "Spend Balance",
+      "SpendInstruction": "How much Balance do you want to spend (up to {max})? Each point spent heals 1d4.",
+      "BalanceRollFlavor": "Balance Healing ({amount}d4)",
+      "ShapeshiftTitle": "Shapeshift",
+      "ShapeshiftToggleTitle": "Click to toggle shapeshift state. Turning it on will ask for the new form's animal name.",
+      "ShapeshiftActiveLabel": "Shapeshifted ({animal})",
+      "ShapeshiftInactiveLabel": "Natural form",
+      "ShapeshiftNotesLabel": "Moves granted by this form (GM notes)",
+      "ShapeshiftPromptTitle": "Shapeshift",
+      "ShapeshiftPromptLabel": "What animal form are you taking?",
+      "ShapeshiftStarted": "Shapeshifted into: {animal}",
+      "ShapeshiftReverted": "Reverted to natural form"
     }
   }
 }

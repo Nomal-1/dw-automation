@@ -48,8 +48,9 @@ function getCandidateActors(healer) {
 
 // 치유 대상을 고른다. 토큰을 하나만 타겟팅해뒀다면 그걸 기본 선택값으로
 // 띄워준다(캔버스 선택/컨트롤과는 다른, 던전월드 데미지 버튼과 무관한
-// 별도의 타겟팅이라 서로 간섭하지 않는다).
-function promptHealTarget(healer) {
+// 별도의 타겟팅이라 서로 간섭하지 않는다). Druid Balance처럼 다른 기능에서도
+// 같은 대상 선택 UI가 필요해서 export한다.
+export function promptHealTarget(healer) {
   return new Promise((resolve) => {
     const candidates = getCandidateActors(healer);
     const targeted = Array.from(game.user.targets ?? [])[0]?.actor;
@@ -231,6 +232,28 @@ function onSocketEvent(data) {
   }
 }
 
+// 실제로 target의 HP에 amount를 더한다. target에 대한 수정 권한(Owner)이
+// 있으면 바로 적용하고, 관찰 권한만 있으면(적인지 아군인지 애매한 대상 등)
+// 접속 중인 GM에게 승인을 구한 뒤 적용한다. Druid Balance처럼 다른 기능에서도
+// 같은 절차가 필요해서 export한다.
+export async function applyHealAmount(healer, target, moveName, amount) {
+  if (target.isOwner) {
+    const targetHp = Number(target.system.attributes?.hp?.value) || 0;
+    const targetMax = Number(target.system.attributes?.hp?.max) || 0;
+    const newHp = Math.min(targetHp + amount, targetMax);
+    await target.update({ "system.attributes.hp.value": newHp });
+
+    announceActionApplied(healer, moveName, game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount }));
+  } else {
+    const approved = await requestHealApproval({ target, healerName: healer.name, itemName: moveName, amount });
+    if (approved) {
+      announceActionApplied(healer, moveName, game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount }));
+    } else {
+      ui.notifications.warn(game.i18n.format("DWAUTO.Healing.PermissionDenied", { name: target.name }));
+    }
+  }
+}
+
 async function performHeal({ healer, target, item, row, resultTag }) {
   let total = 0;
 
@@ -266,29 +289,7 @@ async function performHeal({ healer, target, item, row, resultTag }) {
     }
   }
 
-  if (target.isOwner) {
-    const targetHp = Number(target.system.attributes?.hp?.value) || 0;
-    const targetMax = Number(target.system.attributes?.hp?.max) || 0;
-    const newHp = Math.min(targetHp + total, targetMax);
-    await target.update({ "system.attributes.hp.value": newHp });
-
-    announceActionApplied(
-      healer,
-      item.name,
-      game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount: total })
-    );
-  } else {
-    const approved = await requestHealApproval({ target, healerName: healer.name, itemName: item.name, amount: total });
-    if (approved) {
-      announceActionApplied(
-        healer,
-        item.name,
-        game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount: total })
-      );
-    } else {
-      ui.notifications.warn(game.i18n.format("DWAUTO.Healing.PermissionDenied", { name: target.name }));
-    }
-  }
+  await applyHealAmount(healer, target, item.name, total);
 
   if (row.transferToSelfOnPartial && resultTag === "partial" && target.id !== healer.id) {
     const healerHp = Number(healer.system.attributes?.hp?.value) || 0;

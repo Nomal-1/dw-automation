@@ -1,0 +1,258 @@
+import { MODULE_ID, SETTINGS } from "../constants.js";
+import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
+import { announceActionApplied } from "../lib/announce.js";
+import { handleHoldMove } from "../lib/hold.js";
+import { promptHealTarget, applyHealAmount } from "./healing.js";
+
+const BALANCE_FLAG = "druidBalance";
+const SHAPESHIFT_FLAG = "druidShapeshift";
+
+function splitCommaList(settingKey) {
+  return game.settings
+    .get(MODULE_ID, settingKey)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function findMoveByNames(actor, names) {
+  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+}
+
+function getBalanceMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_BALANCE_MOVE_NAMES));
+}
+
+function getShapeshifterMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES));
+}
+
+function isEnabled() {
+  return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_DRUID_ASSISTANT);
+}
+
+export function hasBalance(actor) {
+  return isEnabled() && Boolean(getBalanceMove(actor));
+}
+
+export function hasShapeshifter(actor) {
+  return isEnabled() && Boolean(getShapeshifterMove(actor));
+}
+
+function getBalance(actor) {
+  return Number(actor.getFlag(MODULE_ID, BALANCE_FLAG)) || 0;
+}
+
+function getShapeshiftState(actor) {
+  return actor.getFlag(MODULE_ID, SHAPESHIFT_FLAG) ?? { active: false, animalName: "", notes: "" };
+}
+
+// Fighter/Ranger 등 데미지를 굴리는 다른 무브와 달리 Balance는 "데미지를 줄
+// 때마다"라서, 특정 무브 하나가 아니라 attack-assistant.js의 데미지 굴림
+// 자체에 걸어둔다(무기 공격 자동화를 거치지 않는 피해는 범위 밖이다).
+export async function incrementBalanceOnDamage(actor) {
+  if (!isEnabled()) return;
+
+  const move = getBalanceMove(actor);
+  if (!move) return;
+
+  const next = getBalance(actor) + 1;
+  await actor.setFlag(MODULE_ID, BALANCE_FLAG, next);
+  announceActionApplied(actor, move.name, game.i18n.format("DWAUTO.Druid.BalanceGained", { balance: next }));
+}
+
+function promptSpendAmount(max) {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = (value) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(value);
+    };
+
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.Druid.SpendTitle"),
+      content: `
+        <form>
+          <p>${game.i18n.format("DWAUTO.Druid.SpendInstruction", { max })}</p>
+          <div class="form-group">
+            <input type="number" name="amount" value="${max}" min="1" max="${max}">
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const raw = Number(html.find('[name="amount"]').val());
+            finish(Math.max(0, Math.min(max, Number.isFinite(raw) ? raw : max)));
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => finish(null)
+        }
+      },
+      default: "ok",
+      close: () => finish(null)
+    }).render(true);
+  });
+}
+
+async function spendBalance(actor) {
+  const balance = getBalance(actor);
+  if (balance <= 0) return;
+
+  const move = getBalanceMove(actor);
+  const moveName = move?.name ?? "Balance";
+
+  const amount = await promptSpendAmount(balance);
+  if (!amount) return;
+
+  const target = await promptHealTarget(actor);
+  if (!target) return;
+
+  const roll = new Roll(`${amount}d4`, actor.getRollData());
+  await roll.evaluate();
+  await roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: game.i18n.format("DWAUTO.Druid.BalanceRollFlavor", { amount })
+  });
+
+  await actor.setFlag(MODULE_ID, BALANCE_FLAG, balance - amount);
+  await applyHealAmount(actor, target, moveName, roll.total);
+}
+
+function promptAnimalName() {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = (value) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(value);
+    };
+
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.Druid.ShapeshiftPromptTitle"),
+      content: `
+        <form>
+          <div class="form-group">
+            <label>${game.i18n.localize("DWAUTO.Druid.ShapeshiftPromptLabel")}</label>
+            <input type="text" name="animal" value="">
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => finish((html.find('[name="animal"]').val() ?? "").trim())
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => finish(null)
+        }
+      },
+      default: "ok",
+      close: () => finish(null)
+    }).render(true);
+  });
+}
+
+async function startShapeshift(actor) {
+  const animalName = await promptAnimalName();
+  if (animalName === null) return;
+
+  const moveName = getShapeshifterMove(actor)?.name ?? "Shapeshifter";
+  const state = getShapeshiftState(actor);
+  await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: true, animalName });
+  announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.ShapeshiftStarted", { animal: animalName || "?" }));
+}
+
+async function revertShapeshift(actor) {
+  const moveName = getShapeshifterMove(actor)?.name ?? "Shapeshifter";
+  const state = getShapeshiftState(actor);
+  await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: false });
+  announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
+}
+
+// 캐릭터 시트 공용 탭(class-info-tab.js)에 조화 예비 섹션을 그려 넣는다.
+export function renderBalanceSection($body, actor) {
+  const balance = getBalance(actor);
+  const $section = $(`
+    <div class="cell dwauto-druid-balance">
+      <h2 class="cell__title">${game.i18n.localize("DWAUTO.Druid.BalanceTitle")}</h2>
+      <p class="dwauto-druid-balance-count">${game.i18n.format("DWAUTO.Druid.BalanceCurrent", { balance })}</p>
+      <button type="button" class="dwauto-druid-spend" ${balance <= 0 ? "disabled" : ""}>
+        ${game.i18n.localize("DWAUTO.Druid.SpendButton")}
+      </button>
+    </div>
+  `);
+
+  $section.find(".dwauto-druid-spend").on("click", () => spendBalance(actor));
+  $body.append($section);
+}
+
+// 캐릭터 시트 공용 탭에 변신 상태 섹션을 그려 넣는다: 지정/비지정 배지 +
+// 동물 이름 표시 + GM이 자유롭게 적고 지울 수 있는 메모란.
+export function renderShapeshiftSection($body, actor) {
+  const state = getShapeshiftState(actor);
+  const label = state.active
+    ? game.i18n.format("DWAUTO.Druid.ShapeshiftActiveLabel", { animal: state.animalName || "?" })
+    : game.i18n.localize("DWAUTO.Druid.ShapeshiftInactiveLabel");
+
+  const $section = $(`
+    <div class="cell dwauto-druid-shapeshift">
+      <h2 class="cell__title">${game.i18n.localize("DWAUTO.Druid.ShapeshiftTitle")}</h2>
+      <a class="tag dwauto-shapeshift-badge${state.active ? " dwauto-shapeshift-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.ShapeshiftToggleTitle")}">${label}</a>
+      <label class="cell__title dwauto-shapeshift-notes-label">${game.i18n.localize("DWAUTO.Druid.ShapeshiftNotesLabel")}</label>
+      <textarea class="dwauto-shapeshift-notes" rows="3">${state.notes ?? ""}</textarea>
+    </div>
+  `);
+
+  $section.find(".dwauto-shapeshift-badge").on("click", async (event) => {
+    event.preventDefault();
+    if (state.active) {
+      await revertShapeshift(actor);
+    } else {
+      await startShapeshift(actor);
+    }
+  });
+
+  $section.find(".dwauto-shapeshift-notes").on("change", async (event) => {
+    const notes = event.currentTarget.value;
+    const current = getShapeshiftState(actor);
+    await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...current, notes });
+  });
+
+  $body.append($section);
+}
+
+// Shapeshifter 굴림 성공/부분성공 시 동물 이름을 물어보고, 동시에 기존
+// [D] Hold 엔진으로 Hold 값도 자동 설정한다(굴림 결과 텍스트의 "Hold N").
+// Hold를 "쓰는" 동작은 이 무브 자체에 선택지 목록이 없어 자동화 대상이
+// 아니다(연관된 무브가 무엇인지는 GM이 그때그때 정하는 서술형이라, 아래
+// 메모란에 적어두고 참고하는 방식으로 남겨뒀다).
+function onCreateChatMessage(message, options, userId) {
+  if (game.system.id !== "dungeonworld") return;
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_DRUID_ASSISTANT)) return;
+  if (userId !== game.user.id) return;
+
+  const info = getMoveCardInfo(message);
+  if (!info) return;
+  const { actor, title, result } = info;
+  if (result !== "success" && result !== "partial" && result !== "failure") return;
+
+  const shapeshifterNames = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
+  if (!shapeshifterNames.includes(title)) return;
+
+  const moveItem = findMoveItem(actor, title);
+  if (moveItem) handleHoldMove(actor, moveItem, result);
+
+  if (result === "success" || result === "partial") {
+    startShapeshift(actor);
+  }
+}
+
+export function registerDruidAssistant() {
+  Hooks.on("createChatMessage", onCreateChatMessage);
+}

@@ -376,4 +376,34 @@ export function registerSettings() {
     type: String,
     default: "Superior Warrior"
   });
+
+  // Druid Balance(조화)/Shapeshifter(변신): 캐릭터 시트에 새 탭(자세한 설계는
+  // features/class-info-tab.js, features/druid.js 참고)을 만들어 조화 예비
+  // 카운터와 변신 상태를 보여준다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_DRUID_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableDruidAssistant.Name",
+    hint: "DWAUTO.Settings.EnableDruidAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_BALANCE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidBalanceMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidBalanceMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Balance"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidShapeshifterMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidShapeshifterMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Shapeshifter"
+  });
 }

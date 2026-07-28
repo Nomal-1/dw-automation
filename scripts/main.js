@@ -7,6 +7,8 @@ import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
 import { registerHitTriggerAssistant } from "./features/hit-trigger.js";
 import { registerHealingAssistant } from "./features/healing.js";
 import { registerMoveUpgradeAssistant } from "./features/move-upgrades.js";
+import { registerDruidAssistant } from "./features/druid.js";
+import { registerClassInfoTab } from "./features/class-info-tab.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -25,3 +27,5 @@ registerSpellcastingAssistant();
 registerHitTriggerAssistant();
 registerHealingAssistant();
 registerMoveUpgradeAssistant();
+registerDruidAssistant();
+registerClassInfoTab();

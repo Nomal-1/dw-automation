@@ -26,5 +26,8 @@ export const SETTINGS = {
   MOVE_UPGRADES: "moveUpgrades",
   DAMAGE_REDUCTION_MOVES: "damageReductionMoves",
   CONDITIONAL_DAMAGE_MOVES: "conditionalDamageMoves",
-  SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames"
+  SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames",
+  ENABLE_DRUID_ASSISTANT: "enableDruidAssistant",
+  DRUID_BALANCE_MOVE_NAMES: "druidBalanceMoveNames",
+  DRUID_SHAPESHIFTER_MOVE_NAMES: "druidShapeshifterMoveNames"
 };

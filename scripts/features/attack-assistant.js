@@ -5,6 +5,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
+import { incrementBalanceOnDamage } from "./druid.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -106,6 +107,8 @@ async function rollDamage(actor, weapon, dmgMod, extraDice) {
     speaker: ChatMessage.getSpeaker({ actor }),
     flavor
   });
+
+  await incrementBalanceOnDamage(actor);
 }
 
 function promptAmmo(ammoItems) {
