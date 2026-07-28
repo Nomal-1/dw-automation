@@ -3,6 +3,8 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
 import { getShedCandidate, applyShed } from "./druid.js";
 import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
+import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isOutnumbered } from "./underdog.js";
+import { findDecidingUser } from "../lib/deciding-user.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -34,11 +36,6 @@ function getHitTriggerCandidates(actor) {
   if (shed) candidates.push(shed);
 
   return candidates;
-}
-
-function getDamageReductionRow(actor) {
-  const table = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
-  return table.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
 }
 
 async function grantForward(actor) {
@@ -236,47 +233,32 @@ function buildHpChange(originalChanges, actor, finalDamage) {
 }
 
 // preUpdateActor(로컬이든 소켓으로 넘겨받았든)가 이미 원래 HP 갱신을 막아둔
-// 뒤 호출된다. Underdog류(damage-reduction) 무브가 있으면 먼저 "숫적으로
-// 열세인지" Y/N으로 물어서 피해 자체를 깎고, 그 다음 무효화 무브(Armor
-// Mastery/Bloody Aegis류)가 있으면 원래 promptHitTrigger로 이어간다. 둘 다
-// 없거나 무효화까지 다 끝나면, 조정된 최종 피해량으로 HP 갱신을 다시 적용한다.
-async function handleIncomingDamage({ actor, damage, changes, options, candidates, reductionRow }) {
-  let finalDamage = damage;
-
-  if (reductionRow) {
-    const confirmed = await Dialog.confirm({
-      title: reductionRow.name,
-      content: `<p>${game.i18n.format("DWAUTO.HitTrigger.ReductionPrompt", { name: reductionRow.name })}</p>`,
-      defaultYes: false
+// 뒤 호출된다. Underdog류(오기/투지)의 "피격 때마다 묻기"가 켜져 있으면
+// 먼저 "숫적으로 열세인지"를 Y/N으로 확인해서 상태가 바뀌었으면 토글과
+// 장갑을 갱신한다(이 답은 지금 받는 피해 자체를 바꾸지 않는다 — 던전월드
+// 시스템의 피해 적용 버튼은 이미 그 전 장갑 값으로 피해를 깎아서 넘겨준
+// 상태이므로, 여기서 장갑을 조정해도 이번 피해엔 영향이 없고 다음 피격부터
+// 반영된다). 그 다음 무효화 무브(Armor Mastery/Bloody Aegis류)가 있으면
+// 원래 promptHitTrigger로 이어간다. 없으면 원래 피해량 그대로 HP 갱신을
+// 다시 적용한다.
+async function handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidate }) {
+  if (outnumberedCandidate) {
+    const nowOutnumbered = await Dialog.confirm({
+      title: outnumberedCandidate.moveName,
+      content: `<p>${game.i18n.format("DWAUTO.Underdog.AskPrompt", { name: outnumberedCandidate.moveName })}</p>`,
+      defaultYes: isOutnumbered(actor)
     });
-    if (confirmed) {
-      finalDamage = Math.max(0, finalDamage - reductionRow.amount);
-      announceActionApplied(
-        actor,
-        reductionRow.name,
-        game.i18n.format("DWAUTO.HitTrigger.ReductionApplied", { amount: reductionRow.amount })
-      );
-    }
+    await applyOutnumberedAnswer(actor, outnumberedCandidate.moveName, nowOutnumbered);
   }
 
-  const adjustedChanges = buildHpChange(changes, actor, finalDamage);
+  const adjustedChanges = buildHpChange(changes, actor, damage);
 
-  if (finalDamage <= 0 || candidates.length === 0) {
+  if (candidates.length === 0) {
     await actor.update(adjustedChanges, { ...options, [SKIP_FLAG]: true });
     return;
   }
 
-  await promptHitTrigger(actor, candidates, finalDamage, adjustedChanges, options);
-}
-
-// 이 액터를 자신의 캐릭터로 지정해둔 접속 중인 플레이어를 우선 찾고, 없으면
-// 소유권(OWNER)을 가진 접속 중인 플레이어를 찾는다. 그런 플레이어가 아무도
-// 없으면(예: GM 혼자 테스트하는 상황) null을 반환하고, 이 경우 지금 갱신을
-// 시작한 클라이언트에서 바로 물어본다 — 결정권자가 아예 없는 것보다는 낫다.
-function findDecidingUser(actor) {
-  const assigned = game.users.find((u) => u.active && !u.isGM && u.character?.id === actor.id);
-  if (assigned) return assigned;
-  return game.users.find((u) => u.active && !u.isGM && actor.testUserPermission(u, "OWNER")) ?? null;
+  await promptHitTrigger(actor, candidates, damage, adjustedChanges, options);
 }
 
 function onPreUpdateActor(actor, changes, options, userId) {
@@ -297,8 +279,8 @@ function onPreUpdateActor(actor, changes, options, userId) {
   if (damage <= 0) return true;
 
   const candidates = getHitTriggerCandidates(actor);
-  const reductionRow = getDamageReductionRow(actor);
-  if (candidates.length === 0 && !reductionRow) return true;
+  const outnumberedCandidate = getOutnumberedAskCandidate(actor);
+  if (candidates.length === 0 && !outnumberedCandidate) return true;
 
   // 여기서 갱신을 막고(false 반환), 대화상자 결과에 따라 원래 변경사항을 다시
   // 적용하거나 대체 효과를 적용한다. preUpdate 훅은 반환값을 동기적으로만
@@ -318,14 +300,14 @@ function onPreUpdateActor(actor, changes, options, userId) {
       targetUserId: decidingUser.id,
       actorId: actor.id,
       candidates,
-      reductionRow,
+      outnumberedCandidate,
       damage,
       changes,
       options
     });
   } else {
     console.log(`${MODULE_ID} | hit-trigger: no other connected owner found for ${actor.name}, prompting locally`);
-    handleIncomingDamage({ actor, damage, changes, options, candidates, reductionRow });
+    handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidate });
   }
   return false;
 }
@@ -346,7 +328,7 @@ function onSocketEvent(data) {
     changes: data.changes,
     options: data.options,
     candidates: data.candidates,
-    reductionRow: data.reductionRow
+    outnumberedCandidate: data.outnumberedCandidate
   });
 }
 

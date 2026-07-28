@@ -12,6 +12,7 @@ import { registerDruidAssistant } from "./features/druid.js";
 import { registerClassInfoTab } from "./features/class-info-tab.js";
 import { registerNoteMoves } from "./features/note-moves.js";
 import { registerArmorAssistant } from "./features/armor-assistant.js";
+import { registerUnderdogAssistant } from "./features/underdog.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -35,3 +36,4 @@ registerDruidAssistant();
 registerClassInfoTab();
 registerNoteMoves();
 registerArmorAssistant();
+registerUnderdogAssistant();

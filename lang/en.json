@@ -108,9 +108,9 @@
         "Hint": "Register pairs of moves where learning the first one automatically removes the second. Pre-filled with all 43 such pairs found across the 8 core classes' compendium data (each advanced move's own \"requires\" field)."
       },
       "DamageReductionMovesMenu": {
-        "Name": "Damage Reduction Moves",
-        "Label": "Edit Damage Reduction Moves",
-        "Hint": "Register moves like Underdog/Serious Underdog that reduce incoming damage by a flat amount under some fictional condition (e.g. being outnumbered) that can't be auto-detected — asked as Y/N right before the damage lands, by name and amount."
+        "Name": "Conditional Armor Bonus Moves",
+        "Label": "Edit Conditional Armor Bonus Moves",
+        "Hint": "Register moves like Underdog/Serious Underdog that grant an armor bonus while outnumbered, by name, base bonus, and outnumbered bonus. Each character's outnumbered/not-outnumbered toggle (see the move's sheet badges) decides which applies, and the armor recalculation button reflects it."
       },
       "ConditionalDamageMovesMenu": {
         "Name": "Conditional Damage Moves",
@@ -320,15 +320,14 @@
       "ArmorItemPromptContent": "Which piece of armor takes the durability hit?",
       "ArmorItemDamaged": "{item}'s armor tag reduced to {value}",
       "ArmorItemDestroyed": "{item} was destroyed",
-      "IndomitableApplied": "+1 forward",
-      "ReductionPrompt": "Are you currently outnumbered (\"{name}\")? If so, this damage is reduced.",
-      "ReductionApplied": "Damage reduced by {amount}"
+      "IndomitableApplied": "+1 forward"
     },
     "DamageReductionMoves": {
-      "Title": "Damage Reduction Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Right before damage lands, the player is asked Y/N whether the fictional condition applies; if yes, incoming damage is reduced by \"Amount\" (floored at 0).",
+      "Title": "Conditional Armor Bonus Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Base Bonus\" is the armor bonus always granted while not outnumbered (e.g. Serious Underdog's constant +1); \"Outnumbered Bonus\" is granted instead while outnumbered. Whether the character currently counts as outnumbered is tracked by a per-character toggle (features/underdog.js) and feeds into the armor recalculation button.",
       "Name": "Move Name",
-      "Amount": "Amount"
+      "BaseBonus": "Base Bonus",
+      "OutnumberedBonus": "Outnumbered Bonus"
     },
     "ConditionalDamageMoves": {
       "Title": "Conditional Damage Moves",
@@ -457,6 +456,17 @@
       "RecalcLabel": "Armor Recalculation",
       "RecalcApplied": "Armor recalculated to {total}",
       "DestroyedSuffix": " (Destroyed)"
+    },
+    "Underdog": {
+      "AskPrompt": "Are you currently outnumbered (\"{name}\")?",
+      "BecameOutnumbered": "Now outnumbered (armor {armor})",
+      "NoLongerOutnumbered": "No longer outnumbered (armor {armor})",
+      "OutnumberedToggleTitle": "Click to toggle whether you're currently outnumbered. Armor adjusts automatically if this actually changes.",
+      "OutnumberedOn": "Outnumbered",
+      "OutnumberedOff": "Not Outnumbered",
+      "AskEachHitTitle": "Click to toggle whether you're asked about outnumbered status on every hit. When off, the current toggle is kept as-is without asking.",
+      "AskEachHitOn": "Ask Each Hit: On",
+      "AskEachHitOff": "Ask Each Hit: Off"
     }
   }
 }

@@ -236,3 +236,18 @@
 .dwauto-armor-recalc:hover {
   filter: brightness(1.2);
 }
+
+.dwauto-underdog-outnumbered-badge,
+.dwauto-underdog-ask-badge {
+  cursor: pointer;
+}
+
+.dwauto-underdog-outnumbered-badge:hover,
+.dwauto-underdog-ask-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-underdog-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}

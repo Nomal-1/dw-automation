@@ -1,13 +1,14 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 
 function blankRow() {
-  return { name: "", amount: 1 };
+  return { name: "", baseBonus: 0, outnumberedBonus: 1 };
 }
 
 function normalizeRow(raw) {
   return {
     name: (raw?.name ?? "").trim(),
-    amount: Math.max(0, parseInt(raw?.amount, 10) || 0)
+    baseBonus: Math.max(0, parseInt(raw?.baseBonus, 10) || 0),
+    outnumberedBonus: Math.max(0, parseInt(raw?.outnumberedBonus, 10) || 0)
   };
 }
 

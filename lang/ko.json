@@ -108,9 +108,9 @@
         "Hint": "먼저 배운 쪽 무브를 지우게 되는 무브 쌍을 등록합니다. 8개 기본 직업 컴펜디엄에서 찾은 43개 쌍(각 상급 무브 자체의 '필요 무브' 필드 기준)이 기본값으로 채워져 있습니다."
       },
       "DamageReductionMovesMenu": {
-        "Name": "피해 경감 무브 설정",
-        "Label": "피해 경감 무브 편집",
-        "Hint": "오기/투지처럼 자동으로 판정할 수 없는 서사적 조건(숫적으로 열세인 상황 등)을 만족하면 들어오는 피해를 고정값만큼 줄여주는 무브를 등록합니다. 피해가 적용되기 직전에 Y/N으로 물어보고, 이름·경감량으로 관리합니다."
+        "Name": "조건부 장갑 보너스 무브 설정",
+        "Label": "조건부 장갑 보너스 무브 편집",
+        "Hint": "오기/투지처럼 '숫적으로 열세일 때 장갑 보너스'를 주는 무브를 이름·평소 보너스·열세 시 보너스로 등록합니다. 캐릭터 시트의 열세/열세아님 토글(features/underdog.js)이 실제 적용 여부를 결정하고, 장갑 재계산 버튼을 누르면 그 토글에 맞는 값이 반영됩니다."
       },
       "ConditionalDamageMovesMenu": {
         "Name": "조건부 데미지 무브 설정",
@@ -320,15 +320,14 @@
       "ArmorItemPromptContent": "어느 방어구의 내구도를 깎으시겠습니까?",
       "ArmorItemDamaged": "{item}의 장갑 태그가 {value}로 줄었습니다",
       "ArmorItemDestroyed": "{item}이(가) 파괴되었습니다",
-      "IndomitableApplied": "forward +1",
-      "ReductionPrompt": "지금 숫적으로 열세이신가요 (\"{name}\")? 그렇다면 이번 피해가 줄어듭니다.",
-      "ReductionApplied": "피해가 {amount}만큼 줄어들었습니다"
+      "IndomitableApplied": "forward +1"
     },
     "DamageReductionMoves": {
-      "Title": "피해 경감 무브 설정",
-      "Hint": "무브 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. 피해가 적용되기 직전에 서사적 조건을 만족하는지 Y/N으로 물어보고, 그렇다고 답하면 들어오는 피해를 '경감량'만큼 줄입니다(0 미만으로는 안 내려감).",
+      "Title": "조건부 장갑 보너스 무브 설정",
+      "Hint": "무브 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. '평소 보너스'는 열세가 아닐 때 항상 받는 장갑 보너스(투지처럼 상시 +1인 경우), '열세 시 보너스'는 열세일 때 대신 받는 장갑 보너스입니다. 실제 열세 여부는 features/underdog.js가 관리하는 캐릭터별 토글을 따르며, 장갑 재계산 버튼과 연동됩니다.",
       "Name": "무브 이름",
-      "Amount": "경감량"
+      "BaseBonus": "평소 보너스",
+      "OutnumberedBonus": "열세 시 보너스"
     },
     "ConditionalDamageMoves": {
       "Title": "조건부 데미지 무브 설정",
@@ -457,6 +456,17 @@
       "RecalcLabel": "장갑 재계산",
       "RecalcApplied": "장갑을 {total}로 재계산했습니다",
       "DestroyedSuffix": " (파괴됨)"
+    },
+    "Underdog": {
+      "AskPrompt": "지금 숫적으로 열세이신가요 (\"{name}\")?",
+      "BecameOutnumbered": "열세 상태가 되었습니다 (장갑 {armor})",
+      "NoLongerOutnumbered": "더 이상 열세가 아닙니다 (장갑 {armor})",
+      "OutnumberedToggleTitle": "클릭하면 지금 열세인지 아닌지를 켜고 끕니다. 실제로 상태가 바뀌면 장갑도 함께 조정됩니다.",
+      "OutnumberedOn": "열세",
+      "OutnumberedOff": "열세 아님",
+      "AskEachHitTitle": "클릭하면 피격 때마다 열세 여부를 다시 물어볼지 켜고 끕니다. 꺼두면 묻지 않고 지금 토글 상태를 그대로 유지합니다.",
+      "AskEachHitOn": "피격 때마다 묻기: 켜짐",
+      "AskEachHitOff": "피격 때마다 묻기: 꺼짐"
     }
   }
 }

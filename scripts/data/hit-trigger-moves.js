@@ -12,12 +12,12 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Bloody Aegis", effect: "debility", grantsForward: false }
 ];
 
-// Thief Underdog/Serious Underdog: "숫적으로 열세일 때 장갑 +N"이라는 조건부
-// 보너스. "숫적 열세"를 씬의 적대 토큰 수로 자동 판정할 수 없어서, 피해를
-// 입기 직전에 Y/N으로 물어보고 승낙하면 그만큼 피해 자체를 깎는다(장갑을
-// 실제로 바꾸지는 않음 — 대가 없이 매번 적용되는 조건부 보너스라 위의
-// "무효화 무브" 표와는 성격이 달라서 별도 표로 관리한다).
+// Thief Underdog(오기)/Serious Underdog(투지): "숫적으로 열세일 때 장갑
+// +N"이라는 조건부 장갑 보너스. 원문 기준 baseBonus(평소)/outnumberedBonus
+// (열세일 때)는 오기가 0/1, 투지가 1/2다 — 투지는 열세가 아니어도 항상
+// +1을 받는다는 점에 주의(features/underdog.js가 이 표를 읽어 실제 열세
+// 토글에 맞는 값을 armor-assistant.js의 장갑 재계산에 반영한다).
 export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
-  { name: "Underdog", amount: 1 },
-  { name: "Serious Underdog", amount: 2 }
+  { name: "Underdog", baseBonus: 0, outnumberedBonus: 1 },
+  { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2 }
 ];
