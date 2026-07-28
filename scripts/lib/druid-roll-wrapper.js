@@ -4,19 +4,42 @@
 // 메모리에서만) 조정했다가 굴림 후 원복한다.
 //
 // "무엇으로 판정할지 그 자리에서 물어보는"(ask, 예: Defy Danger) 무브는
-// item.system.rollType이 "ask"라서 실제 능력치가 굴리기 직전엔 아직 정해져
-// 있지 않다 — 이 시점 이후 플레이어가 대화상자에서 능력치를 고르므로,
-// 여기서 rollMod를 조정해도 어느 능력치 기준으로 조정해야 할지 알 수
-// 없다. 그래서 고정 능력치 무브(Hack & Slash, Volley, Spout Lore 등)만
-// 자동화 대상이고, ask형 무브는 GM/플레이어가 수동으로 +1/-1을 반영해야
-// 한다.
+// 시스템이 rollMod를 자기 대화상자를 띄우기 *전에* 이미 고정해버려서,
+// 능력치 버튼을 누른 뒤에 rollMod를 조정해봐야 이미 늦다. 그래서 이
+// 경우는 시스템 대화상자가 뜨기 전에 우리가 먼저 능력치를 확정해서
+// 물어보고(features/druid.js의 promptAskRollAbility), rollType 자체를
+// 그 능력치로 바꿔치기한 채로 원본 굴림을 호출한다 — 시스템은 rollType이
+// "ask"가 아니면 자기 대화상자를 아예 띄우지 않으므로 두 번 묻는 일도
+// 없다.
 import { MODULE_ID } from "../constants.js";
-import { getFormcrafterRollModifier } from "../features/druid.js";
+import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
+
+async function handleAskRoll(item, wrapped, args) {
+  const chosenStat = await promptAskRollAbility(item.name);
+  if (!chosenStat) return wrapped(...args);
+
+  const mod = getFormcrafterRollModifier(item.actor, chosenStat);
+  const originalType = item.system.rollType;
+  const originalMod = item.system.rollMod;
+  item.system.rollType = chosenStat;
+  item.system.rollMod = (Number(originalMod) || 0) + mod;
+  try {
+    return await wrapped(...args);
+  } finally {
+    item.system.rollType = originalType;
+    item.system.rollMod = originalMod;
+  }
+}
 
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
   const rollType = (this.system.rollType || "").toLowerCase();
+
+  if (rollType === "ask" && shouldInterceptAskRoll(this.actor)) {
+    return handleAskRoll(this, wrapped, args);
+  }
+
   const mod = getFormcrafterRollModifier(this.actor, rollType);
   if (!mod) return wrapped(...args);
 

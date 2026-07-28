@@ -275,9 +275,9 @@ async function clearFormcrafterOnShapeshiftEnd(actor) {
 }
 
 // lib/druid-roll-wrapper.js가 무브를 굴리기 직전마다 호출한다. 이 무브
-// 자체의 rollType(고정 능력치)이 지금 변신 중 보너스/페널티 능력치와
-// 일치하면 그만큼(+1/-1, 둘 다 겹치면 0으로 상쇄) rollMod에 얹을 값을
-// 반환한다.
+// 자체의 rollType(고정 능력치, 또는 아래 shouldInterceptAskRoll로 확정된
+// 능력치)이 지금 변신 중 보너스/페널티 능력치와 일치하면 그만큼(+1/-1,
+// 둘 다 겹치면 0으로 상쇄) rollMod에 얹을 값을 반환한다.
 export function getFormcrafterRollModifier(actor, rollType) {
   if (!isEnabled()) return 0;
   if (!getFormcrafterMove(actor)) return 0;
@@ -290,6 +290,40 @@ export function getFormcrafterRollModifier(actor, rollType) {
   if (stats.bonus === rollType) mod += 1;
   if (stats.penalty === rollType) mod -= 1;
   return mod;
+}
+
+// Defy Danger처럼 "그 자리에서 능력치를 고르는"(ask) 무브는 시스템이
+// rollMod를 대화상자를 띄우기 *전에* 이미 고정해버려서, 버튼을 누른
+// 뒤에 rollMod를 바꿔봐야 소용없다. 대신 lib/druid-roll-wrapper.js가
+// 시스템 기본 Ask 대화상자가 뜨기 전에 이 함수로 먼저 능력치를 확정해서
+// 물어보고, rollType 자체를 그 능력치로 바꿔치기한 채로 원본 굴림을
+// 호출한다(시스템은 rollType이 "ask"가 아니면 자기 대화상자를 띄우지
+// 않는다). Formcrafter가 없거나 변신 중이 아니거나 아직 능력치를 안
+// 골랐으면 가로채지 않고 시스템 기본 대화상자를 그대로 둔다.
+export function shouldInterceptAskRoll(actor) {
+  return (
+    isEnabled() &&
+    Boolean(getFormcrafterMove(actor)) &&
+    isShapeshiftActive(actor) &&
+    Boolean(getFormcrafterStats(actor))
+  );
+}
+
+// 시스템 기본 Ask 대화상자와 같은 방식(능력치 6개 버튼)으로 물어본다.
+export function promptAskRollAbility(moveName) {
+  return new Promise((resolve) => {
+    const buttons = {};
+    for (const key of ABILITY_KEYS) {
+      buttons[key] = { label: abilityLabel(key), callback: () => resolve(key) };
+    }
+
+    new Dialog({
+      title: moveName,
+      content: `<p>${game.i18n.format("DWAUTO.Druid.FormcrafterAskContent", { name: moveName })}</p>`,
+      buttons,
+      close: () => resolve(null)
+    }).render(true);
+  });
 }
 
 // Shed: 변신 중 피해를 입으면 변신을 풀어 그 피해를 무효화할 수 있다.

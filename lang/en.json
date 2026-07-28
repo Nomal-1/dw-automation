@@ -144,7 +144,7 @@
       },
       "DruidFormcrafterMoveNames": {
         "Name": "Druid Formcrafter Move Names",
-        "Hint": "Move names (comma separated) that grant +1 ongoing to a player-chosen ability and -1 ongoing to a GM-chosen ability while shapeshifted. Only auto-applies to moves that use a fixed ability score (e.g. melee moves); moves like Defy Danger that let you pick the ability at roll time are not automated and need to be adjusted manually."
+        "Hint": "Move names (comma separated) that grant +1 ongoing to a player-chosen ability and -1 ongoing to a GM-chosen ability while shapeshifted. Moves that use a fixed ability score (e.g. melee moves) apply automatically; moves like Defy Danger that let you pick the ability at roll time ask for the ability via this module's own dialog first (instead of the system's), then apply the bonus/penalty for whichever ability was chosen."
       },
       "DruidFormshaperMoveNames": {
         "Name": "Druid Formshaper Move Names",
@@ -436,7 +436,8 @@
       "FormcrafterBonusApplied": "+1 ongoing to {stat} rolls while shapeshifted",
       "FormcrafterPenaltyTitle": "Formcrafter: Choose {name}'s Penalty Ability (GM)",
       "FormcrafterPenaltyContent": "Choose the ability that gets -1 ongoing while this character is shapeshifted.",
-      "FormcrafterPenaltyApplied": "-1 ongoing to {stat} rolls while shapeshifted"
+      "FormcrafterPenaltyApplied": "-1 ongoing to {stat} rolls while shapeshifted",
+      "FormcrafterAskContent": "Which ability are you using for \"{name}\"? (Asked first so Formcrafter's bonus/penalty can be applied correctly.)"
     },
     "NoteMoves": {
       "NotesLabel": "Notes"

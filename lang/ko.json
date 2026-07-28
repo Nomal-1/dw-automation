@@ -144,7 +144,7 @@
       },
       "DruidFormcrafterMoveNames": {
         "Name": "드루이드 Formcrafter 무브 이름",
-        "Hint": "변신할 때마다 능력치 하나(본인 선택)에 +1, 다른 능력치 하나(마스터 선택)에 -1 온고잉을 주는 무브 이름(쉼표로 여러 개 구분). 고정 능력치로 판정하는 무브(근접전 등)에만 자동 적용되며, Defy Danger처럼 그 자리에서 능력치를 고르는 무브는 자동화되지 않습니다 — 수동으로 반영해주세요."
+        "Hint": "변신할 때마다 능력치 하나(본인 선택)에 +1, 다른 능력치 하나(마스터 선택)에 -1 온고잉을 주는 무브 이름(쉼표로 여러 개 구분). 고정 능력치로 판정하는 무브(근접전 등)는 자동으로 적용되고, Defy Danger처럼 그 자리에서 능력치를 고르는 무브는 시스템 기본 선택 대화상자 대신 이 모듈의 대화상자로 먼저 능력치를 물어봐서 그 능력치 기준으로 적용됩니다."
       },
       "DruidFormshaperMoveNames": {
         "Name": "드루이드 Formshaper 무브 이름",
@@ -436,7 +436,8 @@
       "FormcrafterBonusApplied": "변신 중 {stat} 판정에 +1 온고잉이 적용됩니다",
       "FormcrafterPenaltyTitle": "Formcrafter: {name}의 페널티 능력치 선택 (마스터)",
       "FormcrafterPenaltyContent": "이 캐릭터가 변신 중 -1 온고잉을 받을 능력치를 고르세요.",
-      "FormcrafterPenaltyApplied": "변신 중 {stat} 판정에 -1 온고잉이 적용됩니다"
+      "FormcrafterPenaltyApplied": "변신 중 {stat} 판정에 -1 온고잉이 적용됩니다",
+      "FormcrafterAskContent": "\"{name}\"에 어떤 능력치를 사용하시겠습니까? (Formcrafter 보너스/페널티 반영을 위해 먼저 확인합니다)"
     },
     "NoteMoves": {
       "NotesLabel": "메모"
