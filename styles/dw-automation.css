@@ -200,6 +200,20 @@
   resize: vertical;
 }
 
+.dwauto-gm-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.dwauto-gm-choice-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
 .dwauto-shapeshift-badge {
   display: inline-block;
   cursor: pointer;

@@ -199,6 +199,16 @@ export async function runTranslationImport() {
   const noteMoveNames = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, translateCommaList(moveMap, noteMoveNames, stats));
 
+  // 클래스 부여 무브 표는 name(발동하는 무브 자체)과 grantedMoveNames(부여할
+  // 다른 직업 무브들, 쉼표 목록) 둘 다 무브 이름이다.
+  const classGrantMoves = game.settings.get(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES);
+  const translatedClassGrantMoves = classGrantMoves.map((row) => ({
+    ...row,
+    name: translateOne(moveMap, row.name, stats),
+    grantedMoveNames: translateCommaList(moveMap, row.grantedMoveNames, stats)
+  }));
+  await game.settings.set(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES, translatedClassGrantMoves);
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

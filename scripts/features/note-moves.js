@@ -20,6 +20,7 @@ import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 // 탭이 생긴다.
 const ACTIVATED_FLAG = "noteMoveActivated"; // { [moveId]: true }
 const ANSWER_FLAG = "noteMoveAnswer"; // { [moveId]: string[] } — 무브 설명 안의 독립된 목록마다 하나씩
+const GM_CHOICE_FLAG = "noteMoveGmChoice"; // { [moveId]: string[] } — "GM이 나중에 정해준다"고 적힌 목록의 GM 선택
 const NOTES_FLAG = "noteMoves"; // { [moveId]: string } — v0.16 이전부터 쓰던 이름 그대로 유지(기존 메모 보존)
 const CUSTOM_VALUE = "__dwauto_custom__";
 
@@ -73,6 +74,23 @@ async function unsetAnswer(actor, moveId) {
   await actor.setFlag(MODULE_ID, ANSWER_FLAG, next);
 }
 
+function getGmChoice(actor, moveId) {
+  return actor.getFlag(MODULE_ID, GM_CHOICE_FLAG)?.[moveId] ?? [];
+}
+
+async function setGmChoice(actor, moveId, values) {
+  const current = actor.getFlag(MODULE_ID, GM_CHOICE_FLAG) ?? {};
+  await actor.setFlag(MODULE_ID, GM_CHOICE_FLAG, { ...current, [moveId]: values });
+}
+
+async function unsetGmChoice(actor, moveId) {
+  const current = actor.getFlag(MODULE_ID, GM_CHOICE_FLAG) ?? {};
+  if (!(moveId in current)) return;
+  const next = { ...current };
+  delete next[moveId];
+  await actor.setFlag(MODULE_ID, GM_CHOICE_FLAG, next);
+}
+
 function getNoteText(actor, moveId) {
   return actor.getFlag(MODULE_ID, NOTES_FLAG)?.[moveId] ?? "";
 }
@@ -98,11 +116,13 @@ async function unsetNoteText(actor, moveId) {
 // 하나만 묻는다.
 //
 // 팔라딘 퀘스트의 "서약" 목록처럼 플레이어가 고르는 게 아니라 "GM이 나중에
-// 정해준다"고 적힌 목록은 프롬프트에서 제외한다(바로 앞 문단에 "GM"이라는
-// 단어가 있으면 그 목록은 건너뛴다).
+// 정해준다"고 적힌 목록(바로 앞 문단에 "GM"이라는 단어가 있으면 판단)은
+// 발동 시 프롬프트에는 넣지 않고 gmGroups로 따로 돌려준다 — 탭에 GM이 직접
+// 체크할 수 있는 목록으로 보여준다(renderGmChoiceSection 참고).
 function extractListGroups(moveItem) {
   const html = $(`<div>${moveItem.system?.description ?? ""}</div>`);
-  const groups = [];
+  const playerGroups = [];
+  const gmGroups = [];
 
   html.find("ul, ol").each((_, el) => {
     const $list = $(el);
@@ -114,12 +134,16 @@ function extractListGroups(moveItem) {
     if (options.length === 0) return;
 
     const precedingText = $list.prev("p").text().trim();
-    if (/\bGM\b/i.test(precedingText)) return;
+    const group = { label: precedingText || null, options };
 
-    groups.push({ label: precedingText || null, options });
+    if (/\bGM\b/i.test(precedingText)) {
+      gmGroups.push(group);
+    } else {
+      playerGroups.push(group);
+    }
   });
 
-  return groups;
+  return { playerGroups, gmGroups };
 }
 
 function promptListAnswers(moveItem, groups) {
@@ -181,11 +205,11 @@ function promptListAnswers(moveItem, groups) {
 }
 
 async function activate(actor, moveItem) {
-  const groups = extractListGroups(moveItem);
+  const { playerGroups } = extractListGroups(moveItem);
   let answers = null;
 
-  if (groups.length > 0) {
-    answers = await promptListAnswers(moveItem, groups);
+  if (playerGroups.length > 0) {
+    answers = await promptListAnswers(moveItem, playerGroups);
     if (!answers) return;
   }
 
@@ -247,7 +271,30 @@ async function onCreateChatMessage(message, options, userId) {
 async function resetNoteMove(actor, moveId) {
   await unsetActivated(actor, moveId);
   await unsetAnswer(actor, moveId);
+  await unsetGmChoice(actor, moveId);
   await unsetNoteText(actor, moveId);
+}
+
+// "GM이 나중에 정해준다"고 적힌 목록(퀘스트의 서약 등)을 체크박스로 보여준다
+// (하나 이상 고를 수 있다는 원문에 맞춰 드롭다운이 아니라 체크박스로 만든다).
+// 특별히 GM 권한으로 잠그지는 않는다 — 이 시트를 열어서 편집할 수 있는
+// 사람(보통 GM)이 체크하면 된다.
+function renderGmChoiceSection(actor, moveItem, gmGroups) {
+  if (gmGroups.length === 0) return "";
+
+  const selected = new Set(getGmChoice(actor, moveItem.id));
+  const optionsHtml = gmGroups
+    .flatMap((group) => group.options)
+    .map(
+      (opt) =>
+        `<label class="dwauto-gm-choice-option"><input type="checkbox" class="dwauto-gm-choice-checkbox" value="${opt}" ${selected.has(opt) ? "checked" : ""}> ${opt}</label>`
+    )
+    .join("");
+
+  return `
+    <label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.GmChoiceLabel")}</label>
+    <div class="dwauto-gm-choice-list">${optionsHtml}</div>
+  `;
 }
 
 function renderTab(actor, moveItem, html) {
@@ -263,6 +310,7 @@ function renderTab(actor, moveItem, html) {
   const description = moveItem.system?.description ?? "";
   const answers = getAnswer(actor, moveItem.id);
   const text = getNoteText(actor, moveItem.id);
+  const { gmGroups } = extractListGroups(moveItem);
 
   const $section = $(`
     <div class="cell dwauto-note-move">
@@ -274,10 +322,19 @@ function renderTab(actor, moveItem, html) {
               .join(" ")}`
           : ""
       }
+      ${renderGmChoiceSection(actor, moveItem, gmGroups)}
       <label class="cell__title dwauto-note-move">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
       <textarea class="dwauto-note-textarea" rows="8">${text}</textarea>
     </div>
   `);
+
+  $section.find(".dwauto-gm-choice-checkbox").on("change", () => {
+    const checked = $section
+      .find(".dwauto-gm-choice-checkbox:checked")
+      .map((_, el) => el.value)
+      .get();
+    setGmChoice(actor, moveItem.id, checked);
+  });
 
   $section.find(".dwauto-note-textarea").on("change", (event) => {
     setNoteText(actor, moveItem.id, event.currentTarget.value);

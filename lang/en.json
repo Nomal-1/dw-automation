@@ -166,6 +166,15 @@
       "EnableArmorAssistant": {
         "Name": "Enable Armor Recalculation Button",
         "Hint": "Turns the character sheet's 'Armor' label into a clickable button, like Damage. Clicking it overwrites the armor value with the sum of armor tags on currently equipped armor items, plus any currently active module modifiers (like Formshaper's 'armor' choice while shapeshifted). Hovering shows what goes into that total. The base system never auto-calculates armor — it's just a plain number field — so the field remains directly editable even with this button enabled."
+      },
+      "EnableClassGrantAssistant": {
+        "Name": "Enable Class Grant Moves",
+        "Hint": "For moves like Paladin's Divine Favor or Ranger's God Amidst The Wastes that grant specific moves from another class outright when taken, actually triggering the move (clicking it in the move list) looks up the registered move(s) by name across all 8 core class compendiums and adds them automatically. Won't add a move the character already has. Which move grants what is managed in the Class Grant Moves setting below."
+      },
+      "ClassGrantMovesMenu": {
+        "Name": "Class Grant Moves",
+        "Label": "Edit Class Grant Moves",
+        "Hint": "Register moves that grant specific move(s) from another class outright when triggered, by name and a comma-separated list of granted move names. Granted moves are looked up by name across all 8 core class compendiums (no need to specify which class)."
       }
     },
     "Npc": {
@@ -299,7 +308,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -439,6 +448,18 @@
       "ResetConfirmTitle": "Reset Druid Shapeshift Damage Die Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
+    "ClassGrantMoves": {
+      "Title": "Class Grant Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Actually triggering \"Move Name\" looks up the moves listed in \"Granted Move Names\" (comma separated) across all 8 core class compendiums and adds them outright. A move the character already has is not added again.",
+      "Name": "Move Name",
+      "GrantedMoveNames": "Granted Move Names",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Class Grant Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "ClassGrant": {
+      "Granted": "Gained the following move(s): {moves}"
+    },
     "ActorTab": {
       "ResetButton": "Reset",
       "ResetConfirmTitle": "Reset Tab",
@@ -489,7 +510,8 @@
       "CustomOption": "Custom",
       "AnswerLabel": "Chosen",
       "AnswerChosen": "Set to \"{answer}\"",
-      "Activated": "Note tab created"
+      "Activated": "Note tab created",
+      "GmChoiceLabel": "GM's Picks"
     },
     "NoteMovesSettings": {
       "Title": "Note-Taking Move Names",

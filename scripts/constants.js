@@ -37,5 +37,7 @@ export const SETTINGS = {
   ENABLE_NOTE_MOVES: "enableNoteMoves",
   NOTE_MOVE_NAMES: "noteMoveNames",
   ENABLE_ARMOR_ASSISTANT: "enableArmorAssistant",
-  BORN_OF_THE_SOIL_MOVE_NAMES: "bornOfTheSoilMoveNames"
+  BORN_OF_THE_SOIL_MOVE_NAMES: "bornOfTheSoilMoveNames",
+  ENABLE_CLASS_GRANT_ASSISTANT: "enableClassGrantAssistant",
+  CLASS_GRANT_MOVES: "classGrantMoves"
 };

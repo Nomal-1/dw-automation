@@ -20,6 +20,8 @@ import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-move
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 import { NoteMovesMenu } from "./apps/note-moves-menu.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "./data/note-moves.js";
+import { ClassGrantMovesMenu } from "./apps/class-grant-moves-menu.js";
+import { DEFAULT_CLASS_GRANT_MOVES } from "./data/class-grant-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -514,5 +516,33 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  // "다른 직업의 액션을 얻는 액션": 팔라딘 Divine Favor/레인저 God Amidst The
+  // Wastes처럼 발동하면 다른 직업의 특정 무브(들)를 그대로 부여받는 무브.
+  // 자세한 설계는 features/class-grant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CLASS_GRANT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableClassGrantAssistant.Name",
+    hint: "DWAUTO.Settings.EnableClassGrantAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_CLASS_GRANT_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "classGrantMovesMenu", {
+    name: "DWAUTO.Settings.ClassGrantMovesMenu.Name",
+    label: "DWAUTO.Settings.ClassGrantMovesMenu.Label",
+    hint: "DWAUTO.Settings.ClassGrantMovesMenu.Hint",
+    icon: "fas fa-people-arrows",
+    type: ClassGrantMovesMenu,
+    restricted: true
   });
 }
