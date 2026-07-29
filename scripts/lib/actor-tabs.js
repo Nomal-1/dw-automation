@@ -1,3 +1,5 @@
+import { MODULE_ID } from "../constants.js";
+
 // NPC 시트에 기능별 탭(랜덤생성/몬스터 스탯/...)을 여러 개 주입할 때 공용으로 쓰는 헬퍼.
 //
 // Foundry의 기본 Tabs 컨트롤러는 재렌더링할 때마다 그 시점에 존재하는 DOM만 보고
@@ -47,9 +49,13 @@ export function injectActorTab({ html, actor, tabKey, navLabel, onReset }) {
       });
       if (!confirmed) return;
       await onReset();
-      // 플래그만 지우면 대부분은 updateActor 훅으로 시트가 알아서 다시 그려지지만,
-      // 플래그 변경 하나로는 감지가 안 되는 경우(예: 여러 플래그를 순차로 지울 때
-      // 마지막 갱신만 감지되는 등)를 대비해 확실하게 직접 다시 그린다.
+      // 플래그 갱신 후 시트가 알아서 다시 그려지는 데 의존하지 않고, 지금 이
+      // 탭/네브 링크를 직접 DOM에서 지운다 — 재렌더 타이밍이나 방식에 좌우되지
+      // 않고 항상 즉시 사라지게 하기 위해서다. 재렌더는 그래도 한 번 요청해서
+      // (예: 다른 자동화가 참고하는 상태도 같이 갱신되도록) 상태를 정리한다.
+      console.log(`${MODULE_ID} | actor-tabs: reset confirmed for tab "${tabKey}", removing nav/body directly`);
+      $navLink.remove();
+      $tabBody.remove();
       actor.sheet?.render(false);
     });
   }

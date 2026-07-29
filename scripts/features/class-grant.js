@@ -55,6 +55,21 @@ async function findMoveDocumentByName(name) {
   return docs.find((d) => d.name === name) ?? null;
 }
 
+// 룰북 원문: "다중직업을 따질 때에 한하여, 직업의 핵심 액션들 중 서로
+// 의존하는 것들은 합해서 하나의 액션으로 칩니다. 예를 들어 마법사의 주문
+// 시전, 주문서, 주문 준비는 합해서 하나로 칩니다." — 클레릭(예배+주문 시전)과
+// 위저드(주문 시전+주문서+주문 준비)가 여기 해당한다. 골라올 수 있는 목록에는
+// 이 묶음을 낱개가 아니라 하나의 선택지로 보여주고, 고르면 묶음 전체를
+// 한꺼번에 부여한다.
+const MULTICLASS_BUNDLES = {
+  "dungeonworld.the-cleric-moves": ["Commune", "Cast A Spell"],
+  "dungeonworld.the-wizard-moves": ["Cast a Spell", "Spellbook", "Prepare Spells"]
+};
+
+function getActorLevel(actor) {
+  return Number(actor.system?.attributes?.level?.value) || 1;
+}
+
 // Multiclass Dabbler/Initiate("다른 직업 무브 하나 습득") 전용: 직업 무브 팩별로
 // (basic-moves 제외) 묶어서 돌려준다. 팩의 label(예: "The Fighter")을 직업
 // 이름 대신 그대로 쓴다 — 시스템 자체가 등록한 이름이라 시스템/모듈 언어
@@ -76,19 +91,56 @@ async function getMovesGroupedByClassPack() {
   return groups;
 }
 
-// 직업을 먼저 고르고, 그 직업의 무브 목록에서 하나를 고르는 대화상자.
-// 직업 선택이 바뀌면 무브 목록도 그에 맞게 다시 채운다. 취소하면 null.
-function promptChoiceGrant(moveItem, classGroups) {
-  const packIds = Array.from(classGroups.keys());
+// 룰북 원문: "자기 레벨보다 하나 이상 낮은 레벨의 액션이면 아무 것이나 골라도
+// 됩니다." — 각 직업 팩에서 캐릭터의 (레벨-1) 이하인 무브만 고를 수 있게
+// 추려내고, 서로 의존하는 핵심 액션 묶음은 하나의 선택지로 합친다. 고를 게
+// 하나도 없는 직업(이론상 없음 — 모든 직업이 레벨 0 시작 무브를 갖고 있다)은
+// 목록에서 아예 뺀다.
+function buildEligiblePicks(classGroups, actorLevel) {
+  const maxLevel = actorLevel - 1;
+  const result = new Map(); // packId -> { label, picks: [{ key, label, docs }] }
+
+  for (const [packId, { label, docs }] of classGroups) {
+    const bundleNames = MULTICLASS_BUNDLES[packId];
+    const picks = [];
+    const bundleDocs = [];
+
+    for (const doc of docs) {
+      if (doc.type !== "move") continue;
+      const reqLevel = Number(doc.system?.requiresLevel) || 0;
+      if (reqLevel > maxLevel) continue;
+
+      if (bundleNames?.includes(doc.name)) {
+        bundleDocs.push(doc);
+        continue;
+      }
+      picks.push({ key: doc.id, label: doc.name, docs: [doc] });
+    }
+
+    if (bundleDocs.length > 0) {
+      picks.unshift({ key: `bundle:${packId}`, label: bundleDocs.map((d) => d.name).join(" + "), docs: bundleDocs });
+    }
+
+    if (picks.length > 0) result.set(packId, { label, picks });
+  }
+
+  return result;
+}
+
+// 직업을 먼저 고르고, 그 직업의 (레벨 자격을 만족하는) 무브 목록에서 하나를
+// 고르는 대화상자. 직업 선택이 바뀌면 무브 목록도 그에 맞게 다시 채운다.
+// 취소하면 null.
+function promptChoiceGrant(moveItem, eligibleGroups) {
+  const packIds = Array.from(eligibleGroups.keys());
   if (packIds.length === 0) return Promise.resolve(null);
 
   const buildMoveOptions = (packId) =>
-    classGroups
+    eligibleGroups
       .get(packId)
-      .docs.map((doc) => `<option value="${doc.id}">${doc.name}</option>`)
+      .picks.map((pick) => `<option value="${pick.key}">${pick.label}</option>`)
       .join("");
 
-  const classOptionsHtml = packIds.map((packId) => `<option value="${packId}">${classGroups.get(packId).label}</option>`).join("");
+  const classOptionsHtml = packIds.map((packId) => `<option value="${packId}">${eligibleGroups.get(packId).label}</option>`).join("");
 
   return new Promise((resolve) => {
     new Dialog({
@@ -101,7 +153,7 @@ function promptChoiceGrant(moveItem, classGroups) {
           </div>
           <div class="form-group">
             <label>${game.i18n.localize("DWAUTO.ClassGrant.ChoiceMoveLabel")}</label>
-            <select name="moveId">${buildMoveOptions(packIds[0])}</select>
+            <select name="moveKey">${buildMoveOptions(packIds[0])}</select>
           </div>
         </form>
       `,
@@ -110,9 +162,9 @@ function promptChoiceGrant(moveItem, classGroups) {
           label: game.i18n.localize("DWAUTO.Confirm"),
           callback: (html) => {
             const packId = html.find('[name="classPack"]').val();
-            const moveId = html.find('[name="moveId"]').val();
-            const doc = classGroups.get(packId)?.docs.find((d) => d.id === moveId);
-            resolve(doc ?? null);
+            const key = html.find('[name="moveKey"]').val();
+            const pick = eligibleGroups.get(packId)?.picks.find((p) => p.key === key);
+            resolve(pick ?? null);
           }
         },
         cancel: {
@@ -124,7 +176,7 @@ function promptChoiceGrant(moveItem, classGroups) {
       width: 420,
       render: (html) => {
         html.find('[name="classPack"]').on("change", (event) => {
-          html.find('[name="moveId"]').html(buildMoveOptions(event.currentTarget.value));
+          html.find('[name="moveKey"]').html(buildMoveOptions(event.currentTarget.value));
         });
       },
       close: () => resolve(null)
@@ -202,14 +254,19 @@ async function onCreateChatMessage(message, options, userId) {
 
     if (row.mode === "choice") {
       const classGroups = await getMovesGroupedByClassPack();
-      const chosenDoc = await promptChoiceGrant(moveItem, classGroups);
-      if (!chosenDoc) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
+      const eligibleGroups = buildEligiblePicks(classGroups, getActorLevel(actor));
+      const chosenPick = await promptChoiceGrant(moveItem, eligibleGroups);
+      if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
       await setGranted(actor, moveItem.id);
-      if (!actor.items.some((i) => i.type === "move" && i.name === chosenDoc.name)) {
-        await actor.createEmbeddedDocuments("Item", [chosenDoc.toObject()]);
+      const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && i.name === d.name));
+      if (toCreate.length > 0) {
+        await actor.createEmbeddedDocuments(
+          "Item",
+          toCreate.map((d) => d.toObject())
+        );
       }
-      announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.ClassGrant.Granted", { moves: chosenDoc.name }));
+      announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.ClassGrant.Granted", { moves: chosenPick.label }));
       return;
     }
 
