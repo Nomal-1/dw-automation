@@ -1,18 +1,29 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { injectActorTab } from "../lib/actor-tabs.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
+import { announceActionApplied } from "../lib/announce.js";
+import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 
-// Cleric Deity/Apotheosis, Druid Born of the Soil, Ranger Animal Companion처럼
-// "이름/영역/증표 같은 것을 자유롭게 정해서 기록해두는" 무브들. 던전월드
-// 자체가 이런 무브는 정형화된 수치가 아니라 서사적 설정이라, 주사위나
-// 선택지를 자동화하는 대신 그 무브 이름을 그대로 딴 탭 하나를 만들어
-// 자유 메모란을 붙여준다(무브 자체의 설명도 같이 보여줘서 정할 항목을
-// 다시 찾아볼 필요가 없게 한다).
-//
-// 메모는 무브 이름이 아니라 그 무브 "아이템의 _id"로 저장한다 — 이름은
-// 번역 모듈이 나중에 바꿀 수 있는데, 그때 이미 적어둔 메모가 옛 이름 밑에
-// 고아로 남아버리는 걸 막기 위해서다.
-const NOTES_FLAG = "noteMoves";
+// Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
+// Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
+// 동반자 같은 것을 자유롭게 정해서 기록해두는" 무브들. 주사위나 선택지를
+// 자동화하는 대신, 실제로 그 무브를 발동(채팅 카드로 클릭)했을 때만 그 무브
+// 이름을 딴 탭을 만들어 자유 메모란을 붙여준다 — 소유만으로 탭이 뜨던
+// v0.23.x까지의 방식과 달리, "발동해야 탭이 생긴다"는 대지의 아들/딸의
+// 방식을 모든 메모형 무브에 동일하게 적용한다(더 이상 이 둘을 구분하지
+// 않는다). 무브 설명 안에 <ul><li> 형태의 선택지 목록이 있으면(대지의
+// 아들/딸의 "결연된 땅" 11개처럼) 그 목록을 그대로 드롭다운으로 보여주고
+// 고르게 한다(+ 직접입력). 목록이 없는 무브(신, 사명 등 순수 자유 서술형)는
+// 그런 선택 단계 없이 발동 즉시 탭이 생긴다.
+const ACTIVATED_FLAG = "noteMoveActivated"; // { [moveId]: true }
+const ANSWER_FLAG = "noteMoveAnswer"; // { [moveId]: string } — 선택지 목록이 있었던 경우만
+const NOTES_FLAG = "noteMoves"; // { [moveId]: string } — v0.16 이전부터 쓰던 이름 그대로 유지(기존 메모 보존)
+const CUSTOM_VALUE = "__dwauto_custom__";
+
+function isEnabled() {
+  return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_NOTE_MOVES);
+}
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -22,54 +33,219 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-function getNoteText(actor, moveItem) {
-  return actor.getFlag(MODULE_ID, NOTES_FLAG)?.[moveItem.id] ?? "";
+function isActivated(actor, moveId) {
+  return Boolean(actor.getFlag(MODULE_ID, ACTIVATED_FLAG)?.[moveId]);
 }
 
-async function setNoteText(actor, moveItem, text) {
-  const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
-  await actor.setFlag(MODULE_ID, NOTES_FLAG, { ...current, [moveItem.id]: text });
+async function setActivated(actor, moveId, value) {
+  const current = actor.getFlag(MODULE_ID, ACTIVATED_FLAG) ?? {};
+  await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, { ...current, [moveId]: value });
 }
 
-async function resetNote(actor, moveItem) {
-  const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
-  if (!(moveItem.id in current)) return;
+async function unsetActivated(actor, moveId) {
+  const current = actor.getFlag(MODULE_ID, ACTIVATED_FLAG) ?? {};
+  if (!(moveId in current)) return;
   const next = { ...current };
-  delete next[moveItem.id];
+  delete next[moveId];
+  await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, next);
+}
+
+function getAnswer(actor, moveId) {
+  return actor.getFlag(MODULE_ID, ANSWER_FLAG)?.[moveId] ?? "";
+}
+
+async function setAnswer(actor, moveId, value) {
+  const current = actor.getFlag(MODULE_ID, ANSWER_FLAG) ?? {};
+  await actor.setFlag(MODULE_ID, ANSWER_FLAG, { ...current, [moveId]: value });
+}
+
+async function unsetAnswer(actor, moveId) {
+  const current = actor.getFlag(MODULE_ID, ANSWER_FLAG) ?? {};
+  if (!(moveId in current)) return;
+  const next = { ...current };
+  delete next[moveId];
+  await actor.setFlag(MODULE_ID, ANSWER_FLAG, next);
+}
+
+function getNoteText(actor, moveId) {
+  return actor.getFlag(MODULE_ID, NOTES_FLAG)?.[moveId] ?? "";
+}
+
+async function setNoteText(actor, moveId, text) {
+  const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
+  await actor.setFlag(MODULE_ID, NOTES_FLAG, { ...current, [moveId]: text });
+}
+
+async function unsetNoteText(actor, moveId) {
+  const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
+  if (!(moveId in current)) return;
+  const next = { ...current };
+  delete next[moveId];
   await actor.setFlag(MODULE_ID, NOTES_FLAG, next);
 }
 
-function renderNoteTab(actor, moveItem, html) {
+// 무브 설명 HTML 안의 <li> 목록(원문 기준, 번역되어 있으면 번역된 그대로)을
+// 뽑아온다. 대지의 아들/딸의 "결연된 땅" 11개가 대표적인 예지만, 목록이
+// 있는 다른 메모형 무브가 있어도 똑같이 동작한다.
+function extractListOptions(moveItem) {
+  const html = $(`<div>${moveItem.system?.description ?? ""}</div>`);
+  return html
+    .find("li")
+    .map((_, el) => $(el).text().trim())
+    .get()
+    .filter(Boolean);
+}
+
+function promptListAnswer(moveItem, options) {
+  const selectOptions = options
+    .map((opt) => `<option value="${opt}">${opt}</option>`)
+    .concat(`<option value="${CUSTOM_VALUE}">${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</option>`)
+    .join("");
+
+  return new Promise((resolve) => {
+    new Dialog({
+      title: moveItem.name,
+      content: `
+        <form>
+          <p>${game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</p>
+          <div class="form-group">
+            <select name="answer">${selectOptions}</select>
+          </div>
+          <div class="form-group dwauto-note-custom" style="display:none;">
+            <input type="text" name="customAnswer" value="">
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const value = html.find('[name="answer"]').val();
+            if (value === CUSTOM_VALUE) {
+              resolve((html.find('[name="customAnswer"]').val() ?? "").trim() || null);
+            } else {
+              resolve(value);
+            }
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve(null)
+        }
+      },
+      default: "ok",
+      render: (html) => {
+        html.find('[name="answer"]').on("change", (event) => {
+          html.find(".dwauto-note-custom").toggle(event.currentTarget.value === CUSTOM_VALUE);
+        });
+      },
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
+async function activate(actor, moveItem) {
+  const options = extractListOptions(moveItem);
+  let answer = null;
+
+  if (options.length > 0) {
+    answer = await promptListAnswer(moveItem, options);
+    if (!answer) return;
+  }
+
+  await setActivated(actor, moveItem.id, true);
+
+  if (answer) {
+    await setAnswer(actor, moveItem.id, answer);
+    announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.NoteMoves.AnswerChosen", { answer }));
+  } else {
+    announceActionApplied(actor, moveItem.name, game.i18n.localize("DWAUTO.NoteMoves.Activated"));
+  }
+}
+
+// 설정("메모형 무브 이름")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
+// 아직 번역 전(영문 기본값)이어도, 지금 이 시점의 번역 데이터로 다시 한번
+// 확인해서 매칭을 놓치지 않는다(born-of-the-soil.js가 쓰던 방식과 동일).
+async function matchesConfiguredName(title) {
+  const configured = splitCommaList(SETTINGS.NOTE_MOVE_NAMES);
+  if (configured.includes(title)) return true;
+
+  try {
+    const nameMap = await getMoveNameMap();
+    for (const defaultName of DEFAULT_NOTE_MOVE_NAMES) {
+      if (nameMap.get(defaultName) === title) return true;
+    }
+  } catch (err) {
+    // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
+  }
+  return false;
+}
+
+async function onCreateChatMessage(message, options, userId) {
+  try {
+    if (game.system.id !== "dungeonworld") return;
+    if (!isEnabled()) return;
+    if (userId !== game.user.id) return;
+
+    const info = getMoveCardInfo(message);
+    if (!info) return;
+    const { actor, title } = info;
+    if (actor.type !== "character") return;
+
+    if (!(await matchesConfiguredName(title))) return;
+
+    const moveItem = findMoveItem(actor, title);
+    if (!moveItem) return;
+    if (isActivated(actor, moveItem.id)) return;
+
+    await activate(actor, moveItem);
+  } catch (err) {
+    console.error(`${MODULE_ID} | note-moves: onCreateChatMessage failed`, err);
+  }
+}
+
+async function resetNoteMove(actor, moveId) {
+  await unsetActivated(actor, moveId);
+  await unsetAnswer(actor, moveId);
+  await unsetNoteText(actor, moveId);
+}
+
+function renderTab(actor, moveItem, html) {
   const $body = injectActorTab({
     html,
     actor,
     tabKey: `dwauto-note-${moveItem.id}`,
     navLabel: moveItem.name,
-    onReset: () => resetNote(actor, moveItem)
+    onReset: () => resetNoteMove(actor, moveItem.id)
   });
   $body.addClass("dwauto-tab");
 
   const description = moveItem.system?.description ?? "";
-  const text = getNoteText(actor, moveItem);
+  const answer = getAnswer(actor, moveItem.id);
+  const text = getNoteText(actor, moveItem.id);
 
   const $section = $(`
     <div class="cell dwauto-note-move">
       ${description ? `<div class="dwauto-note-description">${description}</div>` : ""}
-      <label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
+      ${
+        answer
+          ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.AnswerLabel")}</label><a class="tag dwauto-note-answer">${answer}</a>`
+          : ""
+      }
+      <label class="cell__title dwauto-note-move">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
       <textarea class="dwauto-note-textarea" rows="8">${text}</textarea>
     </div>
   `);
 
   $section.find(".dwauto-note-textarea").on("change", (event) => {
-    setNoteText(actor, moveItem, event.currentTarget.value);
+    setNoteText(actor, moveItem.id, event.currentTarget.value);
   });
 
   $body.append($section);
 }
 
 function onRenderActorSheet(app, html) {
-  if (game.system.id !== "dungeonworld") return;
-  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_NOTE_MOVES)) return;
+  if (!isEnabled()) return;
 
   const actor = app.actor;
   if (actor.type !== "character") return;
@@ -79,86 +255,99 @@ function onRenderActorSheet(app, html) {
 
   for (const moveItem of actor.items) {
     if (moveItem.type !== "move" || !names.includes(moveItem.name)) continue;
-    renderNoteTab(actor, moveItem, html);
+    if (!isActivated(actor, moveItem.id)) continue;
+    renderTab(actor, moveItem, html);
   }
 }
 
-// 대지의 아들/딸은 v0.22.0부터 이 기능(소유만으로 탭 생성) 대신
-// features/born-of-the-soil.js(실제 발동해야 팝업+탭)로 옮겨갔다. 하지만
-// 그 전에 이미 "메모형 무브 이름" 설정을 저장해둔 세계는 그 값이 그대로
-// 남아있어서(기본값을 코드에서 바꿔도 이미 저장된 설정엔 영향이 없다),
-// 이 이름이 여전히 목록에 남아 예전처럼 소유만으로 탭이 뜬다. 세계 설정을
-// 딱 한 번 조용히 정리해서, 영문 기본값("Born of the Soil")과 지금
-// dungeonworld-ko가 알려주는 번역명을 둘 다 확인해 남아있으면 제거한다.
-async function migrateBornOfTheSoilOut() {
+// v0.24.0 전에는 이 여섯 무브(신/신격/동반 동물/사명/신에게 헌신/황야 속의
+// 신)를 "소유만으로" 탭이 떴다. 이미 그 상태로 캐릭터를 플레이해온 세계에서
+// 갑자기 탭이 사라지면 당황스러우니, 지금 이미 그 무브를 갖고 있는 액터는
+// 한 번에 한해 "이미 발동한 것"으로 간주해 탭이 계속 보이게 한다. 이후로
+// 새로 이 무브를 얻는 액터(또는 GM이 나중에 목록에 추가하는 새 이름)는 실제
+// 발동이 필요하다.
+async function migrateLegacyOwnershipToActivation() {
   if (!game.user.isGM) return;
-
-  const raw = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
-  const names = raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (names.length === 0) return;
-
-  const toRemove = new Set(["Born of the Soil"]);
-  try {
-    const nameMap = await getMoveNameMap();
-    const translated = nameMap.get("Born of the Soil");
-    if (translated) toRemove.add(translated);
-  } catch (err) {
-    // 번역 데이터를 못 읽어도 최소한 영문 기본값은 제거한다.
-  }
-
-  const next = names.filter((n) => !toRemove.has(n));
-  if (next.length === names.length) return;
-
-  await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, next.join(", "));
-  console.log(
-    `${MODULE_ID} | note-moves: removed Born of the Soil from Note-Taking Move Names (now handled by features/born-of-the-soil.js)`
-  );
-}
-
-// v0.23.x 전수조사로 새로 찾은 "자유 기입형" 무브(팔라딘 Quest/Divine Favor,
-// 레인저 God Amidst The Wastes)를 이미 이 설정을 저장해둔 세계에도 반영한다.
-// 이미 목록에 있는 이름(영문이든 번역명이든)은 건드리지 않고, 없는 것만 한 번
-// 추가한다.
-async function migrateAddSurveyedNoteMoves() {
-  if (!game.user.isGM) return;
-
-  const NEW_DEFAULTS = ["Quest", "Divine Favor", "God Amidst The Wastes"];
-
-  const raw = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
-  const names = raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const existing = new Set(names);
 
   let nameMap = null;
   try {
     nameMap = await getMoveNameMap();
   } catch (err) {
-    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+    // 번역 데이터를 못 읽어도 최소한 영문 기본값 기준으로는 진행한다.
   }
 
-  const toAdd = [];
-  for (const name of NEW_DEFAULTS) {
-    if (existing.has(name)) continue;
-    const translated = nameMap?.get(name);
-    if (translated && existing.has(translated)) continue;
-    toAdd.push(translated ?? name);
+  const legacyNames = new Set(DEFAULT_NOTE_MOVE_NAMES);
+  if (nameMap) {
+    for (const name of DEFAULT_NOTE_MOVE_NAMES) {
+      const translated = nameMap.get(name);
+      if (translated) legacyNames.add(translated);
+    }
   }
 
-  if (toAdd.length === 0) return;
+  for (const actor of game.actors) {
+    if (actor.type !== "character") continue;
+    const current = actor.getFlag(MODULE_ID, ACTIVATED_FLAG) ?? {};
+    let changed = false;
+    const next = { ...current };
+    for (const moveItem of actor.items) {
+      if (moveItem.type !== "move" || !legacyNames.has(moveItem.name)) continue;
+      if (next[moveItem.id]) continue;
+      next[moveItem.id] = true;
+      changed = true;
+    }
+    if (changed) await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, next);
+  }
+}
 
-  await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, [...names, ...toAdd].join(", "));
-  console.log(`${MODULE_ID} | note-moves: added newly-surveyed default(s) to Note-Taking Move Names`, toAdd);
+// features/born-of-the-soil.js는 v0.24.0에서 폐지되고 이 파일에 완전히
+// 통합됐다(더 이상 "소유 시 탭" 대 "발동 시 탭"을 구분하지 않으므로 별도
+// 기능일 이유가 없다). 그 기능이 쓰던 설정("대지의 아들/딸 무브 이름")과
+// 액터별 플래그(bornOfSoilActivated/bornOfSoilMoveId/bornOfSoilLand/
+// bornOfSoilNotes)를 여기 새 통합 체계로 한 번에 옮긴다.
+async function migrateBornOfSoilIntoNoteMoves() {
+  if (!game.user.isGM) return;
+
+  const bornNames = game.settings
+    .get(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (bornNames.length > 0) {
+    const currentNames = splitCommaList(SETTINGS.NOTE_MOVE_NAMES);
+    const existing = new Set(currentNames);
+    const toAdd = bornNames.filter((n) => !existing.has(n));
+    if (toAdd.length > 0) {
+      await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, [...currentNames, ...toAdd].join(", "));
+    }
+  }
+
+  for (const actor of game.actors) {
+    if (actor.type !== "character") continue;
+    if (!actor.getFlag(MODULE_ID, "bornOfSoilActivated")) continue;
+
+    const moveId = actor.getFlag(MODULE_ID, "bornOfSoilMoveId");
+    if (moveId) {
+      await setActivated(actor, moveId, true);
+      const land = actor.getFlag(MODULE_ID, "bornOfSoilLand");
+      if (land) await setAnswer(actor, moveId, land);
+      const notes = actor.getFlag(MODULE_ID, "bornOfSoilNotes");
+      if (notes) await setNoteText(actor, moveId, notes);
+    }
+
+    await actor.unsetFlag(MODULE_ID, "bornOfSoilActivated");
+    await actor.unsetFlag(MODULE_ID, "bornOfSoilMoveId");
+    await actor.unsetFlag(MODULE_ID, "bornOfSoilLand");
+    await actor.unsetFlag(MODULE_ID, "bornOfSoilNotes");
+  }
+
+  console.log(`${MODULE_ID} | note-moves: merged Born of the Soil into the unified note-move system`);
 }
 
 export function registerNoteMoves() {
+  Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
-    migrateBornOfTheSoilOut();
-    migrateAddSurveyedNoteMoves();
+    migrateBornOfSoilIntoNoteMoves().then(() => migrateLegacyOwnershipToActivation());
   });
 }

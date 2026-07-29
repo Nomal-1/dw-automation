@@ -14,7 +14,6 @@ import { registerNoteMoves } from "./features/note-moves.js";
 import { registerArmorAssistant } from "./features/armor-assistant.js";
 import { registerUnderdogAssistant } from "./features/underdog.js";
 import { registerLevelUpInfo } from "./features/level-up-info.js";
-import { registerBornOfTheSoil } from "./features/born-of-the-soil.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -40,4 +39,3 @@ registerNoteMoves();
 registerArmorAssistant();
 registerUnderdogAssistant();
 registerLevelUpInfo();
-registerBornOfTheSoil();

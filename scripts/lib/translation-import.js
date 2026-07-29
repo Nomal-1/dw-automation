@@ -194,15 +194,10 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, druidShapeshifterNames, stats)
   );
 
+  // v0.24.0부터 대지의 아들/딸은 "메모형 무브 이름" 목록의 한 항목일 뿐이라
+  // (features/note-moves.js 참고) 위 NOTE_MOVE_NAMES 번역만으로 충분하다.
   const noteMoveNames = game.settings.get(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, translateCommaList(moveMap, noteMoveNames, stats));
-
-  const bornOfTheSoilNames = game.settings.get(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES);
-  await game.settings.set(
-    MODULE_ID,
-    SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES,
-    translateCommaList(moveMap, bornOfTheSoilNames, stats)
-  );
 
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(

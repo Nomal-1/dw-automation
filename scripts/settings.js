@@ -490,14 +490,14 @@ export function registerSettings() {
     restricted: true
   });
 
-  // 대지의 아들/딸: 소유만으로 탭이 뜨는 다른 메모형 무브들과 달리, 실제로
-  // 이 무브를 발동(클릭)해야 땅 선택 팝업이 뜨고 탭이 생긴다. 자세한 설계는
-  // features/born-of-the-soil.js 참고.
+  // v0.24.0부터 대지의 아들/딸은 별도 기능이 아니라 "메모형 무브 이름"
+  // 목록의 한 항목일 뿐이다(features/note-moves.js 참고 — 이제 모든 메모형
+  // 무브가 발동해야 탭이 생기는 같은 방식으로 동작한다). 이 설정 자체는
+  // 예전 세계의 값을 한 번 읽어 위 목록에 병합하는 마이그레이션에서만
+  // 쓰이므로 등록은 유지하되 설정 화면에는 더 이상 노출하지 않는다.
   game.settings.register(MODULE_ID, SETTINGS.BORN_OF_THE_SOIL_MOVE_NAMES, {
-    name: "DWAUTO.Settings.BornOfTheSoilMoveNames.Name",
-    hint: "DWAUTO.Settings.BornOfTheSoilMoveNames.Hint",
     scope: "world",
-    config: true,
+    config: false,
     type: String,
     default: "Born of the Soil"
   });
