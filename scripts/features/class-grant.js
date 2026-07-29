@@ -13,6 +13,12 @@ const GRANTED_FLAG = "classGrantGranted"; // { [moveId]: true }
 const MOVE_PACK_IDS = MOVE_PACK_FILES.map((file) => file.replace(/\.json$/, ""));
 let cachedMoveDocs = null;
 
+// 바바리안 Appetite For Destruction/Kill 'Em All 원문("You may not take
+// multiclass moves from those classes")이 가리키는 대상 — 던전월드 컴펜디엄
+// 전체에서 "멀티클래스 무브"에 해당하는 건 이 둘뿐이다(각 기본 직업의
+// 고급 무브로 하나씩 존재).
+const MULTICLASS_MOVE_NAMES = ["Multiclass Dabbler", "Multiclass Initiate"];
+
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_CLASS_GRANT_ASSISTANT);
 }
@@ -105,7 +111,7 @@ function tierSuffix(reqLevel) {
   return game.i18n.localize("DWAUTO.ClassGrant.TierCore");
 }
 
-function buildEligiblePicks(classGroups, actorLevel) {
+function buildEligiblePicks(classGroups, actorLevel, excludeNames = null) {
   const maxLevel = actorLevel - 1;
   const result = new Map(); // packId -> { label, picks: [{ key, label, docs }] }
 
@@ -117,6 +123,7 @@ function buildEligiblePicks(classGroups, actorLevel) {
 
     for (const doc of docs) {
       if (doc.type !== "move") continue;
+      if (excludeNames?.has(doc.name)) continue;
       const reqLevel = Number(doc.system?.requiresLevel) || 0;
       if (reqLevel > maxLevel) continue;
 
@@ -145,6 +152,20 @@ function buildEligiblePicks(classGroups, actorLevel) {
   );
 
   return result;
+}
+
+// row.restrictToClassKeys("fighter,bard,thief" 등)로 제한된 경우, 팩 id가
+// dungeonworld.the-<key>-moves 형태인 그 직업들만 남긴다. 팩 id는 번역
+// 여부와 무관하게 항상 영문 고정값이라 이 매칭은 언어 설정에 안전하다.
+function restrictClassGroups(classGroups, restrictToClassKeys) {
+  if (!restrictToClassKeys) return classGroups;
+  const keys = restrictToClassKeys
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (keys.length === 0) return classGroups;
+
+  return new Map(Array.from(classGroups).filter(([packId]) => keys.some((key) => packId === `dungeonworld.the-${key}-moves`)));
 }
 
 // 직업을 먼저 고르고, 그 직업의 (레벨 자격을 만족하는) 무브 목록에서 하나를
@@ -273,8 +294,9 @@ async function onCreateChatMessage(message, options, userId) {
     if (isGranted(actor, moveItem.id)) return;
 
     if (row.mode === "choice") {
-      const classGroups = await getMovesGroupedByClassPack();
-      const eligibleGroups = buildEligiblePicks(classGroups, getActorLevel(actor));
+      const classGroups = restrictClassGroups(await getMovesGroupedByClassPack(), row.restrictToClassKeys);
+      const excludeNames = row.excludeMulticlassMoves ? new Set(MULTICLASS_MOVE_NAMES) : null;
+      const eligibleGroups = buildEligiblePicks(classGroups, getActorLevel(actor), excludeNames);
       const chosenPick = await promptChoiceGrant(moveItem, eligibleGroups);
       if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
@@ -305,6 +327,47 @@ async function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// v0.33.x 전수조사로 바바리안 Appetite For Destruction/Kill 'Em All을 새로
+// 찾아 DEFAULT_CLASS_GRANT_MOVES에 추가했다. 이미 세계를 설정해둔 GM에게는
+// 코드 기본값을 바꾸는 것만으로 반영되지 않으므로(game.settings 기본값은
+// 한 번도 저장된 적 없는 세계에만 적용된다), 이미 저장된 표에 없는 이름만
+// 골라 한 번 추가해준다 — features/underdog.js의 migrateAddSurveyedDefaults와
+// 같은 패턴.
+async function migrateAddSurveyedDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = getRows();
+  const existingNames = new Set(rows.map((r) => r.name));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_CLASS_GRANT_MOVES) {
+    if (existingNames.has(row.name)) continue;
+
+    const translatedName = nameMap?.get(row.name);
+    if (translatedName && existingNames.has(translatedName)) continue;
+
+    toAdd.push(translatedName ? { ...row, name: translatedName } : row);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | class-grant: added ${toAdd.length} newly-surveyed default(s)`,
+    toAdd.map((r) => r.name)
+  );
+}
+
 export function registerClassGrantAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.once("ready", () => {
+    migrateAddSurveyedDefaults();
+  });
 }

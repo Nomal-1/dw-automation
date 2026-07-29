@@ -7,6 +7,8 @@
         <th>{{localize "DWAUTO.ClassGrantMoves.Name"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.Mode"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.GrantedMoveNames"}}</th>
+        <th>{{localize "DWAUTO.ClassGrantMoves.RestrictToClassKeys"}}</th>
+        <th>{{localize "DWAUTO.ClassGrantMoves.ExcludeMulticlassMoves"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -22,6 +24,8 @@
           </select>
         </td>
         <td><input type="text" name="rows.{{@index}}.grantedMoveNames" value="{{this.grantedMoveNames}}" placeholder="Commune, Cast A Spell"></td>
+        <td><input type="text" name="rows.{{@index}}.restrictToClassKeys" value="{{this.restrictToClassKeys}}" placeholder="fighter,bard,thief"></td>
+        <td><input type="checkbox" name="rows.{{@index}}.excludeMulticlassMoves" {{#if this.excludeMulticlassMoves}}checked{{/if}}></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}

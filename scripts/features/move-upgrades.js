@@ -1,5 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 function getUpgradeRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
@@ -36,6 +38,55 @@ function onCreateItem(item, options, userId) {
   );
 }
 
+// v0.33.x 전수조사로 바바리안/이몰레이터(시스템에 같이 딸려오는 추가 두 직업)
+// 컴펜디엄에서 새로 찾은 3쌍(Kill 'Em All, Burns Half As Long, Fanning The
+// Flames)은 이미 세계를 설정해둔 GM에게는 코드 기본값을 바꾸는 것만으로
+// 반영되지 않는다(game.settings 기본값은 한 번도 저장된 적 없는 세계에만
+// 적용된다). 이미 저장된 표에 없는 쌍만 골라 한 번 추가해준다 — 이름은
+// 번역 데이터가 있으면 번역된 이름 기준으로 저장해서, 이미 번역된 세계에서도
+// 즉시 매칭된다. features/underdog.js의 migrateAddSurveyedDefaults와 같은 패턴.
+async function migrateAddSurveyedDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
+  const rowKey = (r) => `${r.upgradeName}|${r.replacesName}`;
+  const existingKeys = new Set(rows.map(rowKey));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_MOVE_UPGRADES) {
+    if (existingKeys.has(rowKey(row))) continue;
+
+    const translatedUpgrade = nameMap?.get(row.upgradeName);
+    const translatedReplaces = nameMap?.get(row.replacesName);
+    const translatedKey = `${translatedUpgrade ?? row.upgradeName}|${translatedReplaces ?? row.replacesName}`;
+    if (existingKeys.has(translatedKey)) continue;
+
+    toAdd.push({
+      ...row,
+      upgradeName: translatedUpgrade ?? row.upgradeName,
+      replacesName: translatedReplaces ?? row.replacesName
+    });
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | move-upgrades: added ${toAdd.length} newly-surveyed default(s)`,
+    toAdd.map((r) => `${r.upgradeName} <- ${r.replacesName}`)
+  );
+}
+
 export function registerMoveUpgradeAssistant() {
   Hooks.on("createItem", onCreateItem);
+  Hooks.once("ready", () => {
+    migrateAddSurveyedDefaults();
+  });
 }

@@ -25,6 +25,16 @@
 //     Formcrafter를 지워버리면 그 자동화가 깨진다).
 //   World-talker/Thing-talker — 대상 확장이 서로 다름(원소 vs 무생물).
 // 나머지 34쌍은 전부 "같은 효과의 상위 버전"이라 대체로 분류했다.
+//
+// 이후 바바리안/이몰레이터(시스템에 같이 딸려오는 추가 두 직업) 컴펜디엄도
+// 전수조사해서 3쌍을 더 찾았다 — 전부 "필요" 관계다:
+//   Kill 'Em All/Appetite For Destruction(바바리안) — 원문이 "Take ANOTHER
+//     move..."라 이전 선택을 대체하지 않고 추가로 하나 더 얻는 것.
+//   Burns Half As Long/Burns Twice As Bright(이몰레이터) — 서로 짝을 이루는
+//     기믹(하나를 다시 쓰려면 반드시 다른 하나를 먼저 써야 함)이라 둘 다
+//     유지해야 의미가 있음.
+//   Fanning The Flames/Firebrand(이몰레이터) — "Firebrand 효과를 여러 명에게
+//     한번에 적용 가능"이라 Firebrand 자체가 계속 필요함.
 export const DEFAULT_MOVE_UPGRADES = [
   { upgradeName: "Armored Perfection", replacesName: "Armor Mastery", deletesPrevious: true },
   { upgradeName: "Bloodthirsty", replacesName: "Merciless", deletesPrevious: true },
@@ -68,5 +78,8 @@ export const DEFAULT_MOVE_UPGRADES = [
   { upgradeName: "Vicious Blast", replacesName: "Vicious Cacophony", deletesPrevious: true },
   { upgradeName: "Blood and Thunder", replacesName: "Red of Tooth and Claw", deletesPrevious: true },
   { upgradeName: "Formshaper", replacesName: "Formcrafter", deletesPrevious: false },
-  { upgradeName: "World-talker", replacesName: "Thing-talker", deletesPrevious: false }
+  { upgradeName: "World-talker", replacesName: "Thing-talker", deletesPrevious: false },
+  { upgradeName: "Kill 'Em All", replacesName: "Appetite For Destruction", deletesPrevious: false },
+  { upgradeName: "Burns Half As Long", replacesName: "Burns Twice As Bright", deletesPrevious: false },
+  { upgradeName: "Fanning The Flames", replacesName: "Firebrand", deletesPrevious: false }
 ];

@@ -4,7 +4,7 @@ import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 const VALID_MODES = ["fixed", "choice"];
 
 function blankRow() {
-  return { name: "", grantedMoveNames: "", mode: "fixed" };
+  return { name: "", grantedMoveNames: "", mode: "fixed", restrictToClassKeys: "", excludeMulticlassMoves: false };
 }
 
 function normalizeRow(raw) {
@@ -12,7 +12,9 @@ function normalizeRow(raw) {
   return {
     name: (raw?.name ?? "").trim(),
     grantedMoveNames: (raw?.grantedMoveNames ?? "").trim(),
-    mode
+    mode,
+    restrictToClassKeys: (raw?.restrictToClassKeys ?? "").trim(),
+    excludeMulticlassMoves: Boolean(raw?.excludeMulticlassMoves)
   };
 }
 

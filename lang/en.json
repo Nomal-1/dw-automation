@@ -451,7 +451,7 @@
     },
     "ClassGrantMoves": {
       "Title": "Class Grant Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Fixed\" mode: actually triggering \"Move Name\" looks up the moves listed in \"Granted Move Names\" (comma separated) across all 8 core class compendiums and adds them outright. \"Free Choice\" mode: triggering it prompts for a class, then a move from that class's list, and grants whichever is chosen (for Multiclass Dabbler/Initiate — \"Granted Move Names\" is unused in this mode). Either way, a move the character already has is not added again.",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Fixed\" mode: actually triggering \"Move Name\" looks up the moves listed in \"Granted Move Names\" (comma separated) across all 8 core class compendiums and adds them outright. \"Free Choice\" mode: triggering it prompts for a class, then a move from that class's list, and grants whichever is chosen (for Multiclass Dabbler/Initiate — \"Granted Move Names\" is unused in this mode). \"Restrict Choice\" accepts comma-separated class-pack keywords in English lowercase (e.g. fighter,bard,thief) to limit which classes' lists can be picked from; leave blank to allow all 8 classes (used for the Barbarian's Appetite For Destruction/Kill 'Em All, which are restricted to Fighter/Bard/Thief). \"Exclude Multiclass Moves\" removes Multiclass Dabbler/Initiate themselves from the pickable list. Either way, a move the character already has is not added again.",
       "Name": "Move Name",
       "Mode": "Mode",
       "ModeOption": {
@@ -459,6 +459,8 @@
         "choice": "Free Choice (pick a class + move)"
       },
       "GrantedMoveNames": "Granted Move Names",
+      "RestrictToClassKeys": "Restrict Choice (classes, comma)",
+      "ExcludeMulticlassMoves": "Exclude Multiclass Moves",
       "ResetDefaultsButton": "Reset to Verified Defaults (English)",
       "ResetConfirmTitle": "Reset Class Grant Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
