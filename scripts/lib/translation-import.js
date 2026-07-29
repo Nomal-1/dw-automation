@@ -8,10 +8,13 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 // 뿐이라 Babele이 실제로 초기화됐는지에 의존할 필요가 없다.
 export const TRANSLATION_MODULE_ID = "dungeonworld-ko";
 
-// 이 모듈이 자동화하는 8개 기본 직업 + 기본 무브 팩만 대상으로 한다.
-// features/level-up-info.js도 이 파일명 목록에서 ".json"만 뗀 값을 컴펜디엄
+// 이 모듈이 자동화하는 직업 + 기본 무브 팩을 대상으로 한다. features/level-up-info.js와
+// features/class-grant.js도 이 파일명 목록에서 ".json"만 뗀 값을 컴펜디엄
 // 팩 id로 재사용한다(무브 데이터를 fetch가 아니라 game.packs에서 직접 읽을
-// 때도 같은 9개 팩이면 되므로).
+// 때도 같은 팩이면 되므로). 던전월드 룰북 기본 8개 직업(파이터/클레릭/시프/
+// 위저드/레인저/팔라딘/바드/드루이드)만 넣어뒀다가, 바바리안/이몰레이터
+// (시스템에 같이 딸려오는 추가 직업)의 무브(예: Unencumbered, Unharmed)가
+// 자동 번역이 전혀 안 되는 걸 뒤늦게 발견해서 이 둘도 추가했다.
 export const MOVE_PACK_FILES = [
   "dungeonworld.basic-moves.json",
   "dungeonworld.the-fighter-moves.json",
@@ -21,7 +24,9 @@ export const MOVE_PACK_FILES = [
   "dungeonworld.the-ranger-moves.json",
   "dungeonworld.the-paladin-moves.json",
   "dungeonworld.the-bard-moves.json",
-  "dungeonworld.the-druid-moves.json"
+  "dungeonworld.the-druid-moves.json",
+  "dungeonworld.the-barbarian-moves.json",
+  "dungeonworld.the-immolator-moves.json"
 ];
 
 const SPELL_PACK_FILES = ["dungeonworld.the-cleric-spells.json", "dungeonworld.the-wizard-spells.json"];
