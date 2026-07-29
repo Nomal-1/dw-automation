@@ -47,5 +47,11 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
     mode: "choice",
     restrictToClassKeys: "fighter,bard,thief",
     excludeMulticlassMoves: true
-  }
+  },
+  // 이몰레이터 Ogdru Jahad 원문: "Gain the Wizard move Ritual." — Divine
+  // Favor와 같은 "고정" 패턴(정해진 무브를 그대로 부여)이지만, "class list"/
+  // "multiclass" 문구가 없어 처음 바바리안/이몰레이터를 훑을 때 썼던 키워드
+  // 검색(전수조사 1차)에서 놓쳤다가, 이번에(전수조사 2차, 카테고리 전체 재검토)
+  // 발견했다.
+  { name: "Ogdru Jahad", grantedMoveNames: "Ritual", mode: "fixed" }
 ];
