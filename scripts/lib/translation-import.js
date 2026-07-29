@@ -42,12 +42,34 @@ async function fetchPackEntries(file) {
   }
 }
 
+// 실제로 확인된 사례: 클레릭과 팔라딘이 둘 다 "Divine Protection"이라는
+// 영문 이름을 쓰는데(원작 자체가 그렇다), 한글 번역은 "믿음의 갑옷"/"신의
+// 갑옷"으로 서로 다르다. 이 함수는 팩을 순서대로 훑으면서 entry.id를 키로
+// 맵에 쌓는데, 이런 경우 나중에 처리되는 팩(순서상 팔라딘)의 번역이 먼저
+// 것(클레릭)을 조용히 덮어써버려서, 클레릭용으로 등록해둔 설정 행이 실제로는
+// 팔라딘 이름으로 잘못 번역되는 사고가 났다. 같은 영문 이름인데 번역명이
+// 서로 다른 경우를 "모호함"으로 표시해 아예 맵에서 빼버린다 — 틀린 번역을
+// 조용히 적용하는 것보다, 그 이름만 자동 번역하지 않고 그대로 두는 편이
+// 안전하다(GM이 직접 채워 넣을 수 있다).
 async function buildNameMap(files) {
   const map = new Map();
+  const ambiguous = new Set();
   const packs = await Promise.all(files.map(fetchPackEntries));
   for (const entries of packs) {
     for (const entry of entries) {
-      if (entry?.id && entry?.name) map.set(entry.id, entry.name);
+      if (!entry?.id || !entry?.name) continue;
+      if (ambiguous.has(entry.id)) continue;
+
+      const existing = map.get(entry.id);
+      if (existing !== undefined && existing !== entry.name) {
+        ambiguous.add(entry.id);
+        map.delete(entry.id);
+        console.warn(
+          `${MODULE_ID} | translation-import: "${entry.id}" has different translations across classes ("${existing}" vs "${entry.name}") — skipping auto-translate for this name, enter it manually.`
+        );
+        continue;
+      }
+      map.set(entry.id, entry.name);
     }
   }
   return map;
