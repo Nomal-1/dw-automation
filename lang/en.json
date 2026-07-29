@@ -465,7 +465,10 @@
     "ClassGrant": {
       "Granted": "Gained the following move(s): {moves}",
       "ChoiceClassLabel": "Choose a Class",
-      "ChoiceMoveLabel": "Choose a Move"
+      "ChoiceMoveLabel": "Choose a Move",
+      "TierCore": "Core",
+      "TierAdvanced2": "Advanced (Lower)",
+      "TierAdvanced6": "Advanced (Upper)"
     },
     "ActorTab": {
       "ResetButton": "Reset",

@@ -45,14 +45,6 @@ async function setActivated(actor, moveId, value) {
   await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, { ...current, [moveId]: value });
 }
 
-async function unsetActivated(actor, moveId) {
-  const current = actor.getFlag(MODULE_ID, ACTIVATED_FLAG) ?? {};
-  if (!(moveId in current)) return;
-  const next = { ...current };
-  delete next[moveId];
-  await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, next);
-}
-
 // 예전(v0.25.0 이전, 목록을 하나로 뭉뚱그려 프롬프트 하나만 띄우던 시절)
 // 데이터는 문자열 하나였다. 그대로도 읽을 수 있게 배열로 감싸서 돌려준다.
 function getAnswer(actor, moveId) {
@@ -66,14 +58,6 @@ async function setAnswer(actor, moveId, value) {
   await actor.setFlag(MODULE_ID, ANSWER_FLAG, { ...current, [moveId]: value });
 }
 
-async function unsetAnswer(actor, moveId) {
-  const current = actor.getFlag(MODULE_ID, ANSWER_FLAG) ?? {};
-  if (!(moveId in current)) return;
-  const next = { ...current };
-  delete next[moveId];
-  await actor.setFlag(MODULE_ID, ANSWER_FLAG, next);
-}
-
 function getGmChoice(actor, moveId) {
   return actor.getFlag(MODULE_ID, GM_CHOICE_FLAG)?.[moveId] ?? [];
 }
@@ -83,14 +67,6 @@ async function setGmChoice(actor, moveId, values) {
   await actor.setFlag(MODULE_ID, GM_CHOICE_FLAG, { ...current, [moveId]: values });
 }
 
-async function unsetGmChoice(actor, moveId) {
-  const current = actor.getFlag(MODULE_ID, GM_CHOICE_FLAG) ?? {};
-  if (!(moveId in current)) return;
-  const next = { ...current };
-  delete next[moveId];
-  await actor.setFlag(MODULE_ID, GM_CHOICE_FLAG, next);
-}
-
 function getNoteText(actor, moveId) {
   return actor.getFlag(MODULE_ID, NOTES_FLAG)?.[moveId] ?? "";
 }
@@ -98,14 +74,6 @@ function getNoteText(actor, moveId) {
 async function setNoteText(actor, moveId, text) {
   const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
   await actor.setFlag(MODULE_ID, NOTES_FLAG, { ...current, [moveId]: text });
-}
-
-async function unsetNoteText(actor, moveId) {
-  const current = actor.getFlag(MODULE_ID, NOTES_FLAG) ?? {};
-  if (!(moveId in current)) return;
-  const next = { ...current };
-  delete next[moveId];
-  await actor.setFlag(MODULE_ID, NOTES_FLAG, next);
 }
 
 // 서사적 빈칸(______, 밑줄 2개 이상)이 포함된 선택지인지 확인한다. "Slay
@@ -126,8 +94,56 @@ const BLANK_PATTERN = /_{2,}/;
 // 판단 — 번역본은 영문 "GM" 대신 "마스터"라고 적는 경우가 많다)은 발동 시
 // 프롬프트에는 넣지 않고 gmGroups로 따로 돌려준다 — 탭에 GM이 직접 체크할
 // 수 있는 목록으로 보여준다(renderGmChoiceSection 참고).
+const GM_MARKER_PATTERN = /\bGM\b|마스터/i;
+
+function classifyGroup(playerGroups, gmGroups, group, precedingText) {
+  if (GM_MARKER_PATTERN.test(precedingText)) {
+    gmGroups.push(group);
+  } else {
+    playerGroups.push(group);
+  }
+}
+
+// 번역본 중에는 <ul>/<li>가 아니라 그냥 한 문단 안에 "•" 같은 불릿 문자로
+// 목록을 적어둔 경우가 있다(실제로 확인된 사례: 팔라딘 퀘스트의 "서약" 목록).
+// <ul>/<ol>로 못 찾은 문단들 중에서, 줄바꿈(<br>) 기준으로 나눴을 때 불릿
+// 문자로 시작하는 줄이 연속되는 구간을 찾아 같은 방식으로 다룬다. 그 앞의
+// (불릿으로 시작하지 않는) 줄을 이 목록의 label로 쓴다.
+const BULLET_LINE_PATTERN = /^[•·∙‣▪●○◦*-]\s*/;
+
+function extractBulletPseudoGroups(html, playerGroups, gmGroups) {
+  let pendingLabel = null;
+  let pendingOptions = [];
+
+  const flush = () => {
+    if (pendingOptions.length > 0) {
+      classifyGroup(playerGroups, gmGroups, { label: pendingLabel, options: pendingOptions }, pendingLabel ?? "");
+    }
+    pendingOptions = [];
+  };
+
+  html.children("p").each((_, el) => {
+    const rawHtml = $(el).html() ?? "";
+    const lines = rawHtml
+      .split(/<br\s*\/?>/i)
+      .map((line) => $(`<div>${line}</div>`).text().trim())
+      .filter(Boolean);
+
+    for (const line of lines) {
+      if (BULLET_LINE_PATTERN.test(line)) {
+        pendingOptions.push(line.replace(BULLET_LINE_PATTERN, "").trim());
+      } else {
+        flush();
+        pendingLabel = line;
+      }
+    }
+  });
+  flush();
+}
+
 function extractListGroups(moveItem) {
-  const html = $(`<div>${moveItem.system?.description ?? ""}</div>`);
+  const rawDescription = moveItem.system?.description ?? "";
+  const html = $(`<div>${rawDescription}</div>`);
   const playerGroups = [];
   const gmGroups = [];
 
@@ -141,18 +157,16 @@ function extractListGroups(moveItem) {
     if (options.length === 0) return;
 
     const precedingText = $list.prev("p").text().trim();
-    const group = { label: precedingText || null, options };
-
-    if (/\bGM\b/i.test(precedingText) || precedingText.includes("마스터")) {
-      gmGroups.push(group);
-    } else {
-      playerGroups.push(group);
-    }
+    classifyGroup(playerGroups, gmGroups, { label: precedingText || null, options }, precedingText);
   });
 
+  extractBulletPseudoGroups(html, playerGroups, gmGroups);
+
   console.log(
-    `${MODULE_ID} | note-moves: extracted lists for "${moveItem.name}" — player: ${playerGroups.length}, gm: ${gmGroups.length}`,
-    { playerGroups, gmGroups }
+    `${MODULE_ID} | note-moves: extracted lists for "${moveItem.name}" — player: ${playerGroups.length}, gm: ${gmGroups.length}\n` +
+      `  raw description: ${rawDescription}\n` +
+      `  playerGroups: ${JSON.stringify(playerGroups)}\n` +
+      `  gmGroups: ${JSON.stringify(gmGroups)}`
   );
 
   return { playerGroups, gmGroups };
@@ -293,11 +307,20 @@ async function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// 4개 플래그를 따로따로(각각 별도의 actor.update) 지우면, 그 사이사이 갱신
+// 이벤트마다 시트가 자동으로 다시 그려질 수 있어서 아직 일부만 지워진
+// "중간 상태"로 렌더링됐다가 마지막 갱신이 끝나야 완전히 사라지는 경합이
+// 생길 수 있다(탭이 잠깐 사라졌다 다시 생기는 것처럼 보였던 원인). 네 플래그를
+// 한 번의 actor.update로 원자적으로 지워서 그런 중간 상태 자체가 생기지
+// 않게 한다. "flags.모듈.플래그.-=키" 문법은 그 키 하나만 지우는 Foundry의
+// 표준 플래그 삭제 방식이다.
 async function resetNoteMove(actor, moveId) {
-  await unsetActivated(actor, moveId);
-  await unsetAnswer(actor, moveId);
-  await unsetGmChoice(actor, moveId);
-  await unsetNoteText(actor, moveId);
+  await actor.update({
+    [`flags.${MODULE_ID}.${ACTIVATED_FLAG}.-=${moveId}`]: null,
+    [`flags.${MODULE_ID}.${ANSWER_FLAG}.-=${moveId}`]: null,
+    [`flags.${MODULE_ID}.${GM_CHOICE_FLAG}.-=${moveId}`]: null,
+    [`flags.${MODULE_ID}.${NOTES_FLAG}.-=${moveId}`]: null
+  });
 }
 
 // "GM이 나중에 정해준다"고 적힌 목록(퀘스트의 서약 등)을 체크박스로 보여준다

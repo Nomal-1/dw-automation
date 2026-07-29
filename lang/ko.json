@@ -465,7 +465,10 @@
     "ClassGrant": {
       "Granted": "다음 무브를 얻었습니다: {moves}",
       "ChoiceClassLabel": "직업 선택",
-      "ChoiceMoveLabel": "무브 선택"
+      "ChoiceMoveLabel": "무브 선택",
+      "TierCore": "핵심",
+      "TierAdvanced2": "고급 하급",
+      "TierAdvanced6": "고급 상급"
     },
     "ActorTab": {
       "ResetButton": "초기화",

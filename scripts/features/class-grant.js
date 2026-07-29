@@ -96,6 +96,15 @@ async function getMovesGroupedByClassPack() {
 // 추려내고, 서로 의존하는 핵심 액션 묶음은 하나의 선택지로 합친다. 고를 게
 // 하나도 없는 직업(이론상 없음 — 모든 직업이 레벨 0 시작 무브를 갖고 있다)은
 // 목록에서 아예 뺀다.
+// 무브 자체의 requiresLevel(0=핵심, 2=고급 하급 티어, 6=고급 상급 티어)을
+// 그대로 선택지 이름 뒤에 붙여서, 지금 뜨는 목록이 정말 레벨에 맞는 고급
+// 무브까지 포함하고 있는지 눈으로 바로 확인할 수 있게 한다.
+function tierSuffix(reqLevel) {
+  if (reqLevel >= 6) return game.i18n.localize("DWAUTO.ClassGrant.TierAdvanced6");
+  if (reqLevel >= 2) return game.i18n.localize("DWAUTO.ClassGrant.TierAdvanced2");
+  return game.i18n.localize("DWAUTO.ClassGrant.TierCore");
+}
+
 function buildEligiblePicks(classGroups, actorLevel) {
   const maxLevel = actorLevel - 1;
   const result = new Map(); // packId -> { label, picks: [{ key, label, docs }] }
@@ -104,6 +113,7 @@ function buildEligiblePicks(classGroups, actorLevel) {
     const bundleNames = MULTICLASS_BUNDLES[packId];
     const picks = [];
     const bundleDocs = [];
+    let bundleLevel = 0;
 
     for (const doc of docs) {
       if (doc.type !== "move") continue;
@@ -112,17 +122,27 @@ function buildEligiblePicks(classGroups, actorLevel) {
 
       if (bundleNames?.includes(doc.name)) {
         bundleDocs.push(doc);
+        bundleLevel = Math.max(bundleLevel, reqLevel);
         continue;
       }
-      picks.push({ key: doc.id, label: doc.name, docs: [doc] });
+      picks.push({ key: doc.id, label: `${doc.name} (${tierSuffix(reqLevel)})`, docs: [doc] });
     }
 
     if (bundleDocs.length > 0) {
-      picks.unshift({ key: `bundle:${packId}`, label: bundleDocs.map((d) => d.name).join(" + "), docs: bundleDocs });
+      picks.unshift({
+        key: `bundle:${packId}`,
+        label: `${bundleDocs.map((d) => d.name).join(" + ")} (${tierSuffix(bundleLevel)})`,
+        docs: bundleDocs
+      });
     }
 
     if (picks.length > 0) result.set(packId, { label, picks });
   }
+
+  console.log(
+    `${MODULE_ID} | class-grant: eligible picks at level ${actorLevel} (max requiresLevel ${maxLevel}):`,
+    Object.fromEntries(Array.from(result, ([packId, g]) => [packId, g.picks.map((p) => p.label)]))
+  );
 
   return result;
 }
