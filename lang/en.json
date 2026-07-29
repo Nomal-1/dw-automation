@@ -158,6 +158,11 @@
         "Name": "Note-Taking Move Names",
         "Hint": "Move names (comma separated) that get their own character-sheet tab (named after the move) with a free-text note area, for moves whose \"mechanic\" is really a narrative choice with no dice involved."
       },
+      "NoteMovesMenu": {
+        "Name": "Note-Taking Move Names",
+        "Label": "Edit Note-Taking Move Names",
+        "Hint": "Manage, as a list (instead of a comma-separated field), the move names that get their own free-text note tab — Deity, Animal Companion, Quest, and similar narrative-choice moves. Enter names exactly as they appear in your game (translated, if applicable)."
+      },
       "BornOfTheSoilMoveNames": {
         "Name": "Born of the Soil Move Names",
         "Hint": "When this move is actually triggered (clicked in the move list), a prompt shows the list of lands from the move's own text (plus a custom option), and once chosen a dedicated tab appears named after the move (comma separated)."
@@ -254,7 +259,10 @@
       "DamageOnSuccess": "Damage on Success",
       "PartialPickCount": "Partial Pick Count",
       "SuccessPickCount": "Success Pick Count",
-      "AddRow": "Add Row"
+      "AddRow": "Add Row",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Special Attack Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text for all 8 core classes. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "Spell": {
       "NoPrepared": "{name} has no prepared spells; skipping.",
@@ -282,7 +290,10 @@
         "none": "None (just ongoing)",
         "minus1": "-1 (while maintained)",
         "blocked": "Cannot cast"
-      }
+      },
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Ongoing Spells Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against all 63 core Cleric/Wizard spells. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "SpellAugmentation": {
       "Title": "Spell Augmentation",
@@ -309,7 +320,10 @@
         "debility": "Take a debility"
       },
       "GrantsForward": "Grants +1 forward",
-      "AddRow": "Add Row"
+      "AddRow": "Add Row",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Hit-Taken Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "HitTrigger": {
       "PromptTitle": "Negate Damage?",
@@ -331,7 +345,10 @@
       "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Only use this for moves whose condition is independent of any other move/state (e.g. being outnumbered, having your feet on the ground) — not conditions tied to something like shapeshifting. \"Base Bonus\" is the armor bonus granted while the condition is not met; \"Bonus When Condition Met\" is granted instead while it is. Each move gets its own independent per-character toggle (on the move's sheet badge) that feeds into the armor recalculation button.",
       "Name": "Move Name",
       "BaseBonus": "Base Bonus",
-      "OutnumberedBonus": "Bonus When Condition Met"
+      "OutnumberedBonus": "Bonus When Condition Met",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Conditional Armor Bonus Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text across all 10 classes. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "ConditionalDamageMoves": {
       "Title": "Conditional Damage Moves",
@@ -339,7 +356,10 @@
       "Name": "Move Name",
       "YesFormula": "If Yes",
       "NoFormula": "If No",
-      "RequiresDesignation": "Requires Designation"
+      "RequiresDesignation": "Requires Designation",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Conditional Damage Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "ConditionalDamage": {
       "Prompt": "Does the condition for \"{name}\" apply to this attack?",
@@ -368,14 +388,20 @@
       },
       "CustomFormula": "Custom Formula",
       "TransferToSelfOnPartial": "Transfer to Self on Partial",
-      "AddRow": "Add Row"
+      "AddRow": "Add Row",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Healing Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move/spell text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "HospitallerMoves": {
       "Title": "Hospitaller Moves",
       "Hint": "Register moves that add extra healing whenever the character heals someone else (not themselves). Enter the name exactly as it appears in your game (translated, if applicable).",
       "Name": "Move Name",
       "BonusFormula": "Bonus Formula",
-      "AddRow": "Add Row"
+      "AddRow": "Add Row",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Hospitaller Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "Healing": {
       "TargetTitle": "Choose Recipient",
@@ -412,7 +438,10 @@
       "Title": "Druid Shapeshift Damage Die Settings",
       "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). While shapeshifted (in an appropriate animal form), the damage roll's base die is overridden to this size. If the character owns more than one matching move, the largest die size wins.",
       "Name": "Move Name",
-      "DieSize": "Die Size (e.g. 8 → d8)"
+      "DieSize": "Die Size (e.g. 8 → d8)",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Druid Shapeshift Damage Die Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "ActorTab": {
       "ResetButton": "Reset",
@@ -460,6 +489,13 @@
     },
     "NoteMoves": {
       "NotesLabel": "Notes"
+    },
+    "NoteMovesSettings": {
+      "Title": "Note-Taking Move Names",
+      "Name": "Move Name",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Note-Taking Move Names",
+      "ResetConfirmContent": "This clears the current list and restores the English defaults this module has verified against the actual move text across all 10 classes (Deity, Apotheosis, Animal Companion, Quest, and similar). Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "Armor": {
       "NoContributors": "No equipped armor and no currently active modifiers",

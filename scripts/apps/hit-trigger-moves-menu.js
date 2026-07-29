@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 
 const VALID_EFFECTS = ["armor", "debility"];
 
@@ -66,6 +67,18 @@ export class HitTriggerMovesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.HitTriggerMoves.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.HitTriggerMoves.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_HIT_TRIGGER_MOVES);
       this.render();
     });
   }

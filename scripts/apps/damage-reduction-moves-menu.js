@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 
 function blankRow() {
   return { name: "", baseBonus: 0, outnumberedBonus: 1 };
@@ -56,6 +57,18 @@ export class DamageReductionMovesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.DamageReductionMoves.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.DamageReductionMoves.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_DAMAGE_REDUCTION_MOVES);
       this.render();
     });
   }

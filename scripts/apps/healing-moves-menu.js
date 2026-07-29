@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_HEALING_MOVES } from "../data/healing-moves.js";
 
 const VALID_MODES = ["auto", "custom", "max"];
 
@@ -67,6 +68,18 @@ export class HealingMovesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.HealingMoves.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.HealingMoves.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_HEALING_MOVES);
       this.render();
     });
   }

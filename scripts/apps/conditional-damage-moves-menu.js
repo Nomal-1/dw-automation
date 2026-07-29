@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "../data/conditional-damage-moves.js";
 
 function blankRow() {
   return { name: "", yesFormula: "", noFormula: "0", requiresDesignation: false };
@@ -57,6 +58,18 @@ export class ConditionalDamageMovesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.ConditionalDamageMoves.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.ConditionalDamageMoves.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_CONDITIONAL_DAMAGE_MOVES);
       this.render();
     });
   }

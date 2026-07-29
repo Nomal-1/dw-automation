@@ -18,6 +18,8 @@ import { DEFAULT_DRUID_DAMAGE_DIE_MOVES } from "./data/druid-damage-die-moves.js
 import { ConditionalDamageMovesMenu } from "./apps/conditional-damage-moves-menu.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-moves.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
+import { NoteMovesMenu } from "./apps/note-moves-menu.js";
+import { DEFAULT_NOTE_MOVE_NAMES } from "./data/note-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -473,12 +475,19 @@ export function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, SETTINGS.NOTE_MOVE_NAMES, {
-    name: "DWAUTO.Settings.NoteMoveNames.Name",
-    hint: "DWAUTO.Settings.NoteMoveNames.Hint",
     scope: "world",
-    config: true,
+    config: false,
     type: String,
-    default: "Deity, Apotheosis, Animal Companion, Quest, Divine Favor, God Amidst The Wastes"
+    default: DEFAULT_NOTE_MOVE_NAMES.join(", ")
+  });
+
+  game.settings.registerMenu(MODULE_ID, "noteMovesMenu", {
+    name: "DWAUTO.Settings.NoteMovesMenu.Name",
+    label: "DWAUTO.Settings.NoteMovesMenu.Label",
+    hint: "DWAUTO.Settings.NoteMovesMenu.Hint",
+    icon: "fas fa-feather-pointed",
+    type: NoteMovesMenu,
+    restricted: true
   });
 
   // 대지의 아들/딸: 소유만으로 탭이 뜨는 다른 메모형 무브들과 달리, 실제로

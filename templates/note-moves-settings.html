@@ -1,11 +1,10 @@
-<form class="dwauto-druid-damage-die-moves">
+<form class="dwauto-note-moves">
   <p class="notes">{{hint}}</p>
 
   <table class="dwauto-attack-moves-table">
     <thead>
       <tr>
-        <th>{{localize "DWAUTO.DruidDamageDieMoves.Name"}}</th>
-        <th>{{localize "DWAUTO.DruidDamageDieMoves.DieSize"}}</th>
+        <th>{{localize "DWAUTO.NoteMovesSettings.Name"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -13,7 +12,6 @@
       {{#each rows}}
       <tr>
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
-        <td><input type="number" name="rows.{{@index}}.dieSize" value="{{this.dieSize}}" min="1"></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}
@@ -21,7 +19,7 @@
   </table>
 
   <button type="button" data-action="add-row"><i class="fas fa-plus"></i> {{localize "DWAUTO.AttackMoves.AddRow"}}</button>
-  <button type="button" data-action="reset-defaults"><i class="fas fa-rotate-left"></i> {{localize "DWAUTO.DruidDamageDieMoves.ResetDefaultsButton"}}</button>
+  <button type="button" data-action="reset-defaults"><i class="fas fa-rotate-left"></i> {{localize "DWAUTO.NoteMovesSettings.ResetDefaultsButton"}}</button>
 
   <footer class="sheet-footer flexrow">
     <button type="submit"><i class="fas fa-save"></i> {{localize "SETTINGS.Save"}}</button>

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { DEFAULT_DRUID_DAMAGE_DIE_MOVES } from "../data/druid-damage-die-moves.js";
 
 function blankRow() {
   return { name: "", dieSize: 8 };
@@ -55,6 +56,18 @@ export class DruidDamageDieMovesMenu extends FormApplication {
       this._syncRowsFromForm(html);
       const index = Number(event.currentTarget.dataset.index);
       this.rows.splice(index, 1);
+      this.render();
+    });
+
+    html.find('[data-action="reset-defaults"]').on("click", async () => {
+      const confirmed = await Dialog.confirm({
+        title: game.i18n.localize("DWAUTO.DruidDamageDieMoves.ResetConfirmTitle"),
+        content: `<p>${game.i18n.localize("DWAUTO.DruidDamageDieMoves.ResetConfirmContent")}</p>`,
+        defaultYes: false
+      });
+      if (!confirmed) return;
+
+      this.rows = foundry.utils.deepClone(DEFAULT_DRUID_DAMAGE_DIE_MOVES);
       this.render();
     });
   }
