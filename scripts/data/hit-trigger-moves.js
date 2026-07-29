@@ -24,20 +24,21 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
 //   - Holy Protection(팔라딘): "퀘스트 수행 중일 때 +1 장갑"
 //
 // 위 항목들의 조건은 캐릭터 시트에서 무브마다 독립적으로 켜고 끄는 수동
-// 토글로 관리한다(linkedMoveName을 비워두면 이 방식). Holy Protection만은
-// 예외로, "퀘스트 수행 중"이라는 조건이 이미 이 모듈이 추적하는 다른 무브
-// (features/note-moves.js의 Quest 발동 상태)와 정확히 같은 뜻이라 수동
-// 토글 대신 linkedMoveName: "Quest"로 그 무브의 발동 상태를 그대로
-// 가져다 쓴다(수동 토글 UI 자체가 이 행에는 안 뜬다).
+// 토글로 관리한다(linkedMoveName을 비워두면 이 방식). Holy Protection과
+// 팔라딘 버전 Divine Protection(둘 다 아래 참고)만은 예외로, "퀘스트 수행
+// 중"이라는 조건이 이미 이 모듈이 추적하는 다른 무브(features/note-moves.js의
+// Quest 발동 상태)와 정확히 같은 뜻이라 수동 토글 대신 linkedMoveName:
+// "Quest"로 그 무브의 발동 상태를 그대로 가져다 쓴다(수동 토글 UI 자체가
+// 이 행에는 안 뜬다).
 //
-// 참고: 이름이 같은 "Divine Protection"이 팔라딘 쪽에도 있으나(Holy
-// Protection의 업그레이드, 조건도 "퀘스트 수행 중"으로 동일) 여기 등록한
-// "Divine Protection"은 클레릭 버전이다 — 이름이 완전히 같아서 팔라딘
-// 버전을 별도 행으로 등록하면 같은 무브 하나에 행 두 개가 매칭돼 보너스가
-// 중복 적용된다. 팔라딘이 Divine Protection까지 올리면 이 표의 클레릭
-// 버전 행(수동 토글, 값은 우연히 동일)이 대신 적용되니 실제 수치는
-// 똑같지만, 그 시점부터는 퀘스트 상태와 자동 연동되지 않고 수동 토글로
-// 돌아간다.
+// 참고: "Divine Protection"이라는 이름을 클레릭과 팔라딘(Holy Protection의
+// 업그레이드)이 똑같이 쓴다 — 원작 자체가 그렇다. 번역되기 전(영문) 상태로는
+// 두 행이 이름이 같아 보이지만, linkedMoveName 유무로 어느 클래스 것인지
+// 이미 구분되어 있어서 lib/translation-import.js의 자동 채우기가 각각
+// 정확한 한글 이름(클레릭 "믿음의 갑옷" / 팔라딘 "신의 갑옷")으로 번역해
+// 실제로 겹치지 않게 만들어준다. 번역을 전혀 쓰지 않는(원문 영문 그대로
+// 플레이하는) 세계에서는 두 행이 진짜로 이름이 같아 이론상 중복 적용될 수
+// 있으니, 그런 경우 GM이 둘 중 하나를 지우거나 이름을 구분해서 고쳐두면 된다.
 export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
   { name: "Underdog", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
   { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2, linkedMoveName: "" },
@@ -45,5 +46,6 @@ export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
   { name: "Barkskin", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
   { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "" },
   { name: "Divine Armor", baseBonus: 0, outnumberedBonus: 3, linkedMoveName: "" },
-  { name: "Holy Protection", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "Quest" }
+  { name: "Holy Protection", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "Quest" },
+  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "Quest" }
 ];

@@ -235,7 +235,11 @@ async function migrateAddSurveyedDefaults() {
   if (!game.user.isGM) return;
 
   const rows = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
-  const existingNames = new Set(rows.map((r) => r.name));
+  // 이름만으로 구분하면 "Divine Protection"처럼 linkedMoveName 유무로만
+  // 갈리는 두 기본 행(클레릭/팔라딘)을 서로 같은 것으로 착각해 하나를
+  // 빠뜨릴 수 있다 — 이름+연동 무브 이름을 합쳐서 구분한다.
+  const rowKey = (r) => `${r.name}|${r.linkedMoveName || ""}`;
+  const existingKeys = new Set(rows.map(rowKey));
 
   let nameMap = null;
   try {
@@ -246,18 +250,18 @@ async function migrateAddSurveyedDefaults() {
 
   const toAdd = [];
   for (const row of DEFAULT_DAMAGE_REDUCTION_MOVES) {
-    if (existingNames.has(row.name)) continue;
-    const translatedName = nameMap?.get(row.name);
-    if (translatedName && existingNames.has(translatedName)) continue;
+    if (existingKeys.has(rowKey(row))) continue;
 
-    let finalRow = translatedName ? { ...row, name: translatedName } : row;
+    const translatedName = nameMap?.get(row.name);
     // linkedMoveName(Holy Protection의 "Quest" 등)도 무브 이름이라 이 시점의
     // 번역 데이터로 같이 바꿔줘야 features/note-moves.js가 실제 캐릭터가
     // 들고 있는 (번역된) 이름으로 정확히 찾을 수 있다.
-    if (row.linkedMoveName) {
-      const translatedLinked = nameMap?.get(row.linkedMoveName);
-      if (translatedLinked) finalRow = { ...finalRow, linkedMoveName: translatedLinked };
-    }
+    const translatedLinked = row.linkedMoveName ? nameMap?.get(row.linkedMoveName) : row.linkedMoveName;
+    const translatedKey = `${translatedName ?? row.name}|${translatedLinked || ""}`;
+    if (existingKeys.has(translatedKey)) continue;
+
+    let finalRow = translatedName ? { ...row, name: translatedName } : row;
+    if (translatedLinked) finalRow = { ...finalRow, linkedMoveName: translatedLinked };
     toAdd.push(finalRow);
   }
 
