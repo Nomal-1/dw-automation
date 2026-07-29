@@ -42,37 +42,55 @@ async function fetchPackEntries(file) {
   }
 }
 
+// 팩 파일별로 (entry.id -> 번역명) 맵을 따로 유지한다 — mergeNameMaps처럼
+// 합치지 않으므로, 같은 영문 이름을 여러 클래스가 같이 쓰더라도 어느 팩(클래스)의
+// 번역인지 구분해서 나중에 정확히 골라 쓸 수 있다.
+async function buildPackNameMaps(files) {
+  const maps = new Map();
+  const results = await Promise.all(files.map(fetchPackEntries));
+  files.forEach((file, i) => {
+    const map = new Map();
+    for (const entry of results[i]) {
+      if (entry?.id && entry?.name) map.set(entry.id, entry.name);
+    }
+    maps.set(file, map);
+  });
+  return maps;
+}
+
 // 실제로 확인된 사례: 클레릭과 팔라딘이 둘 다 "Divine Protection"이라는
 // 영문 이름을 쓰는데(원작 자체가 그렇다), 한글 번역은 "믿음의 갑옷"/"신의
-// 갑옷"으로 서로 다르다. 이 함수는 팩을 순서대로 훑으면서 entry.id를 키로
-// 맵에 쌓는데, 이런 경우 나중에 처리되는 팩(순서상 팔라딘)의 번역이 먼저
-// 것(클레릭)을 조용히 덮어써버려서, 클레릭용으로 등록해둔 설정 행이 실제로는
-// 팔라딘 이름으로 잘못 번역되는 사고가 났다. 같은 영문 이름인데 번역명이
-// 서로 다른 경우를 "모호함"으로 표시해 아예 맵에서 빼버린다 — 틀린 번역을
-// 조용히 적용하는 것보다, 그 이름만 자동 번역하지 않고 그대로 두는 편이
-// 안전하다(GM이 직접 채워 넣을 수 있다).
-async function buildNameMap(files) {
+// 갑옷"으로 서로 다르다. 팩을 순서대로 훑으면서 하나의 맵에 그대로 쌓으면
+// 나중에 처리되는 팩의 번역이 먼저 것을 조용히 덮어써버려서, 클레릭용으로
+// 등록해둔 설정 행이 실제로는 팔라딘 이름으로 잘못 번역되는 사고가 났다.
+// 같은 영문 이름인데 번역명이 서로 다른 경우를 "모호함"으로 표시해 아예
+// 맵에서 빼버린다 — 틀린 번역을 조용히 적용하는 것보다, 그 이름만 자동
+// 번역하지 않고 그대로 두는 편이 안전하다(아래 AMBIGUOUS_NAME_BY_LINK에
+// 등록해둔 이름은 예외 — resolveAmbiguousName이 별도로 정확히 구분한다).
+function mergeNameMaps(packMaps) {
   const map = new Map();
   const ambiguous = new Set();
-  const packs = await Promise.all(files.map(fetchPackEntries));
-  for (const entries of packs) {
-    for (const entry of entries) {
-      if (!entry?.id || !entry?.name) continue;
-      if (ambiguous.has(entry.id)) continue;
+  for (const packMap of packMaps.values()) {
+    for (const [id, name] of packMap) {
+      if (ambiguous.has(id)) continue;
 
-      const existing = map.get(entry.id);
-      if (existing !== undefined && existing !== entry.name) {
-        ambiguous.add(entry.id);
-        map.delete(entry.id);
+      const existing = map.get(id);
+      if (existing !== undefined && existing !== name) {
+        ambiguous.add(id);
+        map.delete(id);
         console.warn(
-          `${MODULE_ID} | translation-import: "${entry.id}" has different translations across classes ("${existing}" vs "${entry.name}") — skipping auto-translate for this name, enter it manually.`
+          `${MODULE_ID} | translation-import: "${id}" has different translations across classes ("${existing}" vs "${name}") — skipping auto-translate for this name, enter it manually.`
         );
         continue;
       }
-      map.set(entry.id, entry.name);
+      map.set(id, name);
     }
   }
   return map;
+}
+
+async function buildNameMap(files) {
+  return mergeNameMaps(await buildPackNameMaps(files));
 }
 
 // features/level-up-info.js가 레벨업 창의 무브 선행조건(requiresMove, 항상
@@ -80,6 +98,26 @@ async function buildNameMap(files) {
 // 없거나 응답이 실패하면 빈 맵을 반환하고, 호출부가 영문 원본으로 대체 표시한다.
 export async function getMoveNameMap() {
   return buildNameMap(MOVE_PACK_FILES);
+}
+
+// DAMAGE_REDUCTION_MOVES(조건부 장갑 보너스 무브)에서만 쓰는 모호한 이름
+// 구분표. 각 행에 이미 linkedMoveName 유무로 "독립 조건"(클레릭 Divine
+// Protection)인지 "다른 무브 발동에 연동"(팔라딘 Divine Protection, Holy
+// Protection의 업그레이드)인지가 구분돼 있으므로, 그 정보로 어느 클래스
+// 팩의 번역을 써야 하는지 정확히 고를 수 있다 — mergeNameMaps처럼 그냥
+// 건너뛰지 않고 실제로 자동 번역한다.
+const AMBIGUOUS_NAME_BY_LINK = {
+  "Divine Protection": {
+    linked: "dungeonworld.the-paladin-moves.json",
+    unlinked: "dungeonworld.the-cleric-moves.json"
+  }
+};
+
+function resolveAmbiguousName(packMaps, englishName, hasLink) {
+  const resolution = AMBIGUOUS_NAME_BY_LINK[englishName];
+  if (!resolution) return null;
+  const packFile = hasLink ? resolution.linked : resolution.unlinked;
+  return packMaps.get(packFile)?.get(englishName) ?? null;
 }
 
 function translateOne(map, rawName, stats) {
@@ -124,7 +162,8 @@ function translateRows(map, rows, stats) {
 // 찾을 수 있는 것만 바꾸고, 못 찾은 이름(서드파티 확장 무브, 이미 한글로
 // 고쳐둔 값 등)은 그대로 둔다 — 되돌릴 수 없는 손실 없이 항상 안전하게 동작한다.
 export async function runTranslationImport() {
-  const moveMap = await buildNameMap(MOVE_PACK_FILES);
+  const movePackMaps = await buildPackNameMaps(MOVE_PACK_FILES);
+  const moveMap = mergeNameMaps(movePackMaps);
   const spellMap = await buildNameMap(SPELL_PACK_FILES);
   const stats = { matched: 0, unmatched: 0 };
 
@@ -183,13 +222,26 @@ export async function runTranslationImport() {
 
   // linkedMoveName(팔라딘 Holy Protection의 "Quest" 등)도 무브 이름이라
   // 같이 번역해야 features/underdog.js가 그 이름으로 다른 메모형 무브의
-  // 발동 상태를 정확히 찾을 수 있다.
+  // 발동 상태를 정확히 찾을 수 있다. name 자체는 클레릭/팔라딘이 똑같이
+  // "Divine Protection"을 쓰는 것처럼 모호한 경우가 있는데, linkedMoveName
+  // 유무로 어느 쪽인지 구분해서(resolveAmbiguousName) 정확한 번역을 고른다.
   const damageReductionMoves = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
-  const translatedDamageReductionMoves = damageReductionMoves.map((row) => ({
-    ...row,
-    name: translateOne(moveMap, row.name, stats),
-    linkedMoveName: row.linkedMoveName ? translateOne(moveMap, row.linkedMoveName, stats) : row.linkedMoveName
-  }));
+  const translatedDamageReductionMoves = damageReductionMoves.map((row) => {
+    const hasLink = Boolean(row.linkedMoveName);
+    const resolved = resolveAmbiguousName(movePackMaps, row.name, hasLink);
+    let name;
+    if (resolved) {
+      stats.matched++;
+      name = resolved;
+    } else {
+      name = translateOne(moveMap, row.name, stats);
+    }
+    return {
+      ...row,
+      name,
+      linkedMoveName: row.linkedMoveName ? translateOne(moveMap, row.linkedMoveName, stats) : row.linkedMoveName
+    };
+  });
   await game.settings.set(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, translatedDamageReductionMoves);
 
   const conditionalDamageMoves = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
