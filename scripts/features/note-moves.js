@@ -141,6 +141,34 @@ function extractBulletPseudoGroups(html, playerGroups, gmGroups) {
   flush();
 }
 
+// v0.29.0에서 콘솔 로그로 직접 확인한 사실: 팔라딘 Quest("신성한 임무")의
+// 실제 description 필드 자체에 서약(맹세) 문단/목록이 통째로 빠져 있다 —
+// dungeonworld-ko 번역 콘텐츠 자체의 누락이지 파싱 문제가 아니다(원문에는
+// 분명히 있는 내용인데 번역 데이터에 옮겨지지 않았다). 설명에서 서약 목록을
+// 못 찾았을 때, 이름이 알려진 이름과 일치하면 공식 룰북 원문 그대로의 서약
+// 목록을 보충해서 GM이 그래도 체크할 수 있게 한다.
+const KNOWN_MISSING_GM_GROUPS = [
+  {
+    matchNames: ["Quest", "신성한 임무"],
+    label:
+      "그러면 마스터가 다음 중에서 맹세를 하나 이상 고릅니다. 이 맹세를 지켜야 축복을 유지할 수 있습니다:",
+    options: [
+      "명예 (금지: 비겁한 전술이나 속임수)",
+      "절제 (금지: 탐식이나 육체적 향락)",
+      "경건 (필수: 하루하루의 종교적 의식)",
+      "용맹 (금지: 악한 것을 살려두는 것)",
+      "진실 (금지: 거짓말)",
+      "친절 (필수: 어려움에 처한 사람들을 그게 누가 되었건 돌보는 것)"
+    ]
+  }
+];
+
+function applyKnownMissingGmGroups(moveItem, gmGroups) {
+  if (gmGroups.length > 0) return;
+  const entry = KNOWN_MISSING_GM_GROUPS.find((e) => e.matchNames.includes(moveItem.name));
+  if (entry) gmGroups.push({ label: entry.label, options: entry.options });
+}
+
 function extractListGroups(moveItem) {
   const rawDescription = moveItem.system?.description ?? "";
   const html = $(`<div>${rawDescription}</div>`);
@@ -161,6 +189,7 @@ function extractListGroups(moveItem) {
   });
 
   extractBulletPseudoGroups(html, playerGroups, gmGroups);
+  applyKnownMissingGmGroups(moveItem, gmGroups);
 
   console.log(
     `${MODULE_ID} | note-moves: extracted lists for "${moveItem.name}" — player: ${playerGroups.length}, gm: ${gmGroups.length}\n` +
