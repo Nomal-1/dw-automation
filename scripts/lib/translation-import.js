@@ -159,12 +159,16 @@ export async function runTranslationImport() {
   }));
   await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, translatedUpgrades);
 
+  // linkedMoveName(팔라딘 Holy Protection의 "Quest" 등)도 무브 이름이라
+  // 같이 번역해야 features/underdog.js가 그 이름으로 다른 메모형 무브의
+  // 발동 상태를 정확히 찾을 수 있다.
   const damageReductionMoves = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
-  await game.settings.set(
-    MODULE_ID,
-    SETTINGS.DAMAGE_REDUCTION_MOVES,
-    translateRows(moveMap, damageReductionMoves, stats)
-  );
+  const translatedDamageReductionMoves = damageReductionMoves.map((row) => ({
+    ...row,
+    name: translateOne(moveMap, row.name, stats),
+    linkedMoveName: row.linkedMoveName ? translateOne(moveMap, row.linkedMoveName, stats) : row.linkedMoveName
+  }));
+  await game.settings.set(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, translatedDamageReductionMoves);
 
   const conditionalDamageMoves = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
   await game.settings.set(

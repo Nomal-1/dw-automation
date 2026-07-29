@@ -13,8 +13,7 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
 ];
 
 // 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,
-// "다른 무브/상태에 의존하지 않는 독립적인 서사적 조건"으로 장갑을 주는
-// 무브들. 원문 근거:
+// 조건부로 장갑을 주는 무브들. 원문 근거:
 //   - Underdog(오기): "숫적으로 열세일 때 +1 장갑" (평소 0)
 //   - Serious Underdog(투지, Underdog 업그레이드): "항상 +1, 열세일 때 +2"
 //   - Unencumbered, Unharmed(바바리안): "짐이 Load 미만이고 갑옷도 방패도
@@ -22,21 +21,29 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
 //   - Barkskin(드루이드): "발이 땅에 닿아있으면 +1 장갑"
 //   - Divine Protection(클레릭): "갑옷도 방패도 없으면 +2 장갑"
 //   - Divine Armor(클레릭, Divine Protection 업그레이드): "...+3 장갑"
-// 조사 중 이름이 같은 "Divine Protection"이 팔라딘 쪽에도 있으나(퀘스트
-// 무브에 의존하는 별개 조건, 값은 우연히 동일) 여기 등록한 건 클레릭
-// 버전이다 — 어느 쪽이든 값이 같아 실제 동작에는 차이가 없다.
+//   - Holy Protection(팔라딘): "퀘스트 수행 중일 때 +1 장갑"
 //
-// 조사했지만 일부러 넣지 않은 것(다른 무브가 만든 "상태"에 의존해서
-// Formshaper와 같은 이유로 제외 — 독립적인 조건이 아님):
-//   - 팔라딘 Holy Protection/Divine Protection: "퀘스트 중일 때" (Quest 무브에
-//     종속)
-//   - 위저드 Arcane Ward/Arcane Armor: "1레벨 이상 주문을 준비해뒀을 때"
-//     (Prepare Spells 무브에 종속)
+// 위 항목들의 조건은 캐릭터 시트에서 무브마다 독립적으로 켜고 끄는 수동
+// 토글로 관리한다(linkedMoveName을 비워두면 이 방식). Holy Protection만은
+// 예외로, "퀘스트 수행 중"이라는 조건이 이미 이 모듈이 추적하는 다른 무브
+// (features/note-moves.js의 Quest 발동 상태)와 정확히 같은 뜻이라 수동
+// 토글 대신 linkedMoveName: "Quest"로 그 무브의 발동 상태를 그대로
+// 가져다 쓴다(수동 토글 UI 자체가 이 행에는 안 뜬다).
+//
+// 참고: 이름이 같은 "Divine Protection"이 팔라딘 쪽에도 있으나(Holy
+// Protection의 업그레이드, 조건도 "퀘스트 수행 중"으로 동일) 여기 등록한
+// "Divine Protection"은 클레릭 버전이다 — 이름이 완전히 같아서 팔라딘
+// 버전을 별도 행으로 등록하면 같은 무브 하나에 행 두 개가 매칭돼 보너스가
+// 중복 적용된다. 팔라딘이 Divine Protection까지 올리면 이 표의 클레릭
+// 버전 행(수동 토글, 값은 우연히 동일)이 대신 적용되니 실제 수치는
+// 똑같지만, 그 시점부터는 퀘스트 상태와 자동 연동되지 않고 수동 토글로
+// 돌아간다.
 export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
-  { name: "Underdog", baseBonus: 0, outnumberedBonus: 1 },
-  { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2 },
-  { name: "Unencumbered, Unharmed", baseBonus: 0, outnumberedBonus: 1 },
-  { name: "Barkskin", baseBonus: 0, outnumberedBonus: 1 },
-  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2 },
-  { name: "Divine Armor", baseBonus: 0, outnumberedBonus: 3 }
+  { name: "Underdog", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
+  { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2, linkedMoveName: "" },
+  { name: "Unencumbered, Unharmed", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
+  { name: "Barkskin", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
+  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "" },
+  { name: "Divine Armor", baseBonus: 0, outnumberedBonus: 3, linkedMoveName: "" },
+  { name: "Holy Protection", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "Quest" }
 ];

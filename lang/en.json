@@ -347,10 +347,11 @@
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Only use this for moves whose condition is independent of any other move/state (e.g. being outnumbered, having your feet on the ground) — not conditions tied to something like shapeshifting. \"Base Bonus\" is the armor bonus granted while the condition is not met; \"Bonus When Condition Met\" is granted instead while it is. Each move gets its own independent per-character toggle (on the move's sheet badge) that feeds into the armor recalculation button.",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Base Bonus\" is the armor bonus granted while the condition is not met; \"Bonus When Condition Met\" is granted instead while it is. Leave \"Linked Move Name\" blank to manage the condition with a manual per-character toggle on the move's sheet badge (for conditions independent of any other move/state, e.g. being outnumbered, feet on the ground). If the condition is exactly \"is this other specific move currently active\" (e.g. Paladin Holy Protection while on a Quest), enter that move's name (e.g. Quest) instead — the toggle disappears and the condition follows that move's activation state automatically. Feeds into the armor recalculation button either way.",
       "Name": "Move Name",
       "BaseBonus": "Base Bonus",
       "OutnumberedBonus": "Bonus When Condition Met",
+      "LinkedMoveName": "Linked Move Name (optional)",
       "ResetDefaultsButton": "Reset to Verified Defaults (English)",
       "ResetConfirmTitle": "Reset Conditional Armor Bonus Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text across all 10 classes. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
@@ -544,6 +545,7 @@
       "NoLongerOutnumbered": "Condition no longer met (armor {armor})",
       "DamageRecalculated": "This hit's damage recalculated to {damage} using the new armor",
       "OutnumberedToggleTitle": "Click to toggle whether this move's condition is currently met. Armor adjusts automatically if this actually changes.",
+      "LinkedToggleTitle": "Automatically on or off based on whether \"{linked}\" is currently active. Cannot be changed manually.",
       "OutnumberedOn": "Condition Met",
       "OutnumberedOff": "Condition Not Met",
       "AskEachHitTitle": "Click to toggle whether you're asked about this move's condition on every hit. When off, the current toggle is kept as-is without asking.",

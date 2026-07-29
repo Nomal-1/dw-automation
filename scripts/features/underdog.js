@@ -3,6 +3,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { isNoteMoveActive } from "./note-moves.js";
 
 // "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
 // 이름/평소 보너스/조건 충족 시 보너스로 이루어진 일반 표라 GM이 서로 무관한
@@ -54,6 +55,14 @@ export function isConditionActive(actor, moveId) {
   return Boolean(flag?.[moveId]);
 }
 
+// 팔라딘 Holy Protection처럼 linkedMoveName이 있는 행은 수동 토글이 아니라
+// 다른 메모형 무브(퀘스트 등)의 발동 상태를 그대로 조건으로 쓴다 — GM/플레이어가
+// 따로 켜고 끌 필요가 없다.
+function isRowConditionActive(actor, row, move) {
+  if (row.linkedMoveName) return isNoteMoveActive(actor, row.linkedMoveName);
+  return isConditionActive(actor, move.id);
+}
+
 function shouldAskEachHit(actor, moveId) {
   const flag = actor.getFlag(MODULE_ID, ASK_EACH_HIT_FLAG);
   if (typeof flag === "boolean") return flag;
@@ -80,16 +89,18 @@ export function getOutnumberedArmorContribution(actor) {
   if (!isEnabled()) return [];
   return getOwnedRows(actor).map(({ row, move }) => ({
     source: move.name,
-    amount: Number(isConditionActive(actor, move.id) ? row.outnumberedBonus : row.baseBonus) || 0
+    amount: Number(isRowConditionActive(actor, row, move) ? row.outnumberedBonus : row.baseBonus) || 0
   }));
 }
 
 // hit-trigger.js가 피격 훅에서 호출한다. "피격 때마다 묻기"가 켜진 무브들만
-// 후보로 돌려준다(무브마다 독립적이므로 여러 개일 수 있다).
+// 후보로 돌려준다(무브마다 독립적이므로 여러 개일 수 있다). linkedMoveName이
+// 있는 행(퀘스트 연동 등)은 물어볼 게 없다 — 다른 무브의 발동 상태를 그대로
+// 따르므로 애초에 후보에서 뺀다.
 export function getOutnumberedAskCandidate(actor) {
   if (!isEnabled()) return [];
   return getOwnedRows(actor)
-    .filter(({ move }) => shouldAskEachHit(actor, move.id))
+    .filter(({ row, move }) => !row.linkedMoveName && shouldAskEachHit(actor, move.id))
     .map(({ move }) => ({ moveId: move.id, moveName: move.name }));
 }
 
@@ -122,11 +133,24 @@ export async function applyOutnumberedAnswer(actor, moveId, moveName, nowActive)
 }
 
 function renderBadges(actor, html) {
-  for (const { move } of getOwnedRows(actor)) {
+  for (const { row, move } of getOwnedRows(actor)) {
     const $item = html.find(`.item[data-item-id="${move.id}"]`);
     if (!$item.length) continue;
 
     const $tags = getOrCreateTagsContainer($item);
+
+    // linkedMoveName이 있는 행(팔라딘 Holy Protection 등)은 다른 메모형
+    // 무브의 발동 상태를 그대로 따르는 조건이라 수동으로 켜고 끌 게 없다 —
+    // 지금 상태를 읽기 전용 표시로만 보여준다.
+    if (row.linkedMoveName) {
+      if ($tags.find(".dwauto-underdog-linked-badge").length) continue;
+      const active = isRowConditionActive(actor, row, move);
+      const $badge = $(
+        `<a class="tag dwauto-underdog-linked-badge${active ? " dwauto-underdog-on" : ""}" title="${game.i18n.format("DWAUTO.Underdog.LinkedToggleTitle", { linked: row.linkedMoveName })}">${game.i18n.localize(active ? "DWAUTO.Underdog.OutnumberedOn" : "DWAUTO.Underdog.OutnumberedOff")}</a>`
+      );
+      $tags.append($badge);
+      continue;
+    }
 
     if (!$tags.find(".dwauto-underdog-outnumbered-badge").length) {
       const active = isConditionActive(actor, move.id);
@@ -223,9 +247,18 @@ async function migrateAddSurveyedDefaults() {
   const toAdd = [];
   for (const row of DEFAULT_DAMAGE_REDUCTION_MOVES) {
     if (existingNames.has(row.name)) continue;
-    const translated = nameMap?.get(row.name);
-    if (translated && existingNames.has(translated)) continue;
-    toAdd.push(translated ? { ...row, name: translated } : row);
+    const translatedName = nameMap?.get(row.name);
+    if (translatedName && existingNames.has(translatedName)) continue;
+
+    let finalRow = translatedName ? { ...row, name: translatedName } : row;
+    // linkedMoveName(Holy Protection의 "Quest" 등)도 무브 이름이라 이 시점의
+    // 번역 데이터로 같이 바꿔줘야 features/note-moves.js가 실제 캐릭터가
+    // 들고 있는 (번역된) 이름으로 정확히 찾을 수 있다.
+    if (row.linkedMoveName) {
+      const translatedLinked = nameMap?.get(row.linkedMoveName);
+      if (translatedLinked) finalRow = { ...finalRow, linkedMoveName: translatedLinked };
+    }
+    toAdd.push(finalRow);
   }
 
   if (toAdd.length === 0) return;

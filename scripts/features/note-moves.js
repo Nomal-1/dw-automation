@@ -40,6 +40,17 @@ function isActivated(actor, moveId) {
   return Boolean(actor.getFlag(MODULE_ID, ACTIVATED_FLAG)?.[moveId]);
 }
 
+// 다른 기능(예: features/underdog.js의 퀘스트 연동 장갑 보너스 — 팔라딘
+// Holy Protection은 "퀘스트 수행 중"일 때만 장갑을 준다)이 "이 메모형 무브가
+// 지금 발동/활성 상태인가"를 조건으로 재사용할 수 있도록 공개한다. moveName은
+// 지금 액터가 실제로 들고 있는 이름 그대로(번역됐다면 번역된 이름) 넘겨야
+// 한다 — 초기화되면(탭이 사라지면) 다시 false가 된다.
+export function isNoteMoveActive(actor, moveName) {
+  const moveItem = actor.items.find((i) => i.type === "move" && i.name === moveName);
+  if (!moveItem) return false;
+  return isActivated(actor, moveItem.id);
+}
+
 async function setActivated(actor, moveId, value) {
   const current = actor.getFlag(MODULE_ID, ACTIVATED_FLAG) ?? {};
   await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, { ...current, [moveId]: value });

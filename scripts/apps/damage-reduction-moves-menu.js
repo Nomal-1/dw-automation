@@ -2,14 +2,15 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 
 function blankRow() {
-  return { name: "", baseBonus: 0, outnumberedBonus: 1 };
+  return { name: "", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" };
 }
 
 function normalizeRow(raw) {
   return {
     name: (raw?.name ?? "").trim(),
     baseBonus: Math.max(0, parseInt(raw?.baseBonus, 10) || 0),
-    outnumberedBonus: Math.max(0, parseInt(raw?.outnumberedBonus, 10) || 0)
+    outnumberedBonus: Math.max(0, parseInt(raw?.outnumberedBonus, 10) || 0),
+    linkedMoveName: (raw?.linkedMoveName ?? "").trim()
   };
 }
 
