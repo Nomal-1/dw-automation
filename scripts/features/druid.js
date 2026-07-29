@@ -75,7 +75,7 @@ function getShapeshiftState(actor) {
 
 // Red of Tooth and Claw/Blood and Thunder/Shed/Formcrafter/Formshaper처럼
 // "변신 중"이어야만 뜻이 있는 무브들이 실제로 지금 변신 중인지 확인할 때
-// 쓴다. attack-assistant.js/hit-trigger.js/druid-roll-wrapper.js가 이 함수로
+// 쓴다. attack-assistant.js/hit-trigger.js/roll-wrapper.js가 이 함수로
 // 선행 조건(변신 상태)을 확인한다.
 export function isShapeshiftActive(actor) {
   return getShapeshiftState(actor).active === true;
@@ -241,7 +241,7 @@ function promptAbilityChoice(title, content) {
 
 // Formcrafter: 변신할 때 능력치 하나를 골라 +1 온고잉, 마스터가 고른
 // 능력치 하나에 -1 온고잉을 받는다(둘 다 변신 중에만). 실제 적용은
-// lib/druid-roll-wrapper.js가 무브 굴림 직전에 rollMod를 조정하는 방식으로
+// lib/roll-wrapper.js가 무브 굴림 직전에 rollMod를 조정하는 방식으로
 // 한다 — "무엇으로 판정할지 그 자리에서 물어보는"(ask, 예: Defy Danger)
 // 무브는 어떤 능력치를 쓸지가 굴리기 직전엔 아직 정해지지 않아 자동화
 // 대상에서 제외된다(getFormcrafterRollModifier 주석 참고).
@@ -286,7 +286,7 @@ async function clearFormcrafterOnShapeshiftEnd(actor) {
   await actor.unsetFlag(MODULE_ID, FORMCRAFTER_FLAG);
 }
 
-// lib/druid-roll-wrapper.js가 무브를 굴리기 직전마다 호출한다. 이 무브
+// lib/roll-wrapper.js가 무브를 굴리기 직전마다 호출한다. 이 무브
 // 자체의 rollType(고정 능력치, 또는 아래 shouldInterceptAskRoll로 확정된
 // 능력치)이 지금 변신 중 보너스/페널티 능력치와 일치하면 그만큼(+1/-1,
 // 둘 다 겹치면 0으로 상쇄) rollMod에 얹을 값을 반환한다.
@@ -306,7 +306,7 @@ export function getFormcrafterRollModifier(actor, rollType) {
 
 // Defy Danger처럼 "그 자리에서 능력치를 고르는"(ask) 무브는 시스템이
 // rollMod를 대화상자를 띄우기 *전에* 이미 고정해버려서, 버튼을 누른
-// 뒤에 rollMod를 바꿔봐야 소용없다. 대신 lib/druid-roll-wrapper.js가
+// 뒤에 rollMod를 바꿔봐야 소용없다. 대신 lib/roll-wrapper.js가
 // 시스템 기본 Ask 대화상자가 뜨기 전에 이 함수로 먼저 능력치를 확정해서
 // 물어보고, rollType 자체를 그 능력치로 바꿔치기한 채로 원본 굴림을
 // 호출한다(시스템은 rollType이 "ask"가 아니면 자기 대화상자를 띄우지

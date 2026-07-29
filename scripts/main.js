@@ -3,8 +3,7 @@ import { registerNpcGenerator } from "./features/npc-generator.js";
 import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
 import { registerSpellcastingAssistant } from "./features/spellcasting.js";
-import { registerSpellcastingWrapper } from "./lib/spellcasting-wrapper.js";
-import { registerDruidRollWrapper } from "./lib/druid-roll-wrapper.js";
+import { registerRollWrapper } from "./lib/roll-wrapper.js";
 import { registerHitTriggerAssistant } from "./features/hit-trigger.js";
 import { registerHealingAssistant } from "./features/healing.js";
 import { registerMoveUpgradeAssistant } from "./features/move-upgrades.js";
@@ -23,8 +22,7 @@ Hooks.once("init", () => {
 // game.dungeonworld.ItemDw(및 다른 시스템/모듈이 등록해두는 전역들)가 전부
 // 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.
 Hooks.once("ready", () => {
-  registerSpellcastingWrapper();
-  registerDruidRollWrapper();
+  registerRollWrapper();
 });
 
 registerNpcGenerator();
