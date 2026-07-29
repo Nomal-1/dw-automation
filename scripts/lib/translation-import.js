@@ -125,6 +125,23 @@ function resolveAmbiguousName(packMaps, englishName, hasLink) {
   return packMaps.get(packFile)?.get(englishName) ?? null;
 }
 
+// MOVE_UPGRADES 표는 DAMAGE_REDUCTION_MOVES와 달리 linkedMoveName이 없어서
+// hasLink 신호를 쓸 수 없다. 대신 같은 행에 항상 같이 붙어다니는 "짝" 이름
+// (Holy Protection/Divine Armor처럼 그 자체는 겹치지 않는 이름)이 어느 팩에만
+// 있는지로 구분한다 — Holy Protection은 팔라딘 팩에만 있으니 그 행의
+// "Divine Protection"(업그레이드 이름)도 팔라딘 번역으로, Divine Armor는
+// 클레릭 팩에만 있으니 그 행의 "Divine Protection"(대체 대상)도 클레릭
+// 번역으로 고른다. ambiguousName이 애초에 AMBIGUOUS_NAME_BY_LINK에 없으면
+// (겹치지 않는 평범한 이름이면) null을 돌려줘서 평범한 translateOne으로
+// 넘어가게 한다.
+function resolveAmbiguousBySiblingName(packMaps, ambiguousName, siblingName) {
+  if (!AMBIGUOUS_NAME_BY_LINK[ambiguousName]) return null;
+  for (const map of packMaps.values()) {
+    if (map.has(siblingName)) return map.get(ambiguousName) ?? null;
+  }
+  return null;
+}
+
 function translateOne(map, rawName, stats) {
   const name = (rawName ?? "").trim();
   if (!name) return name;
@@ -217,12 +234,21 @@ export async function runTranslationImport() {
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번
   // 자동 채우기를 돌릴 때마다 그 설정이 사라진다.
+  // "Divine Protection"처럼 클레릭/팔라딘이 이름을 공유하는 경우는 moveMap에서
+  // 아예 빠져있으므로(mergeNameMaps), 같은 행의 짝 이름으로 어느 팩인지 먼저
+  // 알아내 그 팩의 번역을 쓴다(resolveAmbiguousBySiblingName) — 안 그러면
+  // 이 이름만 번역이 안 돼서, 번역된 세계에서 실제 캐릭터가 가진 한글 이름과
+  // 표의 영문 이름이 어긋나 업그레이드 자동 삭제가 조용히 멈춘다.
   const moveUpgrades = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
-  const translatedUpgrades = moveUpgrades.map((row) => ({
-    ...row,
-    upgradeName: translateOne(moveMap, row.upgradeName, stats),
-    replacesName: translateOne(moveMap, row.replacesName, stats)
-  }));
+  const translatedUpgrades = moveUpgrades.map((row) => {
+    const resolvedUpgrade = resolveAmbiguousBySiblingName(movePackMaps, row.upgradeName, row.replacesName);
+    const resolvedReplaces = resolveAmbiguousBySiblingName(movePackMaps, row.replacesName, row.upgradeName);
+    const upgradeName = resolvedUpgrade ?? translateOne(moveMap, row.upgradeName, stats);
+    const replacesName = resolvedReplaces ?? translateOne(moveMap, row.replacesName, stats);
+    if (resolvedUpgrade) stats.matched++;
+    if (resolvedReplaces) stats.matched++;
+    return { ...row, upgradeName, replacesName };
+  });
   await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, translatedUpgrades);
 
   // linkedMoveName(팔라딘 Holy Protection의 "Quest" 등)도 무브 이름이라
