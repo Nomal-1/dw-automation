@@ -55,6 +55,83 @@ async function findMoveDocumentByName(name) {
   return docs.find((d) => d.name === name) ?? null;
 }
 
+// Multiclass Dabbler/Initiate("다른 직업 무브 하나 습득") 전용: 직업 무브 팩별로
+// (basic-moves 제외) 묶어서 돌려준다. 팩의 label(예: "The Fighter")을 직업
+// 이름 대신 그대로 쓴다 — 시스템 자체가 등록한 이름이라 시스템/모듈 언어
+// 설정에 따라 이미 적절히 표시된다.
+async function getMovesGroupedByClassPack() {
+  const groups = new Map(); // packId -> { label, docs }
+  await Promise.all(
+    MOVE_PACK_IDS.filter((packId) => !packId.endsWith("basic-moves")).map(async (packId) => {
+      const pack = game.packs.get(packId);
+      if (!pack) return;
+      try {
+        const docs = await pack.getDocuments();
+        groups.set(packId, { label: pack.metadata.label, docs });
+      } catch (err) {
+        console.warn(`${MODULE_ID} | class-grant: failed to load pack ${packId}`, err);
+      }
+    })
+  );
+  return groups;
+}
+
+// 직업을 먼저 고르고, 그 직업의 무브 목록에서 하나를 고르는 대화상자.
+// 직업 선택이 바뀌면 무브 목록도 그에 맞게 다시 채운다. 취소하면 null.
+function promptChoiceGrant(moveItem, classGroups) {
+  const packIds = Array.from(classGroups.keys());
+  if (packIds.length === 0) return Promise.resolve(null);
+
+  const buildMoveOptions = (packId) =>
+    classGroups
+      .get(packId)
+      .docs.map((doc) => `<option value="${doc.id}">${doc.name}</option>`)
+      .join("");
+
+  const classOptionsHtml = packIds.map((packId) => `<option value="${packId}">${classGroups.get(packId).label}</option>`).join("");
+
+  return new Promise((resolve) => {
+    new Dialog({
+      title: moveItem.name,
+      content: `
+        <form>
+          <div class="form-group">
+            <label>${game.i18n.localize("DWAUTO.ClassGrant.ChoiceClassLabel")}</label>
+            <select name="classPack">${classOptionsHtml}</select>
+          </div>
+          <div class="form-group">
+            <label>${game.i18n.localize("DWAUTO.ClassGrant.ChoiceMoveLabel")}</label>
+            <select name="moveId">${buildMoveOptions(packIds[0])}</select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const packId = html.find('[name="classPack"]').val();
+            const moveId = html.find('[name="moveId"]').val();
+            const doc = classGroups.get(packId)?.docs.find((d) => d.id === moveId);
+            resolve(doc ?? null);
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve(null)
+        }
+      },
+      default: "ok",
+      width: 420,
+      render: (html) => {
+        html.find('[name="classPack"]').on("change", (event) => {
+          html.find('[name="moveId"]').html(buildMoveOptions(event.currentTarget.value));
+        });
+      },
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
 // 설정("클래스 부여 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
 // 아직 번역 전(영문 기본값)이어도, 지금 이 시점의 번역 데이터로 다시 한번
 // 확인한다(features/note-moves.js와 같은 방식).
@@ -122,6 +199,19 @@ async function onCreateChatMessage(message, options, userId) {
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
     if (isGranted(actor, moveItem.id)) return;
+
+    if (row.mode === "choice") {
+      const classGroups = await getMovesGroupedByClassPack();
+      const chosenDoc = await promptChoiceGrant(moveItem, classGroups);
+      if (!chosenDoc) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
+
+      await setGranted(actor, moveItem.id);
+      if (!actor.items.some((i) => i.type === "move" && i.name === chosenDoc.name)) {
+        await actor.createEmbeddedDocuments("Item", [chosenDoc.toObject()]);
+      }
+      announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.ClassGrant.Granted", { moves: chosenDoc.name }));
+      return;
+    }
 
     const grantedNames = await grantMoves(actor, row);
     await setGranted(actor, moveItem.id);

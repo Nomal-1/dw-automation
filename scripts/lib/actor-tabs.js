@@ -45,7 +45,12 @@ export function injectActorTab({ html, actor, tabKey, navLabel, onReset }) {
         content: `<p>${game.i18n.localize("DWAUTO.ActorTab.ResetConfirmContent")}</p>`,
         defaultYes: false
       });
-      if (confirmed) await onReset();
+      if (!confirmed) return;
+      await onReset();
+      // 플래그만 지우면 대부분은 updateActor 훅으로 시트가 알아서 다시 그려지지만,
+      // 플래그 변경 하나로는 감지가 안 되는 경우(예: 여러 플래그를 순차로 지울 때
+      // 마지막 갱신만 감지되는 등)를 대비해 확실하게 직접 다시 그린다.
+      actor.sheet?.render(false);
     });
   }
 

@@ -108,6 +108,12 @@ async function unsetNoteText(actor, moveId) {
   await actor.setFlag(MODULE_ID, NOTES_FLAG, next);
 }
 
+// 서사적 빈칸(______, 밑줄 2개 이상)이 포함된 선택지인지 확인한다. "Slay
+// ______, a great blight on the land." / "만인의 적 _________를 죽인다."처럼
+// 옵션 문구 자체에 빈칸이 있는 경우, 그 문구를 그대로 답으로 쓰는 대신
+// 빈칸에 채울 말만 따로 입력받아 문구에 끼워 넣는다.
+const BLANK_PATTERN = /_{2,}/;
+
 // 무브 설명 HTML 안의 독립된 <ul>/<ol> 목록들을 각각 따로 뽑아온다. 신(Deity)처럼
 // 한 무브 설명에 서로 다른 두 선택("신의 영역을 고르시오" 목록 하나, "교리를
 // 고르시오" 목록 하나)이 따로 들어있는 경우, 예전처럼 모든 <li>를 하나로
@@ -116,9 +122,10 @@ async function unsetNoteText(actor, moveId) {
 // 하나만 묻는다.
 //
 // 팔라딘 퀘스트의 "서약" 목록처럼 플레이어가 고르는 게 아니라 "GM이 나중에
-// 정해준다"고 적힌 목록(바로 앞 문단에 "GM"이라는 단어가 있으면 판단)은
-// 발동 시 프롬프트에는 넣지 않고 gmGroups로 따로 돌려준다 — 탭에 GM이 직접
-// 체크할 수 있는 목록으로 보여준다(renderGmChoiceSection 참고).
+// 정해준다"고 적힌 목록(바로 앞 문단에 "GM" 또는 "마스터"라는 단어가 있으면
+// 판단 — 번역본은 영문 "GM" 대신 "마스터"라고 적는 경우가 많다)은 발동 시
+// 프롬프트에는 넣지 않고 gmGroups로 따로 돌려준다 — 탭에 GM이 직접 체크할
+// 수 있는 목록으로 보여준다(renderGmChoiceSection 참고).
 function extractListGroups(moveItem) {
   const html = $(`<div>${moveItem.system?.description ?? ""}</div>`);
   const playerGroups = [];
@@ -136,12 +143,17 @@ function extractListGroups(moveItem) {
     const precedingText = $list.prev("p").text().trim();
     const group = { label: precedingText || null, options };
 
-    if (/\bGM\b/i.test(precedingText)) {
+    if (/\bGM\b/i.test(precedingText) || precedingText.includes("마스터")) {
       gmGroups.push(group);
     } else {
       playerGroups.push(group);
     }
   });
+
+  console.log(
+    `${MODULE_ID} | note-moves: extracted lists for "${moveItem.name}" — player: ${playerGroups.length}, gm: ${gmGroups.length}`,
+    { playerGroups, gmGroups }
+  );
 
   return { playerGroups, gmGroups };
 }
@@ -158,6 +170,9 @@ function promptListAnswers(moveItem, groups) {
         <div class="form-group">
           <label>${group.label ?? game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</label>
           <select name="answer${index}">${selectOptions}</select>
+        </div>
+        <div class="form-group dwauto-note-blank" data-index="${index}" style="display:none;">
+          <input type="text" name="blankAnswer${index}" value="" placeholder="${game.i18n.localize("DWAUTO.NoteMoves.BlankPlaceholder")}">
         </div>
         <div class="form-group dwauto-note-custom" data-index="${index}" style="display:none;">
           <input type="text" name="customAnswer${index}" value="">
@@ -180,6 +195,10 @@ function promptListAnswers(moveItem, groups) {
                 if (value === CUSTOM_VALUE) {
                   return (html.find(`[name="customAnswer${index}"]`).val() ?? "").trim();
                 }
+                if (BLANK_PATTERN.test(value)) {
+                  const fill = (html.find(`[name="blankAnswer${index}"]`).val() ?? "").trim();
+                  return fill ? value.replace(BLANK_PATTERN, fill) : value;
+                }
                 return value;
               })
               .filter(Boolean);
@@ -192,11 +211,17 @@ function promptListAnswers(moveItem, groups) {
         }
       },
       default: "ok",
+      width: 480,
       render: (html) => {
+        const updateFieldVisibility = (index) => {
+          const value = html.find(`[name="answer${index}"]`).val();
+          html.find(`.dwauto-note-custom[data-index="${index}"]`).toggle(value === CUSTOM_VALUE);
+          html.find(`.dwauto-note-blank[data-index="${index}"]`).toggle(value !== CUSTOM_VALUE && BLANK_PATTERN.test(value));
+        };
+
         groups.forEach((_, index) => {
-          html.find(`[name="answer${index}"]`).on("change", (event) => {
-            html.find(`.dwauto-note-custom[data-index="${index}"]`).toggle(event.currentTarget.value === CUSTOM_VALUE);
-          });
+          updateFieldVisibility(index);
+          html.find(`[name="answer${index}"]`).on("change", () => updateFieldVisibility(index));
         });
       },
       close: () => resolve(null)

@@ -450,15 +450,22 @@
     },
     "ClassGrantMoves": {
       "Title": "Class Grant Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Actually triggering \"Move Name\" looks up the moves listed in \"Granted Move Names\" (comma separated) across all 8 core class compendiums and adds them outright. A move the character already has is not added again.",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Fixed\" mode: actually triggering \"Move Name\" looks up the moves listed in \"Granted Move Names\" (comma separated) across all 8 core class compendiums and adds them outright. \"Free Choice\" mode: triggering it prompts for a class, then a move from that class's list, and grants whichever is chosen (for Multiclass Dabbler/Initiate — \"Granted Move Names\" is unused in this mode). Either way, a move the character already has is not added again.",
       "Name": "Move Name",
+      "Mode": "Mode",
+      "ModeOption": {
+        "fixed": "Fixed (grants a specific move)",
+        "choice": "Free Choice (pick a class + move)"
+      },
       "GrantedMoveNames": "Granted Move Names",
       "ResetDefaultsButton": "Reset to Verified Defaults (English)",
       "ResetConfirmTitle": "Reset Class Grant Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "ClassGrant": {
-      "Granted": "Gained the following move(s): {moves}"
+      "Granted": "Gained the following move(s): {moves}",
+      "ChoiceClassLabel": "Choose a Class",
+      "ChoiceMoveLabel": "Choose a Move"
     },
     "ActorTab": {
       "ResetButton": "Reset",
@@ -508,6 +515,7 @@
       "NotesLabel": "Notes",
       "PromptLabel": "Choose from the list, or enter your own.",
       "CustomOption": "Custom",
+      "BlankPlaceholder": "Fill in the blank",
       "AnswerLabel": "Chosen",
       "AnswerChosen": "Set to \"{answer}\"",
       "Activated": "Note tab created",

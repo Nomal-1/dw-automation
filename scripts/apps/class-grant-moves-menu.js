@@ -1,14 +1,18 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 
+const VALID_MODES = ["fixed", "choice"];
+
 function blankRow() {
-  return { name: "", grantedMoveNames: "" };
+  return { name: "", grantedMoveNames: "", mode: "fixed" };
 }
 
 function normalizeRow(raw) {
+  const mode = VALID_MODES.includes(raw?.mode) ? raw.mode : "fixed";
   return {
     name: (raw?.name ?? "").trim(),
-    grantedMoveNames: (raw?.grantedMoveNames ?? "").trim()
+    grantedMoveNames: (raw?.grantedMoveNames ?? "").trim(),
+    mode
   };
 }
 
@@ -31,7 +35,14 @@ export class ClassGrantMovesMenu extends FormApplication {
   getData() {
     return {
       hint: game.i18n.localize("DWAUTO.ClassGrantMoves.Hint"),
-      rows: this.rows
+      rows: this.rows.map((r) => ({
+        ...r,
+        modeOptions: VALID_MODES.map((m) => ({
+          value: m,
+          label: game.i18n.localize(`DWAUTO.ClassGrantMoves.ModeOption.${m}`),
+          selected: m === r.mode
+        }))
+      }))
     };
   }
 
@@ -78,7 +89,7 @@ export class ClassGrantMovesMenu extends FormApplication {
     await game.settings.set(
       MODULE_ID,
       SETTINGS.CLASS_GRANT_MOVES,
-      rows.filter((r) => r.name && r.grantedMoveNames)
+      rows.filter((r) => r.name && (r.mode === "choice" || r.grantedMoveNames))
     );
   }
 }

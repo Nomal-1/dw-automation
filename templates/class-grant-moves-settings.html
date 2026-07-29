@@ -5,6 +5,7 @@
     <thead>
       <tr>
         <th>{{localize "DWAUTO.ClassGrantMoves.Name"}}</th>
+        <th>{{localize "DWAUTO.ClassGrantMoves.Mode"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.GrantedMoveNames"}}</th>
         <th></th>
       </tr>
@@ -13,6 +14,13 @@
       {{#each rows}}
       <tr>
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
+        <td>
+          <select name="rows.{{@index}}.mode">
+            {{#each this.modeOptions}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </td>
         <td><input type="text" name="rows.{{@index}}.grantedMoveNames" value="{{this.grantedMoveNames}}" placeholder="Commune, Cast A Spell"></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
