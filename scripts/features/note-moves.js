@@ -12,12 +12,14 @@ import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 // 이름을 딴 탭을 만들어 자유 메모란을 붙여준다 — 소유만으로 탭이 뜨던
 // v0.23.x까지의 방식과 달리, "발동해야 탭이 생긴다"는 대지의 아들/딸의
 // 방식을 모든 메모형 무브에 동일하게 적용한다(더 이상 이 둘을 구분하지
-// 않는다). 무브 설명 안에 <ul><li> 형태의 선택지 목록이 있으면(대지의
-// 아들/딸의 "결연된 땅" 11개처럼) 그 목록을 그대로 드롭다운으로 보여주고
-// 고르게 한다(+ 직접입력). 목록이 없는 무브(신, 사명 등 순수 자유 서술형)는
-// 그런 선택 단계 없이 발동 즉시 탭이 생긴다.
+// 않는다). 무브 설명 안에 <ul>/<ol> 목록이 있으면(대지의 아들/딸의 "결연된
+// 땅" 11개, 신(Deity)의 "영역"과 "교리"처럼) 목록마다 각각 별도의 드롭다운
+// 선택으로 보여준다(+ 직접입력) — 한 무브에 서로 다른 목록이 여러 개
+// 있어도(신은 영역/교리 2개) 절대 하나로 뭉쳐 보여주지 않는다. 목록이 아예
+// 없는 무브(사명 등 순수 자유 서술형)는 그런 선택 단계 없이 발동 즉시
+// 탭이 생긴다.
 const ACTIVATED_FLAG = "noteMoveActivated"; // { [moveId]: true }
-const ANSWER_FLAG = "noteMoveAnswer"; // { [moveId]: string } — 선택지 목록이 있었던 경우만
+const ANSWER_FLAG = "noteMoveAnswer"; // { [moveId]: string[] } — 무브 설명 안의 독립된 목록마다 하나씩
 const NOTES_FLAG = "noteMoves"; // { [moveId]: string } — v0.16 이전부터 쓰던 이름 그대로 유지(기존 메모 보존)
 const CUSTOM_VALUE = "__dwauto_custom__";
 
@@ -50,8 +52,12 @@ async function unsetActivated(actor, moveId) {
   await actor.setFlag(MODULE_ID, ACTIVATED_FLAG, next);
 }
 
+// 예전(v0.25.0 이전, 목록을 하나로 뭉뚱그려 프롬프트 하나만 띄우던 시절)
+// 데이터는 문자열 하나였다. 그대로도 읽을 수 있게 배열로 감싸서 돌려준다.
 function getAnswer(actor, moveId) {
-  return actor.getFlag(MODULE_ID, ANSWER_FLAG)?.[moveId] ?? "";
+  const value = actor.getFlag(MODULE_ID, ANSWER_FLAG)?.[moveId];
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
 }
 
 async function setAnswer(actor, moveId, value) {
@@ -84,48 +90,76 @@ async function unsetNoteText(actor, moveId) {
   await actor.setFlag(MODULE_ID, NOTES_FLAG, next);
 }
 
-// 무브 설명 HTML 안의 <li> 목록(원문 기준, 번역되어 있으면 번역된 그대로)을
-// 뽑아온다. 대지의 아들/딸의 "결연된 땅" 11개가 대표적인 예지만, 목록이
-// 있는 다른 메모형 무브가 있어도 똑같이 동작한다.
-function extractListOptions(moveItem) {
+// 무브 설명 HTML 안의 독립된 <ul>/<ol> 목록들을 각각 따로 뽑아온다. 신(Deity)처럼
+// 한 무브 설명에 서로 다른 두 선택("신의 영역을 고르시오" 목록 하나, "교리를
+// 고르시오" 목록 하나)이 따로 들어있는 경우, 예전처럼 모든 <li>를 하나로
+// 합치면 두 선택지가 뒤섞여버린다 — 목록(<ul>/<ol>) 단위로 끊어서 각각 별도
+// 선택으로 다룬다. 대지의 아들/딸처럼 목록이 하나뿐인 무브는 그대로 선택
+// 하나만 묻는다.
+//
+// 팔라딘 퀘스트의 "서약" 목록처럼 플레이어가 고르는 게 아니라 "GM이 나중에
+// 정해준다"고 적힌 목록은 프롬프트에서 제외한다(바로 앞 문단에 "GM"이라는
+// 단어가 있으면 그 목록은 건너뛴다).
+function extractListGroups(moveItem) {
   const html = $(`<div>${moveItem.system?.description ?? ""}</div>`);
-  return html
-    .find("li")
-    .map((_, el) => $(el).text().trim())
-    .get()
-    .filter(Boolean);
+  const groups = [];
+
+  html.find("ul, ol").each((_, el) => {
+    const $list = $(el);
+    const options = $list
+      .find("li")
+      .map((_, li) => $(li).text().trim())
+      .get()
+      .filter(Boolean);
+    if (options.length === 0) return;
+
+    const precedingText = $list.prev("p").text().trim();
+    if (/\bGM\b/i.test(precedingText)) return;
+
+    groups.push({ label: precedingText || null, options });
+  });
+
+  return groups;
 }
 
-function promptListAnswer(moveItem, options) {
-  const selectOptions = options
-    .map((opt) => `<option value="${opt}">${opt}</option>`)
-    .concat(`<option value="${CUSTOM_VALUE}">${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</option>`)
+function promptListAnswers(moveItem, groups) {
+  const fieldsHtml = groups
+    .map((group, index) => {
+      const selectOptions = group.options
+        .map((opt) => `<option value="${opt}">${opt}</option>`)
+        .concat(`<option value="${CUSTOM_VALUE}">${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</option>`)
+        .join("");
+
+      return `
+        <div class="form-group">
+          <label>${group.label ?? game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</label>
+          <select name="answer${index}">${selectOptions}</select>
+        </div>
+        <div class="form-group dwauto-note-custom" data-index="${index}" style="display:none;">
+          <input type="text" name="customAnswer${index}" value="">
+        </div>
+      `;
+    })
     .join("");
 
   return new Promise((resolve) => {
     new Dialog({
       title: moveItem.name,
-      content: `
-        <form>
-          <p>${game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</p>
-          <div class="form-group">
-            <select name="answer">${selectOptions}</select>
-          </div>
-          <div class="form-group dwauto-note-custom" style="display:none;">
-            <input type="text" name="customAnswer" value="">
-          </div>
-        </form>
-      `,
+      content: `<form>${fieldsHtml}</form>`,
       buttons: {
         ok: {
           label: game.i18n.localize("DWAUTO.Confirm"),
           callback: (html) => {
-            const value = html.find('[name="answer"]').val();
-            if (value === CUSTOM_VALUE) {
-              resolve((html.find('[name="customAnswer"]').val() ?? "").trim() || null);
-            } else {
-              resolve(value);
-            }
+            const answers = groups
+              .map((_, index) => {
+                const value = html.find(`[name="answer${index}"]`).val();
+                if (value === CUSTOM_VALUE) {
+                  return (html.find(`[name="customAnswer${index}"]`).val() ?? "").trim();
+                }
+                return value;
+              })
+              .filter(Boolean);
+            resolve(answers);
           }
         },
         cancel: {
@@ -135,8 +169,10 @@ function promptListAnswer(moveItem, options) {
       },
       default: "ok",
       render: (html) => {
-        html.find('[name="answer"]').on("change", (event) => {
-          html.find(".dwauto-note-custom").toggle(event.currentTarget.value === CUSTOM_VALUE);
+        groups.forEach((_, index) => {
+          html.find(`[name="answer${index}"]`).on("change", (event) => {
+            html.find(`.dwauto-note-custom[data-index="${index}"]`).toggle(event.currentTarget.value === CUSTOM_VALUE);
+          });
         });
       },
       close: () => resolve(null)
@@ -145,19 +181,23 @@ function promptListAnswer(moveItem, options) {
 }
 
 async function activate(actor, moveItem) {
-  const options = extractListOptions(moveItem);
-  let answer = null;
+  const groups = extractListGroups(moveItem);
+  let answers = null;
 
-  if (options.length > 0) {
-    answer = await promptListAnswer(moveItem, options);
-    if (!answer) return;
+  if (groups.length > 0) {
+    answers = await promptListAnswers(moveItem, groups);
+    if (!answers) return;
   }
 
   await setActivated(actor, moveItem.id, true);
 
-  if (answer) {
-    await setAnswer(actor, moveItem.id, answer);
-    announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.NoteMoves.AnswerChosen", { answer }));
+  if (answers && answers.length > 0) {
+    await setAnswer(actor, moveItem.id, answers);
+    announceActionApplied(
+      actor,
+      moveItem.name,
+      game.i18n.format("DWAUTO.NoteMoves.AnswerChosen", { answer: answers.join(" / ") })
+    );
   } else {
     announceActionApplied(actor, moveItem.name, game.i18n.localize("DWAUTO.NoteMoves.Activated"));
   }
@@ -221,15 +261,17 @@ function renderTab(actor, moveItem, html) {
   $body.addClass("dwauto-tab");
 
   const description = moveItem.system?.description ?? "";
-  const answer = getAnswer(actor, moveItem.id);
+  const answers = getAnswer(actor, moveItem.id);
   const text = getNoteText(actor, moveItem.id);
 
   const $section = $(`
     <div class="cell dwauto-note-move">
       ${description ? `<div class="dwauto-note-description">${description}</div>` : ""}
       ${
-        answer
-          ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.AnswerLabel")}</label><a class="tag dwauto-note-answer">${answer}</a>`
+        answers.length > 0
+          ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.AnswerLabel")}</label>${answers
+              .map((a) => `<a class="tag dwauto-note-answer">${a}</a>`)
+              .join(" ")}`
           : ""
       }
       <label class="cell__title dwauto-note-move">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
@@ -330,7 +372,7 @@ async function migrateBornOfSoilIntoNoteMoves() {
     if (moveId) {
       await setActivated(actor, moveId, true);
       const land = actor.getFlag(MODULE_ID, "bornOfSoilLand");
-      if (land) await setAnswer(actor, moveId, land);
+      if (land) await setAnswer(actor, moveId, [land]);
       const notes = actor.getFlag(MODULE_ID, "bornOfSoilNotes");
       if (notes) await setNoteText(actor, moveId, notes);
     }
