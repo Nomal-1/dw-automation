@@ -270,11 +270,12 @@ async function onCreateChatMessage(message, options, userId) {
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
 
-    if (result === "partial") {
-      announceInfo(actor, game.i18n.localize("DWAUTO.ArcaneArt.PartialNotice"));
-      return;
-    }
-    if (result !== "success") return;
+    // 원문: "Your spell still works" — 7-9도 효과 자체는 그대로 적용되고,
+    // 거기에 "원치 않는 주목을 끌거나 다른 대상에게도 영향을 준다"는
+    // 서사적 덤이 붙을 뿐이다(그 덤은 GM이 정하는 것이라 자동화하지 않고
+    // 안내만 남긴다). 그래서 6-만 제외하고 성공/부분성공 둘 다 아군+효과
+    // 선택 흐름을 그대로 탄다.
+    if (result !== "success" && result !== "partial") return;
 
     const { options: choiceOptions } = getMoveChoiceData(moveItem, "success");
     if (choiceOptions.length === 0) return;
@@ -293,6 +294,9 @@ async function onCreateChatMessage(message, options, userId) {
       count: 1,
       onConfirm: async (selected, indexes) => {
         await applyEffect(actor, target, moveItem, indexes[0], selected[0]);
+        if (result === "partial") {
+          announceInfo(actor, game.i18n.localize("DWAUTO.ArcaneArt.PartialNotice"));
+        }
       }
     });
   } catch (err) {
