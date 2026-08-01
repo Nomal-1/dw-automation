@@ -137,13 +137,57 @@ function promptBonusPermission(data) {
   }).render(true);
 }
 
+// GM에게 보여줄 팝업 자체를 만드는 부분만 따로 뺐다. onAck은 "GM이 확인
+// 눌렀다"는 신호만 전달하면 된다 — 로컬에서 바로 resolve할지, 소켓으로
+// 응답을 돌려보낼지는 호출부가 정한다.
+function showInstinctReminderDialog({ interfererName, targetName, amount }, onAck) {
+  let acked = false;
+  const ack = () => {
+    if (acked) return;
+    acked = true;
+    onAck();
+  };
+
+  new Dialog({
+    title: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderTitle"),
+    content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderContent", {
+      interferer: interfererName,
+      target: targetName,
+      amount: formatSigned(amount)
+    })}</p>`,
+    buttons: {
+      ok: {
+        label: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderAck"),
+        callback: ack
+      }
+    },
+    default: "ok",
+    close: ack
+  }).render(true);
+}
+
 // Command의 본능 보너스는 rollMod로 반영이 안 되므로(파일 상단 주석 참고),
 // GM에게 팝업으로 "플레이어의 유대 입력창에 직접 더해서 입력하도록
 // 공지해달라"고 요청한다. GM이 확인을 누르기 전까지는 원조/방해 판정
 // 자체(=시스템의 유대 입력창)가 뜨지 않는다 — 그래야 안내를 놓치고 먼저
-// 굴려버리는 일이 없다. GM이 접속해 있지 않으면 막을 사람이 없으므로
-// 방해하는 플레이어 본인에게라도 안내하고 바로 진행한다.
+// 굴려버리는 일이 없다.
+//
+// 지금 이 클라이언트가 이미 GM이면(예: GM이 직접 방해 판정을 굴렸거나,
+// 방해 주체와 대상이 둘 다 GM 소유 캐릭터인 경우) 소켓으로 요청을 보내봐야
+// 소용없다 — Foundry의 모듈 소켓(game.socket.emit)은 서버가 "보낸 사람을
+// 제외한" 다른 클라이언트에게만 중계하므로, 받을 다른 GM 클라이언트가
+// 없으면 응답이 영영 안 와서 굴림 자체가 멈춰버린다(원조/방해 무브 옆에서
+// GM이 스스로 테스트할 때 흔히 걸리는 경우). 이 경우는 소켓을 거치지 않고
+// 지금 이 자리에서 바로 팝업을 띄운다. GM이 아니고 접속 중인 GM도 없으면
+// 막을 사람이 없으므로 방해하는 플레이어 본인에게라도 안내하고 바로
+// 진행한다.
 function requestInstinctReminderAck({ interfererName, targetName, amount }) {
+  if (game.user.isGM) {
+    return new Promise((resolve) => {
+      showInstinctReminderDialog({ interfererName, targetName, amount }, resolve);
+    });
+  }
+
   return new Promise((resolve) => {
     const gm = findApprovingGM();
     if (!gm) {
@@ -169,33 +213,13 @@ function requestInstinctReminderAck({ interfererName, targetName, amount }) {
 }
 
 function promptInstinctReminder(data) {
-  let responded = false;
-  const respond = () => {
-    if (responded) return;
-    responded = true;
+  showInstinctReminderDialog(data, () => {
     game.socket.emit(SOCKET_NAME, {
       type: "instinctReminderResponse",
       requestId: data.requestId,
       targetUserId: data.requesterUserId
     });
-  };
-
-  new Dialog({
-    title: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderTitle"),
-    content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderContent", {
-      interferer: data.interfererName,
-      target: data.targetName,
-      amount: formatSigned(data.amount)
-    })}</p>`,
-    buttons: {
-      ok: {
-        label: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderAck"),
-        callback: respond
-      }
-    },
-    default: "ok",
-    close: respond
-  }).render(true);
+  });
 }
 
 function onSocketEvent(data) {
