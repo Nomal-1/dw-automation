@@ -738,4 +738,25 @@ export function registerSettings() {
     type: String,
     default: "Hunt & Track, Discern Realities, Parley"
   });
+
+  // 재주꾼(Well-trained): "동물 친구에게 훈련 특성을 하나 추가하십시오."
+  // 동물 친구 자신의 설명에서 훈련 특성 목록을 그대로 뽑아 쓰므로 별도
+  // 목록 설정은 없다(features/well-trained.js 참고).
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_WELL_TRAINED_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableWellTrainedAssistant.Name",
+    hint: "DWAUTO.Settings.EnableWellTrainedAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WELL_TRAINED_MOVE_NAMES, {
+    name: "DWAUTO.Settings.WellTrainedMoveNames.Name",
+    hint: "DWAUTO.Settings.WellTrainedMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Well-trained"
+  });
 }

@@ -33,3 +33,49 @@ export function parseAnimalCompanionStats(text) {
   }
   return result;
 }
+
+// 동물 친구 설명 안에는 "기본 능력치를 선택합니다"(<ul>, 이미 parseAnimalCompanionStats로
+// 처리됨) 말고도 <h3>제목 문단 바로 뒤에 <p>쉼표 목록</p>이 오는 구조로
+// "사나움 수치만큼 선택하는 강점", "교활함만큼 선택하는 훈련 특성",
+// "본능만큼 선택하는 약점" 목록이 각각 들어있다(종류 목록도 같은 구조지만
+// 여긴 다루지 않는다). 어느 <h3>가 어느 목록인지는 그 제목 문장에 "Ferocity/
+// 사나움" · "Cunning/교활함" · "Instinct/본능" 중 어떤 단어가 들어있는지로
+// 구분한다 — 원문/번역 모두 그 능력치 이름이 반드시 제목에 등장하기 때문에
+// 정확한 헤딩 문구가 조금 달라져도(예: 확장/서드파티 무브) 안정적으로 맞는다.
+// "_______" 같은 서사적 빈칸 옵션은 목록에서 제외한다(직접입력으로 대체).
+const BLANK_OPTION_PATTERN = /_{2,}/;
+
+function extractHeadingListPairs(description) {
+  const html = $(`<div>${description ?? ""}</div>`);
+  const pairs = [];
+  html.find("h3").each((_, h3) => {
+    const heading = $(h3).text();
+    const $next = $(h3).next();
+    if (!$next.is("p")) return;
+    const options = $next
+      .text()
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s && !BLANK_OPTION_PATTERN.test(s));
+    if (options.length > 0) pairs.push({ heading, options });
+  });
+  return pairs;
+}
+
+function findByKeyword(pairs, keywords) {
+  const match = pairs.find((p) => keywords.some((k) => p.heading.includes(k)));
+  return match?.options ?? [];
+}
+
+// features/note-moves.js가 동물 친구의 "기본 능력치" 답을 확정한 직후(사나움/
+// 교활함/본능 숫자를 이미 아는 시점) 이 함수로 강점/훈련/약점 옵션 목록을
+// 뽑아서, 각각 사나움/교활함/본능 개수만큼 고르는 다중 선택 프롬프트를
+// 띄우는 데 쓴다. 셋 다 못 찾으면(원문 구조 자체가 다른 서드파티 무브 등) null.
+export function parseAnimalCompanionChoiceLists(description) {
+  const pairs = extractHeadingListPairs(description);
+  const strengths = findByKeyword(pairs, ["Ferocity", "사나움"]);
+  const trainings = findByKeyword(pairs, ["Cunning", "교활함"]);
+  const weaknesses = findByKeyword(pairs, ["Instinct", "본능"]);
+  if (strengths.length === 0 && trainings.length === 0 && weaknesses.length === 0) return null;
+  return { strengths, trainings, weaknesses };
+}

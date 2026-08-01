@@ -53,5 +53,7 @@ export const SETTINGS = {
   HOLD_GRANT_MOVES: "holdGrantMoves",
   ENABLE_COMMAND_ASSISTANT: "enableCommandAssistant",
   COMMAND_MOVE_NAMES: "commandMoveNames",
-  COMMAND_CUNNING_MOVE_NAMES: "commandCunningMoveNames"
+  COMMAND_CUNNING_MOVE_NAMES: "commandCunningMoveNames",
+  ENABLE_WELL_TRAINED_ASSISTANT: "enableWellTrainedAssistant",
+  WELL_TRAINED_MOVE_NAMES: "wellTrainedMoveNames"
 };

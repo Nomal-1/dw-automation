@@ -4,7 +4,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
-import { parseAnimalCompanionStats } from "../lib/animal-companion-stats.js";
+import { parseAnimalCompanionStats, parseAnimalCompanionChoiceLists } from "../lib/animal-companion-stats.js";
 
 // Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
 // Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
@@ -29,10 +29,27 @@ const CUSTOM_VALUE = "__dwauto_custom__";
 // 아니라 액터 하나당 값 하나다(동반 동물은 보통 하나뿐이라고 가정). features/
 // command.js(레인저 명령/Command 자동화)가 이 값을 읽어서 쓴다.
 const ANIMAL_STATS_FLAG = "animalCompanionStats";
+// 강점/훈련 특성/약점 각각 문자열 배열. 액터당 하나(동반 동물은 보통 하나뿐이라고
+// 가정 — ANIMAL_STATS_FLAG와 동일한 전제). features/well-trained.js(재주꾼)가
+// ANIMAL_TRAININGS_FLAG를 읽고 추가로 하나를 append한다.
+const ANIMAL_STRENGTHS_FLAG = "animalCompanionStrengths";
+const ANIMAL_TRAININGS_FLAG = "animalCompanionTrainings";
+const ANIMAL_WEAKNESSES_FLAG = "animalCompanionWeaknesses";
 
 // features/command.js가 재사용한다. 아직 파싱된 값이 없으면 null.
 export function getAnimalCompanionStats(actor) {
   return actor.getFlag(MODULE_ID, ANIMAL_STATS_FLAG) ?? null;
+}
+
+// features/well-trained.js가 재사용한다. 아직 고른 적 없으면 빈 배열.
+export function getAnimalCompanionTrainings(actor) {
+  return actor.getFlag(MODULE_ID, ANIMAL_TRAININGS_FLAG) ?? [];
+}
+
+export async function addAnimalCompanionTraining(actor, training) {
+  const current = getAnimalCompanionTrainings(actor);
+  if (current.includes(training)) return;
+  await actor.setFlag(MODULE_ID, ANIMAL_TRAININGS_FLAG, [...current, training]);
 }
 
 function isEnabled() {
@@ -294,6 +311,96 @@ function promptListAnswers(moveItem, groups) {
   });
 }
 
+// 동물 친구의 강점/훈련 특성/약점처럼 "목록에서 정확히 N개(사나움/교활함/
+// 본능 수치만큼) 고르는" 선택을 위한 체크박스 다이얼로그. 서사적 빈칸을 위한
+// 직접입력 칸을 하나 더 붙인다. N개를 강제로 막지는 않는다 — 선택 개수를
+// 실시간으로 보여줘서 참고만 하게 한다(플레이어가 일부러 덜 고를 사정이
+// 있을 수도 있으므로). 취소하거나 하나도 안 고르면 빈 배열을 돌려준다(주
+// 선택 다이얼로그와 달리 이 단계를 건너뛴다고 무브 발동 자체를 취소할
+// 이유는 없다).
+function promptCountedMultiSelect(moveItem, label, options, requiredCount) {
+  const checkboxesHtml = options
+    .map(
+      (opt, index) =>
+        `<label class="dwauto-counted-option"><input type="checkbox" name="opt${index}" value="${opt}"> ${opt}</label>`
+    )
+    .join("");
+
+  return new Promise((resolve) => {
+    new Dialog({
+      title: moveItem.name,
+      content: `
+        <form>
+          <p>${label}</p>
+          <div class="dwauto-counted-list">${checkboxesHtml}</div>
+          <div class="form-group">
+            <label>${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</label>
+            <input type="text" name="customExtra" value="" placeholder="${game.i18n.localize("DWAUTO.NoteMoves.BlankPlaceholder")}">
+          </div>
+          <p class="dwauto-counted-count"></p>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const checked = html
+              .find('input[type="checkbox"]:checked')
+              .map((_, el) => el.value)
+              .get();
+            const custom = (html.find('[name="customExtra"]').val() ?? "").trim();
+            if (custom) checked.push(custom);
+            resolve(checked);
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve([])
+        }
+      },
+      default: "ok",
+      width: 420,
+      render: (html) => {
+        const updateCount = () => {
+          const count = html.find('input[type="checkbox"]:checked').length;
+          html
+            .find(".dwauto-counted-count")
+            .text(game.i18n.format("DWAUTO.NoteMoves.CountedSelected", { count, required: requiredCount }));
+        };
+        html.find('input[type="checkbox"]').on("change", updateCount);
+        updateCount();
+      },
+      close: () => resolve([])
+    }).render(true);
+  });
+}
+
+// 동물 친구의 "기본 능력치"가 확정된 직후(사나움/교활함/본능 숫자를 이미
+// 아는 시점)에만 호출된다 — 강점은 사나움만큼, 훈련 특성은 교활함만큼, 약점은
+// 본능만큼 고르는 프롬프트를 순서대로 띄운다. 그 무브의 실제 설명(번역
+// 포함)에서 세 목록을 직접 뽑아 쓰므로 하드코딩된 옵션이 없다.
+async function promptAnimalCompanionChoiceLists(actor, moveItem, stats) {
+  const lists = parseAnimalCompanionChoiceLists(moveItem.system?.description);
+  if (!lists) return;
+
+  const steps = [
+    { options: lists.strengths, count: stats.ferocity, flag: ANIMAL_STRENGTHS_FLAG, labelKey: "DWAUTO.NoteMoves.AnimalStrengthsLabel" },
+    { options: lists.trainings, count: stats.cunning, flag: ANIMAL_TRAININGS_FLAG, labelKey: "DWAUTO.NoteMoves.AnimalTrainingsLabel" },
+    { options: lists.weaknesses, count: stats.instinct, flag: ANIMAL_WEAKNESSES_FLAG, labelKey: "DWAUTO.NoteMoves.AnimalWeaknessesLabel" }
+  ];
+
+  for (const step of steps) {
+    if (step.options.length === 0 || !step.count) continue;
+    const chosen = await promptCountedMultiSelect(
+      moveItem,
+      game.i18n.format(step.labelKey, { count: step.count }),
+      step.options,
+      step.count
+    );
+    if (chosen.length > 0) await actor.setFlag(MODULE_ID, step.flag, chosen);
+  }
+}
+
 async function activate(actor, moveItem) {
   const { playerGroups } = extractListGroups(moveItem);
   let answers = null;
@@ -311,12 +418,18 @@ async function activate(actor, moveItem) {
     // 동반 동물의 "기본 능력치 선택" 답이면(사나움/교활함/본능/장갑 넷 다
     // 파싱되면) 숫자로도 따로 저장한다 — 어느 무브에서 왔는지는 안 따진다
     // (이 패턴에 우연히 맞아떨어질 다른 메모형 무브 답은 사실상 없다).
+    let animalStats = null;
     for (const answer of answers) {
       const stats = parseAnimalCompanionStats(answer);
       if (stats) {
+        animalStats = stats;
         await actor.setFlag(MODULE_ID, ANIMAL_STATS_FLAG, stats);
         break;
       }
+    }
+
+    if (animalStats) {
+      await promptAnimalCompanionChoiceLists(actor, moveItem, animalStats);
     }
 
     announceActionApplied(
@@ -377,13 +490,27 @@ async function onCreateChatMessage(message, options, userId) {
 // 한 번의 actor.update로 원자적으로 지워서 그런 중간 상태 자체가 생기지
 // 않게 한다. "flags.모듈.플래그.-=키" 문법은 그 키 하나만 지우는 Foundry의
 // 표준 플래그 삭제 방식이다.
-async function resetNoteMove(actor, moveId) {
-  await actor.update({
-    [`flags.${MODULE_ID}.${ACTIVATED_FLAG}.-=${moveId}`]: null,
-    [`flags.${MODULE_ID}.${ANSWER_FLAG}.-=${moveId}`]: null,
-    [`flags.${MODULE_ID}.${GM_CHOICE_FLAG}.-=${moveId}`]: null,
-    [`flags.${MODULE_ID}.${NOTES_FLAG}.-=${moveId}`]: null
-  });
+// 동물 친구 탭을 초기화하는 경우, 무브별이 아니라 액터 하나당 값 하나로
+// 저장되는 능력치/강점/훈련/약점 플래그(다른 메모형 무브를 초기화할 때는
+// 절대 건드리면 안 된다)도 같이 지워서 재선택 시 옛 숫자가 남지 않게 한다.
+// 이 무브가 동물 친구인지는 이름이 아니라 실제 설명 구조(사나움/교활함/본능
+// 개수만큼 고르는 <h3>+<p> 목록이 있는지)로 판단한다.
+async function resetNoteMove(actor, moveItem) {
+  const updates = {
+    [`flags.${MODULE_ID}.${ACTIVATED_FLAG}.-=${moveItem.id}`]: null,
+    [`flags.${MODULE_ID}.${ANSWER_FLAG}.-=${moveItem.id}`]: null,
+    [`flags.${MODULE_ID}.${GM_CHOICE_FLAG}.-=${moveItem.id}`]: null,
+    [`flags.${MODULE_ID}.${NOTES_FLAG}.-=${moveItem.id}`]: null
+  };
+
+  if (parseAnimalCompanionChoiceLists(moveItem.system?.description) !== null) {
+    updates[`flags.${MODULE_ID}.-=${ANIMAL_STATS_FLAG}`] = null;
+    updates[`flags.${MODULE_ID}.-=${ANIMAL_STRENGTHS_FLAG}`] = null;
+    updates[`flags.${MODULE_ID}.-=${ANIMAL_TRAININGS_FLAG}`] = null;
+    updates[`flags.${MODULE_ID}.-=${ANIMAL_WEAKNESSES_FLAG}`] = null;
+  }
+
+  await actor.update(updates);
 }
 
 // "GM이 나중에 정해준다"고 적힌 목록(퀘스트의 서약 등)을 체크박스로 보여준다
@@ -414,7 +541,7 @@ function renderTab(actor, moveItem, html) {
     actor,
     tabKey: `dwauto-note-${moveItem.id}`,
     navLabel: moveItem.name,
-    onReset: () => resetNoteMove(actor, moveItem.id)
+    onReset: () => resetNoteMove(actor, moveItem)
   });
   $body.addClass("dwauto-tab");
 
@@ -422,6 +549,16 @@ function renderTab(actor, moveItem, html) {
   const answers = getAnswer(actor, moveItem.id);
   const text = getNoteText(actor, moveItem.id);
   const { gmGroups } = extractListGroups(moveItem);
+  const isAnimalCompanion = parseAnimalCompanionChoiceLists(description) !== null;
+  const strengths = isAnimalCompanion ? actor.getFlag(MODULE_ID, ANIMAL_STRENGTHS_FLAG) ?? [] : [];
+  const trainings = isAnimalCompanion ? getAnimalCompanionTrainings(actor) : [];
+  const weaknesses = isAnimalCompanion ? actor.getFlag(MODULE_ID, ANIMAL_WEAKNESSES_FLAG) ?? [] : [];
+  const renderTagRow = (labelKey, items) =>
+    items.length > 0
+      ? `<label class="cell__title">${game.i18n.localize(labelKey)}</label>${items
+          .map((a) => `<a class="tag dwauto-note-answer">${a}</a>`)
+          .join(" ")}`
+      : "";
 
   const $section = $(`
     <div class="cell dwauto-note-move">
@@ -433,6 +570,9 @@ function renderTab(actor, moveItem, html) {
               .join(" ")}`
           : ""
       }
+      ${renderTagRow("DWAUTO.NoteMoves.AnimalStrengthsTitle", strengths)}
+      ${renderTagRow("DWAUTO.NoteMoves.AnimalTrainingsTitle", trainings)}
+      ${renderTagRow("DWAUTO.NoteMoves.AnimalWeaknessesTitle", weaknesses)}
       ${renderGmChoiceSection(actor, moveItem, gmGroups)}
       <label class="cell__title dwauto-note-move">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
       <textarea class="dwauto-note-textarea" rows="8">${text}</textarea>
@@ -554,10 +694,40 @@ async function migrateBornOfSoilIntoNoteMoves() {
   console.log(`${MODULE_ID} | note-moves: merged Born of the Soil into the unified note-move system`);
 }
 
+// v0.39.0(레인저 명령/Command 자동화)이 나오기 전까지는 동물 친구의 "기본
+// 능력치 선택" 답이 저장은 됐어도(ANSWER_FLAG) 숫자로 파싱되지는(ANIMAL_STATS_FLAG)
+// 않았다. 이미 동물 친구를 발동해서 답을 골라둔 기존 액터는 activate()가
+// 다시 호출되지 않으므로(이미 발동된 무브라 새로 프롬프트를 안 띄운다),
+// 저장된 답을 다시 훑어서 놓친 숫자를 채워 넣는다. 강점/훈련 특성/약점은
+// 이번에 새로 생긴 선택 단계라 옛 데이터에 애초에 없으므로 백필 대상이
+// 아니다 — 필요하면 시트에서 동물 친구 탭을 초기화하고 다시 골라야 한다.
+async function migrateBackfillAnimalCompanionStats() {
+  if (!game.user.isGM) return;
+
+  for (const actor of game.actors) {
+    if (actor.type !== "character") continue;
+    if (actor.getFlag(MODULE_ID, ANIMAL_STATS_FLAG)) continue;
+
+    const answerMap = actor.getFlag(MODULE_ID, ANSWER_FLAG) ?? {};
+    for (const rawAnswers of Object.values(answerMap)) {
+      const answers = Array.isArray(rawAnswers) ? rawAnswers : [rawAnswers];
+      const stats = answers.map(parseAnimalCompanionStats).find(Boolean);
+      if (stats) {
+        await actor.setFlag(MODULE_ID, ANIMAL_STATS_FLAG, stats);
+        break;
+      }
+    }
+  }
+
+  console.log(`${MODULE_ID} | note-moves: backfilled animal companion stats for already-activated actors`);
+}
+
 export function registerNoteMoves() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
-    migrateBornOfSoilIntoNoteMoves().then(() => migrateLegacyOwnershipToActivation());
+    migrateBornOfSoilIntoNoteMoves()
+      .then(() => migrateLegacyOwnershipToActivation())
+      .then(() => migrateBackfillAnimalCompanionStats());
   });
 }

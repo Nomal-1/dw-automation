@@ -235,6 +235,14 @@
       "CommandCunningMoveNames": {
         "Name": "Moves That Receive the Animal's Cunning",
         "Hint": "Moves like Hunt & Track/Discern Realities/Parley where \"the animal's cunning is added to the roll\" (comma-separated). Default is the English original names (Hunt & Track, Discern Realities, Parley)."
+      },
+      "EnableWellTrainedAssistant": {
+        "Name": "Enable Well-trained Automation",
+        "Hint": "When the Ranger's Well-trained move is triggered, prompts the player to pick one training they don't already have from the \"choose as many trainings as Cunning\" list in the Animal Companion move's own description, and adds it to the animal companion's training list. Requires Animal Companion to have already been set up so the training list can be read."
+      },
+      "WellTrainedMoveNames": {
+        "Name": "Well-trained Move Names",
+        "Hint": "Comma-separated list (default: Well-trained)."
       }
     },
     "Npc": {
@@ -368,7 +376,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -677,7 +685,14 @@
       "AnswerLabel": "Chosen",
       "AnswerChosen": "Set to \"{answer}\"",
       "Activated": "Note tab created",
-      "GmChoiceLabel": "GM's Picks"
+      "GmChoiceLabel": "GM's Picks",
+      "CountedSelected": "Selected: {count} / {required}",
+      "AnimalStrengthsLabel": "Choose as many strengths below as your Ferocity ({count}).",
+      "AnimalTrainingsLabel": "Choose as many trainings below as your Cunning ({count}).",
+      "AnimalWeaknessesLabel": "Choose as many weaknesses below as your Instinct ({count}).",
+      "AnimalStrengthsTitle": "Strengths",
+      "AnimalTrainingsTitle": "Trainings",
+      "AnimalWeaknessesTitle": "Weaknesses"
     },
     "NoteMovesSettings": {
       "Title": "Note-Taking Move Names",
@@ -692,6 +707,13 @@
       "CooperatingOff": "Normal",
       "DamageBonusApplied": "Added the animal's Ferocity +{amount} to damage",
       "RollBonusApplied": "Added the animal's Cunning +{amount} to the {move} roll"
+    },
+    "WellTrained": {
+      "PromptLabel": "Choose a training to add.",
+      "Applied": "Added the \"{training}\" training to the animal companion",
+      "AlreadyApplied": "Already applied: the \"{training}\" training has been added",
+      "NoCompanion": "Couldn't find an animal companion on {name}, so its training list is unknown. Set up Animal Companion first.",
+      "NoTrainingsLeft": "{name}'s animal companion already has every training it could choose."
     },
     "Armor": {
       "NoContributors": "No equipped armor and no currently active modifiers",
