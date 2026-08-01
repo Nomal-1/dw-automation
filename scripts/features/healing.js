@@ -5,6 +5,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_HOSPITALLER_MOVES } from "../data/healing-moves.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
+import { setPendingDamageForward } from "../lib/damage-forward-state.js";
 
 // 관찰(Observer) 권한만 있는 대상(적인지 아군인지 애매한 NPC 등)도 치유
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
@@ -13,9 +14,32 @@ import { promptActorTarget } from "../lib/actor-target-picker.js";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const pendingHealApprovals = new Map();
 
+function splitCommaList(settingKey) {
+  return game.settings
+    .get(MODULE_ID, settingKey)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function getHealingRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HEALING_MOVES);
   return table.find((row) => row.name === name) ?? null;
+}
+
+// 클레릭 소생(Invigorate) 원문: "남을 치유하면 그 대상이 다음 피해에 +2
+// forward를 받는다." applyHealAmount를 거치는 모든 치유(무브/주문/조화
+// 소비 등)에 동일하게 적용된다. lib/damage-forward-state.js에 그대로
+// 얹으므로 features/attack-assistant.js가 다음 피해 굴림에서 소모한다.
+function getInvigorateGrant(healer) {
+  if (game.system.id !== "dungeonworld") return null;
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_INVIGORATE_ASSISTANT)) return null;
+
+  const names = splitCommaList(SETTINGS.INVIGORATE_MOVE_NAMES);
+  const move = healer.items.find((i) => i.type === "move" && names.includes(i.name));
+  if (!move) return null;
+
+  return { amount: 2, source: move.name };
 }
 
 // "auto"는 주문 아이템이면 system.rollFormula(구조적 필드, 번역 무관하게 항상
@@ -99,7 +123,7 @@ function findApprovingGM() {
 // 쓸 권한(Owner)이 없으니, 굴린 치유량을 들고 접속 중인 GM에게 승인을
 // 구한다. GM이 허락하면 GM의 클라이언트가 직접 적용한다(GM은 항상 모든
 // 액터에 대한 권한이 있으므로).
-function requestHealApproval({ target, healerName, itemName, amount }) {
+function requestHealApproval({ target, healerName, itemName, amount, invigorate }) {
   return new Promise((resolve) => {
     const gm = findApprovingGM();
     if (!gm) {
@@ -119,7 +143,8 @@ function requestHealApproval({ target, healerName, itemName, amount }) {
       targetActorId: target.id,
       targetName: target.name,
       itemName,
-      amount
+      amount,
+      invigorate
     });
   });
 }
@@ -142,6 +167,7 @@ function promptHealPermission(data) {
             const targetHp = Number(target.system.attributes?.hp?.value) || 0;
             const targetMax = Number(target.system.attributes?.hp?.max) || 0;
             await target.update({ "system.attributes.hp.value": Math.min(targetHp + data.amount, targetMax) });
+            if (data.invigorate) await setPendingDamageForward(target, data.invigorate.amount, data.invigorate.source);
           }
           game.socket.emit(SOCKET_NAME, {
             type: "healPermissionResponse",
@@ -187,21 +213,34 @@ function onSocketEvent(data) {
 // 있으면 바로 적용하고, 관찰 권한만 있으면(적인지 아군인지 애매한 대상 등)
 // 접속 중인 GM에게 승인을 구한 뒤 적용한다. Druid Balance처럼 다른 기능에서도
 // 같은 절차가 필요해서 export한다.
+//
+// 치유자가 소생(Invigorate)을 갖고 있으면, 실제로 치유가 적용된 경우에만
+// (권한이 없어 GM 승인이 필요했다면 승인된 경우에만) 대상에게 "다음 피해
+// +2 forward"도 함께 건다 — HP 갱신과 같은 권한 경로(직접 또는 GM 승인)를
+// 타야 하므로 requestHealApproval에도 함께 실어 보낸다.
 export async function applyHealAmount(healer, target, moveName, amount) {
+  const invigorate = getInvigorateGrant(healer);
+
+  let healed;
   if (target.isOwner) {
     const targetHp = Number(target.system.attributes?.hp?.value) || 0;
     const targetMax = Number(target.system.attributes?.hp?.max) || 0;
     const newHp = Math.min(targetHp + amount, targetMax);
     await target.update({ "system.attributes.hp.value": newHp });
-
-    announceActionApplied(healer, moveName, game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount }));
+    if (invigorate) await setPendingDamageForward(target, invigorate.amount, invigorate.source);
+    healed = true;
   } else {
-    const approved = await requestHealApproval({ target, healerName: healer.name, itemName: moveName, amount });
-    if (approved) {
-      announceActionApplied(healer, moveName, game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount }));
-    } else {
-      ui.notifications.warn(game.i18n.format("DWAUTO.Healing.PermissionDenied", { name: target.name }));
-    }
+    healed = await requestHealApproval({ target, healerName: healer.name, itemName: moveName, amount, invigorate });
+  }
+
+  if (!healed) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.Healing.PermissionDenied", { name: target.name }));
+    return;
+  }
+
+  announceActionApplied(healer, moveName, game.i18n.format("DWAUTO.Healing.Applied", { target: target.name, amount }));
+  if (invigorate) {
+    announceActionApplied(healer, invigorate.source, game.i18n.format("DWAUTO.Invigorate.Applied", { target: target.name }));
   }
 }
 

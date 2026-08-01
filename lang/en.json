@@ -292,6 +292,14 @@
       "GoodDayToDieMoveNames": {
         "Name": "A Good Day To Die Move Names",
         "Hint": "Comma-separated list (default: A Good Day To Die)."
+      },
+      "EnableInvigorateAssistant": {
+        "Name": "Enable Invigorate Automation",
+        "Hint": "If the character has the Cleric's Invigorate, every time they heal someone (through any healing path this module handles — moves, spells, Balance spending, etc.) the target automatically gets \"+2 forward to their next damage\"."
+      },
+      "InvigorateMoveNames": {
+        "Name": "Invigorate Move Names",
+        "Hint": "Comma-separated list (default: Invigorate)."
       }
     },
     "Npc": {
@@ -425,7 +433,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Invigorate Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -599,6 +607,9 @@
       "PermissionAllow": "Allow",
       "PermissionDeny": "Deny",
       "PermissionDenied": "The GM didn't approve healing \"{name}\"."
+    },
+    "Invigorate": {
+      "Applied": "+2 forward queued for {target}'s next damage roll"
     },
     "MoveUpgrades": {
       "Title": "Move Upgrades",

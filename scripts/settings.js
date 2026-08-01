@@ -890,4 +890,25 @@ export function registerSettings() {
     type: String,
     default: "A Good Day To Die"
   });
+
+  // 클레릭 소생(Invigorate): 남을 치유하면 대상이 다음 피해에 +2 forward.
+  // features/healing.js의 applyHealAmount(모든 치유가 거쳐가는 공용 지점)에
+  // 이미 연결되어 있다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_INVIGORATE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableInvigorateAssistant.Name",
+    hint: "DWAUTO.Settings.EnableInvigorateAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.INVIGORATE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.InvigorateMoveNames.Name",
+    hint: "DWAUTO.Settings.InvigorateMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Invigorate"
+  });
 }

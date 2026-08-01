@@ -67,5 +67,7 @@ export const SETTINGS = {
   ENABLE_SELF_FORWARD_ASSISTANT: "enableSelfForwardAssistant",
   SELF_FORWARD_MOVES: "selfForwardMoves",
   ENABLE_BARBARIAN_ASSISTANT: "enableBarbarianAssistant",
-  GOOD_DAY_TO_DIE_MOVE_NAMES: "goodDayToDieMoveNames"
+  GOOD_DAY_TO_DIE_MOVE_NAMES: "goodDayToDieMoveNames",
+  ENABLE_INVIGORATE_ASSISTANT: "enableInvigorateAssistant",
+  INVIGORATE_MOVE_NAMES: "invigorateMoveNames"
 };
