@@ -5,16 +5,21 @@
 //   무효화 — 이미 6개 약화를 전부 갖고 있으면 이 무브 자체를 쓸 수 없음) |
 //   "spellDefense"(위저드 Spell Defense 전용 — 완전 무효화가 아니라 유지
 //   중인 지속 주문 하나를 끝내고 그 주문의 레벨만큼만 피해를 경감한다.
-//   유지 중인 지속 주문이 하나도 없으면 이 무브 자체를 쓸 수 없음)
+//   유지 중인 지속 주문이 하나도 없으면 이 무브 자체를 쓸 수 없음) |
+//   "hold"(클레릭 Divine Intervention/Invincibility 전용 — 기원(Commune)
+//   때 얻은 hold를 하나 써서 완전 무효화한다. hold가 0이면 이 무브 자체를
+//   쓸 수 없음. hold를 얻는 쪽은 data/hold-grant-moves.js 참고)
 // - grantsForward: 무효화에 성공하면 +1 forward도 함께 받는지(Armored
 //   Perfection). 던전월드 시스템의 forward는 다음 굴림에 자동으로 붙었다가
 //   소모되는 값(system.attributes.forward.value)이라 별도 계산이 필요 없다.
-//   spellDefense 행에는 의미 없는 필드다(항상 false).
+//   spellDefense/hold 행에는 의미 없는 필드다(항상 false).
 export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Armor Mastery", effect: "armor", grantsForward: false },
   { name: "Armored Perfection", effect: "armor", grantsForward: true },
   { name: "Bloody Aegis", effect: "debility", grantsForward: false },
-  { name: "Spell Defense", effect: "spellDefense", grantsForward: false }
+  { name: "Spell Defense", effect: "spellDefense", grantsForward: false },
+  { name: "Divine Intervention", effect: "hold", grantsForward: false },
+  { name: "Divine Invincibility", effect: "hold", grantsForward: false }
 ];
 
 // 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,

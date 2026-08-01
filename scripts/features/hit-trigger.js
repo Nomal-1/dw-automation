@@ -6,6 +6,7 @@ import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
 import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive } from "./underdog.js";
 import { findDecidingUser } from "../lib/deciding-user.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
+import { getHold, setHold } from "../lib/divine-hold-state.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 
@@ -233,6 +234,22 @@ async function applySpellDefense(actor, row, damage, originalChanges, originalOp
   return true;
 }
 
+// 클레릭 Divine Intervention/Invincibility 전용: 기원(Commune)으로 얻어둔
+// hold를 하나 써서 완전 무효화한다(Armor Mastery류와 달리 장비/약화 대가가
+// 없다). 원문은 "you or an ally"지만, 이 모듈의 피격 무효화 체계가 "피해를
+// 받는 그 캐릭터 자신의 무브"만 후보로 삼는 구조라 자신을 지키는 경우만
+// 자동화한다(data/hold-grant-moves.js 참고).
+async function applyHoldNegation(actor, row) {
+  const current = getHold(actor);
+  if (current <= 0) return null;
+
+  const next = current - 1;
+  await setHold(actor, next);
+  announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.HoldApplied", { remaining: next }));
+
+  return true;
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
@@ -240,6 +257,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
   const usable = candidates.filter((row) => {
     if (row.effect === "debility") return !hasAllDebilities(actor);
     if (row.effect === "spellDefense") return getActiveOngoingSpells(actor).length > 0;
+    if (row.effect === "hold") return getHold(actor) > 0;
     return true;
   });
   if (usable.length === 0) {
@@ -288,6 +306,9 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
             await applyShed(actor, damage);
           } else if (row.effect === "spellDefense") {
             const applied = await applySpellDefense(actor, row, damage, originalChanges, originalOptions);
+            if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
+          } else if (row.effect === "hold") {
+            const applied = await applyHoldNegation(actor, row);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else {
             const applied = await applyArmorNegation(actor, row, damage);

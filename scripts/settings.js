@@ -28,6 +28,8 @@ import { OngoingPenaltyReductionMovesMenu } from "./apps/ongoing-penalty-reducti
 import { DEFAULT_ONGOING_PENALTY_REDUCTION_MOVES } from "./data/ongoing-penalty-reduction-moves.js";
 import { EmpowerMovesMenu } from "./apps/empower-moves-menu.js";
 import { DEFAULT_EMPOWER_MOVES } from "./data/empower-moves.js";
+import { HoldGrantMovesMenu } from "./apps/hold-grant-moves-menu.js";
+import { DEFAULT_HOLD_GRANT_MOVES } from "./data/hold-grant-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -684,6 +686,26 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.EmpowerMovesMenu.Hint",
     icon: "fas fa-wand-sparkles",
     type: EmpowerMovesMenu,
+    restricted: true
+  });
+
+  // 클레릭 신의 개입(Divine Intervention)/신의 불멸(Divine Invincibility):
+  // 기원(Commune)할 때 hold를 얻고(이전 hold는 소멸), 피격 시 hold를 써서
+  // 피해를 완전 무효화한다. "얻는" 쪽은 이 표(features/spell-preparation.js가
+  // 참조), "쓰는" 쪽은 HIT_TRIGGER_MOVES 표에 effect:"hold"로 등록한다.
+  game.settings.register(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_HOLD_GRANT_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "holdGrantMovesMenu", {
+    name: "DWAUTO.Settings.HoldGrantMovesMenu.Name",
+    label: "DWAUTO.Settings.HoldGrantMovesMenu.Label",
+    hint: "DWAUTO.Settings.HoldGrantMovesMenu.Hint",
+    icon: "fas fa-hand-holding-hand",
+    type: HoldGrantMovesMenu,
     restricted: true
   });
 }

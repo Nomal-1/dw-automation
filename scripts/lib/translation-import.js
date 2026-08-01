@@ -369,6 +369,9 @@ export async function runTranslationImport() {
   const empowerMoves = game.settings.get(MODULE_ID, SETTINGS.EMPOWER_MOVES);
   await game.settings.set(MODULE_ID, SETTINGS.EMPOWER_MOVES, translateRows(moveMap, empowerMoves, stats));
 
+  const holdGrantMoves = game.settings.get(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES, translateRows(moveMap, holdGrantMoves, stats));
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

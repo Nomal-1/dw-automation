@@ -5,6 +5,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "../data/prepare-spells-moves.js";
 import { getDiscountedSpellIds } from "./spell-discount.js";
 import { COMMUNE_PENALTY_FLAG } from "../lib/ongoing-spells-state.js";
+import { setHold } from "../lib/divine-hold-state.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -27,6 +28,16 @@ function getRows() {
 
 function getActorLevel(actor) {
   return Number(actor.system?.attributes?.level?.value) || 1;
+}
+
+// 클레릭 신의 개입(Divine Intervention)/신의 불멸(Divine Invincibility)
+// 전용: 기원(Commune)이 실제로 발동될 때마다 hold를 이 값으로 덮어쓴다
+// (누적이 아니라 "이전 hold는 소멸" — data/hold-grant-moves.js 참고). 위저드
+// Prepare Spells를 발동한 경우는 이 무브 자체를 가질 수 없으므로 자연히
+// 아무 일도 일어나지 않는다.
+function getHoldGrantRow(actor) {
+  const rows = game.settings.get(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES);
+  return rows.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
 }
 
 // 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문은 준비 시 레벨을 1 낮춰서
@@ -228,6 +239,16 @@ async function onCreateChatMessage(message, options, userId) {
         ? game.i18n.format("DWAUTO.PrepareSpells.Prepared", { spells: preparedNames.join(", ") })
         : game.i18n.localize("DWAUTO.PrepareSpells.PreparedNone")
     );
+
+    const holdGrantRow = getHoldGrantRow(actor);
+    if (holdGrantRow) {
+      await setHold(actor, holdGrantRow.holdAmount);
+      announceActionApplied(
+        actor,
+        holdGrantRow.name,
+        game.i18n.format("DWAUTO.PrepareSpells.HoldGranted", { amount: holdGrantRow.holdAmount })
+      );
+    }
   } catch (err) {
     console.error(`${MODULE_ID} | spell-preparation: onCreateChatMessage failed`, err);
   }

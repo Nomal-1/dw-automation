@@ -218,6 +218,11 @@
         "Name": "Empower Moves",
         "Label": "Edit Empower Moves",
         "Hint": "Register moves like the Wizard's Empowered Magic/Greater Empowered Magic or the Cleric's Empower/Greater Empower (\"on a successful cast, pay a cost to pick an extra effect\") by name and whether it's the Greater version. Enabling \"Greater\" makes the effect free (no demerit) on an extreme success (12+)."
+      },
+      "HoldGrantMovesMenu": {
+        "Name": "Hold Grant Moves",
+        "Label": "Edit Hold Grant Moves",
+        "Hint": "Register moves like the Cleric's Divine Intervention/Divine Invincibility (\"gain hold when you Commune, losing any hold you already had\") by name and hold amount. This hold ties into the \"Effect: Spend hold\" option in the Hit-Taken Moves setting."
       }
     },
     "Npc": {
@@ -351,7 +356,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -360,13 +365,14 @@
     },
     "HitTriggerMoves": {
       "Title": "Hit-Taken Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered), or end one currently-maintained ongoing spell and reduce the damage by only that spell's level (the Wizard's Spell Defense — not full negation, and unusable if no ongoing spell is currently maintained). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared; meaningless for the Spell Defense row).",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered), end one currently-maintained ongoing spell and reduce the damage by only that spell's level (the Wizard's Spell Defense — not full negation, and unusable if no ongoing spell is currently maintained), or spend one hold for full negation (the Cleric's Divine Intervention/Invincibility — unusable at 0 hold; hold is filled in whenever \"Commune\" is triggered, per the amount set in the Hold Grant Moves setting). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared; meaningless for the Spell Defense/hold rows).",
       "Name": "Move Name",
       "Effect": "Effect",
       "EffectOption": {
         "armor": "Lower armor by 1",
         "debility": "Take a debility",
-        "spellDefense": "End ongoing spell + reduce by its level"
+        "spellDefense": "End ongoing spell + reduce by its level",
+        "hold": "Spend hold + full negation"
       },
       "GrantsForward": "Grants +1 forward",
       "AddRow": "Add Row",
@@ -389,7 +395,8 @@
       "ArmorItemDestroyed": "{item} was destroyed",
       "IndomitableApplied": "+1 forward",
       "SpellDefenseChooseInstruction": "Choose an ongoing spell to end.",
-      "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) — original damage {original} reduced by {level}, so you actually take {damage}"
+      "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) — original damage {original} reduced by {level}, so you actually take {damage}",
+      "HoldApplied": "Spent one hold to fully negate the damage (remaining hold: {remaining})"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
@@ -455,6 +462,15 @@
       "Applied": "Empower applied. Effect: {effect} / Demerit: {demerit}",
       "AppliedFree": "Empower applied (extreme success, no cost). Effect: {effect}",
       "AppliedNoDemerit": "Empower applied. Effect: {effect}"
+    },
+    "HoldGrantMoves": {
+      "Title": "Hold Grant Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). When a character with this move actually triggers Commune, their hold is set to this amount (never additive — any previous hold is always lost). This hold ties into the \"Effect: Spend hold\" option in the Hit-Taken Moves setting.",
+      "Name": "Move Name",
+      "HoldAmount": "Hold Amount",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Hold Grant Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "HealingMoves": {
       "Title": "Healing Moves",
@@ -566,7 +582,8 @@
       "TooHighNote": "Too high level for this character to choose: {names}",
       "Prepared": "The following spells are now prepared: {spells}",
       "PreparedNone": "No spells are prepared.",
-      "DiscountedLevelLabel": "Lv.{raw}→{effective}, discounted"
+      "DiscountedLevelLabel": "Lv.{raw}→{effective}, discounted",
+      "HoldGranted": "Gained {amount} hold (any previous hold is lost)"
     },
     "SpellDiscount": {
       "ChooseLabel": "Choose spell to discount",
