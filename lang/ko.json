@@ -365,14 +365,15 @@
     },
     "HitTriggerMoves": {
       "Title": "피격 시 무효화 무브 설정",
-      "Hint": "무브 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. '효과'는 이 무브를 쓸 때 무엇을 대가로 치르는지를 정합니다: 장갑을 1 낮추거나, 약화를 하나 골라 겪거나(6개 약화를 이미 다 갖고 있으면 이 무브는 선택지에서 빠지고 쓸 수 없습니다), 유지 중인 지속 주문 하나를 끝내고 그 주문 레벨만큼만 피해를 경감하거나(위저드 Spell Defense 전용 — 완전 무효화가 아니며, 유지 중인 지속 주문이 없으면 이 무브 자체를 쓸 수 없습니다), hold를 하나 소비해서 완전 무효화합니다(클레릭 Divine Intervention/Invincibility 전용 — hold가 0이면 이 무브 자체를 쓸 수 없고, hold는 '기원(Commune)' 발동 시 'hold 부여 무브 설정'에 등록된 값으로 채워집니다). 'forward +1 부여'는 방어의 비법처럼 무효화에 성공하면 추가 보너스도 함께 주는 무브에 체크하세요(던전월드 시스템 자체의 forward 값으로, 다음 굴림에 자동으로 붙었다가 사라집니다. Spell Defense/hold 행에는 의미 없습니다).",
+      "Hint": "무브 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. '효과'는 이 무브를 쓸 때 무엇을 대가로 치르는지를 정합니다: 장갑을 1 낮추거나, 약화를 하나 골라 겪거나(6개 약화를 이미 다 갖고 있으면 이 무브는 선택지에서 빠지고 쓸 수 없습니다), 유지 중인 지속 주문 하나를 끝내고 그 주문 레벨만큼만 피해를 경감하거나(위저드 Spell Defense 전용 — 완전 무효화가 아니며, 유지 중인 지속 주문이 없으면 이 무브 자체를 쓸 수 없습니다), hold를 하나 소비해서 완전 무효화하거나(클레릭 Divine Intervention/Invincibility 전용 — hold가 0이면 이 무브 자체를 쓸 수 없고, hold는 '기원(Commune)' 발동 시 'hold 부여 무브 설정'에 등록된 값으로 채워집니다), 동반 동물이 대신 맞아줘서 완전 무효화합니다(레인저 Man's Best Friend 전용 — 이미 썼으면 이 무브 자체를 쓸 수 없고, '몇 시간 휴식하면 정상으로 돌아옴'은 자동 감지가 안 되어 시트의 배지를 눌러 수동으로 되돌립니다). 'forward +1 부여'는 방어의 비법처럼 무효화에 성공하면 추가 보너스도 함께 주는 무브에 체크하세요(던전월드 시스템 자체의 forward 값으로, 다음 굴림에 자동으로 붙었다가 사라집니다. Spell Defense/hold/animalCompanion 행에는 의미 없습니다).",
       "Name": "무브 이름",
       "Effect": "효과",
       "EffectOption": {
         "armor": "장갑 1 감소",
         "debility": "약화 하나 선택",
         "spellDefense": "지속 주문 종료 + 레벨만큼 경감",
-        "hold": "hold 소비 + 완전 무효화"
+        "hold": "hold 소비 + 완전 무효화",
+        "animalCompanion": "동반 동물이 대신 맞음 + 완전 무효화"
       },
       "GrantsForward": "forward +1 부여",
       "AddRow": "행 추가",
@@ -396,7 +397,11 @@
       "IndomitableApplied": "forward +1",
       "SpellDefenseChooseInstruction": "끝낼 지속 주문을 선택해주세요.",
       "SpellDefenseApplied": "\"{spell}\"(Lv.{level})을(를) 끝냈습니다 — 원래 피해 {original}에서 {level}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다",
-      "HoldApplied": "hold를 하나 써서 피해를 완전히 무효화했습니다 (남은 hold: {remaining})"
+      "HoldApplied": "hold를 하나 써서 피해를 완전히 무효화했습니다 (남은 hold: {remaining})",
+      "AnimalCompanionApplied": "동반 동물이 대신 맞아서 피해를 완전히 무효화했습니다",
+      "AnimalCompanionToggleTitle": "클릭하면 동반 동물의 사나움 상태를 켜고 끕니다. '사용함' 상태에서는 이 무브를 쓸 수 없고, 몇 시간 휴식한 뒤 다시 클릭해서 '정상'으로 되돌리세요.",
+      "AnimalCompanionSpent": "사나움 사용함",
+      "AnimalCompanionReady": "사나움 정상"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",

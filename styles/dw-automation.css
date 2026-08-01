@@ -286,6 +286,19 @@
   filter: brightness(1.2);
 }
 
+.dwauto-animal-companion-badge {
+  cursor: pointer;
+}
+
+.dwauto-animal-companion-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-animal-companion-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;

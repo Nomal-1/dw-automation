@@ -7,6 +7,8 @@ import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive }
 import { findDecidingUser } from "../lib/deciding-user.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getHold, setHold } from "../lib/divine-hold-state.js";
+import { isFerocitySpent, setFerocitySpent } from "../lib/animal-companion-state.js";
+import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 
@@ -250,6 +252,13 @@ async function applyHoldNegation(actor, row) {
   return true;
 }
 
+// 레인저 Man's Best Friend 전용: 동반 동물이 대신 맞아줘서 완전 무효화한다.
+// 대가/선택지가 없어서(druid.js의 applyShed처럼) 곧바로 적용한다.
+async function applyAnimalCompanionNegation(actor, row) {
+  await setFerocitySpent(actor, true);
+  announceActionApplied(actor, row.name, game.i18n.localize("DWAUTO.HitTrigger.AnimalCompanionApplied"));
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
@@ -258,6 +267,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
     if (row.effect === "debility") return !hasAllDebilities(actor);
     if (row.effect === "spellDefense") return getActiveOngoingSpells(actor).length > 0;
     if (row.effect === "hold") return getHold(actor) > 0;
+    if (row.effect === "animalCompanion") return !isFerocitySpent(actor);
     return true;
   });
   if (usable.length === 0) {
@@ -310,6 +320,8 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
           } else if (row.effect === "hold") {
             const applied = await applyHoldNegation(actor, row);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
+          } else if (row.effect === "animalCompanion") {
+            await applyAnimalCompanionNegation(actor, row);
           } else {
             const applied = await applyArmorNegation(actor, row, damage);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
@@ -530,9 +542,48 @@ async function migrateAddSurveyedDefaults() {
   );
 }
 
+// 레인저 Man's Best Friend 옆에 사나움 상태를 배지로 보여준다. "몇 시간
+// 휴식하면 정상으로 돌아온다"는 채팅 트리거로 자동 감지할 수 없어서, 클릭하면
+// 상태를 그대로 뒤집는다(다른 조건부 토글 배지들과 같은 방식 — GM/플레이어
+// 누구나 조작 가능, hold처럼 GM 전용으로 제한하지 않는다).
+function onRenderActorSheet(app, html) {
+  if (game.system.id !== "dungeonworld") return;
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_HIT_TRIGGER_ASSISTANT)) return;
+
+  const actor = app.actor;
+  if (actor.type !== "character") return;
+
+  const table = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
+  for (const row of table) {
+    if (row.effect !== "animalCompanion") continue;
+
+    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    if (!moveItem) continue;
+
+    const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
+    if (!$item.length) continue;
+
+    const $tags = getOrCreateTagsContainer($item);
+    if ($tags.find(".dwauto-animal-companion-badge").length) continue;
+
+    const spent = isFerocitySpent(actor);
+    const $badge = $(
+      `<a class="tag dwauto-animal-companion-badge${spent ? " dwauto-animal-companion-on" : ""}" title="${game.i18n.localize("DWAUTO.HitTrigger.AnimalCompanionToggleTitle")}">${game.i18n.localize(spent ? "DWAUTO.HitTrigger.AnimalCompanionSpent" : "DWAUTO.HitTrigger.AnimalCompanionReady")}</a>`
+    );
+    $tags.append($badge);
+
+    $badge.on("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      await setFerocitySpent(actor, !spent);
+    });
+  }
+}
+
 export function registerHitTriggerAssistant() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
+  Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
     migrateAddSurveyedDefaults();

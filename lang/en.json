@@ -365,14 +365,15 @@
     },
     "HitTriggerMoves": {
       "Title": "Hit-Taken Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered), end one currently-maintained ongoing spell and reduce the damage by only that spell's level (the Wizard's Spell Defense — not full negation, and unusable if no ongoing spell is currently maintained), or spend one hold for full negation (the Cleric's Divine Intervention/Invincibility — unusable at 0 hold; hold is filled in whenever \"Commune\" is triggered, per the amount set in the Hold Grant Moves setting). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared; meaningless for the Spell Defense/hold rows).",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered), end one currently-maintained ongoing spell and reduce the damage by only that spell's level (the Wizard's Spell Defense — not full negation, and unusable if no ongoing spell is currently maintained), spend one hold for full negation (the Cleric's Divine Intervention/Invincibility — unusable at 0 hold; hold is filled in whenever \"Commune\" is triggered, per the amount set in the Hold Grant Moves setting), or let your animal companion take the blow for full negation (the Ranger's Man's Best Friend — unusable once already spent; \"after a few hours of rest it returns to normal\" can't be auto-detected, so click the sheet badge to reset it manually). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared; meaningless for the Spell Defense/hold/animalCompanion rows).",
       "Name": "Move Name",
       "Effect": "Effect",
       "EffectOption": {
         "armor": "Lower armor by 1",
         "debility": "Take a debility",
         "spellDefense": "End ongoing spell + reduce by its level",
-        "hold": "Spend hold + full negation"
+        "hold": "Spend hold + full negation",
+        "animalCompanion": "Animal companion takes the blow + full negation"
       },
       "GrantsForward": "Grants +1 forward",
       "AddRow": "Add Row",
@@ -396,7 +397,11 @@
       "IndomitableApplied": "+1 forward",
       "SpellDefenseChooseInstruction": "Choose an ongoing spell to end.",
       "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) — original damage {original} reduced by {level}, so you actually take {damage}",
-      "HoldApplied": "Spent one hold to fully negate the damage (remaining hold: {remaining})"
+      "HoldApplied": "Spent one hold to fully negate the damage (remaining hold: {remaining})",
+      "AnimalCompanionApplied": "Your animal companion took the blow and fully negated the damage",
+      "AnimalCompanionToggleTitle": "Click to toggle your animal companion's ferocity state. While \"spent\", this move can't be used — click again after a few hours of rest to reset it to \"ready\".",
+      "AnimalCompanionSpent": "Ferocity spent",
+      "AnimalCompanionReady": "Ferocity ready"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
