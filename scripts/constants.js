@@ -65,5 +65,7 @@ export const SETTINGS = {
   ARCANE_ART_CLEAR_ENCHANTMENT_INDEX: "arcaneArtClearEnchantmentIndex",
   ARCANE_ART_ENHANCE_AID_INDEX: "arcaneArtEnhanceAidIndex",
   ENABLE_SELF_FORWARD_ASSISTANT: "enableSelfForwardAssistant",
-  SELF_FORWARD_MOVES: "selfForwardMoves"
+  SELF_FORWARD_MOVES: "selfForwardMoves",
+  ENABLE_BARBARIAN_ASSISTANT: "enableBarbarianAssistant",
+  GOOD_DAY_TO_DIE_MOVE_NAMES: "goodDayToDieMoveNames"
 };

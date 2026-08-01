@@ -869,4 +869,25 @@ export function registerSettings() {
     type: SelfForwardMovesMenu,
     restricted: true
   });
+
+  // 바바리안 죽기 좋은 날(A Good Day To Die): 현재 HP가 CON 미만(또는 1,
+  // 둘 중 큰 쪽)인 동안 모든 판정에 +1 ongoing. HP/CON은 액터 데이터에서
+  // 바로 읽을 수 있어 수동 토글 없이 매 판정마다 자동으로 계산한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BARBARIAN_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBarbarianAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBarbarianAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.GOOD_DAY_TO_DIE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.GoodDayToDieMoveNames.Name",
+    hint: "DWAUTO.Settings.GoodDayToDieMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "A Good Day To Die"
+  });
 }

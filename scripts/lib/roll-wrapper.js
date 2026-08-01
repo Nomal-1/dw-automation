@@ -14,6 +14,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { computeCastPenalty } from "./ongoing-spells-state.js";
 import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
 import { getCommandCunningBonus } from "../features/command.js";
+import { getGoodDayToDieBonus } from "../features/barbarian.js";
 import { getPendingRollBonus, clearPendingRollBonus, rollBonusAppliesTo } from "./roll-bonus-state.js";
 import { announceActionApplied } from "./announce.js";
 import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
@@ -43,12 +44,13 @@ async function handleAskRoll(item, wrapped, args) {
   if (!chosenStat) return wrapped(...args);
 
   const mod = getFormcrafterRollModifier(item.actor, chosenStat);
+  const goodDayToDieMod = getGoodDayToDieBonus(item.actor);
   const pendingBonus = getPendingRollBonus(item.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, item.name);
   const originalType = item.system.rollType;
   const originalMod = item.system.rollMod;
   item.system.rollType = chosenStat;
-  item.system.rollMod = (Number(originalMod) || 0) + mod + (pendingBonusApplies ? pendingBonus.amount : 0);
+  item.system.rollMod = (Number(originalMod) || 0) + mod + goodDayToDieMod + (pendingBonusApplies ? pendingBonus.amount : 0);
   try {
     return await wrapped(...args);
   } finally {
@@ -102,9 +104,10 @@ async function wrappedRoll(wrapped, ...args) {
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
+  const goodDayToDieMod = getGoodDayToDieBonus(this.actor);
   const pendingBonus = getPendingRollBonus(this.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, this.name);
-  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonusApplies ? pendingBonus.amount : 0);
+  const totalMod = formcrafterMod - spellPenalty + commandMod + goodDayToDieMod + (pendingBonusApplies ? pendingBonus.amount : 0);
   if (!totalMod && !pendingBonusApplies) return wrapped(...args);
 
   const original = this.system.rollMod;
