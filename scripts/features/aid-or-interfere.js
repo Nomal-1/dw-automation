@@ -1,10 +1,10 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
-import { announceActionApplied } from "../lib/announce.js";
+import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
-import { getCommandInstinctBonusForInterference } from "./command.js";
+import { getCommandInstinctAmount } from "./command.js";
 
 // 던전월드 기본 무브 "원조/방해(Aid or Interfere)" 원문: "유대가 있는 사람을
 // 돕거나 방해할 때 +유대로 판정한다. 맞히면(7+) 그 사람의 판정에 +1 또는
@@ -15,11 +15,19 @@ import { getCommandInstinctBonusForInterference } from "./command.js";
 // 대상을 고르고 원조/방해를 정하는 시점이 굴리기 "전"이라는 게 핵심이다
 // (lib/roll-wrapper.js가 이 무브를 굴리기 직전에 promptAidOrInterferePreRoll을
 // 부른다) — 그래야 레인저 Command의 "다른 PC가 방해할 때 동물의 본능이 그
-// 판정(=지금 이 굴림)에 더해진다"를 실제로 "이번 판정"에 반영할 수 있다.
-// 굴린 뒤에야 방해인지 알 수 있다면 이미 끝난 판정에는 보정치를 소급 적용할
-// 방법이 없다. 결정 내용(누구를, 얼마를)은 굴리는 순간부터 결과 채팅 카드가
-// 생성되는 순간까지만 잠깐 살아있으면 되므로, 액터 플래그가 아니라 이
-// 모듈 안의 Map에 액터 id로 잠깐 들고 있는다.
+// 판정(=지금 이 굴림)에 더해진다"는 것을 "이번 판정" 시점에 알 수 있다.
+// 결정 내용(누구를, 얼마를)은 굴리는 순간부터 결과 채팅 카드가 생성되는
+// 순간까지만 잠깐 살아있으면 되므로, 액터 플래그가 아니라 이 모듈 안의
+// Map에 액터 id로 잠깐 들고 있는다.
+//
+// 다만 Command의 본능 보너스는 rollMod로 자동 반영할 수 없다 — 던전월드
+// 시스템 자체의 결함으로, "유대(Bond)" 판정(원조/방해 전용 rollType)은
+// item.system.rollMod를 아예 읽지 않는다(features/command.js의
+// getCommandInstinctAmount 주석 참고, v1.8.2 rolls.js에서 직접 확인).
+// 그래서 이 값은 GM에게 팝업으로 안내하고, GM이 "공지했다"고 확인을 눌러야
+// (그래야 GM이 실제로 플레이어에게 알려줄 시간을 확보한다) 비로소 원조/
+// 방해 판정(시스템 자체의 유대 입력창)이 진행되도록 막아둔다 — 플레이어가
+// 안내를 못 보고 먼저 굴려버리는 걸 방지한다.
 //
 // 원조/방해 자체의 +1/-2는 "그 사람이 다음에 무슨 판정을 하든" 한 번 적용되고
 // 사라지는 보너스라 lib/roll-bonus-state.js(다음 판정 자동 적용 + roll-wrapper.js가
@@ -31,6 +39,7 @@ import { getCommandInstinctBonusForInterference } from "./command.js";
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const pendingApprovals = new Map();
 const pendingDecisions = new Map(); // actor.id -> { targetId, targetName, amount }
+const pendingInstinctAcks = new Map(); // requestId -> resolve
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_AID_OR_INTERFERE_ASSISTANT);
@@ -128,6 +137,67 @@ function promptBonusPermission(data) {
   }).render(true);
 }
 
+// Command의 본능 보너스는 rollMod로 반영이 안 되므로(파일 상단 주석 참고),
+// GM에게 팝업으로 "플레이어의 유대 입력창에 직접 더해서 입력하도록
+// 공지해달라"고 요청한다. GM이 확인을 누르기 전까지는 원조/방해 판정
+// 자체(=시스템의 유대 입력창)가 뜨지 않는다 — 그래야 안내를 놓치고 먼저
+// 굴려버리는 일이 없다. GM이 접속해 있지 않으면 막을 사람이 없으므로
+// 방해하는 플레이어 본인에게라도 안내하고 바로 진행한다.
+function requestInstinctReminderAck({ interfererName, targetName, amount }) {
+  return new Promise((resolve) => {
+    const gm = findApprovingGM();
+    if (!gm) {
+      ui.notifications.warn(
+        game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderNoGm", { target: targetName, amount: formatSigned(amount) })
+      );
+      resolve();
+      return;
+    }
+
+    const requestId = foundry.utils.randomID();
+    pendingInstinctAcks.set(requestId, resolve);
+
+    game.socket.emit(SOCKET_NAME, {
+      type: "instinctReminderRequest",
+      requestId,
+      requesterUserId: game.user.id,
+      interfererName,
+      targetName,
+      amount
+    });
+  });
+}
+
+function promptInstinctReminder(data) {
+  let responded = false;
+  const respond = () => {
+    if (responded) return;
+    responded = true;
+    game.socket.emit(SOCKET_NAME, {
+      type: "instinctReminderResponse",
+      requestId: data.requestId,
+      targetUserId: data.requesterUserId
+    });
+  };
+
+  new Dialog({
+    title: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderTitle"),
+    content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderContent", {
+      interferer: data.interfererName,
+      target: data.targetName,
+      amount: formatSigned(data.amount)
+    })}</p>`,
+    buttons: {
+      ok: {
+        label: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderAck"),
+        callback: respond
+      }
+    },
+    default: "ok",
+    close: respond
+  }).render(true);
+}
+
 function onSocketEvent(data) {
   if (data?.type === "rollBonusPermissionRequest") {
     if (!game.user.isGM) return;
@@ -140,6 +210,20 @@ function onSocketEvent(data) {
     if (resolve) {
       pendingApprovals.delete(data.requestId);
       resolve(data.approved);
+    }
+    return;
+  }
+  if (data?.type === "instinctReminderRequest") {
+    if (!game.user.isGM) return;
+    promptInstinctReminder(data);
+    return;
+  }
+  if (data?.type === "instinctReminderResponse") {
+    if (data.targetUserId !== game.user.id) return;
+    const resolve = pendingInstinctAcks.get(data.requestId);
+    if (resolve) {
+      pendingInstinctAcks.delete(data.requestId);
+      resolve();
     }
   }
 }
@@ -171,32 +255,44 @@ function promptAidOrInterfereChoice(moveItem) {
 
 // lib/roll-wrapper.js가 이 무브를 실제로 굴리기 "직전에" 호출한다. 대상과
 // 원조/방해 여부를 먼저 확정해서 pendingDecisions에 담아두고(onCreateChatMessage가
-// 굴린 뒤 결과를 보고 이어받는다), "방해"를 선택했다면 Command의 본능
-// 보너스를 지금 이 판정의 rollMod에 바로 더할 수 있도록 그 값을 반환한다
-// (원조를 선택했거나 이 무브가 아니거나 취소했으면 0). 취소해도 굴림 자체는
-// 막지 않는다 — 그냥 이번 굴림에는 아무 자동화도 적용되지 않을 뿐이다.
+// 굴린 뒤 결과를 보고 이어받는다), "방해"를 선택했고 대상이 Command 조건을
+// 만족하면 GM에게 안내 팝업을 띄우고 확인을 받을 때까지 기다린다(그 뒤에야
+// 이 함수가 끝나서 실제 판정이 진행된다 — rollMod로는 반영이 안 되므로
+// 수동 입력을 GM이 챙기게 하는 것). 취소해도 굴림 자체는 막지 않는다 —
+// 그냥 이번 굴림에는 아무 자동화도 적용되지 않을 뿐이다.
 export async function promptAidOrInterferePreRoll(item) {
-  if (!isEnabled()) return 0;
+  if (!isEnabled()) return;
   const actor = item.actor;
-  if (!actor || actor.type !== "character") return 0;
-  if (!(await matchesConfiguredName(item.name))) return 0;
+  if (!actor || actor.type !== "character") return;
+  if (!(await matchesConfiguredName(item.name))) return;
 
   const target = await promptActorTarget(actor, {
     title: item.name,
     label: game.i18n.localize("DWAUTO.AidOrInterfere.TargetLabel"),
     excludeSelf: true
   });
-  if (!target) return 0;
+  if (!target) return;
 
   const amount = await promptAidOrInterfereChoice(item);
-  if (amount === null) return 0;
+  if (amount === null) return;
 
   pendingDecisions.set(actor.id, { targetId: target.id, targetName: target.name, amount });
 
   // 원문: "다른 PC가 자신을 방해하려 들 때, 동물의 본능이 그 판정에 더해진다."
   // "그 판정"은 방해하는 사람(지금 이 액터)의 판정이므로, 방해를 선택했을
-  // 때만 대상(target)의 Command 조건을 조회해서 지금 이 굴림에 반영한다.
-  return amount === -2 ? getCommandInstinctBonusForInterference(target) : 0;
+  // 때만 대상(target)의 Command 조건을 조회한다.
+  if (amount !== -2) return;
+  const instinctAmount = getCommandInstinctAmount(target);
+  if (!instinctAmount) return;
+
+  await requestInstinctReminderAck({ interfererName: actor.name, targetName: target.name, amount: instinctAmount });
+  announceInfo(
+    actor,
+    game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderLogged", {
+      target: target.name,
+      amount: formatSigned(instinctAmount)
+    })
+  );
 }
 
 async function onCreateChatMessage(message, options, userId) {

@@ -226,7 +226,7 @@
       },
       "EnableCommandAssistant": {
         "Name": "Enable Command Automation",
-        "Hint": "If the character has the Ranger's Command move, a \"Cooperating\" toggle badge appears next to it on the character sheet. While toggled on, the animal companion's stats (Ferocity/Cunning/Armor/Instinct) are automatically applied to attack damage, certain rolls, armor recalculation, and another PC's roll to interfere with you (tied into the Aid or Interfere automation) — the animal's stats are read automatically from the answer chosen when Animal Companion was activated. The Instinct bonus only actually applies if \"Aid or Interfere Automation\" is also enabled."
+        "Hint": "If the character has the Ranger's Command move, a \"Cooperating\" toggle badge appears next to it on the character sheet. While toggled on, the animal companion's stats (Ferocity/Cunning/Armor) are automatically applied to attack damage, certain rolls, and armor recalculation — the animal's stats are read automatically from the answer chosen when Animal Companion was activated. Instinct (\"when another PC interferes with you\") can't be auto-applied since the dungeonworld system doesn't let external bonuses affect a Bond roll — instead, if \"Aid or Interfere Automation\" is enabled, a popup asks the GM to tell the interfering player to add the Instinct bonus by hand right before they roll."
       },
       "CommandMoveNames": {
         "Name": "Command Move Names",
@@ -246,7 +246,7 @@
       },
       "EnableAidOrInterfereAssistant": {
         "Name": "Enable Aid or Interfere Automation",
-        "Hint": "Before rolling the core Aid or Interfere move, prompts for a target and a choice between Aid (+1) or Interfere (-2). On a hit (7+), that bonus is automatically applied to the target's next roll (applied once when they actually roll, then cleared); if you lack permission over the target actor, requests approval from an online GM. If you chose Interfere and the target meets the Ranger Command's cooperating conditions, the animal's Instinct is also automatically added to this Interfere roll itself."
+        "Hint": "Before rolling the core Aid or Interfere move, prompts for a target and a choice between Aid (+1) or Interfere (-2). On a hit (7+), that bonus is automatically applied to the target's next roll (applied once when they actually roll, then cleared); if you lack permission over the target actor, requests approval from an online GM. If you chose Interfere and the target meets the Ranger Command's cooperating conditions, a popup asks the GM to tell the interfering player to add the animal's Instinct bonus by hand before rolling (the dungeonworld system can't apply external bonuses to a Bond roll automatically, so it has to go directly into the bond input field) — the bond input won't appear until the GM confirms."
       },
       "AidOrInterfereMoveNames": {
         "Name": "Aid or Interfere Move Names",
@@ -714,8 +714,7 @@
       "CooperatingOn": "Cooperating",
       "CooperatingOff": "Normal",
       "DamageBonusApplied": "Added the animal's Ferocity +{amount} to damage",
-      "RollBonusApplied": "Added the animal's Cunning +{amount} to the {move} roll",
-      "InstinctBonusApplied": "Added the animal's Instinct +{amount} to another PC's roll to interfere with you"
+      "RollBonusApplied": "Added the animal's Cunning +{amount} to the {move} roll"
     },
     "WellTrained": {
       "PromptLabel": "Choose a training to add.",
@@ -734,7 +733,12 @@
       "NoGmOnline": "You don't have edit permission over \"{name}\" and no GM is currently online to approve it.",
       "PermissionTitle": "Approve this roll bonus?",
       "PermissionContent": "<b>{granter}</b> wants to queue {amount} for <b>{target}</b>'s next roll, but only has Observer permission over that actor. Allow it?",
-      "PermissionDenied": "The GM didn't approve the roll bonus for \"{name}\"."
+      "PermissionDenied": "The GM didn't approve the roll bonus for \"{name}\".",
+      "InstinctReminderTitle": "⚠ Animal Instinct Bonus Reminder",
+      "InstinctReminderContent": "<b>{interferer}</b> is about to Interfere with <b>{target}</b>. <b>{target}</b>'s animal companion's Instinct {amount} needs to be added to this roll — the dungeonworld system can't automatically apply an external bonus to a Bond roll, so please tell {interferer} to add it directly in the bond input field right now! Clicking OK opens {interferer}'s bond input.",
+      "InstinctReminderAck": "Notified (continue)",
+      "InstinctReminderNoGm": "{target}'s animal Instinct {amount} needs to be added directly in the bond input field, but no GM is currently online to relay it. Please add it yourself.",
+      "InstinctReminderLogged": "A reminder was sent to add {target}'s animal Instinct {amount} directly to the bond input"
     },
     "RollBonus": {
       "Consumed": "Applied the {amount} roll bonus from {source}"

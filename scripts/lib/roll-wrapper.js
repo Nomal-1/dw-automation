@@ -90,15 +90,19 @@ async function wrappedRoll(wrapped, ...args) {
   }
 
   // 원조/방해(Aid or Interfere)는 대상/원조·방해 여부를 굴리기 "전"에
-  // 확정해야(레인저 Command의 본능 보너스가 바로 이 판정에 붙어야 하므로)
-  // 다른 보정치들과 나란히 여기서 미리 물어본다 — 이 무브가 아니거나
-  // 자동화가 꺼져있으면 즉시 0을 돌려주므로 다른 판정에는 영향이 없다.
-  const aidOrInterfereBonus = await promptAidOrInterferePreRoll(this);
+  // 확정해야(레인저 Command의 본능 보너스를 GM이 미리 안내할 수 있어야
+  // 하므로) 다른 보정치들과 나란히 여기서 미리 처리한다 — 이 무브가
+  // 아니거나 자동화가 꺼져있으면 즉시 반환하므로 다른 판정에는 영향이
+  // 없다. 본능 보너스 자체는 rollMod로 반영되지 않는다(features/
+  // aid-or-interfere.js 상단 주석 — 던전월드 시스템이 유대 판정에는
+  // rollMod를 읽지 않는 결함이 있다). GM 안내가 끝날 때까지 이 굴림 자체가
+  // 대기한다.
+  await promptAidOrInterferePreRoll(this);
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
   const pendingBonus = getPendingRollBonus(this.actor);
-  const totalMod = formcrafterMod - spellPenalty + commandMod + aidOrInterfereBonus + (pendingBonus?.amount ?? 0);
+  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonus?.amount ?? 0);
   if (!totalMod && !pendingBonus) return wrapped(...args);
 
   const original = this.system.rollMod;
