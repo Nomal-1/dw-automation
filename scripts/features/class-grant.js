@@ -1,6 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
-import { announceActionApplied } from "../lib/announce.js";
+import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, MOVE_PACK_FILES } from "../lib/translation-import.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 
@@ -9,7 +9,12 @@ import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 // 기능이다 — 같은 무브가 동시에 메모형 무브(신을 짓는 서사적 선택)이면서
 // 이 기능의 대상(실제로 클레릭 무브를 부여받음)일 수 있으며, 둘 다 같은
 // createChatMessage 이벤트에서 각자의 설정 표를 보고 독립적으로 반응한다.
-const GRANTED_FLAG = "classGrantGranted"; // { [moveId]: true }
+// { [moveId]: string[] } — 실제로 이 무브가 부여한 이름 목록(고정 모드는
+// 설정된 전체 목록, 자유 선택 모드는 실제로 고른 것). v0.35.x 이전에는 그냥
+// true였는데, 다시 발동했을 때 "무엇을 얻었는지" 다시 보여줄 수 있게
+// 이름까지 남기도록 바뀌었다 — 예전 데이터(boolean true)와도 호환되게
+// isGranted/getGrantedNames가 둘 다 처리한다.
+const GRANTED_FLAG = "classGrantGranted";
 const MOVE_PACK_IDS = MOVE_PACK_FILES.map((file) => file.replace(/\.json$/, ""));
 let cachedMoveDocs = null;
 
@@ -31,9 +36,16 @@ function isGranted(actor, moveId) {
   return Boolean(actor.getFlag(MODULE_ID, GRANTED_FLAG)?.[moveId]);
 }
 
-async function setGranted(actor, moveId) {
+// 예전 데이터(boolean true)는 이름을 몰라서 빈 배열을 돌려준다 — 호출부가
+// 그 경우 row.grantedMoveNames 등 다른 근거로 대체한다.
+function getGrantedNames(actor, moveId) {
+  const value = actor.getFlag(MODULE_ID, GRANTED_FLAG)?.[moveId];
+  return Array.isArray(value) ? value : [];
+}
+
+async function setGranted(actor, moveId, moveNames) {
   const current = actor.getFlag(MODULE_ID, GRANTED_FLAG) ?? {};
-  await actor.setFlag(MODULE_ID, GRANTED_FLAG, { ...current, [moveId]: true });
+  await actor.setFlag(MODULE_ID, GRANTED_FLAG, { ...current, [moveId]: moveNames });
 }
 
 // features/level-up-info.js의 getAllMoveDocuments와 같은 방식(전체 목록을
@@ -291,7 +303,27 @@ async function onCreateChatMessage(message, options, userId) {
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
-    if (isGranted(actor, moveItem.id)) return;
+
+    if (isGranted(actor, moveItem.id)) {
+      // 이미 처리된 무브를 다시 발동한 것 — 새로 뭘 주지 않고, 그때 무엇을
+      // 얻었는지만 다시 알려준다. 예전 데이터(boolean true)라 이름을 모르면
+      // 고정 모드는 설정된 전체 목록으로 대체하고, 자유 선택 모드는 어떤
+      // 이름인지 알 수 없다는 안내로 대체한다.
+      let names = getGrantedNames(actor, moveItem.id);
+      if (names.length === 0 && row.mode !== "choice") {
+        names = row.grantedMoveNames
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      announceInfo(
+        actor,
+        names.length > 0
+          ? game.i18n.format("DWAUTO.ClassGrant.AlreadyGranted", { move: moveItem.name, moves: names.join(", ") })
+          : game.i18n.format("DWAUTO.ClassGrant.AlreadyGrantedUnknown", { move: moveItem.name })
+      );
+      return;
+    }
 
     if (row.mode === "choice") {
       const classGroups = restrictClassGroups(await getMovesGroupedByClassPack(), row.restrictToClassKeys);
@@ -300,7 +332,7 @@ async function onCreateChatMessage(message, options, userId) {
       const chosenPick = await promptChoiceGrant(moveItem, eligibleGroups);
       if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
-      await setGranted(actor, moveItem.id);
+      await setGranted(actor, moveItem.id, chosenPick.docs.map((d) => d.name));
       const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && i.name === d.name));
       if (toCreate.length > 0) {
         await actor.createEmbeddedDocuments(
@@ -313,7 +345,11 @@ async function onCreateChatMessage(message, options, userId) {
     }
 
     const grantedNames = await grantMoves(actor, row);
-    await setGranted(actor, moveItem.id);
+    const fullNames = row.grantedMoveNames
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    await setGranted(actor, moveItem.id, fullNames);
 
     if (grantedNames.length > 0) {
       announceActionApplied(

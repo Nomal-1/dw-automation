@@ -618,9 +618,8 @@ export function registerSettings() {
 
   // 위저드 주문 차단(Counterspell)/마법 차폐(Protective Counter): 준비된 주문
   // 하나를 걸고 굴리는데, 이 시스템 컴펜디엄 데이터에는 rollType이 비어있어
-  // 채팅 카드에 성공/부분성공 판정이 자동으로 표시되지 않는다(직접 확인됨).
-  // 그래서 결과를 GM/플레이어에게 직접 물어본다. 자세한 설계는
-  // features/counterspell.js 참고.
+  // 시스템 자체의 굴림 경로를 탈 수 없다(직접 확인됨). 그래서 이 모듈이 직접
+  // 2d6+INT을 굴려 결과를 판정한다. 자세한 설계는 features/counterspell.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_COUNTERSPELL_ASSISTANT, {
     name: "DWAUTO.Settings.EnableCounterspellAssistant.Name",
     hint: "DWAUTO.Settings.EnableCounterspellAssistant.Hint",

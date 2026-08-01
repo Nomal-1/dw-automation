@@ -9,11 +9,11 @@ import { promptRevokeSpell } from "./spellcasting.js";
 //
 // 실제로 확인해보니 이 무브는 공식 컴펜디엄 데이터의 rollType이 비어있어서
 // (직접 확인됨: 무브 목록에서 클릭해도 채팅 카드에 성공/부분성공 표시가
-// 전혀 없이 서술형 카드만 뜬다) getMoveCardInfo로 결과를 자동 판정할 수
-// 없다. 그래서 무브를 발동하면 (1) 어떤 준비된 주문을 걸지 고르게 하고,
-// (2) 결과(성공/부분성공)를 직접 물어봐서 부분성공이면 건 주문을 잊게 한다
-// (features/spellcasting.js의 promptRevokeSpell 재사용 — Cast a Spell 부분성공
-// 소비와 완전히 같은 동작).
+// 전혀 없이 서술형 카드만 뜬다) 시스템 자체의 굴림 경로를 탈 수 없다. 그래서
+// 무브를 발동하면 (1) 어떤 준비된 주문을 걸지 고르게 하고, (2) 이 모듈이
+// 직접 2d6+INT을 굴려(rollCounterspell — forward/ongoing 보정 포함) 결과를
+// 판정한다. 부분성공이면 건 주문을 잊게 한다(features/spellcasting.js의
+// promptRevokeSpell 재사용 — Cast a Spell 부분성공 소비와 완전히 같은 동작).
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_COUNTERSPELL_ASSISTANT);
 }
@@ -24,6 +24,43 @@ function splitCommaList(settingKey) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function getAbilityMod(actor, ability) {
+  return Number(actor.system?.abilities?.[ability]?.mod) || 0;
+}
+
+function formatModifier(n) {
+  return n >= 0 ? `+${n}` : `${n}`;
+}
+
+// 이 시스템의 원래 굴림 로직(rolls.js의 rollMoveExecute)과 최대한 같은
+// 방식으로 2d6+INT을 직접 굴린다 — forward/ongoing 보정을 formula에 포함하고,
+// forward는 시스템과 동일하게 굴린 뒤 0으로 초기화한다(약화는 능력치
+// 수정치(.mod) 자체에 이미 반영되어 있어 따로 처리할 필요가 없다). 이 무브가
+// 컴펜디엄에 rollType이 없어서 시스템의 원래 굴림 경로(무브 클릭 → 자동 굴림)를
+// 아예 탈 수 없기 때문에 직접 굴리는 것이며, 그 경로에서만 처리되는 유리함/
+// 불리함(advantage/disadvantage) 토글까지는 재현하지 않는다.
+async function rollCounterspell(actor, moveItem) {
+  const mod = getAbilityMod(actor, "int");
+  const rollMod = Number(moveItem.system?.rollMod) || 0;
+  const forward = Number(actor.system?.attributes?.forward?.value) || 0;
+  const ongoing = Number(actor.system?.attributes?.ongoing?.value) || 0;
+
+  let formula = `2d6${formatModifier(mod)}`;
+  if (rollMod) formula += formatModifier(rollMod);
+  if (forward) formula += formatModifier(forward);
+  if (ongoing) formula += formatModifier(ongoing);
+
+  const roll = new Roll(formula);
+  await roll.evaluate();
+  await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: moveItem.name });
+
+  if (forward) {
+    await actor.update({ "system.attributes.forward.value": 0 });
+  }
+
+  return roll.total;
 }
 
 // 준비된 주문 중 하나를 고르는 대화상자. 취소하면 null.
@@ -49,29 +86,6 @@ function promptStakeChoice(moveItem, preparedSpells) {
         cancel: { label: game.i18n.localize("DWAUTO.Cancel"), callback: () => resolve(null) }
       },
       default: "ok",
-      close: () => resolve(null)
-    }).render(true);
-  });
-}
-
-// 이 시스템이 자동으로 굴림 판정을 해주지 않으므로, 결과를 GM/플레이어에게
-// 직접 물어본다. 창을 닫으면(취소) null — 이 경우 건 주문은 그대로 둔다.
-function promptOutcome(moveItem) {
-  return new Promise((resolve) => {
-    new Dialog({
-      title: moveItem.name,
-      content: `<p>${game.i18n.localize("DWAUTO.Counterspell.OutcomeInstruction")}</p>`,
-      buttons: {
-        success: {
-          label: game.i18n.localize("DWAUTO.Counterspell.OutcomeSuccess"),
-          callback: () => resolve("success")
-        },
-        partial: {
-          label: game.i18n.localize("DWAUTO.Counterspell.OutcomePartial"),
-          callback: () => resolve("partial")
-        }
-      },
-      default: "success",
       close: () => resolve(null)
     }).render(true);
   });
@@ -105,17 +119,20 @@ async function onCreateChatMessage(message, options, userId) {
     const spell = actor.items.get(spellId);
     if (!spell) return;
 
-    const outcome = await promptOutcome(moveItem);
-    if (!outcome) return; // 취소 — 아무것도 바꾸지 않는다.
+    const total = await rollCounterspell(actor, moveItem);
+    const outcome = total >= 10 ? "success" : total >= 7 ? "partial" : "failure";
 
-    if (outcome === "partial") {
-      await promptRevokeSpell(actor, spell);
-    } else {
+    if (outcome === "success") {
+      announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.Counterspell.Blocked", { spell: spell.name }));
+    } else if (outcome === "partial") {
       announceActionApplied(
         actor,
         moveItem.name,
-        game.i18n.format("DWAUTO.Counterspell.Blocked", { spell: spell.name })
+        game.i18n.format("DWAUTO.Counterspell.BlockedPartial", { spell: spell.name })
       );
+      await promptRevokeSpell(actor, spell);
+    } else {
+      announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.Counterspell.NotBlocked", { spell: spell.name }));
     }
   } catch (err) {
     console.error(`${MODULE_ID} | counterspell: onCreateChatMessage failed`, err);
