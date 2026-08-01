@@ -39,5 +39,7 @@ export const SETTINGS = {
   ENABLE_ARMOR_ASSISTANT: "enableArmorAssistant",
   BORN_OF_THE_SOIL_MOVE_NAMES: "bornOfTheSoilMoveNames",
   ENABLE_CLASS_GRANT_ASSISTANT: "enableClassGrantAssistant",
-  CLASS_GRANT_MOVES: "classGrantMoves"
+  CLASS_GRANT_MOVES: "classGrantMoves",
+  ENABLE_SPELL_PREPARATION_ASSISTANT: "enableSpellPreparationAssistant",
+  PREPARE_SPELLS_MOVES: "prepareSpellsMoves"
 };

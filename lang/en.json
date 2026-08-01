@@ -175,6 +175,15 @@
         "Name": "Class Grant Moves",
         "Label": "Edit Class Grant Moves",
         "Hint": "Register moves that grant specific move(s) from another class outright when triggered, by name and a comma-separated list of granted move names. Granted moves are looked up by name across all 8 core class compendiums (no need to specify which class)."
+      },
+      "EnableSpellPreparationAssistant": {
+        "Name": "Enable Spell Preparation Assistant",
+        "Hint": "For moves like the Wizard's Prepare Spells or the Cleric's Commune (\"spend time in quiet contemplation, lose all currently prepared spells, and choose new ones\"), actually triggering the move pops up a picker. The total level of chosen spells cannot exceed (character level + 1), and level-0 spells (cantrips/rotes) don't count against that limit and are always prepared automatically. Which moves work this way is managed in the Prepare Spells Moves setting below."
+      },
+      "PrepareSpellsMovesMenu": {
+        "Name": "Prepare Spells Moves",
+        "Label": "Edit Prepare Spells Moves",
+        "Hint": "Register moves that work by \"spend time in contemplation, lose all prepared spells, choose new ones\" by name. Enabling \"Enforce Individual Level Cap\" (per the Cleric's Commune text) also excludes any spell of a higher level than the character's own level from the picker entirely (the Wizard's Prepare Spells has no such cap)."
       }
     },
     "Npc": {
@@ -308,7 +317,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -472,6 +481,24 @@
       "TierCore": "Core",
       "TierAdvanced2": "Advanced (Lower)",
       "TierAdvanced6": "Advanced (Upper)"
+    },
+    "PrepareSpellsMoves": {
+      "Title": "Prepare Spells Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Actually triggering it opens a picker for spells to prepare, limiting the total level of chosen spells to (character level + 1). Level-0 spells (cantrips/rotes) don't count against that limit and are always prepared automatically. Enabling \"Enforce Individual Level Cap\" excludes any spell higher level than the character's own level from the picker entirely (per the Cleric's Commune text — the Wizard's Prepare Spells has no such cap).",
+      "Name": "Move Name",
+      "EnforceIndividualLevelCap": "Enforce Individual Level Cap",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Prepare Spells Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "PrepareSpells": {
+      "Instruction": "Choose spells to prepare — their total level cannot exceed {budget}.",
+      "TotalLabel": "Selected level total:",
+      "NoEligible": "No eligible spells to choose from.",
+      "CantripNote": "Level-0 spells are always prepared regardless of the limit: {names}",
+      "TooHighNote": "Too high level for this character to choose: {names}",
+      "Prepared": "The following spells are now prepared: {spells}",
+      "PreparedNone": "No spells are prepared."
     },
     "ActorTab": {
       "ResetButton": "Reset",

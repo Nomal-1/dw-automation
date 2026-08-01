@@ -332,6 +332,9 @@ export async function runTranslationImport() {
   }));
   await game.settings.set(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES, translatedClassGrantMoves);
 
+  const prepareSpellsMoves = game.settings.get(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES, translateRows(moveMap, prepareSpellsMoves, stats));
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

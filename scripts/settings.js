@@ -22,6 +22,8 @@ import { NoteMovesMenu } from "./apps/note-moves-menu.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "./data/note-moves.js";
 import { ClassGrantMovesMenu } from "./apps/class-grant-moves-menu.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "./data/class-grant-moves.js";
+import { PrepareSpellsMovesMenu } from "./apps/prepare-spells-moves-menu.js";
+import { DEFAULT_PREPARE_SPELLS_MOVES } from "./data/prepare-spells-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -543,6 +545,33 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.ClassGrantMovesMenu.Hint",
     icon: "fas fa-people-arrows",
     type: ClassGrantMovesMenu,
+    restricted: true
+  });
+
+  // 위저드 Prepare Spells/클레릭 Commune: "명상/기원하면 준비된 주문을 전부
+  // 잃고 새로 고른다"는 무브. 자세한 설계는 features/spell-preparation.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELL_PREPARATION_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSpellPreparationAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSpellPreparationAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_PREPARE_SPELLS_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "prepareSpellsMovesMenu", {
+    name: "DWAUTO.Settings.PrepareSpellsMovesMenu.Name",
+    label: "DWAUTO.Settings.PrepareSpellsMovesMenu.Label",
+    hint: "DWAUTO.Settings.PrepareSpellsMovesMenu.Hint",
+    icon: "fas fa-book-sparkles",
+    type: PrepareSpellsMovesMenu,
     restricted: true
   });
 }
