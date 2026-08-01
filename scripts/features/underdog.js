@@ -2,7 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, resolveDamageReductionMoveName } from "../lib/translation-import.js";
 import { isNoteMoveActive } from "./note-moves.js";
 
 // "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
@@ -252,7 +252,19 @@ async function migrateAddSurveyedDefaults() {
   for (const row of DEFAULT_DAMAGE_REDUCTION_MOVES) {
     if (existingKeys.has(rowKey(row))) continue;
 
-    const translatedName = nameMap?.get(row.name);
+    // "Divine Protection"처럼 클레릭/팔라딘이 이름을 공유하는 경우는
+    // getMoveNameMap()에서 아예 빠져있다(모호해서 제외됨). 그런 이름만
+    // runTranslationImport과 같은 규칙(linkedMoveName 유무)으로 다시 알아본다
+    // — 안 그러면 이미 번역되어 저장된 행("믿음의 갑옷"/"신의 갑옷")과 다르다고
+    // 착각해서 중복으로 또 추가해버린다(실제로 발생했던 버그).
+    let translatedName = nameMap?.get(row.name);
+    if (!translatedName) {
+      try {
+        translatedName = await resolveDamageReductionMoveName(row.name, row.linkedMoveName);
+      } catch (err) {
+        // 못 알아내면 영문 이름으로 계속한다.
+      }
+    }
     // linkedMoveName(Holy Protection의 "Quest" 등)도 무브 이름이라 이 시점의
     // 번역 데이터로 같이 바꿔줘야 features/note-moves.js가 실제 캐릭터가
     // 들고 있는 (번역된) 이름으로 정확히 찾을 수 있다.
@@ -274,10 +286,43 @@ async function migrateAddSurveyedDefaults() {
   );
 }
 
+// 위 migrateAddSurveyedDefaults가 예전엔(이 수정 전) "Divine Protection"의
+// 모호한-이름 번역을 제대로 못 알아봐서, 이미 "믿음의 갑옷"/"신의 갑옷"으로
+// 번역되어 저장된 세계에 같은 행을 중복으로 추가해버린 적이 있다(실제로
+// 사용자 화면에서 확인된 버그). 이름+연동 무브 이름이 완전히 같은 행이 두
+// 번 이상 있으면, 먼저 나온 것만 남기고 나머지는 지운다.
+async function migrateDedupeRows() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES);
+  const rowKey = (r) => `${r.name}|${r.linkedMoveName || ""}`;
+  const seen = new Set();
+  const deduped = [];
+  let removed = 0;
+
+  for (const row of rows) {
+    const key = rowKey(row);
+    if (seen.has(key)) {
+      removed++;
+      continue;
+    }
+    seen.add(key);
+    deduped.push(row);
+  }
+
+  if (removed === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.DAMAGE_REDUCTION_MOVES, deduped);
+  console.log(`${MODULE_ID} | underdog: removed ${removed} duplicate row(s) from Conditional Armor Bonus Moves`);
+}
+
 export function registerUnderdogAssistant() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
-  Hooks.once("ready", () => {
-    migrateLegacyAmountField();
-    migrateAddSurveyedDefaults();
+  // 세 마이그레이션 모두 이 표를 읽고 다시 통째로 쓰기 때문에, 순서 없이
+  // 동시에 실행하면 서로의 쓰기를 덮어쓸 수 있다 — 반드시 순서대로 기다린다.
+  Hooks.once("ready", async () => {
+    await migrateLegacyAmountField();
+    await migrateDedupeRows();
+    await migrateAddSurveyedDefaults();
   });
 }

@@ -142,6 +142,20 @@ function resolveAmbiguousBySiblingName(packMaps, ambiguousName, siblingName) {
   return null;
 }
 
+// features/underdog.js의 migrateAddSurveyedDefaults(새로 발견된 기본값을
+// 이미 저장된 표에 추가하는 마이그레이션)가 "이 이름, 이미 있나?"를 정확히
+// 비교하려면 runTranslationImport과 완전히 같은 규칙(resolveAmbiguousName,
+// linkedMoveName 유무로 구분)으로 번역명을 알아야 한다. 이 함수 없이 그냥
+// getMoveNameMap()(모호한 이름은 통째로 빠진 맵)만 쓰면 "Divine Protection"
+// 같은 이름은 항상 미번역 취급되어, 이미 번역되어 저장된 행("믿음의 갑옷"/
+// "신의 갑옷")과 다르다고 착각해 중복 행을 추가해버린다(실제로 발생했던 버그).
+export async function resolveDamageReductionMoveName(englishName, linkedMoveName) {
+  const packMaps = await buildPackNameMaps(MOVE_PACK_FILES);
+  const resolved = resolveAmbiguousName(packMaps, englishName, Boolean(linkedMoveName));
+  if (resolved) return resolved;
+  return mergeNameMaps(packMaps).get(englishName) ?? null;
+}
+
 function translateOne(map, rawName, stats) {
   const name = (rawName ?? "").trim();
   if (!name) return name;
