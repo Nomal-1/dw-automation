@@ -50,5 +50,8 @@ export const SETTINGS = {
   COUNTERSPELL_MOVE_NAMES: "counterspellMoveNames",
   ONGOING_PENALTY_REDUCTION_MOVES: "ongoingPenaltyReductionMoves",
   EMPOWER_MOVES: "empowerMoves",
-  HOLD_GRANT_MOVES: "holdGrantMoves"
+  HOLD_GRANT_MOVES: "holdGrantMoves",
+  ENABLE_COMMAND_ASSISTANT: "enableCommandAssistant",
+  COMMAND_MOVE_NAMES: "commandMoveNames",
+  COMMAND_CUNNING_MOVE_NAMES: "commandCunningMoveNames"
 };

@@ -7,6 +7,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBonus } from "./druid.js";
+import { getCommandDamageBonus } from "./command.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -290,7 +291,8 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
 
   const augBonus = await promptSpellAugmentation(actor);
   const conditionalExtra = await promptConditionalDamageBonuses(actor);
-  const finalExtraDice = appendTerm(extraDice || "", conditionalExtra);
+  const commandBonus = getCommandDamageBonus(actor);
+  const finalExtraDice = appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus);
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
 
   await rollDamage(actor, weapon, finalDmgMod, finalExtraDice);

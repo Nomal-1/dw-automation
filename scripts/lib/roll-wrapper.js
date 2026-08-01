@@ -13,6 +13,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { computeCastPenalty } from "./ongoing-spells-state.js";
 import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
+import { getCommandCunningBonus } from "../features/command.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -71,7 +72,8 @@ async function wrappedRoll(wrapped, ...args) {
   }
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
-  const totalMod = formcrafterMod - spellPenalty;
+  const commandMod = getCommandCunningBonus(this);
+  const totalMod = formcrafterMod - spellPenalty + commandMod;
   if (!totalMod) return wrapped(...args);
 
   const original = this.system.rollMod;

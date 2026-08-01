@@ -372,6 +372,16 @@ export async function runTranslationImport() {
   const holdGrantMoves = game.settings.get(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES);
   await game.settings.set(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES, translateRows(moveMap, holdGrantMoves, stats));
 
+  const commandMoveNames = game.settings.get(MODULE_ID, SETTINGS.COMMAND_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.COMMAND_MOVE_NAMES, translateCommaList(moveMap, commandMoveNames, stats));
+
+  const commandCunningMoveNames = game.settings.get(MODULE_ID, SETTINGS.COMMAND_CUNNING_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.COMMAND_CUNNING_MOVE_NAMES,
+    translateCommaList(moveMap, commandCunningMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

@@ -708,4 +708,34 @@ export function registerSettings() {
     type: HoldGrantMovesMenu,
     restricted: true
   });
+
+  // 레인저 명령(Command): 동물 친구와 협력 중일 때 그 능력치(사나움/교활함/
+  // 장갑)를 공격/추적·상황파악·협상/장갑에 더한다. "지금 정말 협력 중인지"는
+  // 자동 감지할 수 없어서 캐릭터 시트의 수동 토글로 관리한다(features/command.js).
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_COMMAND_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableCommandAssistant.Name",
+    hint: "DWAUTO.Settings.EnableCommandAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.COMMAND_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CommandMoveNames.Name",
+    hint: "DWAUTO.Settings.CommandMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Command"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.COMMAND_CUNNING_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CommandCunningMoveNames.Name",
+    hint: "DWAUTO.Settings.CommandCunningMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Hunt & Track, Discern Realities, Parley"
+  });
 }

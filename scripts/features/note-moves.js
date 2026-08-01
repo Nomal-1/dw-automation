@@ -4,6 +4,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
+import { parseAnimalCompanionStats } from "../lib/animal-companion-stats.js";
 
 // Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
 // Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
@@ -23,6 +24,16 @@ const ANSWER_FLAG = "noteMoveAnswer"; // { [moveId]: string[] } — 무브 설�
 const GM_CHOICE_FLAG = "noteMoveGmChoice"; // { [moveId]: string[] } — "GM이 나중에 정해준다"고 적힌 목록의 GM 선택
 const NOTES_FLAG = "noteMoves"; // { [moveId]: string } — v0.16 이전부터 쓰던 이름 그대로 유지(기존 메모 보존)
 const CUSTOM_VALUE = "__dwauto_custom__";
+// 레인저 동반 동물(Animal Companion)의 "기본 능력치 선택" 답이 파싱되면
+// { ferocity, cunning, instinct, armor } 형태로 여기 저장된다. 무브별이
+// 아니라 액터 하나당 값 하나다(동반 동물은 보통 하나뿐이라고 가정). features/
+// command.js(레인저 명령/Command 자동화)가 이 값을 읽어서 쓴다.
+const ANIMAL_STATS_FLAG = "animalCompanionStats";
+
+// features/command.js가 재사용한다. 아직 파싱된 값이 없으면 null.
+export function getAnimalCompanionStats(actor) {
+  return actor.getFlag(MODULE_ID, ANIMAL_STATS_FLAG) ?? null;
+}
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_NOTE_MOVES);
@@ -296,6 +307,18 @@ async function activate(actor, moveItem) {
 
   if (answers && answers.length > 0) {
     await setAnswer(actor, moveItem.id, answers);
+
+    // 동반 동물의 "기본 능력치 선택" 답이면(사나움/교활함/본능/장갑 넷 다
+    // 파싱되면) 숫자로도 따로 저장한다 — 어느 무브에서 왔는지는 안 따진다
+    // (이 패턴에 우연히 맞아떨어질 다른 메모형 무브 답은 사실상 없다).
+    for (const answer of answers) {
+      const stats = parseAnimalCompanionStats(answer);
+      if (stats) {
+        await actor.setFlag(MODULE_ID, ANIMAL_STATS_FLAG, stats);
+        break;
+      }
+    }
+
     announceActionApplied(
       actor,
       moveItem.name,

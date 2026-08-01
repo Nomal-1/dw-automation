@@ -299,6 +299,19 @@
   color: #fff !important;
 }
 
+.dwauto-command-badge {
+  cursor: pointer;
+}
+
+.dwauto-command-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-command-on {
+  background: #2e7a4a !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;
