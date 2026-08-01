@@ -225,6 +225,7 @@ async function applySpellDefense(actor, row, damage, originalChanges, originalOp
     game.i18n.format("DWAUTO.HitTrigger.SpellDefenseApplied", {
       spell: spellItem?.name ?? "?",
       level: spellLevel,
+      original: damage,
       damage: reducedDamage
     })
   );

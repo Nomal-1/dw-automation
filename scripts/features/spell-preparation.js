@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "../data/prepare-spells-moves.js";
 import { getDiscountedSpellIds } from "./spell-discount.js";
+import { COMMUNE_PENALTY_FLAG } from "../lib/ongoing-spells-state.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -166,6 +167,13 @@ function promptSpellPreparation(actor, moveItem, row) {
 // 반영한다 — 액터의 모든 주문을 훑어서, 골랐거나(chosenIds) 0레벨이면
 // prepared를 true로, 나머지는 전부 false로 맞춘다(한도 초과로 목록에서 아예
 // 빠졌던 주문도 여기서 자동으로 준비 해제된다).
+//
+// Cast a Spell 부분성공(7-9)에서 "서약 페널티"(다음 기원/주문 준비까지 -1)를
+// 고른 적이 있으면(features/spellcasting.js의 addCommunePenalty), 원문
+// 그대로 "다음 Prepare Spells/Commune까지"이므로 여기서 실제로 다시
+// 준비/기원한 시점에 그 페널티를 0으로 초기화한다 — 이전에는 이 자동화가
+// system.prepared만 바꾸고 이 페널티는 그대로 둬서, 캐릭터 시트의 배너를
+// 수동으로 눌러 지우기 전까지 영원히 남아있는 버그가 있었다.
 async function applySelection(actor, chosenIds) {
   const discountedIds = new Set(getDiscountedSpellIds(actor));
   const allSpells = actor.items.filter((i) => i.type === "spell");
@@ -183,6 +191,10 @@ async function applySelection(actor, chosenIds) {
 
   if (updates.length > 0) {
     await actor.updateEmbeddedDocuments("Item", updates);
+  }
+
+  if (actor.getFlag(MODULE_ID, COMMUNE_PENALTY_FLAG)) {
+    await actor.unsetFlag(MODULE_ID, COMMUNE_PENALTY_FLAG);
   }
 
   return preparedNames;

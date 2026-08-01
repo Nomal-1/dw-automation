@@ -389,7 +389,7 @@
       "ArmorItemDestroyed": "{item} was destroyed",
       "IndomitableApplied": "+1 forward",
       "SpellDefenseChooseInstruction": "Choose an ongoing spell to end.",
-      "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) and reduced this hit to {damage}"
+      "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) — original damage {original} reduced by {level}, so you actually take {damage}"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",

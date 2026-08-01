@@ -389,7 +389,7 @@
       "ArmorItemDestroyed": "{item}이(가) 파괴되었습니다",
       "IndomitableApplied": "forward +1",
       "SpellDefenseChooseInstruction": "끝낼 지속 주문을 선택해주세요.",
-      "SpellDefenseApplied": "\"{spell}\"(Lv.{level})을(를) 끝내고 이번 피해를 {damage}로 경감했습니다"
+      "SpellDefenseApplied": "\"{spell}\"(Lv.{level})을(를) 끝냈습니다 — 원래 피해 {original}에서 {level}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",
