@@ -5,6 +5,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { getCommandInstinctAmount } from "./command.js";
+import { hasEnhancedAid, consumeEnhancedAid } from "./arcane-art.js";
 
 // 던전월드 기본 무브 "원조/방해(Aid or Interfere)" 원문: "유대가 있는 사람을
 // 돕거나 방해할 때 +유대로 판정한다. 맞히면(7+) 그 사람의 판정에 +1 또는
@@ -342,7 +343,16 @@ async function onCreateChatMessage(message, options, userId) {
     const target = game.actors.get(decision.targetId);
     if (!target) return;
 
-    const applied = await applyBonus(actor, target, decision.amount);
+    // 바드 마법의 곡조(Arcane Art)가 "다음에 누군가 대상을 원조하면 +1이
+    // 아니라 +2"를 걸어뒀을 수 있다 — 방해(-2)에는 해당 없이 원조(+1)일
+    // 때만, 그리고 딱 한 번만 소비된다.
+    let amount = decision.amount;
+    if (amount === 1 && hasEnhancedAid(target)) {
+      amount = 2;
+      await consumeEnhancedAid(target);
+    }
+
+    const applied = await applyBonus(actor, target, amount);
     if (!applied) {
       ui.notifications.warn(game.i18n.format("DWAUTO.AidOrInterfere.PermissionDenied", { name: target.name }));
       return;
@@ -352,9 +362,9 @@ async function onCreateChatMessage(message, options, userId) {
       result === "partial"
         ? game.i18n.format("DWAUTO.AidOrInterfere.AppliedPartial", {
             target: target.name,
-            amount: formatSigned(decision.amount)
+            amount: formatSigned(amount)
           })
-        : game.i18n.format("DWAUTO.AidOrInterfere.Applied", { target: target.name, amount: formatSigned(decision.amount) });
+        : game.i18n.format("DWAUTO.AidOrInterfere.Applied", { target: target.name, amount: formatSigned(amount) });
     announceActionApplied(actor, moveItem?.name ?? title, detail);
   } catch (err) {
     console.error(`${MODULE_ID} | aid-or-interfere: onCreateChatMessage failed`, err);

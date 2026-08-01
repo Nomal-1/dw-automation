@@ -251,6 +251,30 @@
       "AidOrInterfereMoveNames": {
         "Name": "Aid or Interfere Move Names",
         "Hint": "Comma-separated list (default: Aid or Interfere)."
+      },
+      "EnableArcaneArtAssistant": {
+        "Name": "Enable Arcane Art Automation",
+        "Hint": "When the Bard's Arcane Art hits, prompts for an ally and an effect (heal / bonus to next damage / clear an enchantment / enhance the next aid) and actually applies it. A 7-9 is a narrative call (unwanted attention, etc.) so it's only logged, not automated."
+      },
+      "ArcaneArtMoveNames": {
+        "Name": "Arcane Art Move Names",
+        "Hint": "Comma-separated list (default: Arcane Art)."
+      },
+      "ArcaneArtHealIndex": {
+        "Name": "Arcane Art - Heal Option Index",
+        "Hint": "Which option in the list is \"heal 1d8 damage\" (1st in the default dungeonworld order). Specified as a number since matching by text would break under translation."
+      },
+      "ArcaneArtDamageForwardIndex": {
+        "Name": "Arcane Art - Damage Bonus Option Index",
+        "Hint": "Which option in the list is \"+1d4 to the next damage they deal\" (2nd in the default order)."
+      },
+      "ArcaneArtClearEnchantmentIndex": {
+        "Name": "Arcane Art - Clear Enchantment Option Index",
+        "Hint": "Which option in the list is \"one enchantment on their mind is cleared\" (3rd in the default order). No state actually changes — this just logs a chat note."
+      },
+      "ArcaneArtEnhanceAidIndex": {
+        "Name": "Arcane Art - Enhance Aid Option Index",
+        "Hint": "Which option in the list is \"the next time someone aids the target, they get +2 instead of +1\" (4th in the default order). Ties into Aid or Interfere Automation."
       }
     },
     "Npc": {
@@ -384,7 +408,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -739,6 +763,24 @@
       "InstinctReminderAck": "Notified (continue)",
       "InstinctReminderNoGm": "{target}'s animal Instinct {amount} needs to be added directly in the bond input field, but no GM is currently online to relay it. Please add it yourself.",
       "InstinctReminderLogged": "A reminder was sent to add {target}'s animal Instinct {amount} directly to the bond input"
+    },
+    "ArcaneArt": {
+      "TargetLabel": "Which ally is this for?",
+      "EffectInstruction": "Choose one effect.",
+      "PartialNotice": "The spell still works, but it draws unwanted attention or affects other targets too — GM's call on the details.",
+      "HealRollFlavor": "{name} healing",
+      "DamageForwardRollFlavor": "{name} damage bonus",
+      "DamageForwardApplied": "{amount} queued for {target}'s next damage roll",
+      "DamageForwardConsumed": "Applied the {amount} damage bonus from Arcane Art",
+      "DamageForwardDescription": "{amount} on their next damage roll",
+      "EnchantmentCleared": "One enchantment on {target}'s mind was cleared",
+      "AidEnhanced": "The next time {target} is aided, they'll get +2 instead of +1",
+      "AidEnhanceDescription": "+2 instead of +1 on their next aid roll",
+      "AppliedUnknown": "Applied the effect to {target}",
+      "NoGmOnline": "You don't have edit permission over \"{name}\" and no GM is currently online to approve it.",
+      "PermissionDenied": "The GM didn't approve the effect on \"{name}\".",
+      "FlagPermissionTitle": "Approve this effect?",
+      "FlagPermissionContent": "<b>{granter}</b> wants to apply \"{description}\" to <b>{target}</b>, but only has Observer permission over that actor. Allow it?"
     },
     "RollBonus": {
       "Consumed": "Applied the {amount} roll bonus from {source}"

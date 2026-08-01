@@ -396,6 +396,9 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, aidOrInterfereMoveNames, stats)
   );
 
+  const arcaneArtMoveNames = game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.ARCANE_ART_MOVE_NAMES, translateCommaList(moveMap, arcaneArtMoveNames, stats));
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

@@ -8,6 +8,7 @@ import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBonus } from "./druid.js";
 import { getCommandDamageBonus } from "./command.js";
+import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damage-forward-state.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -292,10 +293,23 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   const augBonus = await promptSpellAugmentation(actor);
   const conditionalExtra = await promptConditionalDamageBonuses(actor);
   const commandBonus = getCommandDamageBonus(actor);
-  const finalExtraDice = appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus);
+  const damageForward = getPendingDamageForward(actor);
+  const finalExtraDice = appendTerm(
+    appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus),
+    damageForward ? String(damageForward.amount) : ""
+  );
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
 
   await rollDamage(actor, weapon, finalDmgMod, finalExtraDice);
+
+  if (damageForward) {
+    await clearPendingDamageForward(actor);
+    announceActionApplied(
+      actor,
+      damageForward.source,
+      game.i18n.format("DWAUTO.ArcaneArt.DamageForwardConsumed", { amount: `+${damageForward.amount}` })
+    );
+  }
 
   if (consumed && consumed.ammoCount > 0) {
     const ammoItem = actor.items.get(consumed.ammoItemId);

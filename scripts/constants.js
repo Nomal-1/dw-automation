@@ -57,5 +57,11 @@ export const SETTINGS = {
   ENABLE_WELL_TRAINED_ASSISTANT: "enableWellTrainedAssistant",
   WELL_TRAINED_MOVE_NAMES: "wellTrainedMoveNames",
   ENABLE_AID_OR_INTERFERE_ASSISTANT: "enableAidOrInterfereAssistant",
-  AID_OR_INTERFERE_MOVE_NAMES: "aidOrInterfereMoveNames"
+  AID_OR_INTERFERE_MOVE_NAMES: "aidOrInterfereMoveNames",
+  ENABLE_ARCANE_ART_ASSISTANT: "enableArcaneArtAssistant",
+  ARCANE_ART_MOVE_NAMES: "arcaneArtMoveNames",
+  ARCANE_ART_HEAL_INDEX: "arcaneArtHealIndex",
+  ARCANE_ART_DAMAGE_FORWARD_INDEX: "arcaneArtDamageForwardIndex",
+  ARCANE_ART_CLEAR_ENCHANTMENT_INDEX: "arcaneArtClearEnchantmentIndex",
+  ARCANE_ART_ENHANCE_AID_INDEX: "arcaneArtEnhanceAidIndex"
 };

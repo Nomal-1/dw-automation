@@ -780,4 +780,63 @@ export function registerSettings() {
     type: String,
     default: "Aid or Interfere"
   });
+
+  // 바드 마법의 곡조(Arcane Art): 성공 시 아군 한 명 + 효과 하나(치유/다음
+  // 피해 보너스/마법 해제/다음 원조 강화)를 고른다. 어느 효과가 몇 번째
+  // 선택지인지는 텍스트로 판별하면 번역에 깨지므로(Cast a Spell 부분성공과
+  // 같은 이유) 숫자로 지정한다. 던전월드 기본 문구 순서는 1=치유, 2=다음
+  // 피해 보너스, 3=마법 해제, 4=다음 원조 강화.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_ARCANE_ART_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableArcaneArtAssistant.Name",
+    hint: "DWAUTO.Settings.EnableArcaneArtAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ARCANE_ART_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ArcaneArtMoveNames.Name",
+    hint: "DWAUTO.Settings.ArcaneArtMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Arcane Art"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ARCANE_ART_HEAL_INDEX, {
+    name: "DWAUTO.Settings.ArcaneArtHealIndex.Name",
+    hint: "DWAUTO.Settings.ArcaneArtHealIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 1
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ARCANE_ART_DAMAGE_FORWARD_INDEX, {
+    name: "DWAUTO.Settings.ArcaneArtDamageForwardIndex.Name",
+    hint: "DWAUTO.Settings.ArcaneArtDamageForwardIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 2
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ARCANE_ART_CLEAR_ENCHANTMENT_INDEX, {
+    name: "DWAUTO.Settings.ArcaneArtClearEnchantmentIndex.Name",
+    hint: "DWAUTO.Settings.ArcaneArtClearEnchantmentIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 3
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ARCANE_ART_ENHANCE_AID_INDEX, {
+    name: "DWAUTO.Settings.ArcaneArtEnhanceAidIndex.Name",
+    hint: "DWAUTO.Settings.ArcaneArtEnhanceAidIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 4
+  });
 }
