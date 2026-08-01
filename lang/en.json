@@ -187,11 +187,11 @@
       },
       "EnableSpellDiscountAssistant": {
         "Name": "Enable Spell Discount Assistant",
-        "Hint": "Actually triggering the Wizard's Prodigy (or Master, which adds one more) prompts you to pick one of your spellbook spells, and from then on that spell is treated as one level lower when computing the Prepare Spells budget (a level-1 spell becomes 0, i.e. always free like a cantrip). Which move names work this way is managed in the Spell Discount Move Names setting below."
+        "Hint": "Actually triggering the Wizard's Prodigy/Master or the Cleric's Chosen One/Anointed (all four share identical text) prompts you to pick one of your spellbook spells, and from then on that spell is treated as one level lower when computing the Prepare Spells budget (a level-1 spell becomes 0, i.e. always free like a cantrip). Which move names work this way is managed in the Spell Discount Move Names setting below."
       },
       "DiscountSpellMoveNames": {
         "Name": "Spell Discount Move Names",
-        "Hint": "Comma separated (default: Prodigy, Master)."
+        "Hint": "Comma separated (default: Prodigy, Master, Chosen One, Anointed)."
       },
       "EnableSpellbookExpansionAssistant": {
         "Name": "Enable Spellbook Expansion Assistant",

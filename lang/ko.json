@@ -187,11 +187,11 @@
       },
       "EnableSpellDiscountAssistant": {
         "Name": "주문 할인 자동화 사용",
-        "Hint": "위저드 천재(Prodigy)/대가(Master)를 실제로 발동하면, 스펠북 주문 중 하나(대가는 하나 더)를 고르게 하고, 그 주문을 앞으로 준비할 때 레벨을 1 낮춰서 계산합니다(레벨 1 주문이면 0이 되어 칸트립처럼 항상 무료로 준비됩니다). 어떤 무브 이름이 이 방식으로 동작하는지는 아래 '주문 할인 무브 이름'에서 관리합니다."
+        "Hint": "위저드 천재(Prodigy)/대가(Master), 클레릭 선택받은 자(Chosen One)/성유 받은 자(Anointed)를 실제로 발동하면(넷 다 원문이 완전히 같음), 스펠북 주문 중 하나를 고르게 하고, 그 주문을 앞으로 준비할 때 레벨을 1 낮춰서 계산합니다(레벨 1 주문이면 0이 되어 칸트립처럼 항상 무료로 준비됩니다). 어떤 무브 이름이 이 방식으로 동작하는지는 아래 '주문 할인 무브 이름'에서 관리합니다."
       },
       "DiscountSpellMoveNames": {
         "Name": "주문 할인 무브 이름",
-        "Hint": "쉼표로 구분해서 입력하세요(기본값: Prodigy, Master)."
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Prodigy, Master, Chosen One, Anointed)."
       },
       "EnableSpellbookExpansionAssistant": {
         "Name": "증보 자동화 사용",

@@ -593,7 +593,10 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    default: "Prodigy, Master"
+    // 클레릭 선택받은 자(Chosen One)/성유 받은 자(Anointed) 원문이 위저드
+    // 천재/대가와 완전히 같다("주문 하나를 골라 한 레벨 낮은 것처럼 받는다") —
+    // 같은 자동화(features/spell-discount.js)를 그대로 쓴다.
+    default: "Prodigy, Master, Chosen One, Anointed"
   });
 
   // 위저드 증보(Expanded Spellbook): 다른 어떤 직업의 주문 목록에서든 새
