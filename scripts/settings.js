@@ -759,4 +759,25 @@ export function registerSettings() {
     type: String,
     default: "Well-trained"
   });
+
+  // 원조/방해(Aid or Interfere, 던전월드 기본 무브): 성공(10+) 시 대상에게
+  // +1 또는 -2를 "다음 판정 한 번" 자동으로 걸어준다(lib/roll-bonus-state.js
+  // + lib/roll-wrapper.js 연동).
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_AID_OR_INTERFERE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableAidOrInterfereAssistant.Name",
+    hint: "DWAUTO.Settings.EnableAidOrInterfereAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.AID_OR_INTERFERE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.AidOrInterfereMoveNames.Name",
+    hint: "DWAUTO.Settings.AidOrInterfereMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Aid or Interfere"
+  });
 }

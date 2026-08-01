@@ -389,6 +389,13 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, wellTrainedMoveNames, stats)
   );
 
+  const aidOrInterfereMoveNames = game.settings.get(MODULE_ID, SETTINGS.AID_OR_INTERFERE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.AID_OR_INTERFERE_MOVE_NAMES,
+    translateCommaList(moveMap, aidOrInterfereMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

@@ -14,6 +14,8 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { computeCastPenalty } from "./ongoing-spells-state.js";
 import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
 import { getCommandCunningBonus } from "../features/command.js";
+import { getPendingRollBonus, clearPendingRollBonus } from "./roll-bonus-state.js";
+import { announceActionApplied } from "./announce.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -40,16 +42,31 @@ async function handleAskRoll(item, wrapped, args) {
   if (!chosenStat) return wrapped(...args);
 
   const mod = getFormcrafterRollModifier(item.actor, chosenStat);
+  const pendingBonus = getPendingRollBonus(item.actor);
   const originalType = item.system.rollType;
   const originalMod = item.system.rollMod;
   item.system.rollType = chosenStat;
-  item.system.rollMod = (Number(originalMod) || 0) + mod;
+  item.system.rollMod = (Number(originalMod) || 0) + mod + (pendingBonus?.amount ?? 0);
   try {
     return await wrapped(...args);
   } finally {
     item.system.rollType = originalType;
     item.system.rollMod = originalMod;
+    if (pendingBonus) await consumePendingRollBonus(item, pendingBonus);
   }
+}
+
+// 원조/방해(Aid or Interfere)의 +1/-2처럼 "다음 판정 한 번" 보정치를 실제로
+// 굴린 뒤 지운다. 소모 시점에 채팅으로도 남겨서(누가 어떤 보정을 왜 받았는지)
+// 그 판정 결과 카드만 보고는 왜 수치가 다른지 헷갈리지 않게 한다.
+async function consumePendingRollBonus(item, pendingBonus) {
+  await clearPendingRollBonus(item.actor);
+  const signed = pendingBonus.amount >= 0 ? `+${pendingBonus.amount}` : `${pendingBonus.amount}`;
+  announceActionApplied(
+    item.actor,
+    item.name,
+    game.i18n.format("DWAUTO.RollBonus.Consumed", { amount: signed, source: pendingBonus.source })
+  );
 }
 
 async function wrappedRoll(wrapped, ...args) {
@@ -73,8 +90,9 @@ async function wrappedRoll(wrapped, ...args) {
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
-  const totalMod = formcrafterMod - spellPenalty + commandMod;
-  if (!totalMod) return wrapped(...args);
+  const pendingBonus = getPendingRollBonus(this.actor);
+  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonus?.amount ?? 0);
+  if (!totalMod && !pendingBonus) return wrapped(...args);
 
   const original = this.system.rollMod;
   this.system.rollMod = (Number(original) || 0) + totalMod;
@@ -82,6 +100,7 @@ async function wrappedRoll(wrapped, ...args) {
     return await wrapped(...args);
   } finally {
     this.system.rollMod = original;
+    if (pendingBonus) await consumePendingRollBonus(this, pendingBonus);
   }
 }
 

@@ -55,5 +55,7 @@ export const SETTINGS = {
   COMMAND_MOVE_NAMES: "commandMoveNames",
   COMMAND_CUNNING_MOVE_NAMES: "commandCunningMoveNames",
   ENABLE_WELL_TRAINED_ASSISTANT: "enableWellTrainedAssistant",
-  WELL_TRAINED_MOVE_NAMES: "wellTrainedMoveNames"
+  WELL_TRAINED_MOVE_NAMES: "wellTrainedMoveNames",
+  ENABLE_AID_OR_INTERFERE_ASSISTANT: "enableAidOrInterfereAssistant",
+  AID_OR_INTERFERE_MOVE_NAMES: "aidOrInterfereMoveNames"
 };

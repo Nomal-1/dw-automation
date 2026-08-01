@@ -243,6 +243,14 @@
       "WellTrainedMoveNames": {
         "Name": "Well-trained Move Names",
         "Hint": "Comma-separated list (default: Well-trained)."
+      },
+      "EnableAidOrInterfereAssistant": {
+        "Name": "Enable Aid or Interfere Automation",
+        "Hint": "When the core Aid or Interfere move hits (7+), prompts for a target and a choice between Aid (+1) or Interfere (-2), then automatically applies it to that target's next roll (applied once when they actually roll, then cleared). If you lack permission over the target actor, requests approval from an online GM."
+      },
+      "AidOrInterfereMoveNames": {
+        "Name": "Aid or Interfere Move Names",
+        "Hint": "Comma-separated list (default: Aid or Interfere)."
       }
     },
     "Npc": {
@@ -376,7 +384,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -714,6 +722,21 @@
       "AlreadyApplied": "Already applied: the \"{training}\" training has been added",
       "NoCompanion": "Couldn't find an animal companion on {name}, so its training list is unknown. Set up Animal Companion first.",
       "NoTrainingsLeft": "{name}'s animal companion already has every training it could choose."
+    },
+    "AidOrInterfere": {
+      "TargetLabel": "Who are you helping or hindering?",
+      "ChoicePrompt": "Choose Aid (+1) or Interfere (-2).",
+      "Aid": "Aid (+1)",
+      "Interfere": "Interfere (-2)",
+      "Applied": "{amount} queued for {target}'s next roll",
+      "AppliedPartial": "{amount} queued for {target}'s next roll (7-9: you also expose yourself to danger, retribution, or cost — GM's call)",
+      "NoGmOnline": "You don't have edit permission over \"{name}\" and no GM is currently online to approve it.",
+      "PermissionTitle": "Approve this roll bonus?",
+      "PermissionContent": "<b>{granter}</b> wants to queue {amount} for <b>{target}</b>'s next roll, but only has Observer permission over that actor. Allow it?",
+      "PermissionDenied": "The GM didn't approve the roll bonus for \"{name}\"."
+    },
+    "RollBonus": {
+      "Consumed": "Applied the {amount} roll bonus from {source}"
     },
     "Armor": {
       "NoContributors": "No equipped armor and no currently active modifiers",

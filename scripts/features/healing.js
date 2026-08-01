@@ -4,6 +4,7 @@ import { extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_HOSPITALLER_MOVES } from "../data/healing-moves.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { promptActorTarget } from "../lib/actor-target-picker.js";
 
 // 관찰(Observer) 권한만 있는 대상(적인지 아군인지 애매한 NPC 등)도 치유
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
@@ -35,69 +36,17 @@ function getHospitallerBonusRows(actor) {
   return table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
 }
 
-// 이 목록은 치유자를 조작하는 클라이언트(보통 그 플레이어 본인)의 화면에
-// 뜨는 대화상자에 들어간다. GM이 권한을 안 준 액터(플레이어가 볼 수 없어야
-// 하는 몬스터 등)는 이름조차 후보에 넣지 않는다 — 이름을 보여주는 것만으로도
-// 캔버스에서 숨겨두려던 정체가 새어나갈 수 있기 때문이다. HP 같은 수치는
-// 애초에 이 드롭다운에 표시하지 않는다.
-function getCandidateActors(healer) {
-  const sceneActors = canvas.tokens?.placeables?.map((t) => t.actor).filter(Boolean) ?? [];
-  const visible = sceneActors.filter((a) => game.user.isGM || a.testUserPermission(game.user, "OBSERVER"));
-  const unique = Array.from(new Map(visible.map((a) => [a.id, a])).values());
-  if (!unique.some((a) => a.id === healer.id)) unique.unshift(healer);
-  return unique;
-}
-
 // 치유 대상을 고른다. 토큰을 하나만 타겟팅해뒀다면 그걸 기본 선택값으로
 // 띄워준다(캔버스 선택/컨트롤과는 다른, 던전월드 데미지 버튼과 무관한
 // 별도의 타겟팅이라 서로 간섭하지 않는다). Druid Balance처럼 다른 기능에서도
-// 같은 대상 선택 UI가 필요해서 export한다.
+// 같은 대상 선택 UI가 필요해서 export한다 — 실제 목록/다이얼로그 로직은
+// lib/actor-target-picker.js에 공용으로 뺐다(features/aid-or-interfere.js도
+// 재사용).
 export function promptHealTarget(healer) {
-  return new Promise((resolve) => {
-    const candidates = getCandidateActors(healer);
-    const targeted = Array.from(game.user.targets ?? [])[0]?.actor;
-    const defaultId = targeted?.id ?? healer.id;
-
-    const options = candidates
-      .map((a) => {
-        const label = a.id === healer.id ? `${a.name} (${game.i18n.localize("DWAUTO.Healing.Self")})` : a.name;
-        return `<option value="${a.id}" ${a.id === defaultId ? "selected" : ""}>${label}</option>`;
-      })
-      .join("");
-
-    let resolved = false;
-    const finish = (value) => {
-      if (resolved) return;
-      resolved = true;
-      resolve(value);
-    };
-
-    new Dialog({
-      title: game.i18n.localize("DWAUTO.Healing.TargetTitle"),
-      content: `
-        <form>
-          <div class="form-group">
-            <label>${game.i18n.localize("DWAUTO.Healing.TargetLabel")}</label>
-            <select name="target">${options}</select>
-          </div>
-        </form>
-      `,
-      buttons: {
-        ok: {
-          label: game.i18n.localize("DWAUTO.Confirm"),
-          callback: (html) => {
-            const id = html.find('[name="target"]').val();
-            finish(candidates.find((a) => a.id === id) ?? null);
-          }
-        },
-        cancel: {
-          label: game.i18n.localize("DWAUTO.Cancel"),
-          callback: () => finish(null)
-        }
-      },
-      default: "ok",
-      close: () => finish(null)
-    }).render(true);
+  return promptActorTarget(healer, {
+    title: game.i18n.localize("DWAUTO.Healing.TargetTitle"),
+    label: game.i18n.localize("DWAUTO.Healing.TargetLabel"),
+    selfLabel: game.i18n.localize("DWAUTO.Healing.Self")
   });
 }
 
