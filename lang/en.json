@@ -278,12 +278,12 @@
       },
       "EnableSelfForwardAssistant": {
         "Name": "Enable Self-Forward Move Automation",
-        "Hint": "When a move like Reaper (Cleric) / Quick Study (Wizard) / An Ear For Magic (Bard) / My Love For You Is Like A Truck (Barbarian) — \"when X happens (no roll), take +1 forward\" — is triggered, automatically queues that +1 for your next roll (or, for moves restricted to a specific move in the table, only that move's next roll)."
+        "Hint": "When a move like Reaper (Cleric) / Quick Study (Wizard) / An Ear For Magic, Unforgettable Face (Bard) / My Love For You Is Like A Truck, Usurper (Barbarian) — \"when X happens (no roll), take +1 forward\" — is triggered, automatically queues that +1 for your next roll (or, for moves restricted to a specific move in the table, only that move's next roll). A badge next to the move shows whether it's currently queued, and the GM can click it to toggle on/off directly (players can only see it) — for Unforgettable Face/Usurper, where the +1 only applies against a specific NPC (or their underlings), the GM judges whether the situation applies and flips the badge accordingly."
       },
       "SelfForwardMovesMenu": {
         "Name": "Self-Forward Moves",
         "Label": "Edit Self-Forward Moves",
-        "Hint": "Register by name and an optional move restriction (leave blank to apply to any next roll). Moves like Unforgettable Face/Usurper, where the +1 only applies against a specific NPC (or their underlings), can't be auto-detected and aren't handled here."
+        "Hint": "Register by name and an optional move restriction (leave blank to apply to any next roll)."
       }
     },
     "Npc": {
@@ -805,7 +805,10 @@
     },
     "SelfForward": {
       "Applied": "+1 queued for your next roll",
-      "AppliedRestricted": "+1 queued for your next {moves} roll"
+      "AppliedRestricted": "+1 queued for your next {moves} roll",
+      "ToggleTitle": "Click to toggle whether this move's +1 forward is queued (GM only). Once the +1 is actually applied to a roll, it automatically reverts to \"Not queued\".",
+      "Active": "Queued",
+      "Inactive": "Not queued"
     },
     "Armor": {
       "NoContributors": "No equipped armor and no currently active modifiers",

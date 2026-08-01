@@ -334,6 +334,19 @@
   color: #fff !important;
 }
 
+.dwauto-self-forward-badge {
+  cursor: pointer;
+}
+
+.dwauto-self-forward-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-self-forward-on {
+  background: #7a6a2e !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;
