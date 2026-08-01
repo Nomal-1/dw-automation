@@ -574,4 +574,68 @@ export function registerSettings() {
     type: PrepareSpellsMovesMenu,
     restricted: true
   });
+
+  // 위저드 천재(Prodigy)/대가(Master): 주문 하나(대가는 하나 더)를 골라, 그
+  // 주문을 준비할 때 한 레벨 낮은 것처럼 취급한다. 자세한 설계는
+  // features/spell-discount.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELL_DISCOUNT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSpellDiscountAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSpellDiscountAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DISCOUNT_SPELL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DiscountSpellMoveNames.Name",
+    hint: "DWAUTO.Settings.DiscountSpellMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Prodigy, Master"
+  });
+
+  // 위저드 증보(Expanded Spellbook): 다른 어떤 직업의 주문 목록에서든 새
+  // 주문 하나를 스펠북에 추가한다. 자세한 설계는 features/spellbook-expansion.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELLBOOK_EXPANSION_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSpellbookExpansionAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSpellbookExpansionAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.EXPANDED_SPELLBOOK_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ExpandedSpellbookMoveNames.Name",
+    hint: "DWAUTO.Settings.ExpandedSpellbookMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Expanded Spellbook"
+  });
+
+  // 위저드 주문 차단(Counterspell)/마법 차폐(Protective Counter): 준비된 주문
+  // 하나를 걸고 굴리는데, 이 시스템 컴펜디엄 데이터에는 rollType이 비어있어
+  // 채팅 카드에 성공/부분성공 판정이 자동으로 표시되지 않는다(직접 확인됨).
+  // 그래서 결과를 GM/플레이어에게 직접 물어본다. 자세한 설계는
+  // features/counterspell.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_COUNTERSPELL_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableCounterspellAssistant.Name",
+    hint: "DWAUTO.Settings.EnableCounterspellAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.COUNTERSPELL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CounterspellMoveNames.Name",
+    hint: "DWAUTO.Settings.CounterspellMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Counterspell, Protective Counter"
+  });
 }

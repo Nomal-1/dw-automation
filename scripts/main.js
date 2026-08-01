@@ -15,6 +15,9 @@ import { registerUnderdogAssistant } from "./features/underdog.js";
 import { registerLevelUpInfo } from "./features/level-up-info.js";
 import { registerClassGrantAssistant } from "./features/class-grant.js";
 import { registerSpellPreparationAssistant } from "./features/spell-preparation.js";
+import { registerSpellDiscountAssistant } from "./features/spell-discount.js";
+import { registerSpellbookExpansionAssistant } from "./features/spellbook-expansion.js";
+import { registerCounterspellAssistant } from "./features/counterspell.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -41,3 +44,6 @@ registerUnderdogAssistant();
 registerLevelUpInfo();
 registerClassGrantAssistant();
 registerSpellPreparationAssistant();
+registerSpellDiscountAssistant();
+registerSpellbookExpansionAssistant();
+registerCounterspellAssistant();

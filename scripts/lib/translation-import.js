@@ -29,7 +29,10 @@ export const MOVE_PACK_FILES = [
   "dungeonworld.the-immolator-moves.json"
 ];
 
-const SPELL_PACK_FILES = ["dungeonworld.the-cleric-spells.json", "dungeonworld.the-wizard-spells.json"];
+// features/spellbook-expansion.js도 이 목록에서 ".json"만 뗀 값을 컴펜디엄
+// 팩 id로 재사용한다(증보(Expanded Spellbook)가 "다른 어떤 직업의 주문
+// 목록에서든" 고를 수 있게 하려면 클레릭/위저드 주문 팩 전체가 필요하다).
+export const SPELL_PACK_FILES = ["dungeonworld.the-cleric-spells.json", "dungeonworld.the-wizard-spells.json"];
 
 export function isTranslationModuleActive() {
   return game.modules.get(TRANSLATION_MODULE_ID)?.active ?? false;
@@ -334,6 +337,27 @@ export async function runTranslationImport() {
 
   const prepareSpellsMoves = game.settings.get(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES);
   await game.settings.set(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES, translateRows(moveMap, prepareSpellsMoves, stats));
+
+  const discountSpellNames = game.settings.get(MODULE_ID, SETTINGS.DISCOUNT_SPELL_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DISCOUNT_SPELL_MOVE_NAMES,
+    translateCommaList(moveMap, discountSpellNames, stats)
+  );
+
+  const expandedSpellbookNames = game.settings.get(MODULE_ID, SETTINGS.EXPANDED_SPELLBOOK_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.EXPANDED_SPELLBOOK_MOVE_NAMES,
+    translateCommaList(moveMap, expandedSpellbookNames, stats)
+  );
+
+  const counterspellNames = game.settings.get(MODULE_ID, SETTINGS.COUNTERSPELL_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.COUNTERSPELL_MOVE_NAMES,
+    translateCommaList(moveMap, counterspellNames, stats)
+  );
 
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(

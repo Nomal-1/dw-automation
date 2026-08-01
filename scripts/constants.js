@@ -41,5 +41,11 @@ export const SETTINGS = {
   ENABLE_CLASS_GRANT_ASSISTANT: "enableClassGrantAssistant",
   CLASS_GRANT_MOVES: "classGrantMoves",
   ENABLE_SPELL_PREPARATION_ASSISTANT: "enableSpellPreparationAssistant",
-  PREPARE_SPELLS_MOVES: "prepareSpellsMoves"
+  PREPARE_SPELLS_MOVES: "prepareSpellsMoves",
+  ENABLE_SPELL_DISCOUNT_ASSISTANT: "enableSpellDiscountAssistant",
+  DISCOUNT_SPELL_MOVE_NAMES: "discountSpellMoveNames",
+  ENABLE_SPELLBOOK_EXPANSION_ASSISTANT: "enableSpellbookExpansionAssistant",
+  EXPANDED_SPELLBOOK_MOVE_NAMES: "expandedSpellbookMoveNames",
+  ENABLE_COUNTERSPELL_ASSISTANT: "enableCounterspellAssistant",
+  COUNTERSPELL_MOVE_NAMES: "counterspellMoveNames"
 };

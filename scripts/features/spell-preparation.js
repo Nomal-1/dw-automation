@@ -3,6 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "../data/prepare-spells-moves.js";
+import { getDiscountedSpellIds } from "./spell-discount.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -25,6 +26,14 @@ function getRows() {
 
 function getActorLevel(actor) {
   return Number(actor.system?.attributes?.level?.value) || 1;
+}
+
+// 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문은 준비 시 레벨을 1 낮춰서
+// 계산한다(features/spell-discount.js 참고). 레벨 1 주문이 할인되면 0이 되어
+// 칸트립처럼 항상 무료로 준비된다.
+function effectiveSpellLevel(spell, discountedIds) {
+  const raw = Number(spell.system?.spellLevel) || 0;
+  return discountedIds.has(spell.id) ? Math.max(0, raw - 1) : raw;
 }
 
 // 설정("주문 준비 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
@@ -51,25 +60,32 @@ async function matchesConfiguredRow(title) {
 // 레벨 1 이상인 주문 중에서 고를 수 있는 목록을 보여주고, 고른 주문들의 레벨
 // 합이 한도(자기 레벨+1)를 넘지 않게 실시간으로 제한한다. 취소하면 null.
 function promptSpellPreparation(actor, moveItem, row) {
+  const discountedIds = new Set(getDiscountedSpellIds(actor));
   const allSpells = actor.items.filter((i) => i.type === "spell");
-  const cantrips = allSpells.filter((s) => Number(s.system?.spellLevel) === 0);
+  const cantrips = allSpells.filter((s) => effectiveSpellLevel(s, discountedIds) === 0);
   const level = getActorLevel(actor);
   const budget = level + 1;
   const cap = row.enforceIndividualLevelCap ? level : Infinity;
 
   const eligible = allSpells
-    .filter((s) => Number(s.system?.spellLevel) > 0 && Number(s.system.spellLevel) <= cap)
-    .sort((a, b) => Number(a.system.spellLevel) - Number(b.system.spellLevel) || a.name.localeCompare(b.name));
-  const tooHigh = allSpells.filter((s) => Number(s.system?.spellLevel) > 0 && Number(s.system.spellLevel) > cap);
+    .filter((s) => effectiveSpellLevel(s, discountedIds) > 0 && effectiveSpellLevel(s, discountedIds) <= cap)
+    .sort((a, b) => effectiveSpellLevel(a, discountedIds) - effectiveSpellLevel(b, discountedIds) || a.name.localeCompare(b.name));
+  const tooHigh = allSpells.filter((s) => effectiveSpellLevel(s, discountedIds) > cap && effectiveSpellLevel(s, discountedIds) > 0);
 
   const rowsHtml = eligible
-    .map(
-      (s) => `
+    .map((s) => {
+      const eff = effectiveSpellLevel(s, discountedIds);
+      const rawLevel = Number(s.system?.spellLevel) || 0;
+      const levelLabel =
+        eff !== rawLevel
+          ? `${game.i18n.format("DWAUTO.PrepareSpells.DiscountedLevelLabel", { raw: rawLevel, effective: eff })}`
+          : `Lv.${rawLevel}`;
+      return `
       <label style="display:block;margin:2px 0;">
-        <input type="checkbox" data-level="${s.system.spellLevel}" value="${s.id}" ${s.system.prepared ? "checked" : ""}>
-        ${s.name} (Lv.${s.system.spellLevel})
-      </label>`
-    )
+        <input type="checkbox" data-level="${eff}" value="${s.id}" ${s.system.prepared ? "checked" : ""}>
+        ${s.name} (${levelLabel})
+      </label>`;
+    })
     .join("");
 
   const cantripNote = cantrips.length
@@ -151,12 +167,13 @@ function promptSpellPreparation(actor, moveItem, row) {
 // prepared를 true로, 나머지는 전부 false로 맞춘다(한도 초과로 목록에서 아예
 // 빠졌던 주문도 여기서 자동으로 준비 해제된다).
 async function applySelection(actor, chosenIds) {
+  const discountedIds = new Set(getDiscountedSpellIds(actor));
   const allSpells = actor.items.filter((i) => i.type === "spell");
   const updates = [];
   const preparedNames = [];
 
   for (const spell of allSpells) {
-    const isCantrip = Number(spell.system?.spellLevel) === 0;
+    const isCantrip = effectiveSpellLevel(spell, discountedIds) === 0;
     const shouldBePrepared = isCantrip || chosenIds.has(spell.id);
     if (shouldBePrepared) preparedNames.push(spell.name);
     if (Boolean(spell.system?.prepared) !== shouldBePrepared) {

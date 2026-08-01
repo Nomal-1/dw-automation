@@ -18,7 +18,9 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-async function promptRevokeSpell(actor, spell) {
+// features/counterspell.js도 재사용한다(주문 차단 부분성공 시 건 주문을 잊는
+// 것과 완전히 같은 동작이라 — "system.prepared: false로 바꾸고 알린다").
+export async function promptRevokeSpell(actor, spell) {
   await spell.update({ "system.prepared": false });
   announceActionApplied(actor, spell.name, game.i18n.localize("DWAUTO.Spell.Revoked"));
 }

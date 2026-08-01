@@ -184,6 +184,30 @@
         "Name": "Prepare Spells Moves",
         "Label": "Edit Prepare Spells Moves",
         "Hint": "Register moves that work by \"spend time in contemplation, lose all prepared spells, choose new ones\" by name. Enabling \"Enforce Individual Level Cap\" (per the Cleric's Commune text) also excludes any spell of a higher level than the character's own level from the picker entirely (the Wizard's Prepare Spells has no such cap)."
+      },
+      "EnableSpellDiscountAssistant": {
+        "Name": "Enable Spell Discount Assistant",
+        "Hint": "Actually triggering the Wizard's Prodigy (or Master, which adds one more) prompts you to pick one of your spellbook spells, and from then on that spell is treated as one level lower when computing the Prepare Spells budget (a level-1 spell becomes 0, i.e. always free like a cantrip). Which move names work this way is managed in the Spell Discount Move Names setting below."
+      },
+      "DiscountSpellMoveNames": {
+        "Name": "Spell Discount Move Names",
+        "Hint": "Comma separated (default: Prodigy, Master)."
+      },
+      "EnableSpellbookExpansionAssistant": {
+        "Name": "Enable Spellbook Expansion Assistant",
+        "Hint": "Actually triggering the Wizard's Expanded Spellbook prompts you to pick a class (Cleric/Wizard) and then a spell from that class's list, adding it outright to your spellbook (spells you already have are excluded). The added spell starts unprepared — you'll need to Prepare Spells again to actually use it. Which move names work this way is managed in the Expanded Spellbook Move Names setting below."
+      },
+      "ExpandedSpellbookMoveNames": {
+        "Name": "Expanded Spellbook Move Names",
+        "Hint": "Comma separated (default: Expanded Spellbook)."
+      },
+      "EnableCounterspellAssistant": {
+        "Name": "Enable Counterspell Assistant",
+        "Hint": "Actually triggering the Wizard's Counterspell/Protective Counter prompts you to pick which prepared spell to stake, then asks you to declare the outcome (success/partial) directly — this move's compendium data has no roll type, so the system never posts an automatic success/partial result to check. Picking \"partial\" forgets the staked spell (same consumption as a partial Cast a Spell). Which move names work this way is managed in the Counterspell Move Names setting below."
+      },
+      "CounterspellMoveNames": {
+        "Name": "Counterspell Move Names",
+        "Hint": "Comma separated (default: Counterspell, Protective Counter)."
       }
     },
     "Npc": {
@@ -317,7 +341,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -499,7 +523,26 @@
       "CantripNote": "Level-0 spells are always prepared regardless of the limit: {names}",
       "TooHighNote": "Too high level for this character to choose: {names}",
       "Prepared": "The following spells are now prepared: {spells}",
-      "PreparedNone": "No spells are prepared."
+      "PreparedNone": "No spells are prepared.",
+      "DiscountedLevelLabel": "Lv.{raw}→{effective}, discounted"
+    },
+    "SpellDiscount": {
+      "ChooseLabel": "Choose spell to discount",
+      "Discounted": "\"{spell}\" will be prepared as one level lower from now on.",
+      "NoCandidates": "{name} has no eligible (level 1+) spells to discount."
+    },
+    "SpellbookExpansion": {
+      "ChooseClassLabel": "Choose a Class",
+      "ChooseSpellLabel": "Choose a Spell",
+      "Added": "Added \"{spell}\" to the spellbook (not yet prepared)."
+    },
+    "Counterspell": {
+      "StakeLabel": "Choose spell to stake",
+      "OutcomeInstruction": "Declare the outcome: choose \"Success\" if it was fully blocked, or \"Partial\" if it was blocked but you forgot the staked spell.",
+      "OutcomeSuccess": "Success (spell kept)",
+      "OutcomePartial": "Partial (spell forgotten)",
+      "NoPrepared": "{name} has no prepared spells.",
+      "Blocked": "Staked \"{spell}\" and fully blocked the spell."
     },
     "ActorTab": {
       "ResetButton": "Reset",
