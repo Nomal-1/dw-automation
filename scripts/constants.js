@@ -63,5 +63,7 @@ export const SETTINGS = {
   ARCANE_ART_HEAL_INDEX: "arcaneArtHealIndex",
   ARCANE_ART_DAMAGE_FORWARD_INDEX: "arcaneArtDamageForwardIndex",
   ARCANE_ART_CLEAR_ENCHANTMENT_INDEX: "arcaneArtClearEnchantmentIndex",
-  ARCANE_ART_ENHANCE_AID_INDEX: "arcaneArtEnhanceAidIndex"
+  ARCANE_ART_ENHANCE_AID_INDEX: "arcaneArtEnhanceAidIndex",
+  ENABLE_SELF_FORWARD_ASSISTANT: "enableSelfForwardAssistant",
+  SELF_FORWARD_MOVES: "selfForwardMoves"
 };

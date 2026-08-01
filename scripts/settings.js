@@ -30,6 +30,8 @@ import { EmpowerMovesMenu } from "./apps/empower-moves-menu.js";
 import { DEFAULT_EMPOWER_MOVES } from "./data/empower-moves.js";
 import { HoldGrantMovesMenu } from "./apps/hold-grant-moves-menu.js";
 import { DEFAULT_HOLD_GRANT_MOVES } from "./data/hold-grant-moves.js";
+import { SelfForwardMovesMenu } from "./apps/self-forward-moves-menu.js";
+import { DEFAULT_SELF_FORWARD_MOVES } from "./data/self-forward-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -838,5 +840,33 @@ export function registerSettings() {
     config: true,
     type: Number,
     default: 4
+  });
+
+  // Reaper(클레릭)/Quick Study(위저드)/An Ear For Magic(바드)/My Love For You
+  // Is Like A Truck(바바리안)처럼 "판정 없이 특정 상황이 벌어지면 자기
+  // 자신에게 +1 forward"인 무브들을 이름·무브 제한(선택) 표로 관리한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SELF_FORWARD_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSelfForwardAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSelfForwardAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SELF_FORWARD_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_SELF_FORWARD_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "selfForwardMovesMenu", {
+    name: "DWAUTO.Settings.SelfForwardMovesMenu.Name",
+    label: "DWAUTO.Settings.SelfForwardMovesMenu.Label",
+    hint: "DWAUTO.Settings.SelfForwardMovesMenu.Hint",
+    icon: "fas fa-arrow-up-right-from-square",
+    type: SelfForwardMovesMenu,
+    restricted: true
   });
 }

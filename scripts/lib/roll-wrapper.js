@@ -14,7 +14,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { computeCastPenalty } from "./ongoing-spells-state.js";
 import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
 import { getCommandCunningBonus } from "../features/command.js";
-import { getPendingRollBonus, clearPendingRollBonus } from "./roll-bonus-state.js";
+import { getPendingRollBonus, clearPendingRollBonus, rollBonusAppliesTo } from "./roll-bonus-state.js";
 import { announceActionApplied } from "./announce.js";
 import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
 
@@ -44,16 +44,17 @@ async function handleAskRoll(item, wrapped, args) {
 
   const mod = getFormcrafterRollModifier(item.actor, chosenStat);
   const pendingBonus = getPendingRollBonus(item.actor);
+  const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, item.name);
   const originalType = item.system.rollType;
   const originalMod = item.system.rollMod;
   item.system.rollType = chosenStat;
-  item.system.rollMod = (Number(originalMod) || 0) + mod + (pendingBonus?.amount ?? 0);
+  item.system.rollMod = (Number(originalMod) || 0) + mod + (pendingBonusApplies ? pendingBonus.amount : 0);
   try {
     return await wrapped(...args);
   } finally {
     item.system.rollType = originalType;
     item.system.rollMod = originalMod;
-    if (pendingBonus) await consumePendingRollBonus(item, pendingBonus);
+    if (pendingBonusApplies) await consumePendingRollBonus(item, pendingBonus);
   }
 }
 
@@ -102,8 +103,9 @@ async function wrappedRoll(wrapped, ...args) {
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
   const pendingBonus = getPendingRollBonus(this.actor);
-  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonus?.amount ?? 0);
-  if (!totalMod && !pendingBonus) return wrapped(...args);
+  const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, this.name);
+  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonusApplies ? pendingBonus.amount : 0);
+  if (!totalMod && !pendingBonusApplies) return wrapped(...args);
 
   const original = this.system.rollMod;
   this.system.rollMod = (Number(original) || 0) + totalMod;
@@ -111,7 +113,7 @@ async function wrappedRoll(wrapped, ...args) {
     return await wrapped(...args);
   } finally {
     this.system.rollMod = original;
-    if (pendingBonus) await consumePendingRollBonus(this, pendingBonus);
+    if (pendingBonusApplies) await consumePendingRollBonus(this, pendingBonus);
   }
 }
 

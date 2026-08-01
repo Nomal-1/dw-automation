@@ -399,6 +399,18 @@ export async function runTranslationImport() {
   const arcaneArtMoveNames = game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.ARCANE_ART_MOVE_NAMES, translateCommaList(moveMap, arcaneArtMoveNames, stats));
 
+  // 일반 name 필드 말고 restrictToMoveNames(쉼표 목록)도 무브 이름이라 같이
+  // 번역해야 한다(My Love For You Is Like A Truck의 "Parley" 제한 등) —
+  // translateRows는 name만 다루므로 이 표만 직접 처리한다.
+  const selfForwardMoves = game.settings.get(MODULE_ID, SETTINGS.SELF_FORWARD_MOVES);
+  const translatedSelfForwardMoves = selfForwardMoves.map((row) => ({
+    name: translateOne(moveMap, row.name, stats),
+    restrictToMoveNames: row.restrictToMoveNames
+      ? translateCommaList(moveMap, row.restrictToMoveNames, stats)
+      : row.restrictToMoveNames
+  }));
+  await game.settings.set(MODULE_ID, SETTINGS.SELF_FORWARD_MOVES, translatedSelfForwardMoves);
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

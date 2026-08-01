@@ -275,6 +275,15 @@
       "ArcaneArtEnhanceAidIndex": {
         "Name": "Arcane Art - Enhance Aid Option Index",
         "Hint": "Which option in the list is \"the next time someone aids the target, they get +2 instead of +1\" (4th in the default order). Ties into Aid or Interfere Automation."
+      },
+      "EnableSelfForwardAssistant": {
+        "Name": "Enable Self-Forward Move Automation",
+        "Hint": "When a move like Reaper (Cleric) / Quick Study (Wizard) / An Ear For Magic (Bard) / My Love For You Is Like A Truck (Barbarian) — \"when X happens (no roll), take +1 forward\" — is triggered, automatically queues that +1 for your next roll (or, for moves restricted to a specific move in the table, only that move's next roll)."
+      },
+      "SelfForwardMovesMenu": {
+        "Name": "Self-Forward Moves",
+        "Label": "Edit Self-Forward Moves",
+        "Hint": "Register by name and an optional move restriction (leave blank to apply to any next roll). Moves like Unforgettable Face/Usurper, where the +1 only applies against a specific NPC (or their underlings), can't be auto-detected and aren't handled here."
       }
     },
     "Npc": {
@@ -408,7 +417,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -527,6 +536,15 @@
       "HoldAmount": "Hold Amount",
       "ResetDefaultsButton": "Reset to Verified Defaults (English)",
       "ResetConfirmTitle": "Reset Hold Grant Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "SelfForwardMoves": {
+      "Title": "Self-Forward Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). Triggering this move queues +1 for your own next roll. Leave \"Restrict To Move\" blank to apply to any next roll, or fill it in (e.g. Parley) to restrict it to that move's next roll (comma-separated for multiple).",
+      "Name": "Move Name",
+      "RestrictToMoveNames": "Restrict To Move (optional)",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Self-Forward Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
     "HealingMoves": {
@@ -784,6 +802,10 @@
     },
     "RollBonus": {
       "Consumed": "Applied the {amount} roll bonus from {source}"
+    },
+    "SelfForward": {
+      "Applied": "+1 queued for your next roll",
+      "AppliedRestricted": "+1 queued for your next {moves} roll"
     },
     "Armor": {
       "NoContributors": "No equipped armor and no currently active modifiers",
