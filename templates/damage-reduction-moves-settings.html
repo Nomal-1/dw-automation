@@ -8,6 +8,7 @@
         <th>{{localize "DWAUTO.DamageReductionMoves.BaseBonus"}}</th>
         <th>{{localize "DWAUTO.DamageReductionMoves.OutnumberedBonus"}}</th>
         <th>{{localize "DWAUTO.DamageReductionMoves.LinkedMoveName"}}</th>
+        <th>{{localize "DWAUTO.DamageReductionMoves.AutoCheckPreparedSpell"}}</th>
         <th></th>
       </tr>
     </thead>
@@ -18,6 +19,7 @@
         <td><input type="number" name="rows.{{@index}}.baseBonus" value="{{this.baseBonus}}" min="0"></td>
         <td><input type="number" name="rows.{{@index}}.outnumberedBonus" value="{{this.outnumberedBonus}}" min="0"></td>
         <td><input type="text" name="rows.{{@index}}.linkedMoveName" value="{{this.linkedMoveName}}" placeholder="(비워두면 수동 토글)"></td>
+        <td><input type="checkbox" name="rows.{{@index}}.autoCheckPreparedSpell" {{#if this.autoCheckPreparedSpell}}checked{{/if}}></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>
       {{/each}}

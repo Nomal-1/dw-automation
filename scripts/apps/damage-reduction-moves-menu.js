@@ -2,7 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 
 function blankRow() {
-  return { name: "", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" };
+  return { name: "", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "", autoCheckPreparedSpell: false };
 }
 
 function normalizeRow(raw) {
@@ -10,7 +10,8 @@ function normalizeRow(raw) {
     name: (raw?.name ?? "").trim(),
     baseBonus: Math.max(0, parseInt(raw?.baseBonus, 10) || 0),
     outnumberedBonus: Math.max(0, parseInt(raw?.outnumberedBonus, 10) || 0),
-    linkedMoveName: (raw?.linkedMoveName ?? "").trim()
+    linkedMoveName: (raw?.linkedMoveName ?? "").trim(),
+    autoCheckPreparedSpell: Boolean(raw?.autoCheckPreparedSpell)
   };
 }
 

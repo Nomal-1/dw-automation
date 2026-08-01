@@ -39,6 +39,15 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
 // 실제로 겹치지 않게 만들어준다. 번역을 전혀 쓰지 않는(원문 영문 그대로
 // 플레이하는) 세계에서는 두 행이 진짜로 이름이 같아 이론상 중복 적용될 수
 // 있으니, 그런 경우 GM이 둘 중 하나를 지우거나 이름을 구분해서 고쳐두면 된다.
+//
+// autoCheckPreparedSpell: 위저드 Arcane Ward/Arcane Armor 전용. 원문: "As
+// long as you have at least one prepared spell of first level or higher,
+// you have +2(Arcane Armor는 +4) armor." — linkedMoveName(다른 메모형 무브의
+// 발동 상태를 따름)과 달리, 이 조건은 "1레벨 이상 주문 중 하나라도 준비됨
+// (system.prepared && spellLevel >= 1)"을 액터의 주문 아이템에서 직접 읽어
+// 완전히 자동으로 판정할 수 있다 — features/spell-preparation.js(Phase 6)가
+// system.prepared를 정확히 유지해주기 전에는 믿을 수 있는 판정 근거가 없어서
+// 미뤄뒀던 항목이다. linkedMoveName처럼 수동 토글 UI 자체가 뜨지 않는다.
 export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
   { name: "Underdog", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "" },
   { name: "Serious Underdog", baseBonus: 1, outnumberedBonus: 2, linkedMoveName: "" },
@@ -47,5 +56,7 @@ export const DEFAULT_DAMAGE_REDUCTION_MOVES = [
   { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "" },
   { name: "Divine Armor", baseBonus: 0, outnumberedBonus: 3, linkedMoveName: "" },
   { name: "Holy Protection", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "Quest" },
-  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "Quest" }
+  { name: "Divine Protection", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "Quest" },
+  { name: "Arcane Ward", baseBonus: 0, outnumberedBonus: 2, linkedMoveName: "", autoCheckPreparedSpell: true },
+  { name: "Arcane Armor", baseBonus: 0, outnumberedBonus: 4, linkedMoveName: "", autoCheckPreparedSpell: true }
 ];

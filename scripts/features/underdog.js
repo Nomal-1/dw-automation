@@ -55,10 +55,19 @@ export function isConditionActive(actor, moveId) {
   return Boolean(flag?.[moveId]);
 }
 
+// 위저드 Arcane Ward/Arcane Armor 전용: "1레벨 이상 주문을 하나라도 준비하고
+// 있는가"를 액터의 주문 아이템에서 직접 읽어 판정한다(features/spell-preparation.js가
+// system.prepared를 정확히 유지해준다).
+function hasPreparedSpellOfLevel1Plus(actor) {
+  return actor.items.some((i) => i.type === "spell" && i.system?.prepared && Number(i.system?.spellLevel) >= 1);
+}
+
 // 팔라딘 Holy Protection처럼 linkedMoveName이 있는 행은 수동 토글이 아니라
 // 다른 메모형 무브(퀘스트 등)의 발동 상태를 그대로 조건으로 쓴다 — GM/플레이어가
-// 따로 켜고 끌 필요가 없다.
+// 따로 켜고 끌 필요가 없다. autoCheckPreparedSpell이 있는 행(Arcane Ward/Armor)도
+// 마찬가지로 완전히 자동 판정이라 수동 토글이 필요 없다.
 function isRowConditionActive(actor, row, move) {
+  if (row.autoCheckPreparedSpell) return hasPreparedSpellOfLevel1Plus(actor);
   if (row.linkedMoveName) return isNoteMoveActive(actor, row.linkedMoveName);
   return isConditionActive(actor, move.id);
 }
@@ -94,13 +103,13 @@ export function getOutnumberedArmorContribution(actor) {
 }
 
 // hit-trigger.js가 피격 훅에서 호출한다. "피격 때마다 묻기"가 켜진 무브들만
-// 후보로 돌려준다(무브마다 독립적이므로 여러 개일 수 있다). linkedMoveName이
-// 있는 행(퀘스트 연동 등)은 물어볼 게 없다 — 다른 무브의 발동 상태를 그대로
-// 따르므로 애초에 후보에서 뺀다.
+// 후보로 돌려준다(무브마다 독립적이므로 여러 개일 수 있다). linkedMoveName이나
+// autoCheckPreparedSpell이 있는 행은 물어볼 게 없다 — 조건이 다른 곳(메모형
+// 무브 발동 상태, 준비된 주문 목록)에서 자동으로 정해지므로 애초에 후보에서 뺀다.
 export function getOutnumberedAskCandidate(actor) {
   if (!isEnabled()) return [];
   return getOwnedRows(actor)
-    .filter(({ row, move }) => !row.linkedMoveName && shouldAskEachHit(actor, move.id))
+    .filter(({ row, move }) => !row.linkedMoveName && !row.autoCheckPreparedSpell && shouldAskEachHit(actor, move.id))
     .map(({ move }) => ({ moveId: move.id, moveName: move.name }));
 }
 
@@ -139,14 +148,17 @@ function renderBadges(actor, html) {
 
     const $tags = getOrCreateTagsContainer($item);
 
-    // linkedMoveName이 있는 행(팔라딘 Holy Protection 등)은 다른 메모형
-    // 무브의 발동 상태를 그대로 따르는 조건이라 수동으로 켜고 끌 게 없다 —
-    // 지금 상태를 읽기 전용 표시로만 보여준다.
-    if (row.linkedMoveName) {
+    // linkedMoveName이 있는 행(팔라딘 Holy Protection 등)이나 autoCheckPreparedSpell이
+    // 있는 행(위저드 Arcane Ward/Armor)은 다른 곳에서 조건이 자동으로 정해지므로
+    // 수동으로 켜고 끌 게 없다 — 지금 상태를 읽기 전용 표시로만 보여준다.
+    if (row.linkedMoveName || row.autoCheckPreparedSpell) {
       if ($tags.find(".dwauto-underdog-linked-badge").length) continue;
       const active = isRowConditionActive(actor, row, move);
+      const title = row.autoCheckPreparedSpell
+        ? game.i18n.localize("DWAUTO.Underdog.AutoPreparedSpellToggleTitle")
+        : game.i18n.format("DWAUTO.Underdog.LinkedToggleTitle", { linked: row.linkedMoveName });
       const $badge = $(
-        `<a class="tag dwauto-underdog-linked-badge${active ? " dwauto-underdog-on" : ""}" title="${game.i18n.format("DWAUTO.Underdog.LinkedToggleTitle", { linked: row.linkedMoveName })}">${game.i18n.localize(active ? "DWAUTO.Underdog.OutnumberedOn" : "DWAUTO.Underdog.OutnumberedOff")}</a>`
+        `<a class="tag dwauto-underdog-linked-badge${active ? " dwauto-underdog-on" : ""}" title="${title}">${game.i18n.localize(active ? "DWAUTO.Underdog.OutnumberedOn" : "DWAUTO.Underdog.OutnumberedOff")}</a>`
       );
       $tags.append($badge);
       continue;
