@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
+import { getCommandInstinctBonusForInterference } from "./command.js";
 
 // 던전월드 기본 무브 "원조/방해(Aid or Interfere)" 원문: "유대가 있는 사람을
 // 돕거나 방해할 때 +유대로 판정한다. 맞히면(7+) 그 사람의 판정에 +1 또는
@@ -11,14 +12,25 @@ import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 // "맞히면"은 7-9/10+ 모두 포함하므로 이 모듈에서도 둘 다 트리거로 삼는다
 // (7-9의 "노출" 부분은 서사적 판단이라 자동화하지 않고 채팅에 안내만 남긴다).
 //
-// +1/-2는 "그 사람이 다음에 무슨 판정을 하든" 한 번 적용되고 사라지는
-// 보너스라 lib/roll-bonus-state.js(다음 판정 자동 적용 + lib/roll-wrapper.js가
-// 소모)에 그대로 얹는다. 대상 액터에 대한 수정 권한(Owner)이 없으면(플레이어
-// 서로 다른 캐릭터라 권한이 없는 게 보통이다) 접속 중인 GM에게 승인을
-// 구한다 — features/healing.js와 같은 방식(같은 소켓 채널을 쓰지만 type
-// 값으로 서로 구분한다).
+// 대상을 고르고 원조/방해를 정하는 시점이 굴리기 "전"이라는 게 핵심이다
+// (lib/roll-wrapper.js가 이 무브를 굴리기 직전에 promptAidOrInterferePreRoll을
+// 부른다) — 그래야 레인저 Command의 "다른 PC가 방해할 때 동물의 본능이 그
+// 판정(=지금 이 굴림)에 더해진다"를 실제로 "이번 판정"에 반영할 수 있다.
+// 굴린 뒤에야 방해인지 알 수 있다면 이미 끝난 판정에는 보정치를 소급 적용할
+// 방법이 없다. 결정 내용(누구를, 얼마를)은 굴리는 순간부터 결과 채팅 카드가
+// 생성되는 순간까지만 잠깐 살아있으면 되므로, 액터 플래그가 아니라 이
+// 모듈 안의 Map에 액터 id로 잠깐 들고 있는다.
+//
+// 원조/방해 자체의 +1/-2는 "그 사람이 다음에 무슨 판정을 하든" 한 번 적용되고
+// 사라지는 보너스라 lib/roll-bonus-state.js(다음 판정 자동 적용 + roll-wrapper.js가
+// 소모)에 그대로 얹는다 — 이건 지금 굴리는 이 판정이 아니라 원조/방해를
+// "당한" 사람의 미래 판정이므로 그대로 사후 처리다. 대상 액터에 대한 수정
+// 권한(Owner)이 없으면(플레이어 서로 다른 캐릭터라 권한이 없는 게 보통이다)
+// 접속 중인 GM에게 승인을 구한다 — features/healing.js와 같은 방식(같은
+// 소켓 채널을 쓰지만 type 값으로 서로 구분한다).
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const pendingApprovals = new Map();
+const pendingDecisions = new Map(); // actor.id -> { targetId, targetName, amount }
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_AID_OR_INTERFERE_ASSISTANT);
@@ -157,6 +169,36 @@ function promptAidOrInterfereChoice(moveItem) {
   });
 }
 
+// lib/roll-wrapper.js가 이 무브를 실제로 굴리기 "직전에" 호출한다. 대상과
+// 원조/방해 여부를 먼저 확정해서 pendingDecisions에 담아두고(onCreateChatMessage가
+// 굴린 뒤 결과를 보고 이어받는다), "방해"를 선택했다면 Command의 본능
+// 보너스를 지금 이 판정의 rollMod에 바로 더할 수 있도록 그 값을 반환한다
+// (원조를 선택했거나 이 무브가 아니거나 취소했으면 0). 취소해도 굴림 자체는
+// 막지 않는다 — 그냥 이번 굴림에는 아무 자동화도 적용되지 않을 뿐이다.
+export async function promptAidOrInterferePreRoll(item) {
+  if (!isEnabled()) return 0;
+  const actor = item.actor;
+  if (!actor || actor.type !== "character") return 0;
+  if (!(await matchesConfiguredName(item.name))) return 0;
+
+  const target = await promptActorTarget(actor, {
+    title: item.name,
+    label: game.i18n.localize("DWAUTO.AidOrInterfere.TargetLabel"),
+    excludeSelf: true
+  });
+  if (!target) return 0;
+
+  const amount = await promptAidOrInterfereChoice(item);
+  if (amount === null) return 0;
+
+  pendingDecisions.set(actor.id, { targetId: target.id, targetName: target.name, amount });
+
+  // 원문: "다른 PC가 자신을 방해하려 들 때, 동물의 본능이 그 판정에 더해진다."
+  // "그 판정"은 방해하는 사람(지금 이 액터)의 판정이므로, 방해를 선택했을
+  // 때만 대상(target)의 Command 조건을 조회해서 지금 이 굴림에 반영한다.
+  return amount === -2 ? getCommandInstinctBonusForInterference(target) : 0;
+}
+
 async function onCreateChatMessage(message, options, userId) {
   try {
     if (game.system.id !== "dungeonworld") return;
@@ -167,24 +209,20 @@ async function onCreateChatMessage(message, options, userId) {
     if (!info) return;
     const { actor, title, result } = info;
     if (actor.type !== "character") return;
-    if (result !== "success" && result !== "partial") return; // 6-는 아무 효과 없음
 
     if (!(await matchesConfiguredName(title))) return;
 
-    const moveItem = findMoveItem(actor, title);
-    if (!moveItem) return;
+    const decision = pendingDecisions.get(actor.id);
+    if (!decision) return; // 굴리기 전에 취소했거나, 애초에 이 무브가 아니었다.
+    pendingDecisions.delete(actor.id);
 
-    const target = await promptActorTarget(actor, {
-      title: moveItem.name,
-      label: game.i18n.localize("DWAUTO.AidOrInterfere.TargetLabel"),
-      excludeSelf: true
-    });
+    if (result !== "success" && result !== "partial") return; // 6-는 아무 효과 없음 — 결정은 그냥 버려진다.
+
+    const moveItem = findMoveItem(actor, title);
+    const target = game.actors.get(decision.targetId);
     if (!target) return;
 
-    const amount = await promptAidOrInterfereChoice(moveItem);
-    if (amount === null) return;
-
-    const applied = await applyBonus(actor, target, amount);
+    const applied = await applyBonus(actor, target, decision.amount);
     if (!applied) {
       ui.notifications.warn(game.i18n.format("DWAUTO.AidOrInterfere.PermissionDenied", { name: target.name }));
       return;
@@ -192,9 +230,12 @@ async function onCreateChatMessage(message, options, userId) {
 
     const detail =
       result === "partial"
-        ? game.i18n.format("DWAUTO.AidOrInterfere.AppliedPartial", { target: target.name, amount: formatSigned(amount) })
-        : game.i18n.format("DWAUTO.AidOrInterfere.Applied", { target: target.name, amount: formatSigned(amount) });
-    announceActionApplied(actor, moveItem.name, detail);
+        ? game.i18n.format("DWAUTO.AidOrInterfere.AppliedPartial", {
+            target: target.name,
+            amount: formatSigned(decision.amount)
+          })
+        : game.i18n.format("DWAUTO.AidOrInterfere.Applied", { target: target.name, amount: formatSigned(decision.amount) });
+    announceActionApplied(actor, moveItem?.name ?? title, detail);
   } catch (err) {
     console.error(`${MODULE_ID} | aid-or-interfere: onCreateChatMessage failed`, err);
   }

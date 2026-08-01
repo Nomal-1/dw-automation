@@ -226,7 +226,7 @@
       },
       "EnableCommandAssistant": {
         "Name": "Enable Command Automation",
-        "Hint": "If the character has the Ranger's Command move, a \"Cooperating\" toggle badge appears next to it on the character sheet. While toggled on, the animal companion's stats (Ferocity/Cunning/Armor) are automatically applied to attack damage, certain rolls, and armor recalculation (the animal's stats are read automatically from the answer chosen when Animal Companion was activated). \"A PC's instinct is added when another PC tries to interfere with you\" is out of scope for automation since it requires intervening in another character's roll, and must be handled manually by the GM."
+        "Hint": "If the character has the Ranger's Command move, a \"Cooperating\" toggle badge appears next to it on the character sheet. While toggled on, the animal companion's stats (Ferocity/Cunning/Armor/Instinct) are automatically applied to attack damage, certain rolls, armor recalculation, and another PC's roll to interfere with you (tied into the Aid or Interfere automation) — the animal's stats are read automatically from the answer chosen when Animal Companion was activated. The Instinct bonus only actually applies if \"Aid or Interfere Automation\" is also enabled."
       },
       "CommandMoveNames": {
         "Name": "Command Move Names",
@@ -246,7 +246,7 @@
       },
       "EnableAidOrInterfereAssistant": {
         "Name": "Enable Aid or Interfere Automation",
-        "Hint": "When the core Aid or Interfere move hits (7+), prompts for a target and a choice between Aid (+1) or Interfere (-2), then automatically applies it to that target's next roll (applied once when they actually roll, then cleared). If you lack permission over the target actor, requests approval from an online GM."
+        "Hint": "Before rolling the core Aid or Interfere move, prompts for a target and a choice between Aid (+1) or Interfere (-2). On a hit (7+), that bonus is automatically applied to the target's next roll (applied once when they actually roll, then cleared); if you lack permission over the target actor, requests approval from an online GM. If you chose Interfere and the target meets the Ranger Command's cooperating conditions, the animal's Instinct is also automatically added to this Interfere roll itself."
       },
       "AidOrInterfereMoveNames": {
         "Name": "Aid or Interfere Move Names",
@@ -714,7 +714,8 @@
       "CooperatingOn": "Cooperating",
       "CooperatingOff": "Normal",
       "DamageBonusApplied": "Added the animal's Ferocity +{amount} to damage",
-      "RollBonusApplied": "Added the animal's Cunning +{amount} to the {move} roll"
+      "RollBonusApplied": "Added the animal's Cunning +{amount} to the {move} roll",
+      "InstinctBonusApplied": "Added the animal's Instinct +{amount} to another PC's roll to interfere with you"
     },
     "WellTrained": {
       "PromptLabel": "Choose a training to add.",

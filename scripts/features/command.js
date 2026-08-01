@@ -6,9 +6,11 @@ import { getAnimalCompanionStats } from "./note-moves.js";
 // 레인저 명령(Command) 원문: "동물 친구가 받은 훈련을 활용하고 있으면 —
 // 같은 대상을 공격할 때 동물의 사나움을 피해에, 추적할 때 동물의 교활함을
 // 판정에, 피해를 입을 때 동물의 장갑을 자신의 장갑에, 상황 파악/협상 시
-// 동물의 교활함을 판정에 더한다." ("다른 PC가 방해할 때 동물의 본능이 그
-// 판정에 더해진다"는 다른 캐릭터의 굴림에 개입해야 해서 자동화 대상에서
-// 뺐다 — GM이 수동으로 처리한다.)
+// 동물의 교활함을 판정에 더한다. 다른 PC가 방해할 때는 동물의 본능이 그
+// 판정에 더해진다." 마지막 항목(다른 캐릭터의 굴림에 개입)은 처음엔 자동화
+// 대상에서 뺐었지만, features/aid-or-interfere.js가 원조/방해를 굴리기
+// 전에 대상을 먼저 확정하는 구조로 바뀌면서 getCommandInstinctBonusForInterference로
+// 함께 연결했다(아래 참고).
 //
 // "지금 동물 친구가 정말 협력하고 있는지"는 채팅 트리거로 자동 감지할 수
 // 없어서(GM 요청), 캐릭터 시트에 수동 토글 배지를 하나 둔다 — 켜져 있는
@@ -99,6 +101,24 @@ export function getCommandArmorContribution(actor) {
 
   const moveItem = findCommandMove(actor);
   return { source: moveItem?.name ?? "Command", amount: stats.armor };
+}
+
+// Command 원문의 마지막 항목: "다른 PC가 자신을 방해하려 들 때, 동물의
+// 본능이 그 판정에 더해진다." — 방해"당하는" 쪽(target)의 조건(Command +
+// 협력 중 + 본능 수치)으로 조회하되, 실제 보너스는 방해"하는" 쪽의 판정에
+// 붙는다는 점이 다른 세 보너스(자기 자신 기준)와 다르다. features/
+// aid-or-interfere.js가 "방해"를 선택했을 때만(원조는 해당 없음) 호출한다.
+export function getCommandInstinctBonusForInterference(target) {
+  const stats = getActiveStats(target);
+  if (!stats || !stats.instinct) return 0;
+
+  const moveItem = findCommandMove(target);
+  announceActionApplied(
+    target,
+    moveItem?.name ?? "Command",
+    game.i18n.format("DWAUTO.Command.InstinctBonusApplied", { amount: stats.instinct })
+  );
+  return stats.instinct;
 }
 
 // 명령 무브 옆에 "협력 중"/"평소" 토글 배지를 붙인다. 클릭하면 상태가

@@ -16,6 +16,7 @@ import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbilit
 import { getCommandCunningBonus } from "../features/command.js";
 import { getPendingRollBonus, clearPendingRollBonus } from "./roll-bonus-state.js";
 import { announceActionApplied } from "./announce.js";
+import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -88,10 +89,16 @@ async function wrappedRoll(wrapped, ...args) {
     spellPenalty = amount;
   }
 
+  // 원조/방해(Aid or Interfere)는 대상/원조·방해 여부를 굴리기 "전"에
+  // 확정해야(레인저 Command의 본능 보너스가 바로 이 판정에 붙어야 하므로)
+  // 다른 보정치들과 나란히 여기서 미리 물어본다 — 이 무브가 아니거나
+  // 자동화가 꺼져있으면 즉시 0을 돌려주므로 다른 판정에는 영향이 없다.
+  const aidOrInterfereBonus = await promptAidOrInterferePreRoll(this);
+
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
   const pendingBonus = getPendingRollBonus(this.actor);
-  const totalMod = formcrafterMod - spellPenalty + commandMod + (pendingBonus?.amount ?? 0);
+  const totalMod = formcrafterMod - spellPenalty + commandMod + aidOrInterfereBonus + (pendingBonus?.amount ?? 0);
   if (!totalMod && !pendingBonus) return wrapped(...args);
 
   const original = this.system.rollMod;
