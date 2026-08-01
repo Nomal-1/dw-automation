@@ -583,7 +583,11 @@
       "Prepared": "다음 주문이 준비되었습니다: {spells}",
       "PreparedNone": "준비된 주문이 없습니다.",
       "DiscountedLevelLabel": "Lv.{raw}→{effective}, 할인됨",
-      "HoldGranted": "hold {amount}개를 얻었습니다(이전 hold는 소멸)"
+      "HoldGranted": "hold {amount}개를 얻었습니다(이전 hold는 소멸)",
+      "HoldBadge": "hold: {hold}",
+      "HoldBadgeTitle": "지금 남은 hold 개수입니다. 피격 시 무효화에 쓰면 자동으로 줄어듭니다. 플레이어는 직접 조정할 수 없습니다.",
+      "HoldMinusTitle": "hold를 1 줄입니다(GM 전용)",
+      "HoldPlusTitle": "hold를 1 늘립니다(GM 전용)"
     },
     "SpellDiscount": {
       "ChooseLabel": "할인할 주문 선택",

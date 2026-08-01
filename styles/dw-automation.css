@@ -273,6 +273,19 @@
   color: #fff !important;
 }
 
+.dwauto-hold-badge {
+  background: #2e4a7a !important;
+  color: #fff !important;
+}
+
+.dwauto-hold-adjust {
+  cursor: pointer;
+}
+
+.dwauto-hold-adjust:hover {
+  filter: brightness(1.2);
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;

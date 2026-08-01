@@ -5,7 +5,8 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "../data/prepare-spells-moves.js";
 import { getDiscountedSpellIds } from "./spell-discount.js";
 import { COMMUNE_PENALTY_FLAG } from "../lib/ongoing-spells-state.js";
-import { setHold } from "../lib/divine-hold-state.js";
+import { getHold, setHold } from "../lib/divine-hold-state.js";
+import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -254,6 +255,60 @@ async function onCreateChatMessage(message, options, userId) {
   }
 }
 
+// 클레릭 신의 개입/신의 불멸을 실제로 가진 캐릭터의 시트에 지금 hold가
+// 몇 개인지 배지로 보여준다. GM 요청에 따라, 이 값은 플레이어가 스스로
+// 조정할 수 없는 GM 전용 판정 자원이라(hold를 "언제 쓸지"는 피격 시
+// 무효화 대화상자에서 이미 자동으로 소비되지만, GM이 서사적 판단으로
+// 직접 늘리거나 줄여야 하는 경우가 있다) 배지 자체는 누구나 보이지만
+// +1/-1 조정 버튼은 GM에게만 보인다.
+function onRenderActorSheet(app, html) {
+  if (game.system.id !== "dungeonworld") return;
+  if (!isEnabled()) return;
+
+  const actor = app.actor;
+  if (actor.type !== "character") return;
+
+  const row = getHoldGrantRow(actor);
+  if (!row) return;
+
+  const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+  if (!moveItem) return;
+
+  const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  if ($tags.find(".dwauto-hold-badge").length) return;
+
+  const hold = getHold(actor);
+  const $badge = $(
+    `<a class="tag dwauto-hold-badge" title="${game.i18n.localize("DWAUTO.PrepareSpells.HoldBadgeTitle")}">${game.i18n.format("DWAUTO.PrepareSpells.HoldBadge", { hold })}</a>`
+  );
+  $tags.append($badge);
+
+  if (!game.user.isGM) return; // 플레이어는 표시만 — 조정 버튼은 GM에게만 붙인다.
+
+  const $minus = $(
+    `<a class="tag dwauto-hold-adjust" title="${game.i18n.localize("DWAUTO.PrepareSpells.HoldMinusTitle")}">-1</a>`
+  );
+  const $plus = $(
+    `<a class="tag dwauto-hold-adjust" title="${game.i18n.localize("DWAUTO.PrepareSpells.HoldPlusTitle")}">+1</a>`
+  );
+  $tags.append($minus).append($plus);
+
+  $minus.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await setHold(actor, Math.max(0, getHold(actor) - 1));
+  });
+  $plus.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await setHold(actor, getHold(actor) + 1);
+  });
+}
+
 export function registerSpellPreparationAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.on("renderActorSheet", onRenderActorSheet);
 }

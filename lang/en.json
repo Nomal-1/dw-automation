@@ -583,7 +583,11 @@
       "Prepared": "The following spells are now prepared: {spells}",
       "PreparedNone": "No spells are prepared.",
       "DiscountedLevelLabel": "Lv.{raw}→{effective}, discounted",
-      "HoldGranted": "Gained {amount} hold (any previous hold is lost)"
+      "HoldGranted": "Gained {amount} hold (any previous hold is lost)",
+      "HoldBadge": "hold: {hold}",
+      "HoldBadgeTitle": "Current remaining hold. Automatically decreases when spent on hit negation. Players cannot adjust this directly.",
+      "HoldMinusTitle": "Decrease hold by 1 (GM only)",
+      "HoldPlusTitle": "Increase hold by 1 (GM only)"
     },
     "SpellDiscount": {
       "ChooseLabel": "Choose spell to discount",
