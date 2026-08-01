@@ -208,6 +208,16 @@
       "CounterspellMoveNames": {
         "Name": "Counterspell Move Names",
         "Hint": "Comma separated (default: Counterspell, Protective Counter)."
+      },
+      "OngoingPenaltyReductionMovesMenu": {
+        "Name": "Ongoing Penalty Reduction Moves",
+        "Label": "Edit Ongoing Penalty Reduction Moves",
+        "Hint": "Register moves like the Cleric's Serenity/Providence (\"ignore some of the cast-a-spell penalty from ongoing spells\") by name and a reduction amount. This amount is subtracted from the total ongoing-spell penalty (floored at 0, and never applied to the vow penalty)."
+      },
+      "EmpowerMovesMenu": {
+        "Name": "Empower Moves",
+        "Label": "Edit Empower Moves",
+        "Hint": "Register moves like the Wizard's Empowered Magic/Greater Empowered Magic or the Cleric's Empower/Greater Empower (\"on a successful cast, pay a cost to pick an extra effect\") by name and whether it's the Greater version. Enabling \"Greater\" makes the effect free (no demerit) on an extreme success (12+)."
       }
     },
     "Npc": {
@@ -341,7 +351,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -350,12 +360,13 @@
     },
     "HitTriggerMoves": {
       "Title": "Hit-Taken Moves",
-      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, or take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared).",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). \"Effect\" decides what the player gives up to negate the damage: lower armor by 1, take a debility of their choice (if all 6 debilities are already taken, the move can't be used and won't be offered), or end one currently-maintained ongoing spell and reduce the damage by only that spell's level (the Wizard's Spell Defense — not full negation, and unusable if no ongoing spell is currently maintained). Check \"Grants +1 forward\" for moves like Armored Perfection that also grant a bonus (Dungeon World's own forward attribute, auto-applied to the next roll and then cleared; meaningless for the Spell Defense row).",
       "Name": "Move Name",
       "Effect": "Effect",
       "EffectOption": {
         "armor": "Lower armor by 1",
-        "debility": "Take a debility"
+        "debility": "Take a debility",
+        "spellDefense": "End ongoing spell + reduce by its level"
       },
       "GrantsForward": "Grants +1 forward",
       "AddRow": "Add Row",
@@ -376,7 +387,9 @@
       "ArmorItemPromptContent": "Which piece of armor takes the durability hit?",
       "ArmorItemDamaged": "{item}'s armor tag reduced to {value}",
       "ArmorItemDestroyed": "{item} was destroyed",
-      "IndomitableApplied": "+1 forward"
+      "IndomitableApplied": "+1 forward",
+      "SpellDefenseChooseInstruction": "Choose an ongoing spell to end.",
+      "SpellDefenseApplied": "Ended \"{spell}\" (Lv.{level}) and reduced this hit to {damage}"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
@@ -415,6 +428,33 @@
     },
     "SuperiorWarrior": {
       "Applied": "Extreme success (12+): deal damage, avoid the enemy's attack, and impress/dismay/frighten it."
+    },
+    "OngoingPenaltyReductionMoves": {
+      "Title": "Ongoing Penalty Reduction Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). When computing the Cast a Spell roll penalty, this reduction amount is subtracted from the total penalty accrued from ongoing spells (floored at 0). E.g. a character with a reduction-1 move who has accrued a -3 ongoing-spell penalty actually takes only -2. Never applied to the vow penalty (\"take -1 ongoing until you commune\" from a partial Cast a Spell).",
+      "Name": "Move Name",
+      "Reduction": "Reduction Amount",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Ongoing Penalty Reduction Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "EmpowerMoves": {
+      "Title": "Empower Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). On a successful (10+) Cast a Spell, you'll be asked whether to apply the effect; if you accept, you pick one enhancement effect and one demerit. Enabling \"Greater\" skips the demerit and grants the effect for free on an extreme success (12+).",
+      "Name": "Move Name",
+      "IsGreater": "Greater (free at 12+)",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Empower Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "Empower": {
+      "ConfirmContent": "The spell was cast successfully. Apply \"{move}\"'s enhancement effect?",
+      "NotApplied": "Empower not applied",
+      "EffectInstruction": "Choose an enhancement effect.",
+      "DemeritInstruction": "Choose a demerit.",
+      "Applied": "Empower applied. Effect: {effect} / Demerit: {demerit}",
+      "AppliedFree": "Empower applied (extreme success, no cost). Effect: {effect}",
+      "AppliedNoDemerit": "Empower applied. Effect: {effect}"
     },
     "HealingMoves": {
       "Title": "Healing Moves",

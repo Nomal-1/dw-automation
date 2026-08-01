@@ -47,5 +47,7 @@ export const SETTINGS = {
   ENABLE_SPELLBOOK_EXPANSION_ASSISTANT: "enableSpellbookExpansionAssistant",
   EXPANDED_SPELLBOOK_MOVE_NAMES: "expandedSpellbookMoveNames",
   ENABLE_COUNTERSPELL_ASSISTANT: "enableCounterspellAssistant",
-  COUNTERSPELL_MOVE_NAMES: "counterspellMoveNames"
+  COUNTERSPELL_MOVE_NAMES: "counterspellMoveNames",
+  ONGOING_PENALTY_REDUCTION_MOVES: "ongoingPenaltyReductionMoves",
+  EMPOWER_MOVES: "empowerMoves"
 };

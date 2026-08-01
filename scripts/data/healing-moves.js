@@ -29,9 +29,15 @@ export const DEFAULT_HEALING_MOVES = [
 // 캐릭터가 이 표의 무브로 남을 치유하면 무조건 보너스를 더한다"로 단순화해서
 // 구현해뒀다(어느 치유 무브로 치유했는지는 구분하지 않음) — 새 항목도 같은
 // 단순화를 그대로 따른다.
+// 클레릭 헌신적 치유자(Devoted Healer) 원문: "When you heal someone else of
+// damage, add your level to the amount of damage healed." — Hospitaller와
+// 정확히 같은 "남을 치유할 때 추가로 더한다" 구조라, bonusFormula에 고정
+// 주사위 대신 던전월드 시스템의 롤데이터 경로(actor.getRollData()의
+// attributes.level.value)를 그대로 적어서 레벨만큼 더하게 한다.
 export const DEFAULT_HOSPITALLER_MOVES = [
   { name: "Hospitaller", bonusFormula: "1d8" },
   { name: "Perfect Hospitaller", bonusFormula: "2d8" },
   { name: "Healing Song", bonusFormula: "1d8" },
-  { name: "Healing Chorus", bonusFormula: "2d8" }
+  { name: "Healing Chorus", bonusFormula: "2d8" },
+  { name: "Devoted Healer", bonusFormula: "@attributes.level.value" }
 ];

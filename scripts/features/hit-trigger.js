@@ -5,6 +5,9 @@ import { getShedCandidate, applyShed } from "./druid.js";
 import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
 import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive } from "./underdog.js";
 import { findDecidingUser } from "../lib/deciding-user.js";
+import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
+import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -160,11 +163,84 @@ function promptDebilityChoice(actor, row) {
   });
 }
 
+// 위저드 Spell Defense 전용: 완전 무효화가 아니라 "유지 중인 지속 주문 하나를
+// 끝내고, 그 주문 레벨만큼만 피해를 경감"하는 대가다. 유지 중인 지속 주문
+// 중 하나를 고르는 대화상자. 취소하면 null.
+function promptSpellDefenseChoice(actor, row, active) {
+  const options = active
+    .map((s) => {
+      const level = Number(actor.items.get(s.itemId)?.system?.spellLevel) || 0;
+      return `<option value="${s.itemId}">${s.name} (Lv.${level})</option>`;
+    })
+    .join("");
+
+  return new Promise((resolve) => {
+    new Dialog({
+      title: row.name,
+      content: `
+        <form>
+          <p>${game.i18n.localize("DWAUTO.HitTrigger.SpellDefenseChooseInstruction")}</p>
+          <div class="form-group">
+            <select name="spell">${options}</select>
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => resolve(html.find('[name="spell"]').val())
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => resolve(undefined)
+        }
+      },
+      default: "ok",
+      close: () => resolve(undefined)
+    }).render(true);
+  });
+}
+
+// 완전 무효화(applyArmorNegation)와 달리, 원래 피해에서 (피해 - 주문 레벨)만
+// 실제로 적용한다 — buildHpChange로 원래 변경사항의 다른 필드는 그대로 두고
+// hp 필드만 다시 계산해서 덮어쓴다. 선택을 취소하면 null을 반환해서 호출부가
+// 원래 피해를 그대로 적용하게 한다.
+async function applySpellDefense(actor, row, damage, originalChanges, originalOptions) {
+  const active = getActiveOngoingSpells(actor);
+  const spellId = await promptSpellDefenseChoice(actor, row, active);
+  if (spellId === undefined) return null;
+
+  const spellItem = actor.items.get(spellId);
+  const spellLevel = Number(spellItem?.system?.spellLevel) || 0;
+  const reducedDamage = Math.max(0, damage - spellLevel);
+
+  await removeActiveOngoingSpell(actor, spellId);
+
+  const adjustedChanges = buildHpChange(originalChanges, actor, reducedDamage);
+  await actor.update(adjustedChanges, { ...originalOptions, [SKIP_FLAG]: true });
+
+  announceActionApplied(
+    actor,
+    row.name,
+    game.i18n.format("DWAUTO.HitTrigger.SpellDefenseApplied", {
+      spell: spellItem?.name ?? "?",
+      level: spellLevel,
+      damage: reducedDamage
+    })
+  );
+
+  return true;
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
 async function promptHitTrigger(actor, candidates, damage, originalChanges, originalOptions) {
-  const usable = candidates.filter((row) => row.effect !== "debility" || !hasAllDebilities(actor));
+  const usable = candidates.filter((row) => {
+    if (row.effect === "debility") return !hasAllDebilities(actor);
+    if (row.effect === "spellDefense") return getActiveOngoingSpells(actor).length > 0;
+    return true;
+  });
   if (usable.length === 0) {
     await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
     return;
@@ -209,6 +285,9 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
             if (!accepted) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else if (row.effect === "shed") {
             await applyShed(actor, damage);
+          } else if (row.effect === "spellDefense") {
+            const applied = await applySpellDefense(actor, row, damage, originalChanges, originalOptions);
+            if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else {
             const applied = await applyArmorNegation(actor, row, damage);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
@@ -393,10 +472,47 @@ function onUpdateActor(actor, changes, options, userId) {
   });
 }
 
+// v0.35.x에 위저드 Spell Defense를 새로 찾아 DEFAULT_HIT_TRIGGER_MOVES에
+// 추가했다. 이 표는 처음부터(Armor Mastery 3개 행) 지금까지 추가 마이그레이션이
+// 없었으므로, 이미 저장된 표에 없는 이름만 골라 한 번 추가해준다 —
+// features/underdog.js의 migrateAddSurveyedDefaults와 같은 패턴.
+async function migrateAddSurveyedDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
+  const existingNames = new Set(rows.map((r) => r.name));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_HIT_TRIGGER_MOVES) {
+    if (existingNames.has(row.name)) continue;
+
+    const translatedName = nameMap?.get(row.name);
+    if (translatedName && existingNames.has(translatedName)) continue;
+
+    toAdd.push(translatedName ? { ...row, name: translatedName } : row);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | hit-trigger: added ${toAdd.length} newly-surveyed default(s) to Hit-Trigger Moves`,
+    toAdd.map((r) => r.name)
+  );
+}
+
 export function registerHitTriggerAssistant() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
+    migrateAddSurveyedDefaults();
   });
 }

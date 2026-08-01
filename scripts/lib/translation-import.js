@@ -359,6 +359,16 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, counterspellNames, stats)
   );
 
+  const ongoingPenaltyReductionMoves = game.settings.get(MODULE_ID, SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES,
+    translateRows(moveMap, ongoingPenaltyReductionMoves, stats)
+  );
+
+  const empowerMoves = game.settings.get(MODULE_ID, SETTINGS.EMPOWER_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.EMPOWER_MOVES, translateRows(moveMap, empowerMoves, stats));
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

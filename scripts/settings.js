@@ -24,6 +24,10 @@ import { ClassGrantMovesMenu } from "./apps/class-grant-moves-menu.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "./data/class-grant-moves.js";
 import { PrepareSpellsMovesMenu } from "./apps/prepare-spells-moves-menu.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "./data/prepare-spells-moves.js";
+import { OngoingPenaltyReductionMovesMenu } from "./apps/ongoing-penalty-reduction-moves-menu.js";
+import { DEFAULT_ONGOING_PENALTY_REDUCTION_MOVES } from "./data/ongoing-penalty-reduction-moves.js";
+import { EmpowerMovesMenu } from "./apps/empower-moves-menu.js";
+import { DEFAULT_EMPOWER_MOVES } from "./data/empower-moves.js";
 
 export function registerSettings() {
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
@@ -639,5 +643,47 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Counterspell, Protective Counter"
+  });
+
+  // 클레릭 평온(Serenity)/섭리(Providence): 주문 시전 시 지속 주문으로 인한
+  // 페널티 합계에서 일정량을 항상 깎아준다. 자세한 설계는
+  // lib/ongoing-spells-state.js의 computeCastPenalty 참고. features/spellcasting.js가
+  // 이미 ENABLE_SPELLCASTING_ASSISTANT로 켜고 끄는 계산 경로 안에 들어가므로
+  // 별도의 켬/끔 설정은 두지 않는다.
+  game.settings.register(MODULE_ID, SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_ONGOING_PENALTY_REDUCTION_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "ongoingPenaltyReductionMovesMenu", {
+    name: "DWAUTO.Settings.OngoingPenaltyReductionMovesMenu.Name",
+    label: "DWAUTO.Settings.OngoingPenaltyReductionMovesMenu.Label",
+    hint: "DWAUTO.Settings.OngoingPenaltyReductionMovesMenu.Hint",
+    icon: "fas fa-shield-heart",
+    type: OngoingPenaltyReductionMovesMenu,
+    restricted: true
+  });
+
+  // 위저드 주문 강화/상급 주문 강화, 클레릭 강화/상급 강화: 주문 시전 10+
+  // 성공 시 추가 강화 효과를 선택적으로 적용한다. 자세한 설계는
+  // features/spellcasting.js의 promptEmpowerFlow 참고. features/spellcasting.js가
+  // 이미 ENABLE_SPELLCASTING_ASSISTANT로 켜고 끄는 흐름 안에 들어가므로
+  // 별도의 켬/끔 설정은 두지 않는다.
+  game.settings.register(MODULE_ID, SETTINGS.EMPOWER_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_EMPOWER_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "empowerMovesMenu", {
+    name: "DWAUTO.Settings.EmpowerMovesMenu.Name",
+    label: "DWAUTO.Settings.EmpowerMovesMenu.Label",
+    hint: "DWAUTO.Settings.EmpowerMovesMenu.Hint",
+    icon: "fas fa-wand-sparkles",
+    type: EmpowerMovesMenu,
+    restricted: true
   });
 }
