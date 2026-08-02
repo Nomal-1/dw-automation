@@ -39,6 +39,15 @@ function isAmmoItem(item) {
   return /ammo/i.test(item.system?.tagsString ?? "");
 }
 
+// 바바리안 Musclebound: "무기를 쥐고 있는 동안 그 무기는 forceful/messy
+// 태그를 갖는다." 무기의 실제 tagsString과 무관하게 이 무브를 가진
+// 액터라면 항상 적용되는 "가상 태그"라, TAG_CATALOG를 그대로 재사용하되
+// 무기 문자열 매칭 대신 무브 소지 여부로 판정한다.
+function hasMusclebound(actor) {
+  const names = splitCommaList(SETTINGS.MUSCLEBOUND_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
 // 모듈 설정(태그 자동 반영 목록)에서 켜둔 태그만 검사한다.
 // "raw" 타입은 매칭된 태그 원문(예: "1 piercing", "+1 damage")을 그대로 반환한다 —
 // 이 문자열을 채팅 메시지에 노출시켜 두면, 던전월드 시스템의 네이티브 피해 적용
@@ -47,12 +56,13 @@ function isAmmoItem(item) {
 // _chatActionDamage 참고). 그래서 여기서는 절대 수식에 더하면 안 된다 — 더하면
 // 버튼을 눌렀을 때 이중으로 반영된다.
 // "note" 타입은 시스템이 자동화해주지 않는 서술형 태그라 참고 문구로만 보여준다.
-function getTagDisplay(weapon) {
+function getTagDisplay(weapon, actor) {
   const enabled = game.settings.get(MODULE_ID, SETTINGS.ENABLED_DAMAGE_TAGS);
   const tagsString = weapon.system?.tagsString ?? "";
 
   const rawTags = [];
   const notes = [];
+  const noteKeysAdded = new Set();
 
   for (const tag of TAG_CATALOG) {
     if (!enabled.includes(tag.key)) continue;
@@ -63,6 +73,15 @@ function getTagDisplay(weapon) {
       rawTags.push(match[0]);
     } else {
       notes.push(game.i18n.format(tag.noteKey, { n: match[1] ?? "" }));
+      noteKeysAdded.add(tag.key);
+    }
+  }
+
+  if (actor && hasMusclebound(actor)) {
+    for (const key of ["forceful", "messy"]) {
+      if (noteKeysAdded.has(key) || !enabled.includes(key)) continue;
+      const tag = TAG_CATALOG.find((t) => t.key === key);
+      notes.push(game.i18n.localize(tag.noteKey));
     }
   }
 
@@ -94,7 +113,7 @@ async function rollDamage(actor, weapon, dmgMod, extraDice) {
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
 
-  const { rawTags, notes } = getTagDisplay(weapon);
+  const { rawTags, notes } = getTagDisplay(weapon, actor);
 
   const flavor = `
     <h3>${game.i18n.format("DWAUTO.Attack.DamageFlavor", { weapon: weapon.name })}</h3>

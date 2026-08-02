@@ -406,6 +406,21 @@ export function registerSettings() {
     default: "Smash!"
   });
 
+  // 바바리안 Musclebound: "While you wield a weapon it gains the forceful
+  // and messy tags." 무기 자체의 tagsString과 무관하게, 이 무브를 가진
+  // 캐릭터가 굴리는 모든 데미지에 forceful/messy 참고 문구를 항상 덧붙인다
+  // (attack-assistant.js의 getTagDisplay 참고). forceful/messy는 원래도
+  // "참고 문구로만 표시"되는 태그라 무기가 실제로 갖고 있을 때와 완전히
+  // 같은 방식으로 노출되며, 데미지 굴림 자체를 바꾸지는 않는다.
+  game.settings.register(MODULE_ID, SETTINGS.MUSCLEBOUND_MOVE_NAMES, {
+    name: "DWAUTO.Settings.MuscleboundMoveNames.Name",
+    hint: "DWAUTO.Settings.MuscleboundMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Musclebound"
+  });
+
   // Druid Balance(조화)/Shapeshifter(변신): 캐릭터 시트에 새 탭(자세한 설계는
   // features/class-info-tab.js, features/druid.js 참고)을 만들어 조화 예비
   // 카운터와 변신 상태를 보여준다.

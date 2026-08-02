@@ -309,6 +309,13 @@ export async function runTranslationImport() {
   const smashMoveNames = game.settings.get(MODULE_ID, SETTINGS.SMASH_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.SMASH_MOVE_NAMES, translateCommaList(moveMap, smashMoveNames, stats));
 
+  const muscleboundNames = game.settings.get(MODULE_ID, SETTINGS.MUSCLEBOUND_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.MUSCLEBOUND_MOVE_NAMES,
+    translateCommaList(moveMap, muscleboundNames, stats)
+  );
+
   const druidBalanceNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_BALANCE_MOVE_NAMES);
   await game.settings.set(
     MODULE_ID,

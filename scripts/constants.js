@@ -28,6 +28,7 @@ export const SETTINGS = {
   CONDITIONAL_DAMAGE_MOVES: "conditionalDamageMoves",
   SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames",
   SMASH_MOVE_NAMES: "smashMoveNames",
+  MUSCLEBOUND_MOVE_NAMES: "muscleboundMoveNames",
   ENABLE_DRUID_ASSISTANT: "enableDruidAssistant",
   DRUID_BALANCE_MOVE_NAMES: "druidBalanceMoveNames",
   DRUID_SHAPESHIFTER_MOVE_NAMES: "druidShapeshifterMoveNames",
