@@ -7,7 +7,8 @@ import {
   getAnimalCompanionStats,
   addAnimalCompanionStatBonus,
   getAnimalCompanionTrainings,
-  addAnimalCompanionTraining
+  addAnimalCompanionTraining,
+  registerAnimalCompanionResetListener
 } from "./note-moves.js";
 
 // 레인저 Unnatural Ally(고급 무브) 원문: "당신의 동물 친구는 동물이 아니라
@@ -154,4 +155,10 @@ async function onCreateChatMessage(message, options, userId) {
 
 export function registerUnnaturalAllyAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  // 동물 친구 탭이 초기화되면(새 동물 친구로 다시 시작하면) 옛 동물 친구를
+  // 가리키던 "이미 적용됨" 기록도 같이 지워서, 새 동물 친구에 Unnatural Ally를
+  // 다시 적용할 수 있게 한다.
+  registerAnimalCompanionResetListener(async (actor) => {
+    await actor.unsetFlag(MODULE_ID, APPLIED_FLAG);
+  });
 }

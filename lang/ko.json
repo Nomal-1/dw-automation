@@ -816,7 +816,9 @@
       "AnimalWeaknessesLabel": "아래 약점 중에서 본능 수치({count}개)만큼 선택해주세요.",
       "AnimalStrengthsTitle": "강점",
       "AnimalTrainingsTitle": "훈련 특성",
-      "AnimalWeaknessesTitle": "약점"
+      "AnimalWeaknessesTitle": "약점",
+      "AnimalStatsLabel": "현재 능력치 (Unnatural Ally 등 보너스 포함)",
+      "AnimalStatsSummary": "사나움 +{ferocity}, 교활함 +{cunning}, 장갑 {armor}, 본능 +{instinct}"
     },
     "NoteMovesSettings": {
       "Title": "메모형 무브 이름 설정",

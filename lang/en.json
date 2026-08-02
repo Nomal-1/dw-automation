@@ -816,7 +816,9 @@
       "AnimalWeaknessesLabel": "Choose as many weaknesses below as your Instinct ({count}).",
       "AnimalStrengthsTitle": "Strengths",
       "AnimalTrainingsTitle": "Trainings",
-      "AnimalWeaknessesTitle": "Weaknesses"
+      "AnimalWeaknessesTitle": "Weaknesses",
+      "AnimalStatsLabel": "Current Stats (includes bonuses like Unnatural Ally)",
+      "AnimalStatsSummary": "Ferocity +{ferocity}, Cunning +{cunning}, {armor} Armor, Instinct +{instinct}"
     },
     "NoteMovesSettings": {
       "Title": "Note-Taking Move Names",

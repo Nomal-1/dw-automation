@@ -36,6 +36,18 @@ const ANIMAL_STRENGTHS_FLAG = "animalCompanionStrengths";
 const ANIMAL_TRAININGS_FLAG = "animalCompanionTrainings";
 const ANIMAL_WEAKNESSES_FLAG = "animalCompanionWeaknesses";
 
+// features/well-trained.js(재주꾼)·features/unnatural-ally.js처럼 동물 친구
+// 상태에 얹혀사는 "무브당 한 번만 적용" 플래그를 가진 기능이 등록해두면,
+// 동물 친구 탭이 초기화될 때마다(resetNoteMove) 같이 호출해준다. 이게 없으면
+// 그 기능들의 "이미 적용됨" 플래그가 사라진 옛 동물 친구를 계속 가리킨 채로
+// 남아서, 새 동물 친구를 만들어도 다시 적용이 안 되고 "이미 적용됨" 메시지만
+// 뜨는 문제가 생긴다(실제로 Unnatural Ally에서 발견됨).
+const animalCompanionResetListeners = [];
+
+export function registerAnimalCompanionResetListener(fn) {
+  animalCompanionResetListeners.push(fn);
+}
+
 // features/command.js가 재사용한다. 아직 파싱된 값이 없으면 null.
 export function getAnimalCompanionStats(actor) {
   return actor.getFlag(MODULE_ID, ANIMAL_STATS_FLAG) ?? null;
@@ -519,7 +531,8 @@ async function resetNoteMove(actor, moveItem) {
     [`flags.${MODULE_ID}.${NOTES_FLAG}.-=${moveItem.id}`]: null
   };
 
-  if (parseAnimalCompanionChoiceLists(moveItem.system?.description) !== null) {
+  const isAnimalCompanion = parseAnimalCompanionChoiceLists(moveItem.system?.description) !== null;
+  if (isAnimalCompanion) {
     updates[`flags.${MODULE_ID}.-=${ANIMAL_STATS_FLAG}`] = null;
     updates[`flags.${MODULE_ID}.-=${ANIMAL_STRENGTHS_FLAG}`] = null;
     updates[`flags.${MODULE_ID}.-=${ANIMAL_TRAININGS_FLAG}`] = null;
@@ -527,6 +540,12 @@ async function resetNoteMove(actor, moveItem) {
   }
 
   await actor.update(updates);
+
+  if (isAnimalCompanion) {
+    for (const listener of animalCompanionResetListeners) {
+      await listener(actor);
+    }
+  }
 }
 
 // "GM이 나중에 정해준다"고 적힌 목록(퀘스트의 서약 등)을 체크박스로 보여준다
@@ -566,6 +585,7 @@ function renderTab(actor, moveItem, html) {
   const text = getNoteText(actor, moveItem.id);
   const { gmGroups } = extractListGroups(moveItem);
   const isAnimalCompanion = parseAnimalCompanionChoiceLists(description) !== null;
+  const stats = isAnimalCompanion ? getAnimalCompanionStats(actor) : null;
   const strengths = isAnimalCompanion ? actor.getFlag(MODULE_ID, ANIMAL_STRENGTHS_FLAG) ?? [] : [];
   const trainings = isAnimalCompanion ? getAnimalCompanionTrainings(actor) : [];
   const weaknesses = isAnimalCompanion ? actor.getFlag(MODULE_ID, ANIMAL_WEAKNESSES_FLAG) ?? [] : [];
@@ -584,6 +604,11 @@ function renderTab(actor, moveItem, html) {
           ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.AnswerLabel")}</label>${answers
               .map((a) => `<a class="tag dwauto-note-answer">${a}</a>`)
               .join(" ")}`
+          : ""
+      }
+      ${
+        stats
+          ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.AnimalStatsLabel")}</label><a class="tag dwauto-note-answer">${game.i18n.format("DWAUTO.NoteMoves.AnimalStatsSummary", stats)}</a>`
           : ""
       }
       ${renderTagRow("DWAUTO.NoteMoves.AnimalStrengthsTitle", strengths)}

@@ -3,7 +3,11 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { parseAnimalCompanionChoiceLists } from "../lib/animal-companion-stats.js";
-import { getAnimalCompanionTrainings, addAnimalCompanionTraining } from "./note-moves.js";
+import {
+  getAnimalCompanionTrainings,
+  addAnimalCompanionTraining,
+  registerAnimalCompanionResetListener
+} from "./note-moves.js";
 
 // 레인저 재주꾼(Well-trained, 고급 무브) 원문: "동물 친구에게 훈련 특성을
 // 하나 추가하십시오." 새로 목록을 관리하지 않고, 동물 친구(Animal Companion)
@@ -143,4 +147,10 @@ async function onCreateChatMessage(message, options, userId) {
 
 export function registerWellTrainedAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  // 동물 친구 탭이 초기화되면(새 동물 친구로 다시 시작하면) 옛 동물 친구를
+  // 가리키던 "이미 적용됨" 기록도 같이 지워서, 새 동물 친구에 재주꾼을 다시
+  // 적용할 수 있게 한다.
+  registerAnimalCompanionResetListener(async (actor) => {
+    await actor.unsetFlag(MODULE_ID, APPLIED_FLAG);
+  });
 }
