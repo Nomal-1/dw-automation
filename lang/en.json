@@ -300,6 +300,14 @@
       "InvigorateMoveNames": {
         "Name": "Invigorate Move Names",
         "Hint": "Comma-separated list (default: Invigorate)."
+      },
+      "EnableLittleHelpAssistant": {
+        "Name": "Enable A Little Help From My Friends Automation",
+        "Hint": "If the character has the Bard's A Little Help From My Friends, successfully choosing Aid (+1) on Aid or Interfere automatically queues +1 forward on their own next roll too (separate from the +1 queued for the person they aided). Requires \"Aid or Interfere Automation\" to also be enabled."
+      },
+      "LittleHelpMoveNames": {
+        "Name": "A Little Help From My Friends Move Names",
+        "Hint": "Comma-separated list (default: A Little Help From My Friends)."
       }
     },
     "Npc": {
@@ -433,7 +441,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Invigorate Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -799,7 +807,8 @@
       "InstinctReminderContent": "<b>{interferer}</b> is about to Interfere with <b>{target}</b>. <b>{target}</b>'s animal companion's Instinct {amount} needs to be added to this roll — the dungeonworld system can't automatically apply an external bonus to a Bond roll, so please tell {interferer} to add it directly in the bond input field right now! Clicking OK opens {interferer}'s bond input.",
       "InstinctReminderAck": "Notified (continue)",
       "InstinctReminderNoGm": "{target}'s animal Instinct {amount} needs to be added directly in the bond input field, but no GM is currently online to relay it. Please add it yourself.",
-      "InstinctReminderLogged": "A reminder was sent to add {target}'s animal Instinct {amount} directly to the bond input"
+      "InstinctReminderLogged": "A reminder was sent to add {target}'s animal Instinct {amount} directly to the bond input",
+      "LittleHelpApplied": "Aid succeeded, so +1 forward is also queued for your own next roll"
     },
     "ArcaneArt": {
       "TargetLabel": "Which ally is this for?",

@@ -911,4 +911,26 @@ export function registerSettings() {
     type: String,
     default: "Invigorate"
   });
+
+  // 바드 친구여 고맙소(A Little Help From My Friends): 원조/방해에서 원조
+  // (+1)를 성공시키면 자기 자신도 다음 판정에 +1 forward를 받는다.
+  // features/aid-or-interfere.js가 원조 판정 결과를 처리할 때 이미
+  // 연결되어 있다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_LITTLE_HELP_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableLittleHelpAssistant.Name",
+    hint: "DWAUTO.Settings.EnableLittleHelpAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LITTLE_HELP_MOVE_NAMES, {
+    name: "DWAUTO.Settings.LittleHelpMoveNames.Name",
+    hint: "DWAUTO.Settings.LittleHelpMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "A Little Help From My Friends"
+  });
 }

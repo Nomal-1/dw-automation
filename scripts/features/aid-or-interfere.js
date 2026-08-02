@@ -67,6 +67,16 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
+// 바드 친구여 고맙소(A Little Help From My Friends) 원문: "원조에 성공하면
+// 자기 자신도 +1 forward를 받는다." — 방해(-2)에는 해당 없이 원조(+1)를
+// 실제로 성공시켰을 때만(방해하는 사람에게 걸리는 게 아니라 원조하는 이
+// 자신에게) 적용된다.
+function findLittleHelpMove(actor) {
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_LITTLE_HELP_ASSISTANT)) return null;
+  const names = splitCommaList(SETTINGS.LITTLE_HELP_MOVE_NAMES);
+  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+}
+
 function findApprovingGM() {
   return game.users.find((u) => u.active && u.isGM) ?? null;
 }
@@ -366,6 +376,17 @@ async function onCreateChatMessage(message, options, userId) {
           })
         : game.i18n.format("DWAUTO.AidOrInterfere.Applied", { target: target.name, amount: formatSigned(amount) });
     announceActionApplied(actor, moveItem?.name ?? title, detail);
+
+    // 바드 친구여 고맙소: 원조(방해가 아니라)를 실제로 성공시켰을 때만,
+    // 자기 자신(actor)에게도 별도로 +1 forward를 건다 — target에게 건
+    // 보너스와는 독립적인, actor 자신의 다음 판정용 보너스다.
+    if (decision.amount === 1) {
+      const littleHelpMove = findLittleHelpMove(actor);
+      if (littleHelpMove) {
+        await setPendingRollBonus(actor, 1, littleHelpMove.name);
+        announceActionApplied(actor, littleHelpMove.name, game.i18n.localize("DWAUTO.AidOrInterfere.LittleHelpApplied"));
+      }
+    }
   } catch (err) {
     console.error(`${MODULE_ID} | aid-or-interfere: onCreateChatMessage failed`, err);
   }
