@@ -257,6 +257,14 @@
         "Name": "Well-trained Move Names",
         "Hint": "Comma-separated list (default: Well-trained)."
       },
+      "EnableUnnaturalAllyAssistant": {
+        "Name": "Enable Unnatural Ally Automation",
+        "Hint": "When the Ranger's advanced move Unnatural Ally is triggered, adds +2 ferocity/+1 instinct to the Animal Companion's base stats and, the same way Well-trained does, prompts the player to pick one training they don't already have and adds it to the animal companion's training list. Requires the Animal Companion's base stats to already be set, and only applies once per character."
+      },
+      "UnnaturalAllyMoveNames": {
+        "Name": "Unnatural Ally Move Names",
+        "Hint": "Comma-separated list (default: Unnatural Ally)."
+      },
       "EnableAidOrInterfereAssistant": {
         "Name": "Enable Aid or Interfere Automation",
         "Hint": "Before rolling the core Aid or Interfere move, prompts for a target and a choice between Aid (+1) or Interfere (-2). On a hit (7+), that bonus is automatically applied to the target's next roll (applied once when they actually roll, then cleared); if you lack permission over the target actor, requests approval from an online GM. If you chose Interfere and the target meets the Ranger Command's cooperating conditions, a popup asks the GM to tell the interfering player to add the animal's Instinct bonus by hand before rolling (the dungeonworld system can't apply external bonuses to a Bond roll automatically, so it has to go directly into the bond input field) — the bond input won't appear until the GM confirms."
@@ -458,7 +466,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -834,6 +842,14 @@
       "Applied": "Added the \"{training}\" training to the animal companion",
       "AlreadyApplied": "Already applied: the \"{training}\" training has been added",
       "NoCompanion": "Couldn't find an animal companion on {name}, so its training list is unknown. Set up Animal Companion first.",
+      "NoTrainingsLeft": "{name}'s animal companion already has every training it could choose."
+    },
+    "UnnaturalAlly": {
+      "PromptLabel": "Choose a training to add.",
+      "Applied": "The animal companion has become a monster: +2 ferocity, +1 instinct, added the \"{training}\" training",
+      "AlreadyApplied": "Already applied: the \"{training}\" training has been added",
+      "NoCompanion": "Couldn't find an animal companion on {name}, so its training list is unknown. Set up Animal Companion first.",
+      "NoStats": "{name}'s animal companion doesn't have base stats set yet. Finish the Animal Companion base stat choice first.",
       "NoTrainingsLeft": "{name}'s animal companion already has every training it could choose."
     },
     "AidOrInterfere": {

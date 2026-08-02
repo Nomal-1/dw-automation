@@ -59,6 +59,8 @@ export const SETTINGS = {
   COMMAND_CUNNING_MOVE_NAMES: "commandCunningMoveNames",
   ENABLE_WELL_TRAINED_ASSISTANT: "enableWellTrainedAssistant",
   WELL_TRAINED_MOVE_NAMES: "wellTrainedMoveNames",
+  ENABLE_UNNATURAL_ALLY_ASSISTANT: "enableUnnaturalAllyAssistant",
+  UNNATURAL_ALLY_MOVE_NAMES: "unnaturalAllyMoveNames",
   ENABLE_AID_OR_INTERFERE_ASSISTANT: "enableAidOrInterfereAssistant",
   AID_OR_INTERFERE_MOVE_NAMES: "aidOrInterfereMoveNames",
   ENABLE_ARCANE_ART_ASSISTANT: "enableArcaneArtAssistant",

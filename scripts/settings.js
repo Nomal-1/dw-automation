@@ -813,6 +813,29 @@ export function registerSettings() {
     default: "Well-trained"
   });
 
+  // 레인저 Unnatural Ally(고급 무브): "동물 친구가 동물이 아니라 괴물입니다.
+  // 사나움 +2, 본능 +1을 주고, 새 훈련 특성을 하나 추가하세요." 재주꾼과 같은
+  // 방식으로 훈련 특성 목록을 재사용하고, 능력치 보너스는 note-moves.js가
+  // 관리하는 동반 동물 기본 능력치 값에 직접 더한다(features/unnatural-ally.js
+  // 참고). 별도 목록 설정은 없다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_UNNATURAL_ALLY_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableUnnaturalAllyAssistant.Name",
+    hint: "DWAUTO.Settings.EnableUnnaturalAllyAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.UNNATURAL_ALLY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.UnnaturalAllyMoveNames.Name",
+    hint: "DWAUTO.Settings.UnnaturalAllyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Unnatural Ally"
+  });
+
   // 원조/방해(Aid or Interfere, 던전월드 기본 무브): 성공(10+) 시 대상에게
   // +1 또는 -2를 "다음 판정 한 번" 자동으로 걸어준다(lib/roll-bonus-state.js
   // + lib/roll-wrapper.js 연동).

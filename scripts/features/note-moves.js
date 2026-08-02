@@ -52,6 +52,22 @@ export async function addAnimalCompanionTraining(actor, training) {
   await actor.setFlag(MODULE_ID, ANIMAL_TRAININGS_FLAG, [...current, training]);
 }
 
+// features/unnatural-ally.js가 재사용한다. 레인저 Unnatural Ally의 "사나움
+// +2, 본능 +1"처럼 기본 능력치에 고정 보너스를 더한다. 아직 기본 능력치가
+// 파싱되어 있지 않으면(동반 동물 능력치 선택을 아직 안 했으면) 아무것도
+// 하지 않고 false를 돌려준다.
+export async function addAnimalCompanionStatBonus(actor, bonus) {
+  const current = getAnimalCompanionStats(actor);
+  if (!current) return false;
+
+  const next = { ...current };
+  for (const [key, amount] of Object.entries(bonus)) {
+    next[key] = (next[key] ?? 0) + amount;
+  }
+  await actor.setFlag(MODULE_ID, ANIMAL_STATS_FLAG, next);
+  return true;
+}
+
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_NOTE_MOVES);
 }

@@ -402,6 +402,13 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, wellTrainedMoveNames, stats)
   );
 
+  const unnaturalAllyMoveNames = game.settings.get(MODULE_ID, SETTINGS.UNNATURAL_ALLY_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.UNNATURAL_ALLY_MOVE_NAMES,
+    translateCommaList(moveMap, unnaturalAllyMoveNames, stats)
+  );
+
   const aidOrInterfereMoveNames = game.settings.get(MODULE_ID, SETTINGS.AID_OR_INTERFERE_MOVE_NAMES);
   await game.settings.set(
     MODULE_ID,
