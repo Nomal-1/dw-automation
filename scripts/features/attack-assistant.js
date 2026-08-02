@@ -128,9 +128,17 @@ async function rollDamage(actor, weapon, dmgMod, extraDice, extraRawTags = []) {
     </div>
   `;
 
+  // 던전월드 시스템의 피해 적용 버튼(chat.js의 _chatActionDamage)은 메시지의
+  // flavor가 아니라 content 필드 텍스트만 정규식으로 훑어서 관통/방어구 무시/
+  // 데미지 보너스 원문을 찾는다(actor.js의 rollMove도 같은 이유로 항상 굴림
+  // HTML을 직접 렌더링해서 content에 합쳐 넣는다). Roll#toMessage에 flavor만
+  // 넘기면 태그 문구가 content에 실리지 않아 버튼을 눌러도 무시되므로, 태그/
+  // 버튼 HTML과 굴림 결과 HTML을 직접 합쳐서 content로 넘긴다.
+  const content = `${flavor}${await roll.render()}`;
+
   await roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
-    flavor
+    content
   });
 
   await incrementBalanceOnDamage(actor);
