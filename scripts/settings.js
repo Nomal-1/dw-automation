@@ -17,6 +17,8 @@ import { DruidDamageDieMovesMenu } from "./apps/druid-damage-die-moves-menu.js";
 import { DEFAULT_DRUID_DAMAGE_DIE_MOVES } from "./data/druid-damage-die-moves.js";
 import { ConditionalDamageMovesMenu } from "./apps/conditional-damage-moves-menu.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-moves.js";
+import { ConditionalTagMovesMenu } from "./apps/conditional-tag-moves-menu.js";
+import { DEFAULT_CONDITIONAL_TAG_MOVES } from "./data/conditional-tag-moves.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 import { NoteMovesMenu } from "./apps/note-moves-menu.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "./data/note-moves.js";
@@ -377,6 +379,27 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.ConditionalDamageMovesMenu.Hint",
     icon: "fas fa-dice",
     type: ConditionalDamageMovesMenu,
+    restricted: true
+  });
+
+  // Ranger Smaug's Belly처럼 "특정 조건을 만족하면 이번 공격에 데미지 태그
+  // 원문(예: "2 piercing")을 하나 추가로 붙이는" 무브들. Conditional Damage
+  // Moves와 같은 Y/N 질문 패턴이지만, 주사위 공식이 아니라 TAG_CATALOG의
+  // "raw" 태그처럼 원문 문자열을 데미지 메시지에 그대로 노출시킨다는 점이
+  // 다르다. 자세한 설계는 features/attack-assistant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_CONDITIONAL_TAG_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "conditionalTagMovesMenu", {
+    name: "DWAUTO.Settings.ConditionalTagMovesMenu.Name",
+    label: "DWAUTO.Settings.ConditionalTagMovesMenu.Label",
+    hint: "DWAUTO.Settings.ConditionalTagMovesMenu.Hint",
+    icon: "fas fa-dice",
+    type: ConditionalTagMovesMenu,
     restricted: true
   });
 

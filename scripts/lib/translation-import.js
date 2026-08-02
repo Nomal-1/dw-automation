@@ -299,6 +299,9 @@ export async function runTranslationImport() {
     translateRows(moveMap, conditionalDamageMoves, stats)
   );
 
+  const conditionalTagMoves = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES, translateRows(moveMap, conditionalTagMoves, stats));
+
   const superiorWarriorNames = game.settings.get(MODULE_ID, SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
   await game.settings.set(
     MODULE_ID,

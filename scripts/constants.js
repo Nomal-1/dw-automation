@@ -26,6 +26,7 @@ export const SETTINGS = {
   MOVE_UPGRADES: "moveUpgrades",
   DAMAGE_REDUCTION_MOVES: "damageReductionMoves",
   CONDITIONAL_DAMAGE_MOVES: "conditionalDamageMoves",
+  CONDITIONAL_TAG_MOVES: "conditionalTagMoves",
   SUPERIOR_WARRIOR_MOVE_NAMES: "superiorWarriorMoveNames",
   SMASH_MOVE_NAMES: "smashMoveNames",
   MUSCLEBOUND_MOVE_NAMES: "muscleboundMoveNames",

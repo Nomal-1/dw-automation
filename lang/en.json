@@ -117,6 +117,11 @@
         "Label": "Edit Conditional Damage Moves",
         "Hint": "Register moves like Smite/Holy Smite/Exterminatus or Viper's Strike/Fangs that add a dice bonus (or penalty) to a damage roll depending on a fictional condition that can't be auto-detected (being on a Quest, dual-wielding, etc.) — asked as Y/N when rolling damage. \"Yes\"/\"No\" formula are added to the roll; leave a formula blank or \"0\" to add nothing for that answer. Check \"Requires Designation\" for moves like Exterminatus whose effect doesn't exist at all until a target is declared (adds a designated/not-designated toggle on the sheet; while not designated, the move is completely ignored)."
       },
+      "ConditionalTagMovesMenu": {
+        "Name": "Conditional Damage Tag Moves",
+        "Label": "Edit Conditional Damage Tag Moves",
+        "Hint": "Register moves like Ranger Smaug's Belly that add a literal damage tag (e.g. \"2 piercing\") to this attack whenever a fictional condition that can't be auto-detected (knowing the target's weakest point, etc.) is met — asked as Y/N when rolling damage. On \"yes\", the registered tag text is shown verbatim in the damage message (the dungeonworld system's damage-apply button picks it up automatically). \"No\" adds nothing."
+      },
       "SuperiorWarriorMoveNames": {
         "Name": "Superior Warrior Move Names",
         "Hint": "Move names (comma separated) that announce in chat whenever a melee attack move reaches an extreme success (12+)."
@@ -453,7 +458,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -527,6 +532,20 @@
       "ResetDefaultsButton": "Reset to Verified Defaults (English)",
       "ResetConfirmTitle": "Reset Conditional Damage Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
+    "ConditionalTagMoves": {
+      "Title": "Conditional Damage Tag Moves",
+      "Hint": "Enter the move name exactly as it appears in your game (translated, if applicable). When rolling damage, the player is asked Y/N whether the fictional condition applies; on \"yes\", the registered tag text (e.g. \"2 piercing\", \"Ignores Armor\") is shown verbatim in the damage message. The dungeonworld system's damage-apply button reads the message text and applies it automatically, so just enter the exact tag text here.",
+      "Name": "Move Name",
+      "Tag": "Tag Text (if condition met)",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Conditional Damage Tag Moves Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?",
+      "Prompt": "Does the condition for \"{name}\" apply to this attack?",
+      "Yes": "{tag} (condition met)",
+      "AutoNoTitle": "Click to toggle whether this move's \"No\" answer is applied automatically without asking every time.",
+      "AutoNoOn": "Auto No ({tag} not added)",
+      "AutoNoOff": "Ask each time"
     },
     "ConditionalDamage": {
       "Prompt": "Does the condition for \"{name}\" apply to this attack?",

@@ -99,7 +99,7 @@ function appendTerm(formula, term) {
   return t.startsWith("+") || t.startsWith("-") ? `${formula}${t}` : `${formula}+${t}`;
 }
 
-async function rollDamage(actor, weapon, dmgMod, extraDice) {
+async function rollDamage(actor, weapon, dmgMod, extraDice, extraRawTags = []) {
   let die = actor.system.attributes?.damage?.value || "d6";
   die = applyDamageDieOverride(actor, die);
   const miscBonus = actor.system.attributes?.damage?.misc || "";
@@ -114,6 +114,7 @@ async function rollDamage(actor, weapon, dmgMod, extraDice) {
   await roll.evaluate();
 
   const { rawTags, notes } = getTagDisplay(weapon, actor);
+  rawTags.push(...extraRawTags);
 
   const flavor = `
     <h3>${game.i18n.format("DWAUTO.Attack.DamageFlavor", { weapon: weapon.name })}</h3>
@@ -299,6 +300,36 @@ async function promptConditionalDamageBonuses(actor) {
   return extra;
 }
 
+// Ranger Smaug's Belly처럼 "특정 조건을 만족하면 이번 공격에 데미지 태그
+// 원문(예: "2 piercing")을 하나 추가로 붙이는" 무브들. promptConditionalDamageBonuses와
+// 같은 Y/N 질문 패턴이지만, 주사위 공식이 아니라 원문 문자열 배열을 반환해서
+// rollDamage의 rawTags에 그대로 얹는다("아니오"면 아무것도 붙지 않는다).
+// "자동 아니오" 잠금은 conditional damage moves와 같은 플래그를 공유한다
+// (액터+무브 이름으로 구분되므로 표가 달라도 충돌하지 않는다).
+async function promptConditionalTagMoves(actor) {
+  const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  if (owned.length === 0) return [];
+
+  const locks = getAutoNoLocks(actor);
+  const tags = [];
+  for (const row of owned) {
+    const confirmed = locks.includes(row.name)
+      ? false
+      : await Dialog.confirm({
+          title: row.name,
+          content: `<p>${game.i18n.format("DWAUTO.ConditionalTagMoves.Prompt", { name: row.name })}</p>`,
+          defaultYes: false
+        });
+
+    if (confirmed) {
+      tags.push(row.tag);
+      announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.ConditionalTagMoves.Yes", { tag: row.tag }));
+    }
+  }
+  return tags;
+}
+
 async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   let consumed = null;
 
@@ -311,6 +342,7 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
 
   const augBonus = await promptSpellAugmentation(actor);
   const conditionalExtra = await promptConditionalDamageBonuses(actor);
+  const conditionalTags = await promptConditionalTagMoves(actor);
   const commandBonus = getCommandDamageBonus(actor);
   const damageForward = getPendingDamageForward(actor);
   const finalExtraDice = appendTerm(
@@ -319,7 +351,7 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   );
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
 
-  await rollDamage(actor, weapon, finalDmgMod, finalExtraDice);
+  await rollDamage(actor, weapon, finalDmgMod, finalExtraDice, conditionalTags);
 
   if (damageForward) {
     await clearPendingDamageForward(actor);
@@ -595,6 +627,34 @@ function onRenderActorSheet(app, html) {
         await setAutoNoLock(actor, row.name, !locked);
       });
     }
+  }
+
+  const tagTable = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
+  for (const row of tagTable) {
+    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    if (!moveItem) continue;
+
+    const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
+    if (!$item.length) continue;
+
+    const $tags = getOrCreateTagsContainer($item);
+    if ($tags.find(".dwauto-autono-badge").length) continue;
+
+    const locked = locks.includes(row.name);
+    const label = locked
+      ? game.i18n.format("DWAUTO.ConditionalTagMoves.AutoNoOn", { tag: row.tag })
+      : game.i18n.localize("DWAUTO.ConditionalTagMoves.AutoNoOff");
+
+    const $badge = $(
+      `<a class="tag dwauto-autono-badge${locked ? " dwauto-autono-on" : ""}" title="${game.i18n.localize("DWAUTO.ConditionalTagMoves.AutoNoTitle")}">${label}</a>`
+    );
+    $tags.append($badge);
+
+    $badge.on("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      await setAutoNoLock(actor, row.name, !locked);
+    });
   }
 }
 
