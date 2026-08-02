@@ -6,4 +6,4 @@
 // 정규식으로 훑어서 알아서 반영한다). CONDITIONAL_DAMAGE_MOVES와 달리
 // "아니오"일 때 아무것도 더하지 않는 것 외에 다른 페널티가 없어서
 // noFormula/requiresDesignation 없이 tag 하나만 갖는다.
-export const DEFAULT_CONDITIONAL_TAG_MOVES = [{ name: "Smaug's Belly", tag: "2 piercing" }];
+export const DEFAULT_CONDITIONAL_TAG_MOVES = [{ name: "Smaug’s Belly", tag: "2 piercing" }];
