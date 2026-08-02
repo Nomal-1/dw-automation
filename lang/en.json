@@ -458,7 +458,8 @@
         "debility": "Take a debility",
         "spellDefense": "End ongoing spell + reduce by its level",
         "hold": "Spend hold + full negation",
-        "animalCompanion": "Animal companion takes the blow + full negation"
+        "animalCompanion": "Animal companion takes the blow + full negation",
+        "ongoingPenalty": "-1 ongoing until sated + full negation"
       },
       "GrantsForward": "Grants +1 forward",
       "AddRow": "Add Row",
@@ -486,7 +487,11 @@
       "AnimalCompanionApplied": "Your animal companion took the blow and fully negated the damage",
       "AnimalCompanionToggleTitle": "Click to toggle your animal companion's ferocity state. While \"spent\", this move can't be used — click again after a few hours of rest to reset it to \"ready\".",
       "AnimalCompanionSpent": "Ferocity spent",
-      "AnimalCompanionReady": "Ferocity ready"
+      "AnimalCompanionReady": "Ferocity ready",
+      "OngoingPenaltyApplied": "Took -1 ongoing on all rolls until an appetite is sated",
+      "HungerPenaltyToggleTitle": "Click to toggle the hunger penalty. This move can't be used while the penalty is active — click again once it's sated (e.g. by eating) to reset.",
+      "HungerPenaltyActive": "Penalty active",
+      "HungerPenaltyReady": "Ready"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",

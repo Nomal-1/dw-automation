@@ -321,6 +321,19 @@
   color: #fff !important;
 }
 
+.dwauto-hunger-penalty-badge {
+  cursor: pointer;
+}
+
+.dwauto-hunger-penalty-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-hunger-penalty-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-command-badge {
   cursor: pointer;
 }

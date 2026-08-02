@@ -458,7 +458,8 @@
         "debility": "약화 하나 선택",
         "spellDefense": "지속 주문 종료 + 레벨만큼 경감",
         "hold": "hold 소비 + 완전 무효화",
-        "animalCompanion": "동반 동물이 대신 맞음 + 완전 무효화"
+        "animalCompanion": "동반 동물이 대신 맞음 + 완전 무효화",
+        "ongoingPenalty": "욕구를 채울 때까지 -1 ongoing + 완전 무효화"
       },
       "GrantsForward": "forward +1 부여",
       "AddRow": "행 추가",
@@ -486,7 +487,11 @@
       "AnimalCompanionApplied": "동반 동물이 대신 맞아서 피해를 완전히 무효화했습니다",
       "AnimalCompanionToggleTitle": "클릭하면 동반 동물의 사나움 상태를 켜고 끕니다. '사용함' 상태에서는 이 무브를 쓸 수 없고, 몇 시간 휴식한 뒤 다시 클릭해서 '정상'으로 되돌리세요.",
       "AnimalCompanionSpent": "사나움 사용함",
-      "AnimalCompanionReady": "사나움 정상"
+      "AnimalCompanionReady": "사나움 정상",
+      "OngoingPenaltyApplied": "욕구를 채울 때까지 모든 판정에 -1 ongoing을 지게 되었습니다",
+      "HungerPenaltyToggleTitle": "클릭하면 욕구 페널티 상태를 켜고 끕니다. 페널티가 있는 동안에는 이 무브를 쓸 수 없고, 욕구를 채우면(예: 식사) 다시 클릭해서 정상으로 되돌리세요.",
+      "HungerPenaltyActive": "페널티 적용중",
+      "HungerPenaltyReady": "정상"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",

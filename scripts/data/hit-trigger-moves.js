@@ -14,7 +14,12 @@
 //   모듈이 추적하지 않아서 "이미 썼는지" boolean으로 단순화했다 — 이미
 //   썼으면 이 무브 자체를 쓸 수 없고, "몇 시간 휴식하면 정상으로 돌아옴"은
 //   채팅 트리거로 자동 감지할 수 없어서 캐릭터 시트의 배지를 눌러 수동으로
-//   되돌린다)
+//   되돌린다) | "ongoingPenalty"(바바리안 Indestructible Hunger 전용 —
+//   완전 무효화하는 대신 "욕구를 채울 때까지 -1 ongoing"을 진다. 이미 그
+//   페널티를 지고 있으면 이 무브 자체를 쓸 수 없고(원문 그대로), "욕구를
+//   채움"은 animalCompanion과 같은 이유로 채팅 트리거로 자동 감지할 수
+//   없어서 캐릭터 시트의 배지를 눌러 수동으로 되돌린다. -1은 모든 판정에
+//   실시간으로 적용되며 lib/roll-wrapper.js가 매 판정마다 확인한다)
 // - grantsForward: 무효화에 성공하면 +1 forward도 함께 받는지(Armored
 //   Perfection). 던전월드 시스템의 forward는 다음 굴림에 자동으로 붙었다가
 //   소모되는 값(system.attributes.forward.value)이라 별도 계산이 필요 없다.
@@ -26,7 +31,8 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Spell Defense", effect: "spellDefense", grantsForward: false },
   { name: "Divine Intervention", effect: "hold", grantsForward: false },
   { name: "Divine Invincibility", effect: "hold", grantsForward: false },
-  { name: "Man's Best Friend", effect: "animalCompanion", grantsForward: false }
+  { name: "Man's Best Friend", effect: "animalCompanion", grantsForward: false },
+  { name: "Indestructible Hunger", effect: "ongoingPenalty", grantsForward: false }
 ];
 
 // 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,

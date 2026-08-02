@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 
-const VALID_EFFECTS = ["armor", "debility", "spellDefense", "hold", "animalCompanion"];
+const VALID_EFFECTS = ["armor", "debility", "spellDefense", "hold", "animalCompanion", "ongoingPenalty"];
 
 function blankRow() {
   return { name: "", effect: "armor", grantsForward: false };
