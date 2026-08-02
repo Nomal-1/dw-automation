@@ -53,5 +53,11 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
   // "multiclass" 문구가 없어 처음 바바리안/이몰레이터를 훑을 때 썼던 키워드
   // 검색(전수조사 1차)에서 놓쳤다가, 이번에(전수조사 2차, 카테고리 전체 재검토)
   // 발견했다.
-  { name: "Ogdru Jahad", grantedMoveNames: "Ritual", mode: "fixed" }
+  { name: "Ogdru Jahad", grantedMoveNames: "Ritual", mode: "fixed" },
+  // 드루이드 Hunter's Brother(레벨2)/Stalker's Sister(레벨6) 원문: "Choose
+  // one move from the ranger class list." — Appetite For Destruction/
+  // Kill 'Em All과 완전히 같은 "choice + restrictToClassKeys" 패턴이다
+  // (excludeMulticlassMoves는 원문에 언급이 없어 켜지 않는다).
+  { name: "Hunter's Brother", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" },
+  { name: "Stalker's Sister", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" }
 ];
