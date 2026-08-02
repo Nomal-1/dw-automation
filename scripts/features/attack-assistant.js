@@ -116,10 +116,13 @@ async function rollDamage(actor, weapon, dmgMod, extraDice, extraRawTags = []) {
   const { rawTags, notes } = getTagDisplay(weapon, actor);
   rawTags.push(...extraRawTags);
 
-  const flavor = `
+  const rollHtml = await roll.render();
+
+  const content = `
     <h3>${game.i18n.format("DWAUTO.Attack.DamageFlavor", { weapon: weapon.name })}</h3>
     ${rawTags.length ? `<p class="dwauto-raw-tags">${rawTags.join(", ")}</p>` : ""}
     ${notes.length ? `<ul class="dwauto-tag-notes"><li>${notes.join("</li><li>")}</li></ul>` : ""}
+    ${rollHtml}
     <div class="chat-damage-buttons">
       <button type="button" class="button damage full-damage" data-action="damage" title="${game.i18n.localize("DWAUTO.Attack.ApplyFullTitle")}"><i class="fas fa-user-minus"></i></button>
       <button type="button" class="button damage half-damage" data-action="half-damage" title="${game.i18n.localize("DWAUTO.Attack.ApplyHalfTitle")}"><i class="fas fa-user-minus"></i> 1/2</button>
@@ -128,18 +131,26 @@ async function rollDamage(actor, weapon, dmgMod, extraDice, extraRawTags = []) {
     </div>
   `;
 
-  // 던전월드 시스템의 피해 적용 버튼(chat.js의 _chatActionDamage)은 메시지의
-  // flavor가 아니라 content 필드 텍스트만 정규식으로 훑어서 관통/방어구 무시/
-  // 데미지 보너스 원문을 찾는다(actor.js의 rollMove도 같은 이유로 항상 굴림
-  // HTML을 직접 렌더링해서 content에 합쳐 넣는다). Roll#toMessage에 flavor만
-  // 넘기면 태그 문구가 content에 실리지 않아 버튼을 눌러도 무시되므로, 태그/
-  // 버튼 HTML과 굴림 결과 HTML을 직접 합쳐서 content로 넘긴다.
-  const content = `${flavor}${await roll.render()}`;
-
-  await roll.toMessage({
+  const chatData = {
+    user: game.user.id,
     speaker: ChatMessage.getSpeaker({ actor }),
     content
-  });
+  };
+
+  // Roll#toMessage로 메시지를 만들면 Foundry가 이 메시지를 "굴림" 타입으로
+  // 취급해서, 굴림 부분을 매 클라이언트마다(공개 여부에 따라) 자체적으로 다시
+  // 렌더링하며 우리가 content에 넣어둔 태그 문구/버튼을 통째로 무시해버린다
+  // (비공개/블라인드 굴림을 클라이언트별로 다르게 보여주기 위한 동작). 이걸
+  // 피하려고 actor.js의 rollMove(시스템 자체의 무브 굴림)와 완전히 같은
+  // 방식으로, 렌더링된 굴림 HTML을 직접 content에 심고 ChatMessage.create로
+  // 평범한 메시지를 만든다. Dice So Nice 3D 주사위 연동도 시스템과 동일하게
+  // 수동으로 호출해줘야 한다(rolls 배열을 안 붙이므로 자동으로 안 뜬다).
+  if (game.dice3d) {
+    await game.dice3d.showForRoll(roll, game.user, true, null, false);
+  } else {
+    chatData.sound = CONFIG.sounds.dice;
+  }
+  await ChatMessage.create(chatData);
 
   await incrementBalanceOnDamage(actor);
 }
