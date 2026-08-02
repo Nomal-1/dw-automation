@@ -891,6 +891,19 @@ export function registerSettings() {
     default: "A Good Day To Die"
   });
 
+  // 바바리안 삼손(Samson): 약화를 하나 받고 즉시 구속에서 벗어난다. 판정이
+  // 없는 자기 발동형 액션이라 무브를 클릭하면 바로 약화 선택 대화상자를
+  // 띄운다. 위 EnableBarbarianAssistant 토글을 함께 쓴다(바바리안 무브
+  // 전체의 공용 켜기/끄기).
+  game.settings.register(MODULE_ID, SETTINGS.SAMSON_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SamsonMoveNames.Name",
+    hint: "DWAUTO.Settings.SamsonMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Samson"
+  });
+
   // 클레릭 소생(Invigorate): 남을 치유하면 대상이 다음 피해에 +2 forward.
   // features/healing.js의 applyHealAmount(모든 치유가 거쳐가는 공용 지점)에
   // 이미 연결되어 있다.

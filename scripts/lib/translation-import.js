@@ -418,6 +418,9 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, goodDayToDieMoveNames, stats)
   );
 
+  const samsonMoveNames = game.settings.get(MODULE_ID, SETTINGS.SAMSON_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.SAMSON_MOVE_NAMES, translateCommaList(moveMap, samsonMoveNames, stats));
+
   const invigorateMoveNames = game.settings.get(MODULE_ID, SETTINGS.INVIGORATE_MOVE_NAMES);
   await game.settings.set(
     MODULE_ID,
