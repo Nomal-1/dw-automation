@@ -121,6 +121,10 @@
         "Name": "Superior Warrior Move Names",
         "Hint": "Move names (comma separated) that announce in chat whenever a melee attack move reaches an extreme success (12+)."
       },
+      "SmashMoveNames": {
+        "Name": "Smash! Move Names",
+        "Hint": "Move names (comma separated, default: Smash!) that announce \"choose something physical they have and they lose it\" in chat whenever a melee attack move reaches an extreme success (12+)."
+      },
       "EnableDruidAssistant": {
         "Name": "Enable Druid Assistant",
         "Hint": "Adds a character sheet tab for Druids showing a Balance counter (gained whenever the character deals damage via the automated attack flow, spendable to heal someone) and Shapeshift state (active/inactive, current animal form, and a free-text note area for the GM)."
@@ -445,7 +449,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Superior Warrior Move Names, Smash! Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -534,6 +538,9 @@
     },
     "SuperiorWarrior": {
       "Applied": "Extreme success (12+): deal damage, avoid the enemy's attack, and impress/dismay/frighten it."
+    },
+    "Smash": {
+      "Applied": "Extreme success (12+): deal damage, and choose something physical your target has (a weapon, their position, a limb) — they lose it."
     },
     "OngoingPenaltyReductionMoves": {
       "Title": "Ongoing Penalty Reduction Moves",

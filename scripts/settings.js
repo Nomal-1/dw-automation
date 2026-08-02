@@ -393,6 +393,19 @@ export function registerSettings() {
     default: "Superior Warrior"
   });
 
+  // 바바리안 Smash!: "Hack & Slash에서 12+가 뜨면 데미지를 주고, 상대가 가진
+  // 물리적인 것 하나를 골라 잃게 한다." 데미지 자체는 이미 정상적으로
+  // 적용되므로, Superior Warrior와 같은 자리에서 "추가 효과를 잊지 말라"는
+  // 알림만 남긴다.
+  game.settings.register(MODULE_ID, SETTINGS.SMASH_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SmashMoveNames.Name",
+    hint: "DWAUTO.Settings.SmashMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Smash!"
+  });
+
   // Druid Balance(조화)/Shapeshifter(변신): 캐릭터 시트에 새 탭(자세한 설계는
   // features/class-info-tab.js, features/druid.js 참고)을 만들어 조화 예비
   // 카운터와 변신 상태를 보여준다.

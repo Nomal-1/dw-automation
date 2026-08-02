@@ -482,8 +482,10 @@ function onCreateChatMessage(message, options, userId) {
   }
 
   // 극단적 성공(12+)은 데미지 굴림 확인 다이얼로그 문구에 반영되고
-  // (promptDamageRoll 참고), Fighter Superior Warrior처럼 근접 무브의 12+를
-  // 소비하는 무브가 있으면 별도로 채팅에 알린다.
+  // (promptDamageRoll 참고), Fighter Superior Warrior/바바리안 Smash!처럼
+  // 근접 무브의 12+를 소비하는 무브가 있으면 별도로 채팅에 알린다. 둘 다
+  // "근접 무브에서 12+가 뜨면"이라는 같은 조건이라 같은 자리에서 처리하되,
+  // 원문 문구가 서로 달라 메시지는 각자 설정 표를 쓴다.
   if (result === "success" && info.isExtreme && !behavior.ranged) {
     const superiorWarriorNames = splitCommaList(SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
     const superiorWarriorMove = actor.items.find(
@@ -491,6 +493,12 @@ function onCreateChatMessage(message, options, userId) {
     );
     if (superiorWarriorMove) {
       announceActionApplied(actor, superiorWarriorMove.name, game.i18n.localize("DWAUTO.SuperiorWarrior.Applied"));
+    }
+
+    const smashNames = splitCommaList(SETTINGS.SMASH_MOVE_NAMES);
+    const smashMove = actor.items.find((i) => i.type === "move" && smashNames.includes(i.name));
+    if (smashMove) {
+      announceActionApplied(actor, smashMove.name, game.i18n.localize("DWAUTO.Smash.Applied"));
     }
   }
 

@@ -59,5 +59,13 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
   // Kill 'Em All과 완전히 같은 "choice + restrictToClassKeys" 패턴이다
   // (excludeMulticlassMoves는 원문에 언급이 없어 켜지 않는다).
   { name: "Hunter's Brother", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" },
-  { name: "Stalker's Sister", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" }
+  { name: "Stalker's Sister", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" },
+  // 레인저 Special Trick 원문: "다른 직업의 무브를 하나 고른다. 동반 동물과
+  // 함께 활동하는 동안에만 그 무브를 쓸 수 있다." Multiclass Dabbler/
+  // Initiate와 완전히 같은 "제한 없는 choice" 패턴이고(다른 8개 기본 직업
+  // 전체에서 고름), "동반 동물과 함께일 때만"이라는 조건은 이 모듈이
+  // 자동으로 판정할 수 없는 서사적 전제라 무시한다(무브를 얻으면 항상 쓸
+  // 수 있게 된다) — Multiclass Dabbler/Initiate 자체도 조건 없이 그대로
+  // 부여하는 것과 같은 단순화다.
+  { name: "Special Trick", grantedMoveNames: "", mode: "choice" }
 ];
