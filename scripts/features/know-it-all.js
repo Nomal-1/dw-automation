@@ -317,7 +317,12 @@ function onRenderActorSheet(app, html) {
   if (!$item.length) return;
 
   const $tags = getOrCreateTagsContainer($item);
-  if ($tags.find(".dwauto-know-it-all-badge").length) return;
+  // 항상 지우고 다시 그린다 — "이미 있으면 건너뛴다" 가드를 썼더니, 여러
+  // 명에게 연달아 조언했을 때 첫 대상 배지만 남고 새로 추가된 대상이 반영
+  // 안 되는 문제가 있었다(재렌더링 시점에 컨테이너가 완전히 새로 생기지
+  // 않는 경우가 있는 듯). 매번 우리 배지만 지우고 현재 상태 그대로 다시
+  // 채워 넣으면 항상 최신 상태와 일치한다.
+  $tags.find(".dwauto-know-it-all-badge").remove();
 
   const advisees = game.actors.filter((a) => getKnowItAllPending(a)?.grantorActorId === actor.id);
 
@@ -363,11 +368,18 @@ function onUpdateActor(actor, changes) {
   const relevant = Object.keys(flat).some((key) => key.includes("knowItAllPending"));
   if (!relevant) return;
 
-  for (const app of Object.values(ui.windows)) {
-    if (app.actor?.type === "character" && findMoveByConfiguredNames(app.actor) && typeof app.render === "function") {
-      app.render(false);
+  // 여러 대상에게 연달아 조언을 걸면(또는 대기가 거의 동시에 여러 개
+  // 풀리면) updateActor가 짧은 간격으로 여러 번 발생한다. 매번 즉시
+  // render()를 부르면 이미 진행 중인 렌더링과 겹쳐서 뒤에 온 요청이
+  // 무시될 수 있으므로, 살짝 늦춰서 그 사이 다른 갱신도 다 반영된 뒤에
+  // 한 번 확실하게 다시 그린다(force로 강제).
+  setTimeout(() => {
+    for (const app of Object.values(ui.windows)) {
+      if (app.actor?.type === "character" && findMoveByConfiguredNames(app.actor) && typeof app.render === "function") {
+        app.render(true);
+      }
     }
-  }
+  }, 50);
 }
 
 export function registerKnowItAllAssistant() {
