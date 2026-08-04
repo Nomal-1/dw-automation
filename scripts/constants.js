@@ -77,5 +77,7 @@ export const SETTINGS = {
   ENABLE_INVIGORATE_ASSISTANT: "enableInvigorateAssistant",
   INVIGORATE_MOVE_NAMES: "invigorateMoveNames",
   ENABLE_LITTLE_HELP_ASSISTANT: "enableLittleHelpAssistant",
-  LITTLE_HELP_MOVE_NAMES: "littleHelpMoveNames"
+  LITTLE_HELP_MOVE_NAMES: "littleHelpMoveNames",
+  ENABLE_I_AM_THE_LAW_ASSISTANT: "enableIAmTheLawAssistant",
+  I_AM_THE_LAW_MOVE_NAMES: "iAmTheLawMoveNames"
 };

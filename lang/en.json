@@ -333,6 +333,14 @@
       "LittleHelpMoveNames": {
         "Name": "A Little Help From My Friends Move Names",
         "Hint": "Comma-separated list (default: A Little Help From My Friends)."
+      },
+      "EnableIAmTheLawAssistant": {
+        "Name": "Enable I Am The Law Automation",
+        "Hint": "Automatically queues a forward bonus on the next roll based on the Paladin's I Am The Law (roll+CHA) outcome: +1 on a success (10+), -1 on a failure. The move text restricts this bonus to \"rolls against that NPC\", which is simplified the same way Aid or Interfere is — an unrestricted bonus on the very next roll. A partial success (7-9) has no mechanical effect, so only a reminder is shown."
+      },
+      "IAmTheLawMoveNames": {
+        "Name": "I Am The Law Move Names",
+        "Hint": "Comma-separated list (default: I Am The Law)."
       }
     },
     "Npc": {
@@ -466,7 +474,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -756,6 +764,11 @@
       "Blocked": "Staked \"{spell}\" and fully blocked the spell (10+).",
       "BlockedPartial": "Staked \"{spell}\" and blocked it, but forgot the staked spell (7-9).",
       "NotBlocked": "Staked \"{spell}\" but failed to block it (6-)."
+    },
+    "IAmTheLaw": {
+      "SuccessApplied": "Success (10+): they choose one. +1 forward on your next roll against them.",
+      "PartialInfo": "Partial success (7-9): they choose one (no extra forward).",
+      "FailureApplied": "Failure: they do as they please. -1 forward on your next roll against them."
     },
     "ActorTab": {
       "ResetButton": "Reset",

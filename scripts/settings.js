@@ -1020,4 +1020,26 @@ export function registerSettings() {
     type: String,
     default: "A Little Help From My Friends"
   });
+
+  // 팔라딘 I Am The Law: roll+CHA. 성공하면 그 NPC를 상대로 +1 forward,
+  // 실패하면 -1 forward를 받는다("그들을 상대로"라는 제한은 원조/방해와
+  // 같은 방식으로 단순화 — features/i-am-the-law.js 참고). 부분성공은
+  // 추가 효과가 없어 안내만 표시한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_I_AM_THE_LAW_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableIAmTheLawAssistant.Name",
+    hint: "DWAUTO.Settings.EnableIAmTheLawAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.I_AM_THE_LAW_MOVE_NAMES, {
+    name: "DWAUTO.Settings.IAmTheLawMoveNames.Name",
+    hint: "DWAUTO.Settings.IAmTheLawMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "I Am The Law"
+  });
 }
