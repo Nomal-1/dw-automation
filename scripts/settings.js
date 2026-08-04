@@ -1022,9 +1022,9 @@ export function registerSettings() {
   });
 
   // 팔라딘 I Am The Law: roll+CHA. 성공하면 그 NPC를 상대로 +1 forward,
-  // 실패하면 -1 forward를 받는다("그들을 상대로"라는 제한은 원조/방해와
-  // 같은 방식으로 단순화 — features/i-am-the-law.js 참고). 부분성공은
-  // 추가 효과가 없어 안내만 표시한다.
+  // 실패하면 -1 forward가 대기 상태로 걸리고, 이후 그 NPC 상대 판정인지
+  // 매번 확인받아야 실제로 적용된다(features/i-am-the-law.js 참고).
+  // 부분성공은 추가 효과가 없어 안내만 표시한다.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_I_AM_THE_LAW_ASSISTANT, {
     name: "DWAUTO.Settings.EnableIAmTheLawAssistant.Name",
     hint: "DWAUTO.Settings.EnableIAmTheLawAssistant.Hint",
@@ -1041,5 +1041,27 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "I Am The Law"
+  });
+
+  // 위저드 Know-It-All: 다른 플레이어의 캐릭터에게 조언을 주면, 그 조언을
+  // 따른 판정에 +1 forward를 주고 자신은 XP를 마크한다(features/
+  // know-it-all.js 참고). 대상/조언자 둘 다 액터 쓰기 권한이 없을 수 있어
+  // 접속 중인 GM에게 승인을 구한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_KNOW_IT_ALL_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableKnowItAllAssistant.Name",
+    hint: "DWAUTO.Settings.EnableKnowItAllAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.KNOW_IT_ALL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.KnowItAllMoveNames.Name",
+    hint: "DWAUTO.Settings.KnowItAllMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Know-It-All"
   });
 }

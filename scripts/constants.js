@@ -79,5 +79,7 @@ export const SETTINGS = {
   ENABLE_LITTLE_HELP_ASSISTANT: "enableLittleHelpAssistant",
   LITTLE_HELP_MOVE_NAMES: "littleHelpMoveNames",
   ENABLE_I_AM_THE_LAW_ASSISTANT: "enableIAmTheLawAssistant",
-  I_AM_THE_LAW_MOVE_NAMES: "iAmTheLawMoveNames"
+  I_AM_THE_LAW_MOVE_NAMES: "iAmTheLawMoveNames",
+  ENABLE_KNOW_IT_ALL_ASSISTANT: "enableKnowItAllAssistant",
+  KNOW_IT_ALL_MOVE_NAMES: "knowItAllMoveNames"
 };

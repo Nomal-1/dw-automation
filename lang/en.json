@@ -341,6 +341,14 @@
       "IAmTheLawMoveNames": {
         "Name": "I Am The Law Move Names",
         "Hint": "Comma-separated list (default: I Am The Law)."
+      },
+      "EnableKnowItAllAssistant": {
+        "Name": "Enable Know-It-All Automation",
+        "Hint": "When the Wizard's Know-It-All is triggered, prompts them to pick another player's character to advise. Every roll that character makes afterward asks \"was this roll following that advice?\" — yes grants +1 forward to that roll and marks experience for the Wizard. If the current client lacks write permission on the target/Wizard actor, an online GM is asked to approve."
+      },
+      "KnowItAllMoveNames": {
+        "Name": "Know-It-All Move Names",
+        "Hint": "Comma-separated list (default: Know-It-All)."
       }
     },
     "Npc": {
@@ -474,7 +482,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -775,6 +783,20 @@
       "PendingOn": "Bonus pending ({amount})",
       "PendingOff": "Nothing pending",
       "PendingTitle": "Click to cancel the pending bonus (use this if you'll never face that NPC again)."
+    },
+    "KnowItAll": {
+      "TargetLabel": "Who are you advising?",
+      "Granted": "Gave advice to {target}. +1 forward is pending for a roll that follows it.",
+      "TargetPrompt": "Is this roll following \"{name}\"'s advice?",
+      "TargetApplied": "Followed the advice — applied +1 forward to this roll.",
+      "XpMarked": "Marked experience because another character followed this advice",
+      "NoGmOnline": "You don't have edit permission over \"{name}\" and no GM is currently online to approve it.",
+      "PermissionDenied": "The GM didn't approve the advice bonus for \"{name}\".",
+      "GrantPermissionTitle": "Approve this advice bonus?",
+      "GrantPermissionContent": "<b>{grantor}</b> wants to advise <b>{target}</b> and queue +1 forward for a roll that follows it, but only has Observer permission over that actor. Allow it?",
+      "XpNoGm": "\"{name}\" needs experience marked, but no GM is currently online to approve it.",
+      "XpPermissionTitle": "Approve marking experience?",
+      "XpPermissionContent": "Another character followed <b>{name}</b>'s advice and wants to mark 1 experience for them, but only has Observer permission over that actor. Allow it?"
     },
     "ActorTab": {
       "ResetButton": "Reset",

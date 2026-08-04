@@ -4,10 +4,11 @@
 // 별도의 타겟팅이라 서로 간섭하지 않는다). GM이 아닌 사용자에게는 최소
 // 관찰(Observer) 권한이 있는 액터만 후보로 보여준다 — 권한이 없는 대상은
 // 적인지 아군인지 애매한 정체가 새어나갈 수 있으므로 이름조차 노출하지 않는다.
-export function getCandidateActors(self, { excludeSelf = false } = {}) {
+export function getCandidateActors(self, { excludeSelf = false, filter = null } = {}) {
   const sceneActors = canvas.tokens?.placeables?.map((t) => t.actor).filter(Boolean) ?? [];
   const visible = sceneActors.filter((a) => game.user.isGM || a.testUserPermission(game.user, "OBSERVER"));
-  const unique = Array.from(new Map(visible.map((a) => [a.id, a])).values());
+  let unique = Array.from(new Map(visible.map((a) => [a.id, a])).values());
+  if (filter) unique = unique.filter(filter);
 
   if (excludeSelf) return unique.filter((a) => a.id !== self.id);
   if (!unique.some((a) => a.id === self.id)) unique.unshift(self);
@@ -16,10 +17,12 @@ export function getCandidateActors(self, { excludeSelf = false } = {}) {
 
 // excludeSelf: 자기 자신은 후보에서 뺀다(원조/방해처럼 "다른 사람"이어야
 // 말이 되는 경우). selfLabel: 자기 자신 항목 옆에 붙일 안내문구(예: "자신").
+// filter: 후보를 더 좁히는 선택적 조건(예: 위저드 Know-It-All의 "다른
+// 플레이어의 캐릭터"처럼 actor.type === "character"만 보여줘야 하는 경우).
 // 후보가 하나도 없으면(관찰 권한이 있는 다른 액터가 씬에 없음) 다이얼로그를
 // 띄우지 않고 바로 null을 돌려준다.
-export function promptActorTarget(self, { title, label, excludeSelf = false, selfLabel = null } = {}) {
-  const candidates = getCandidateActors(self, { excludeSelf });
+export function promptActorTarget(self, { title, label, excludeSelf = false, selfLabel = null, filter = null } = {}) {
+  const candidates = getCandidateActors(self, { excludeSelf, filter });
   if (candidates.length === 0) return Promise.resolve(null);
 
   // 우선순위: 캔버스에서 타겟팅해둔 대상 > 자기 자신(후보에 있다면) > 목록

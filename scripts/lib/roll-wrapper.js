@@ -20,6 +20,7 @@ import { getPendingRollBonus, clearPendingRollBonus, rollBonusAppliesTo } from "
 import { announceActionApplied } from "./announce.js";
 import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
 import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
+import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -85,16 +86,20 @@ async function consumePendingRollBonus(item, pendingBonus) {
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
-  // I Am The Law가 대기 중이면 이 액터가 어떤 판정을 하든(ask 타입 포함) 먼저
-  // 확인을 받아야 하므로, 다른 분기보다 가장 먼저 처리한다. cancel이면 이
-  // 판정 자체가 열리지 않는다(대기 중에 I Am The Law를 또 굴리려는 경우).
+  // I Am The Law/Know-It-All이 대기 중이면 이 액터가 어떤 판정을 하든(ask
+  // 타입 포함) 먼저 확인을 받아야 하므로, 다른 분기보다 가장 먼저 처리한다.
+  // cancel이면 이 판정 자체가 열리지 않는다(대기 중에 I Am The Law를 또
+  // 굴리려는 경우 — Know-It-All은 대상 쪽에 걸리는 보정치라 재굴림을 막을
+  // 이유가 없어 항상 cancel이 없다).
   const iAmTheLaw = await promptIAmTheLawPreRoll(this);
   if (iAmTheLaw.cancel) return undefined;
+  const knowItAll = await promptKnowItAllPreRoll(this);
+  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus;
 
   const rollType = (this.system.rollType || "").toLowerCase();
 
   if (rollType === "ask" && shouldInterceptAskRoll(this.actor)) {
-    return handleAskRoll(this, wrapped, args, iAmTheLaw.bonus);
+    return handleAskRoll(this, wrapped, args, preRollBonus);
   }
 
   let spellPenalty = 0;
@@ -130,7 +135,7 @@ async function wrappedRoll(wrapped, ...args) {
     goodDayToDieMod +
     ongoingPenaltyMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
-    iAmTheLaw.bonus;
+    preRollBonus;
   if (!totalMod && !pendingBonusApplies) return wrapped(...args);
 
   const original = this.system.rollMod;

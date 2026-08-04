@@ -26,6 +26,7 @@ import { registerSpellDiscountAssistant } from "./features/spell-discount.js";
 import { registerSpellbookExpansionAssistant } from "./features/spellbook-expansion.js";
 import { registerCounterspellAssistant } from "./features/counterspell.js";
 import { registerIAmTheLawAssistant } from "./features/i-am-the-law.js";
+import { registerKnowItAllAssistant } from "./features/know-it-all.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -63,3 +64,4 @@ registerSpellDiscountAssistant();
 registerSpellbookExpansionAssistant();
 registerCounterspellAssistant();
 registerIAmTheLawAssistant();
+registerKnowItAllAssistant();
