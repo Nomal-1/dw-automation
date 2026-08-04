@@ -349,6 +349,10 @@
       "KnowItAllMoveNames": {
         "Name": "Know-It-All Move Names",
         "Hint": "Comma-separated list (default: Know-It-All)."
+      },
+      "EnableVitalsAssistant": {
+        "Name": "Enable Max HP/Load Recalculation Buttons",
+        "Hint": "Same idea as the armor recalculation button: turns the sheet's HP and Weight labels into clickable buttons. Clicking one computes class base + Constitution/Strength score (not the modifier) and applies it as max HP / base load. Hovering shows the formula first. If the sheet's class field is empty or unrecognized, only a warning is shown and nothing changes."
       }
     },
     "Npc": {
@@ -950,6 +954,15 @@
       "TooltipClickHint": "(Click to recalculate armor to this total)",
       "RecalcApplied": "Armor recalculation applied: {total}",
       "DestroyedSuffix": " (Destroyed)"
+    },
+    "Vitals": {
+      "HpFormula": "Your max HP is {base}+CON.",
+      "LoadFormula": "Your base load is {base}+STR.",
+      "ClickHint": "(Click to calculate and apply)",
+      "NoClassTooltip": "No class set, can't calculate. Set a class first.",
+      "NoClassWarning": "Set a class for {name} first.",
+      "HpApplied": "Max HP recalculation applied: {base}+CON({con}) = {total}",
+      "LoadApplied": "Base load recalculation applied: {base}+STR({str}) = {total}"
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",

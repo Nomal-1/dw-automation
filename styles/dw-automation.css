@@ -280,6 +280,14 @@
   filter: brightness(1.2);
 }
 
+.dwauto-vitals-recalc {
+  cursor: pointer;
+}
+
+.dwauto-vitals-recalc:hover {
+  filter: brightness(1.2);
+}
+
 .dwauto-underdog-outnumbered-badge,
 .dwauto-underdog-ask-badge {
   cursor: pointer;

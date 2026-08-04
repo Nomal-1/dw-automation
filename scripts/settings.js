@@ -1064,4 +1064,19 @@ export function registerSettings() {
     type: String,
     default: "Know-It-All"
   });
+
+  // 최대 체력/기본 하중 재계산 버튼: 장갑 재계산과 같은 패턴으로 캐릭터
+  // 시트의 '체력'/'무게' 라벨을 클릭 가능한 버튼으로 바꿔서, 누르면 직업별
+  // 기본값(data/class-base-stats.js) + 체력(CON)/근력(STR) 점수로 최대 체력/
+  // 기본 하중을 계산해 덮어쓴다. 직업이 인식되지 않으면(system.details.class가
+  // 비어있거나 알 수 없는 값) 경고만 띄운다. 자세한 설계는 features/
+  // vitals-assistant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_VITALS_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableVitalsAssistant.Name",
+    hint: "DWAUTO.Settings.EnableVitalsAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
 }

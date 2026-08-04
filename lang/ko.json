@@ -349,6 +349,10 @@
       "KnowItAllMoveNames": {
         "Name": "Know-It-All 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Know-It-All)."
+      },
+      "EnableVitalsAssistant": {
+        "Name": "최대 체력/하중 재계산 버튼 사용",
+        "Hint": "장갑 재계산 버튼과 같은 방식으로, 캐릭터 시트의 '체력'/'무게' 라벨을 클릭 가능한 버튼으로 바꿉니다. 누르면 직업 기본값 + 체력(CON)/근력(STR) 점수(수정치 아님)로 최대 체력/기본 하중을 계산해서 적용합니다. 마우스를 올리면 계산식을 미리 보여줍니다. 시트에 직업이 정해져 있지 않으면(또는 인식할 수 없으면) 경고만 뜨고 아무것도 바뀌지 않습니다."
       }
     },
     "Npc": {
@@ -950,6 +954,15 @@
       "TooltipClickHint": "(클릭하면 이 합계로 장갑 값을 다시 계산합니다)",
       "RecalcApplied": "장갑 재계산 적용: {total}",
       "DestroyedSuffix": " (파괴됨)"
+    },
+    "Vitals": {
+      "HpFormula": "당신의 최대 체력은 {base}+체력 입니다.",
+      "LoadFormula": "당신의 기본 하중은 {base}+근력 입니다.",
+      "ClickHint": "(클릭하면 계산해서 적용합니다)",
+      "NoClassTooltip": "직업이 정해지지 않아 계산할 수 없습니다. 직업을 먼저 정해주세요.",
+      "NoClassWarning": "{name}의 직업을 먼저 정해주세요.",
+      "HpApplied": "최대 체력 재계산 적용: {base}+체력({con}) = {total}",
+      "LoadApplied": "기본 하중 재계산 적용: {base}+근력({str}) = {total}"
     },
     "Underdog": {
       "AskPrompt": "지금 \"{name}\"의 발동 조건을 충족하고 있습니까?",

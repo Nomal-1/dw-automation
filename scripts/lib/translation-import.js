@@ -34,6 +34,11 @@ export const MOVE_PACK_FILES = [
 // 목록에서든" 고를 수 있게 하려면 클레릭/위저드 주문 팩 전체가 필요하다).
 export const SPELL_PACK_FILES = ["dungeonworld.the-cleric-spells.json", "dungeonworld.the-wizard-spells.json"];
 
+// features/vitals-assistant.js(최대 체력/하중 자동계산)가 캐릭터 시트의
+// system.details.class(자유 입력 텍스트라 "Fighter"/"The Fighter"/번역명 등
+// 무엇이 들어있을지 모른다)를 실제 직업 키와 매칭할 때 쓴다.
+const CLASS_PACK_FILE = "dungeonworld.classes.json";
+
 export function isTranslationModuleActive() {
   return game.modules.get(TRANSLATION_MODULE_ID)?.active ?? false;
 }
@@ -106,6 +111,13 @@ async function buildNameMap(files) {
 // 없거나 응답이 실패하면 빈 맵을 반환하고, 호출부가 영문 원본으로 대체 표시한다.
 export async function getMoveNameMap() {
   return buildNameMap(MOVE_PACK_FILES);
+}
+
+// features/vitals-assistant.js가 재사용한다. "The Fighter" -> "전사"처럼
+// 직업 아이템 이름 그대로 매핑한다(무브 이름과 겹칠 일이 없는 별도 컴펜디엄
+// 이라 mergeNameMaps의 모호함 처리는 필요 없다).
+export async function getClassNameMap() {
+  return buildNameMap([CLASS_PACK_FILE]);
 }
 
 // DAMAGE_REDUCTION_MOVES(조건부 장갑 보너스 무브)에서만 쓰는 모호한 이름
