@@ -360,6 +360,19 @@
   color: #fff !important;
 }
 
+.dwauto-i-am-the-law-badge {
+  cursor: pointer;
+}
+
+.dwauto-i-am-the-law-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-i-am-the-law-on {
+  background: #7a6a2e !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;

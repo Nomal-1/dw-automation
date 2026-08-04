@@ -336,7 +336,7 @@
       },
       "EnableIAmTheLawAssistant": {
         "Name": "Enable I Am The Law Automation",
-        "Hint": "Automatically queues a forward bonus on the next roll based on the Paladin's I Am The Law (roll+CHA) outcome: +1 on a success (10+), -1 on a failure. The move text restricts this bonus to \"rolls against that NPC\", which is simplified the same way Aid or Interfere is — an unrestricted bonus on the very next roll. A partial success (7-9) has no mechanical effect, so only a reminder is shown."
+        "Hint": "Queues a forward bonus for the Paladin's next roll \"against that NPC\", based on the I Am The Law (roll+CHA) outcome: +1 on a success (10+), -1 on a failure. Unlike Aid or Interfere, this restriction is actually enforced instead of simplified away: right after the roll, only a \"bonus pending\" badge lights up next to the move. While pending, every roll this character makes asks \"is this roll against that NPC?\" — answering yes applies the bonus to that roll and clears the pending state. Trying to roll I Am The Law again while a bonus is still pending is blocked until it's resolved. The GM can also click the badge to cancel a pending bonus. A partial success (7-9) has no mechanical effect, so only a reminder is shown."
       },
       "IAmTheLawMoveNames": {
         "Name": "I Am The Law Move Names",
@@ -766,9 +766,15 @@
       "NotBlocked": "Staked \"{spell}\" but failed to block it (6-)."
     },
     "IAmTheLaw": {
-      "SuccessApplied": "Success (10+): they choose one. +1 forward on your next roll against them.",
+      "SuccessApplied": "Success (10+): they choose one. +1 forward is pending for your next roll against them.",
       "PartialInfo": "Partial success (7-9): they choose one (no extra forward).",
-      "FailureApplied": "Failure: they do as they please. -1 forward on your next roll against them."
+      "FailureApplied": "Failure: they do as they please. -1 forward is pending for your next roll against them.",
+      "PendingBlocked": "{name} still has an unconfirmed I Am The Law bonus pending. Confirm whether the next roll is against that NPC first.",
+      "TargetPrompt": "Is this roll against the NPC you gave orders to as \"{name}\"?",
+      "TargetApplied": "Applied {amount} forward to this roll.",
+      "PendingOn": "Bonus pending ({amount})",
+      "PendingOff": "Nothing pending",
+      "PendingTitle": "Click to cancel the pending bonus (use this if you'll never face that NPC again)."
     },
     "ActorTab": {
       "ResetButton": "Reset",

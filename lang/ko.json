@@ -336,7 +336,7 @@
       },
       "EnableIAmTheLawAssistant": {
         "Name": "I Am The Law 자동화 사용",
-        "Hint": "팔라딘 I Am The Law(roll+CHA)의 결과에 따라 다음 판정에 자동으로 forward를 겁니다: 성공(10+)이면 +1, 실패면 -1. 원문은 그 보정치가 '상대한 그 NPC를 상대로 한 판정에만' 적용되지만, 원조/방해와 같은 방식으로 제한 없이 다음 판정 한 번에 적용하는 것으로 단순화합니다. 부분성공(7-9)은 추가 효과가 없어 안내만 표시합니다."
+        "Hint": "팔라딘 I Am The Law(roll+CHA)의 결과에 따라 '그 NPC를 상대로 한 다음 판정'에 forward를 겁니다: 성공(10+)이면 +1, 실패면 -1. 원조/방해와 달리 '그 NPC 상대'라는 제한을 실제로 지키기 위해, 판정 직후에는 곧바로 걸지 않고 무브 옆에 '보정치 대기 중' 배지만 켭니다. 대기 중인 동안 이 캐릭터가 어떤 판정을 하든 '이 판정이 그 NPC를 상대로 한 것입니까?'라고 물어보고, '예'면 그 판정에 보정치를 적용하고 대기를 끕니다. 대기 중에 I Am The Law 자체를 다시 굴리려 하면 먼저 해소하라고 막습니다. GM은 시트의 배지를 클릭해서 대기 상태를 취소할 수도 있습니다. 부분성공(7-9)은 추가 효과가 없어 안내만 표시합니다."
       },
       "IAmTheLawMoveNames": {
         "Name": "I Am The Law 무브 이름",
@@ -766,9 +766,15 @@
       "NotBlocked": "\"{spell}\"을(를) 걸었지만 막지 못했습니다(6-)."
     },
     "IAmTheLaw": {
-      "SuccessApplied": "성공(10+): 그들이 하나를 고릅니다. 그들을 상대로 다음 판정에 +1 forward.",
+      "SuccessApplied": "성공(10+): 그들이 하나를 고릅니다. 그들을 상대로 한 다음 판정에 +1 forward가 대기 중입니다.",
       "PartialInfo": "부분성공(7-9): 그들이 하나를 고릅니다(추가 forward 없음).",
-      "FailureApplied": "실패: 그들은 하고 싶은 대로 합니다. 그들을 상대로 다음 판정에 -1 forward."
+      "FailureApplied": "실패: 그들은 하고 싶은 대로 합니다. 그들을 상대로 한 다음 판정에 -1 forward가 대기 중입니다.",
+      "PendingBlocked": "{name}에게 아직 확인되지 않은 I Am The Law 보정치가 대기 중입니다. 다음 판정에서 그 NPC 상대인지 먼저 확인해주세요.",
+      "TargetPrompt": "이 판정이 \"{name}\"으로 명령을 내렸던 그 NPC를 상대로 한 것입니까?",
+      "TargetApplied": "이번 판정에 {amount} forward를 적용했습니다.",
+      "PendingOn": "보정치 대기 중 ({amount})",
+      "PendingOff": "대기 없음",
+      "PendingTitle": "클릭하면 대기 중인 보정치를 취소합니다(그 NPC를 다시 마주칠 일이 없을 때 사용하세요)."
     },
     "ActorTab": {
       "ResetButton": "초기화",

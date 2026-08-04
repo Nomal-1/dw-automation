@@ -19,6 +19,7 @@ import { getOngoingPenaltyMalus } from "../features/hit-trigger.js";
 import { getPendingRollBonus, clearPendingRollBonus, rollBonusAppliesTo } from "./roll-bonus-state.js";
 import { announceActionApplied } from "./announce.js";
 import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
+import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -40,7 +41,7 @@ function isCastSpellMove(item) {
 // promptAskRollAbility), rollType 자체를 그 능력치로 바꿔치기한 채로 원본
 // 굴림을 호출한다 — 시스템은 rollType이 "ask"가 아니면 자기 대화상자를 아예
 // 띄우지 않으므로 두 번 묻는 일도 없다.
-async function handleAskRoll(item, wrapped, args) {
+async function handleAskRoll(item, wrapped, args, extraBonus = 0) {
   const chosenStat = await promptAskRollAbility(item.name);
   if (!chosenStat) return wrapped(...args);
 
@@ -53,7 +54,12 @@ async function handleAskRoll(item, wrapped, args) {
   const originalMod = item.system.rollMod;
   item.system.rollType = chosenStat;
   item.system.rollMod =
-    (Number(originalMod) || 0) + mod + goodDayToDieMod + ongoingPenaltyMod + (pendingBonusApplies ? pendingBonus.amount : 0);
+    (Number(originalMod) || 0) +
+    mod +
+    goodDayToDieMod +
+    ongoingPenaltyMod +
+    (pendingBonusApplies ? pendingBonus.amount : 0) +
+    extraBonus;
   try {
     return await wrapped(...args);
   } finally {
@@ -79,10 +85,16 @@ async function consumePendingRollBonus(item, pendingBonus) {
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
+  // I Am The Law가 대기 중이면 이 액터가 어떤 판정을 하든(ask 타입 포함) 먼저
+  // 확인을 받아야 하므로, 다른 분기보다 가장 먼저 처리한다. cancel이면 이
+  // 판정 자체가 열리지 않는다(대기 중에 I Am The Law를 또 굴리려는 경우).
+  const iAmTheLaw = await promptIAmTheLawPreRoll(this);
+  if (iAmTheLaw.cancel) return undefined;
+
   const rollType = (this.system.rollType || "").toLowerCase();
 
   if (rollType === "ask" && shouldInterceptAskRoll(this.actor)) {
-    return handleAskRoll(this, wrapped, args);
+    return handleAskRoll(this, wrapped, args, iAmTheLaw.bonus);
   }
 
   let spellPenalty = 0;
@@ -112,7 +124,13 @@ async function wrappedRoll(wrapped, ...args) {
   const pendingBonus = getPendingRollBonus(this.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, this.name);
   const totalMod =
-    formcrafterMod - spellPenalty + commandMod + goodDayToDieMod + ongoingPenaltyMod + (pendingBonusApplies ? pendingBonus.amount : 0);
+    formcrafterMod -
+    spellPenalty +
+    commandMod +
+    goodDayToDieMod +
+    ongoingPenaltyMod +
+    (pendingBonusApplies ? pendingBonus.amount : 0) +
+    iAmTheLaw.bonus;
   if (!totalMod && !pendingBonusApplies) return wrapped(...args);
 
   const original = this.system.rollMod;
