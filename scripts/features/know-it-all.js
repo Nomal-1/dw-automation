@@ -4,6 +4,7 @@ import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { getKnowItAllPending, setKnowItAllPending, clearKnowItAllPending } from "../lib/know-it-all-state.js";
+import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 
 // 위저드 Know-It-All 원문: "다른 플레이어의 캐릭터가 조언을 구하러 오고
 // 당신이 최선이라 생각하는 걸 말해주면, 그들이 그 조언을 따를 때 +1
@@ -33,6 +34,11 @@ function splitCommaList(settingKey) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function findMoveByConfiguredNames(actor) {
+  const names = splitCommaList(SETTINGS.KNOW_IT_ALL_MOVE_NAMES);
+  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
 }
 
 async function matchesConfiguredName(title) {
@@ -289,8 +295,56 @@ export async function promptKnowItAllPreRoll(item) {
   return { bonus: 1 };
 }
 
+// 위저드 자신의 시트, Know-It-All 무브 옆에 "누구에게 조언을 대기 중인지"
+// 배지를 붙인다. 대기 상태 자체는 조언을 받은 대상 액터에 저장돼 있으므로
+// (판정을 하는 쪽이 대상이라), 전체 액터를 훑어서 grantorActorId가 이
+// 위저드인 것만 골라 대상별로 배지 하나씩 보여준다 — 위저드 한 명이 동시에
+// 여러 명에게 조언해뒀을 수 있다. 배지는 누구에게나 보이지만, GM만 클릭해서
+// 그 조언 대기를 취소할 수 있다(플레이어는 못 건드린다).
+function onRenderActorSheet(app, html) {
+  if (!isEnabled()) return;
+
+  const actor = app.actor;
+  if (actor.type !== "character") return;
+
+  const moveItem = findMoveByConfiguredNames(actor);
+  if (!moveItem) return;
+
+  const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  if ($tags.find(".dwauto-know-it-all-badge").length) return;
+
+  const advisees = game.actors.filter((a) => getKnowItAllPending(a)?.grantorActorId === actor.id);
+
+  if (advisees.length === 0) {
+    $tags.append(
+      $(
+        `<a class="tag dwauto-know-it-all-badge" title="${game.i18n.localize("DWAUTO.KnowItAll.BadgeTitle")}">${game.i18n.localize("DWAUTO.KnowItAll.PendingOff")}</a>`
+      )
+    );
+    return;
+  }
+
+  for (const target of advisees) {
+    const $badge = $(
+      `<a class="tag dwauto-know-it-all-badge dwauto-know-it-all-on" title="${game.i18n.localize("DWAUTO.KnowItAll.BadgeTitle")}">${game.i18n.format("DWAUTO.KnowItAll.PendingOn", { name: target.name })}</a>`
+    );
+    $tags.append($badge);
+
+    if (!game.user.isGM) continue;
+    $badge.on("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      await clearKnowItAllPending(target);
+    });
+  }
+}
+
 export function registerKnowItAllAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
   });

@@ -796,7 +796,10 @@
       "GrantPermissionContent": "<b>{grantor}</b> wants to advise <b>{target}</b> and queue +1 forward for a roll that follows it, but only has Observer permission over that actor. Allow it?",
       "XpNoGm": "\"{name}\" needs experience marked, but no GM is currently online to approve it.",
       "XpPermissionTitle": "Approve marking experience?",
-      "XpPermissionContent": "Another character followed <b>{name}</b>'s advice and wants to mark 1 experience for them, but only has Observer permission over that actor. Allow it?"
+      "XpPermissionContent": "Another character followed <b>{name}</b>'s advice and wants to mark 1 experience for them, but only has Observer permission over that actor. Allow it?",
+      "PendingOff": "Nobody advised",
+      "PendingOn": "Advising: {name}",
+      "BadgeTitle": "Click to cancel that pending advice."
     },
     "ActorTab": {
       "ResetButton": "Reset",

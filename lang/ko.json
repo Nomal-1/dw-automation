@@ -796,7 +796,10 @@
       "GrantPermissionContent": "<b>{grantor}</b>이(가) <b>{target}</b>에게 조언을 주고, 그 조언을 따르면 +1 forward를 걸려고 하는데, 그 대상에 대해 관찰 권한만 갖고 있습니다. 허용하시겠습니까?",
       "XpNoGm": "\"{name}\"의 경험치를 마크해야 하는데, 승인해줄 GM이 지금 접속해 있지 않습니다.",
       "XpPermissionTitle": "경험치 마크를 승인하시겠습니까?",
-      "XpPermissionContent": "<b>{name}</b>의 조언을 다른 캐릭터가 따라서 경험치를 1 마크하려고 하는데, 그 액터에 대해 관찰 권한만 갖고 있습니다. 허용하시겠습니까?"
+      "XpPermissionContent": "<b>{name}</b>의 조언을 다른 캐릭터가 따라서 경험치를 1 마크하려고 하는데, 그 액터에 대해 관찰 권한만 갖고 있습니다. 허용하시겠습니까?",
+      "PendingOff": "조언 대상 없음",
+      "PendingOn": "조언 대상: {name}",
+      "BadgeTitle": "클릭하면 그 조언 대기를 취소합니다."
     },
     "ActorTab": {
       "ResetButton": "초기화",

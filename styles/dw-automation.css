@@ -373,6 +373,19 @@
   color: #fff !important;
 }
 
+.dwauto-know-it-all-badge {
+  cursor: pointer;
+}
+
+.dwauto-know-it-all-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-know-it-all-on {
+  background: #7a6a2e !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;
