@@ -249,11 +249,14 @@ async function onCreateChatMessage(message, options, userId) {
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
 
+    // 이미 다른(또는 같은) 만물박사 조언이 대기 중인 대상은 후보에서 뺀다 —
+    // 안 그러면 다시 조언해서 이전 대기 상태(와 그 조언자의 XP 귀속)를
+    // 조용히 덮어써버린다.
     const target = await promptActorTarget(actor, {
       title: moveItem.name,
       label: game.i18n.localize("DWAUTO.KnowItAll.TargetLabel"),
       excludeSelf: true,
-      filter: (a) => a.type === "character"
+      filter: (a) => a.type === "character" && !getKnowItAllPending(a)
     });
     if (!target) return;
 
@@ -342,9 +345,35 @@ function onRenderActorSheet(app, html) {
   }
 }
 
+// 대기 상태는 조언한 위저드가 아니라 조언받은 대상 액터에 저장되므로,
+// Foundry는 대상이 갱신돼도 위저드 본인의 시트를 자동으로 다시 그려주지
+// 않는다(어떤 시트를 자동으로 다시 그릴지는 그 시트가 보여주는 액터 자신이
+// 바뀌었는지로만 판단하기 때문) — 그래서 위저드 시트를 껐다 켜야만 배지가
+// 갱신되는 문제가 있었다. updateActor는 모든 클라이언트에서 실행되므로,
+// 이 클라이언트에 열려 있는 시트 중 만물박사를 가진 것만 걸러서 직접 다시
+// 그려준다.
+function onUpdateActor(actor, changes) {
+  if (!isEnabled()) return;
+
+  // setFlag는 "flags.dw-automation.knowItAllPending" 경로로, unsetFlag는
+  // "flags.dw-automation.-=knowItAllPending"라는 별도 삭제 키로 diff에
+  // 잡히므로(hasProperty로는 삭제 쪽을 못 찾는다), flattenObject 후 키
+  // 이름에 플래그 이름이 포함되는지로 두 경우를 한 번에 잡는다.
+  const flat = foundry.utils.flattenObject(changes);
+  const relevant = Object.keys(flat).some((key) => key.includes("knowItAllPending"));
+  if (!relevant) return;
+
+  for (const app of Object.values(ui.windows)) {
+    if (app.actor?.type === "character" && findMoveByConfiguredNames(app.actor) && typeof app.render === "function") {
+      app.render(false);
+    }
+  }
+}
+
 export function registerKnowItAllAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.on("updateActor", onUpdateActor);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
   });
