@@ -1202,4 +1202,33 @@ export function registerSettings() {
     type: String,
     default: "Defend"
   });
+
+  // 소각술사 고급액션 곱절로 밝게 타올라/반절로 길게 타올라: 자세한 설계는
+  // features/twice-as-bright.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TWICE_AS_BRIGHT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableTwiceAsBrightAssistant.Name",
+    hint: "DWAUTO.Settings.EnableTwiceAsBrightAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TWICE_AS_BRIGHT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.TwiceAsBrightMoveNames.Name",
+    hint: "DWAUTO.Settings.TwiceAsBrightMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Burns Twice As Bright"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HALF_AS_LONG_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HalfAsLongMoveNames.Name",
+    hint: "DWAUTO.Settings.HalfAsLongMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Burns Half As Long"
+  });
 }

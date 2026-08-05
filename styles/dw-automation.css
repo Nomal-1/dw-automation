@@ -420,6 +420,19 @@
   color: #fff !important;
 }
 
+.dwauto-twice-as-bright-badge {
+  cursor: pointer;
+}
+
+.dwauto-twice-as-bright-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-twice-as-bright-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-monster-reminders ul {
   margin: 2px 0 0;
   padding-left: 18px;

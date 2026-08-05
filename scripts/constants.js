@@ -92,5 +92,8 @@ export const SETTINGS = {
   ENABLE_BURNING_BRAND_ASSISTANT: "enableBurningBrandAssistant",
   BURNING_BRAND_MOVE_NAMES: "burningBrandMoveNames",
   ENABLE_DEFEND_ASSISTANT: "enableDefendAssistant",
-  DEFEND_MOVE_NAMES: "defendMoveNames"
+  DEFEND_MOVE_NAMES: "defendMoveNames",
+  ENABLE_TWICE_AS_BRIGHT_ASSISTANT: "enableTwiceAsBrightAssistant",
+  TWICE_AS_BRIGHT_MOVE_NAMES: "twiceAsBrightMoveNames",
+  HALF_AS_LONG_MOVE_NAMES: "halfAsLongMoveNames"
 };
