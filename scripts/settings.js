@@ -40,9 +40,8 @@ export function registerSettings() {
   // Foundry 설정 창은 메뉴(버튼으로 여는 것들)를 일반 설정보다 항상 먼저
   // 보여준다 — 일반 설정으로 등록하면(예전 방식) 메뉴 목록을 다 지나야
   // 나오는 아래쪽에 있어서 "맨 위"가 아니었다. 그래서 메뉴로 등록하고,
-  // 메뉴 중에서도 가장 먼저 등록해서 진짜 맨 위에 오게 한다. 값을 저장할
-  // 필요가 없는 순수 안내용이라 apps/version-info-menu.js가 Dialog를 그대로
-  // 재사용한다.
+  // 메뉴 중에서도 가장 먼저 등록해서 진짜 맨 위에 오게 한다. 자세한 설계는
+  // apps/version-info-menu.js 참고.
   game.settings.registerMenu(MODULE_ID, SETTINGS.MODULE_VERSION_DISPLAY, {
     name: "DWAUTO.Settings.ModuleVersion.Name",
     label: "DWAUTO.Settings.ModuleVersion.Label",
