@@ -35,6 +35,7 @@ import { registerBurningBrandAssistant } from "./features/burning-brand.js";
 import { registerDefendAssistant } from "./features/defend.js";
 import { registerTwiceAsBrightAssistant } from "./features/twice-as-bright.js";
 import { registerBurningBridgesAssistant } from "./features/burning-bridges.js";
+import { registerTwinHornWildfireAssistant } from "./features/twin-horn-wildfire.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -81,3 +82,4 @@ registerBurningBrandAssistant();
 registerDefendAssistant();
 registerTwiceAsBrightAssistant();
 registerBurningBridgesAssistant();
+registerTwinHornWildfireAssistant();

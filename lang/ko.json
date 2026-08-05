@@ -429,6 +429,18 @@
       "LastBreathMoveNames": {
         "Name": "황천길 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Last Breath)."
+      },
+      "EnableTwinHornWildfireAssistant": {
+        "Name": "쌍각의 들불 자동화 사용",
+        "Hint": "쌍각의 들불을 가진 캐릭터가 생각의 발신 판정에 실패하지 않으면, 채팅창에 [쌍각의 들불 적용 가능] 안내만 띄웁니다(상태를 저장하거나 다른 걸 바꾸지는 않습니다)."
+      },
+      "TwinHornWildfireMoveNames": {
+        "Name": "쌍각의 들불 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 쌍각의 들불)."
+      },
+      "SendThoughtsMoveNames": {
+        "Name": "생각의 발신 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 생각의 발신)."
       }
     },
     "Npc": {
@@ -1158,6 +1170,9 @@
       "NoGmOnline": "{name}에 대한 권한이 없고 접속 중인 GM도 없어 요청하지 못했습니다",
       "VengeanceGrantPermissionTitle": "빈틈 노림 보정을 승인하시겠습니까?",
       "VengeanceGrantPermissionContent": "<b>{defender}</b>가 <b>{ally}</b>에게, <b>{victim}</b>을(를) 공격한 캐릭터에 대한 다음 판정 +1 forward를 걸려고 하는데, 그 대상에 대해 관찰 권한만 갖고 있습니다. 허용하시겠습니까?"
+    },
+    "TwinHornWildfire": {
+      "Available": "[쌍각의 들불 적용 가능]"
     },
     "BurningBridges": {
       "PromptTitle": "사그라지는 인연을 사용하시겠습니까?",

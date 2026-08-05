@@ -1281,4 +1281,34 @@ export function registerSettings() {
     type: String,
     default: "Last Breath"
   });
+
+  // 소각술사 고급액션(6레벨 이후) 쌍각의 들불: 자세한 설계는
+  // features/twin-horn-wildfire.js 참고. "생각의 발신"/"쌍각의 들불" 둘 다
+  // 공식 컴펜디엄에서 확인되지 않는 이름이라 기본값을 한국어 원문으로 둔다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TWIN_HORN_WILDFIRE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableTwinHornWildfireAssistant.Name",
+    hint: "DWAUTO.Settings.EnableTwinHornWildfireAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TWIN_HORN_WILDFIRE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.TwinHornWildfireMoveNames.Name",
+    hint: "DWAUTO.Settings.TwinHornWildfireMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "쌍각의 들불"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SEND_THOUGHTS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SendThoughtsMoveNames.Name",
+    hint: "DWAUTO.Settings.SendThoughtsMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "생각의 발신"
+  });
 }

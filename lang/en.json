@@ -429,6 +429,18 @@
       "LastBreathMoveNames": {
         "Name": "Last Breath Move Names",
         "Hint": "Comma-separated (default: Last Breath)."
+      },
+      "EnableTwinHornWildfireAssistant": {
+        "Name": "Enable Twin-Horn Wildfire Automation",
+        "Hint": "If a character with Twin-Horn Wildfire rolls Send Thoughts and doesn't fail, this just posts a [Twin-Horn Wildfire available] chat notice — it doesn't track any state or change anything else. (These two move names aren't in the official compendium, so their defaults are kept in the original Korean.)"
+      },
+      "TwinHornWildfireMoveNames": {
+        "Name": "Twin-Horn Wildfire Move Names",
+        "Hint": "Comma-separated (default: 쌍각의 들불)."
+      },
+      "SendThoughtsMoveNames": {
+        "Name": "Send Thoughts Move Names",
+        "Hint": "Comma-separated (default: 생각의 발신)."
       }
     },
     "Npc": {
@@ -1158,6 +1170,9 @@
       "NoGmOnline": "No permission on {name} and no GM online, so the request couldn't be sent",
       "VengeanceGrantPermissionTitle": "Approve the vengeance bonus?",
       "VengeanceGrantPermissionContent": "<b>{defender}</b> wants to give <b>{ally}</b> +1 forward on their next roll against whoever attacked <b>{victim}</b>, but only has Observer permission on that target. Allow it?"
+    },
+    "TwinHornWildfire": {
+      "Available": "[Twin-Horn Wildfire available]"
     },
     "BurningBridges": {
       "PromptTitle": "Use Burning Bridges?",
