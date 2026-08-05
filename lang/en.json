@@ -389,6 +389,14 @@
       "EnableVitalsAssistant": {
         "Name": "Enable Max HP/Load Recalculation Buttons",
         "Hint": "Same idea as the armor recalculation button: turns the sheet's HP and Weight labels into clickable buttons. Clicking one applies class base + Constitution score for max HP, and class base + Strength modifier for base load (matching the dungeonworld system's own class-selection calculation exactly — HP and load intentionally use different formulas). Hovering shows the formula first. If the sheet's class field is empty or unrecognized, only a warning is shown and nothing changes."
+      },
+      "EnableDefendAssistant": {
+        "Name": "Enable Defend Automation",
+        "Hint": "Triggering Defend grants a reserve (hold) based on the result tier (3 on a 10+, 1 on a 7-9, 0 on a failure) and prompts you to choose who to protect. As long as reserve remains, every time you or your ward takes damage you may spend 1 reserve to choose one of: [do nothing this time / release your stance and give up all reserve / take the hit yourself instead / halve the damage or effect / open the attacker up so an ally gets +1 forward against them / deal damage equal to your level back to the attacker]."
+      },
+      "DefendMoveNames": {
+        "Name": "Defend Move Names",
+        "Hint": "Comma-separated (default: Defend)."
       }
     },
     "Npc": {
@@ -1045,6 +1053,41 @@
       "WeaponName": "Burning Brand",
       "WeaponDescription": "A weapon of pure flame.",
       "Created": "Conjured a weapon: {tags}"
+    },
+    "Defend": {
+      "FailedNoReserve": "The roll failed, so no reserve was gained",
+      "ReserveGained": "Gained {amount} reserve. Protecting: {target}",
+      "ProtectTargetLabel": "Choose who to protect",
+      "SelfLabel": "self",
+      "ChoiceNone": "Don't apply Defend this time",
+      "ChoiceRelease": "Release your stance and give up all reserve",
+      "ChoiceRedirect": "Take the attack yourself instead of your ward",
+      "ChoiceHalve": "Halve the attack's damage or effect",
+      "ChoiceVengeanceForward": "Open the attacker up so a chosen ally gets +1 forward against them",
+      "ChoiceAttackBack": "Deal damage equal to your level to the attacker",
+      "PromptContent": "<b>{victim}</b> is about to take {damage} damage. Spend <b>{defender}</b>'s reserve ({reserve} left) to do what?",
+      "DefaultMoveLabel": "Defend",
+      "ReleaseApplied": "Released your stance and gave up all reserve",
+      "RedirectApplied": "Took {damage} damage yourself instead of {victim}",
+      "HalveApplied": "Halved the damage (original {original} → {damage})",
+      "VengeanceTargetLabel": "Choose the ally who gets +1 forward",
+      "VengeanceApplied": "Gave {ally} +1 forward on their next roll against whoever attacked {victim}",
+      "PermissionDenied": "{name}'s owner (or GM) denied this, so it wasn't applied",
+      "AttackerTargetLabel": "Choose who to strike back (the attacker)",
+      "AttackBackApplied": "Struck {attacker} back for damage equal to your level ({damage})",
+      "VengeancePrompt": "Is this roll against the character who attacked {victim}?",
+      "VengeanceConsumed": "Got +1 on this roll",
+      "AdjustTitle": "Adjust Reserve",
+      "AdjustLabel": "New reserve value",
+      "ReserveBadgeTitle": "Click to set the reserve value directly (GM only).",
+      "ReserveBadgeTitleWithTarget": "Protecting: {name}. Click to set the reserve value directly (GM only).",
+      "ReserveLabel": "Reserve {reserve}",
+      "VengeanceBadgeTitle": "Click to cancel this pending bonus (GM only).",
+      "VengeancePendingOn": "Vengeance pending on {name}",
+      "NoGmOnlineUpdate": "No permission on {name} and no GM online, so it wasn't applied",
+      "NoGmOnline": "No permission on {name} and no GM online, so the request couldn't be sent",
+      "VengeanceGrantPermissionTitle": "Approve the vengeance bonus?",
+      "VengeanceGrantPermissionContent": "<b>{defender}</b> wants to give <b>{ally}</b> +1 forward on their next roll against whoever attacked <b>{victim}</b>, but only has Observer permission on that target. Allow it?"
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",

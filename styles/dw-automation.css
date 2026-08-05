@@ -407,6 +407,19 @@
   color: #fff !important;
 }
 
+.dwauto-defend-badge {
+  cursor: pointer;
+}
+
+.dwauto-defend-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-defend-on {
+  background: #2e5a7a !important;
+  color: #fff !important;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;

@@ -24,6 +24,7 @@ import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
 import { promptRecruitPreRoll } from "../features/recruit.js";
 import { promptBolsterPreRoll } from "../features/bolster.js";
+import { promptDefendVengeancePreRoll } from "../features/defend.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -103,10 +104,15 @@ async function wrappedRoll(wrapped, ...args) {
   if (iAmTheLaw.cancel) return undefined;
   const knowItAll = await promptKnowItAllPreRoll(this);
 
+  // 방어(Defend)의 "공격자에게 빈틈을 만들어 아군에게 +1" 대기도 만물박사와
+  // 같은 이유로 매 판정마다 확인이 필요하다(features/defend.js 참고).
+  const defendVengeance = await promptDefendVengeancePreRoll(this);
+
   // 수련(Bolster) 예비도 "이 판정에 쓸지" 매번 물어봐야 하는 사전 확인이라
   // 같은 자리에서 처리한다(features/bolster.js 참고).
   const bolster = await promptBolsterPreRoll(this);
-  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus + bolster.bonus;
+  const preRollBonus =
+    iAmTheLaw.bonus + knowItAll.bonus + defendVengeance.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus + bolster.bonus;
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

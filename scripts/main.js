@@ -32,6 +32,7 @@ import { registerEncumbranceAssistant } from "./features/encumbrance.js";
 import { registerRecruitAssistant } from "./features/recruit.js";
 import { registerBolsterAssistant } from "./features/bolster.js";
 import { registerBurningBrandAssistant } from "./features/burning-brand.js";
+import { registerDefendAssistant } from "./features/defend.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -75,3 +76,4 @@ registerEncumbranceAssistant();
 registerRecruitAssistant();
 registerBolsterAssistant();
 registerBurningBrandAssistant();
+registerDefendAssistant();

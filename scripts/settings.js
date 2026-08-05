@@ -1180,4 +1180,26 @@ export function registerSettings() {
     type: String,
     default: "Burning Brand"
   });
+
+  // 기본액션 방어(Defend): 발동하면 결과 등급에 따라 예비(hold)를 얻고
+  // 보호대상을 고른다. 예비가 남아있는 동안 자신이나 보호대상이 피격당할
+  // 때마다 예비를 소모해서 여섯 가지 선택지 중 하나를 고를 수 있다. 자세한
+  // 설계는 features/defend.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_DEFEND_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableDefendAssistant.Name",
+    hint: "DWAUTO.Settings.EnableDefendAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DEFEND_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DefendMoveNames.Name",
+    hint: "DWAUTO.Settings.DefendMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Defend"
+  });
 }

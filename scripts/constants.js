@@ -90,5 +90,7 @@ export const SETTINGS = {
   ENABLE_BOLSTER_ASSISTANT: "enableBolsterAssistant",
   BOLSTER_MOVE_NAMES: "bolsterMoveNames",
   ENABLE_BURNING_BRAND_ASSISTANT: "enableBurningBrandAssistant",
-  BURNING_BRAND_MOVE_NAMES: "burningBrandMoveNames"
+  BURNING_BRAND_MOVE_NAMES: "burningBrandMoveNames",
+  ENABLE_DEFEND_ASSISTANT: "enableDefendAssistant",
+  DEFEND_MOVE_NAMES: "defendMoveNames"
 };
