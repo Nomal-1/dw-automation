@@ -374,6 +374,14 @@
         "Name": "Bolster Move Names",
         "Hint": "Comma-separated list (default: Bolster)."
       },
+      "EnableBurningBrandAssistant": {
+        "Name": "Enable Burning Brand Automation",
+        "Hint": "Triggering Burning Brand prompts extra tags based on the result tier (2 on a success, 1 on a partial, 0 on a failure) and creates a weapon item in the inventory with them added to the fiery/touch/dangerous/3 uses base tags. Every attack with that weapon (melee or ranged) reduces its \"N uses\" tag by 1, and it's removed once it hits 0 (the Attack Assistant setting must also be enabled)."
+      },
+      "BurningBrandMoveNames": {
+        "Name": "Burning Brand Move Names",
+        "Hint": "Comma-separated list (default: Burning Brand)."
+      },
       "EnableVitalsAssistant": {
         "Name": "Enable Max HP/Load Recalculation Buttons",
         "Hint": "Same idea as the armor recalculation button: turns the sheet's HP and Weight labels into clickable buttons. Clicking one applies class base + Constitution score for max HP, and class base + Strength modifier for base load (matching the dungeonworld system's own class-selection calculation exactly — HP and load intentionally use different formulas). Hovering shows the formula first. If the sheet's class field is empty or unrecognized, only a warning is shown and nothing changes."
@@ -424,6 +432,9 @@
       "AmmoCountLabel": "How many will you use?",
       "AmmoSkip": "Don't consume",
       "AmmoConsumed": "{name} x{count} consumed (remaining: {remaining})",
+      "WeaponSpentSuffix": " (Spent)",
+      "WeaponUsesSpent": "Used up its last use",
+      "WeaponUsesRemaining": "Consumed 1 use (remaining: {remaining})",
       "Remaining": "remaining",
       "DamageFlavor": "{weapon} Damage",
       "ApplyFullTitle": "Apply full damage to selected tokens (Dungeon World system feature)",
@@ -510,7 +521,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names, Burning Brand Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -1016,6 +1027,11 @@
       "AskOff": "Not asking",
       "UsePrompt": "Spend preparation for +1 on this roll? (currently {reserve})",
       "Consumed": "Spent 1 preparation for +1 on this roll (remaining: {remaining})"
+    },
+    "BurningBrand": {
+      "WeaponName": "Burning Brand",
+      "WeaponDescription": "A weapon of pure flame.",
+      "Created": "Conjured a weapon: {tags}"
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",

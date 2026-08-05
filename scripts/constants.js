@@ -88,5 +88,7 @@ export const SETTINGS = {
   RECRUIT_MOVE_NAMES: "recruitMoveNames",
   MODULE_VERSION_DISPLAY: "moduleVersionDisplay",
   ENABLE_BOLSTER_ASSISTANT: "enableBolsterAssistant",
-  BOLSTER_MOVE_NAMES: "bolsterMoveNames"
+  BOLSTER_MOVE_NAMES: "bolsterMoveNames",
+  ENABLE_BURNING_BRAND_ASSISTANT: "enableBurningBrandAssistant",
+  BURNING_BRAND_MOVE_NAMES: "burningBrandMoveNames"
 };

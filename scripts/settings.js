@@ -118,14 +118,16 @@ export function registerSettings() {
   // 무기는 데미지 굴림 시 무기 목록에서 제외되지 않도록 폴백 처리한다
   // (attack-assistant.js의 promptWeaponChoice 참고).
   // 던전월드 기본 무기는 근접이 hand/close/reach, 사격이 near/far 태그를 쓰므로
-  // 기본값은 그에 맞춰뒀다.
+  // 기본값은 그에 맞춰뒀다. touch(반드시 인접해야 하는 사거리)도 사실상
+  // 근접이라 포함한다 — 소각술사 불타는 낙인의 무기가 기본으로 이 태그를
+  // 가진다(features/burning-brand.js 참고).
   game.settings.register(MODULE_ID, SETTINGS.MELEE_WEAPON_TAGS, {
     name: "DWAUTO.Settings.MeleeWeaponTags.Name",
     hint: "DWAUTO.Settings.MeleeWeaponTags.Hint",
     scope: "world",
     config: true,
     type: String,
-    default: "hand, close, reach"
+    default: "hand, close, reach, touch"
   });
 
   game.settings.register(MODULE_ID, SETTINGS.RANGED_WEAPON_TAGS, {
@@ -1155,5 +1157,29 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Bolster"
+  });
+
+  // 소각술사 핵심 액션 불타는 낙인(Burning Brand): 발동하면 결과 등급에
+  // 따라 추가 태그를 고르고(성공 2개/부분성공 1개/실패 0개), fiery/touch/
+  // dangerous/3 uses 기본 태그에 반영해서 무기 아이템을 인벤토리에
+  // 만들어준다. "N uses" 태그 소모는 attack-assistant.js가 담당한다(근접/
+  // 사격 구분 없이 이 무기로 공격할 때마다 1씩 줄어든다). 자세한 설계는
+  // features/burning-brand.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BURNING_BRAND_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBurningBrandAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBurningBrandAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BURNING_BRAND_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BurningBrandMoveNames.Name",
+    hint: "DWAUTO.Settings.BurningBrandMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Burning Brand"
   });
 }
