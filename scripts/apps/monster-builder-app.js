@@ -69,11 +69,22 @@ export class MonsterBuilderApp extends FormApplication {
     const data = foundry.utils.expandObject(formData);
     const result = computeMonsterBuild(data);
 
+    // 시트의 "태그" 칸(system.tags)은 아이템 태그와 완전히 같은 형식이다
+    // (JSON.stringify한 {value}[] + 쉼표로 합친 표시용 tagsString — 던전월드
+    // 시스템의 actor-sheet.js _prepareNpcItems가 그렇게 파싱한다). 여기서
+    // 안 채워주면 계산은 다 되는데 시트에는 아무것도 안 보이는 상태가 된다.
+    const allTags = [...result.tags, ...result.rangeTags];
+    const tagsJson = JSON.stringify(allTags.map((value) => ({ value })));
+    const tagsString = allTags.join(", ");
+
     await this.actor.update({
       "system.attributes.damage.value": formatDamageFormula(result.damageDie, result.damageMod, result.rollMode),
+      "system.attributes.damage.piercing": result.pierce > 0 ? `${result.pierce} piercing` : "",
       "system.attributes.ac.value": result.armor,
       "system.attributes.hp.value": result.hp,
       "system.attributes.hp.max": result.hp,
+      "system.tags": tagsJson,
+      "system.tagsString": tagsString,
       [`flags.${MODULE_ID}.${ANSWERS_FLAG}`]: data,
       [`flags.${MODULE_ID}.monsterTags`]: result.tags,
       [`flags.${MODULE_ID}.monsterRangeTags`]: result.rangeTags,

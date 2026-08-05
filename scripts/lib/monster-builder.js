@@ -106,6 +106,7 @@ export function computeMonsterBuild(data) {
     rollMode,
     armor,
     hp,
+    pierce,
     tags: uniqueTags,
     rangeTags: [...rangeTags],
     duplicateCount,
