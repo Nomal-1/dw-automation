@@ -2,10 +2,14 @@
   "DWAUTO": {
     "Cancel": "취소",
     "Confirm": "확인",
+    "VersionInfo": {
+      "Content": "지금 로드된 던전월드 자동화 툴킷 버전입니다."
+    },
     "Settings": {
       "ModuleVersion": {
         "Name": "던전월드 자동화 툴킷 버전",
-        "Hint": "지금 로드된 이 모듈의 버전입니다(참고용, 값을 바꿔도 아무 효과가 없습니다)."
+        "Label": "버전 확인",
+        "Hint": "지금 로드된 이 모듈의 버전을 보여줍니다(참고용)."
       },
       "EnableNpcGenerator": {
         "Name": "NPC 자동 생성 사용",
@@ -422,6 +426,8 @@
       "ConfirmTitle": "데미지 굴림",
       "ConfirmContent": "<b>{name}</b>의 공격이 성공했습니다. 데미지를 굴릴까요?",
       "ConfirmContentExtreme": "<b>{name}</b>의 공격이 극단적으로 성공했습니다(12+)! 데미지를 굴릴까요?",
+      "HackAndSlashBonusPrompt": "빈틈을 보이고 대신 피해를 1d6 더 줄 수도 있습니다. 그렇게 하시겠습니까? (적의 공격에 노출됩니다 — 마스터가 판정)",
+      "HackAndSlashBonusApplied": "빈틈을 보이는 대신 데미지에 +1d6을 더합니다. 적의 공격에 노출되었습니다.",
       "WeaponDialogTitle": "공격 장비 선택",
       "WeaponLabel": "어떤 장비로 공격하셨나요?",
       "ModLabel": "데미지 수정치",

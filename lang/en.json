@@ -2,10 +2,14 @@
   "DWAUTO": {
     "Cancel": "Cancel",
     "Confirm": "Confirm",
+    "VersionInfo": {
+      "Content": "Currently loaded Dungeon World Automation Toolkit version."
+    },
     "Settings": {
       "ModuleVersion": {
         "Name": "Dungeon World Automation Toolkit Version",
-        "Hint": "The version of this module currently loaded (informational only, changing it has no effect)."
+        "Label": "Check Version",
+        "Hint": "Shows the version of this module currently loaded (informational)."
       },
       "EnableNpcGenerator": {
         "Name": "Enable NPC Generator",
@@ -422,6 +426,8 @@
       "ConfirmTitle": "Roll Damage",
       "ConfirmContent": "<b>{name}</b>'s attack succeeded. Roll damage?",
       "ConfirmContentExtreme": "<b>{name}</b>'s attack was an extreme success (12+)! Roll damage?",
+      "HackAndSlashBonusPrompt": "You may expose yourself to the enemy's attack for +1d6 damage. Do it? (GM adjudicates the exposure)",
+      "HackAndSlashBonusApplied": "Exposed yourself for +1d6 damage. You're open to the enemy's attack.",
       "WeaponDialogTitle": "Choose Weapon",
       "WeaponLabel": "Which weapon did you attack with?",
       "ModLabel": "Damage Modifier",

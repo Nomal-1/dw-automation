@@ -34,23 +34,22 @@ import { HoldGrantMovesMenu } from "./apps/hold-grant-moves-menu.js";
 import { DEFAULT_HOLD_GRANT_MOVES } from "./data/hold-grant-moves.js";
 import { SelfForwardMovesMenu } from "./apps/self-forward-moves-menu.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "./data/self-forward-moves.js";
+import { VersionInfoMenu } from "./apps/version-info-menu.js";
 
 export function registerSettings() {
-  // 설정 목록 맨 위에 지금 로드된 모듈 버전을 보여준다. 실제로 저장하거나
-  // 읽는 곳은 없는 순수 표시용이라, choices를 버전 값 하나만 있는 목록으로
-  // 줘서 드롭다운이 사실상 "고정 텍스트"처럼 보이게 한다(일반 문자열
-  // 입력칸으로 만들면 GM이 실수로 값을 고쳐서 뭔가 설정처럼 오해할 수
-  // 있다). Manage Modules 화면에도 버전이 나오지만, 이 모듈 설정을 여는
-  // 김에 지금 로드된 버전을 바로 확인할 수 있게 하기 위함이다.
-  const moduleVersion = game.modules.get(MODULE_ID)?.version ?? "?";
-  game.settings.register(MODULE_ID, SETTINGS.MODULE_VERSION_DISPLAY, {
+  // Foundry 설정 창은 메뉴(버튼으로 여는 것들)를 일반 설정보다 항상 먼저
+  // 보여준다 — 일반 설정으로 등록하면(예전 방식) 메뉴 목록을 다 지나야
+  // 나오는 아래쪽에 있어서 "맨 위"가 아니었다. 그래서 메뉴로 등록하고,
+  // 메뉴 중에서도 가장 먼저 등록해서 진짜 맨 위에 오게 한다. 값을 저장할
+  // 필요가 없는 순수 안내용이라 apps/version-info-menu.js가 Dialog를 그대로
+  // 재사용한다.
+  game.settings.registerMenu(MODULE_ID, SETTINGS.MODULE_VERSION_DISPLAY, {
     name: "DWAUTO.Settings.ModuleVersion.Name",
+    label: "DWAUTO.Settings.ModuleVersion.Label",
     hint: "DWAUTO.Settings.ModuleVersion.Hint",
-    scope: "world",
-    config: true,
-    type: String,
-    choices: { [moduleVersion]: moduleVersion },
-    default: moduleVersion
+    icon: "fas fa-info-circle",
+    type: VersionInfoMenu,
+    restricted: true
   });
 
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {

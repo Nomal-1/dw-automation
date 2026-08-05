@@ -508,7 +508,7 @@ function promptWeaponChoice(actor, ranged, extraDice) {
   }).render(true);
 }
 
-async function promptDamageRoll(actor, ranged, isExtreme) {
+async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "") {
   const content = isExtreme
     ? `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContentExtreme", { name: actor.name })}</p>`
     : `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContent", { name: actor.name })}</p>`;
@@ -520,7 +520,26 @@ async function promptDamageRoll(actor, ranged, isExtreme) {
   });
   if (!confirmed) return;
 
-  promptWeaponChoice(actor, ranged);
+  promptWeaponChoice(actor, ranged, extraDice);
+}
+
+// 접근전(Hack & Slash) 원문 성공(10+) 결과: "적에게 데미지를 주고 반격을
+// 피한다. 원한다면 빈틈을 보이는 대신 +1d6 데미지를 줄 수 있다." choices
+// 필드가 아니라 성공 결과 문구 안에 산문으로 서술돼 있어서(선택지 목록
+// 구조가 아니다) getMoveChoiceData로는 못 잡는다 — 근접 무브 이름 목록
+// (MELEE_MOVE_NAMES, 기본값 "Hack & Slash")에 있는 무브가 성공했을 때만
+// 별도로 물어본다. "빈틈"에 노출된 뒤 실제로 적의 반격을 받는지는 서사적
+// 판단(GM 재량)이라 안내만 남기고 자동으로 피해를 적용하지는 않는다.
+async function promptHackAndSlashBonus(actor, moveItem) {
+  const wantsBonus = await Dialog.confirm({
+    title: moveItem.name,
+    content: `<p>${game.i18n.localize("DWAUTO.Attack.HackAndSlashBonusPrompt")}</p>`,
+    defaultYes: false
+  });
+  if (!wantsBonus) return "";
+
+  announceActionApplied(actor, moveItem.name, game.i18n.localize("DWAUTO.Attack.HackAndSlashBonusApplied"));
+  return "1d6";
 }
 
 // 무브 자체의 "Choose N" 문구로 개수를 추정해보되(getMoveChoiceData), 설정
@@ -645,7 +664,20 @@ function onCreateChatMessage(message, options, userId) {
   } else if (hasChoices) {
     handleFlavorChoiceAttack(actor, moveItem, result, behavior.ranged, shouldDamage, info.isExtreme, behavior.pickCount);
   } else if (shouldDamage) {
-    promptDamageRoll(actor, behavior.ranged, info.isExtreme);
+    const isHackAndSlash =
+      result === "success" &&
+      !behavior.ranged &&
+      moveItem &&
+      splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(title);
+
+    if (isHackAndSlash) {
+      (async () => {
+        const bonusDice = await promptHackAndSlashBonus(actor, moveItem);
+        promptDamageRoll(actor, behavior.ranged, info.isExtreme, bonusDice);
+      })();
+    } else {
+      promptDamageRoll(actor, behavior.ranged, info.isExtreme);
+    }
   }
 }
 
