@@ -77,12 +77,27 @@ async function findMoveDocumentByName(name) {
   return docs.find((d) => d.name === name) ?? null;
 }
 
+// 컴펜디엄 문서를 pack.getDocuments()로 직접 읽으면, 번역 모듈(예:
+// dungeonworld-ko/Babele)이 활성화된 세계에서는 이름 자체가 이미 번역된
+// 채로 온다 — 그래서 "Burns Half As Long"이라는 영문 리터럴로 찾으면
+// 조용히 실패한다. 다른 곳(class-grant.js 등)은 설정값이 이미 번역된
+// 이름을 담고 있어서 문제가 없었는데, 여기는 설정이 아니라 코드에 박아둔
+// 고정 이름이라 번역을 직접 한 번 시도해야 한다.
 async function grantHalfAsLongIfMissing(actor) {
   if (findMoveByConfiguredNames(actor, SETTINGS.HALF_AS_LONG_MOVE_NAMES)) return null;
 
-  const doc = await findMoveDocumentByName("Burns Half As Long");
+  let targetName = "Burns Half As Long";
+  try {
+    const nameMap = await getMoveNameMap();
+    const translated = nameMap.get("Burns Half As Long");
+    if (translated) targetName = translated;
+  } catch (err) {
+    // 번역 데이터를 못 읽으면 영문 이름 그대로 시도한다.
+  }
+
+  const doc = await findMoveDocumentByName(targetName);
   if (!doc) {
-    console.warn(`${MODULE_ID} | twice-as-bright: couldn't find "Burns Half As Long" in the move compendium`);
+    console.warn(`${MODULE_ID} | twice-as-bright: couldn't find "${targetName}" in the move compendium`);
     return null;
   }
 

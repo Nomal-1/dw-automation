@@ -40,10 +40,17 @@ function onCreateChatMessage(message, options, userId) {
     if (!sendThoughtsNames.includes(title)) return;
 
     const wildfireNames = splitCommaList(SETTINGS.TWIN_HORN_WILDFIRE_MOVE_NAMES);
-    const hasWildfire = actor.items.some((i) => i.type === "move" && wildfireNames.includes(i.name));
-    if (!hasWildfire) return;
+    const wildfireItem = actor.items.find((i) => i.type === "move" && wildfireNames.includes(i.name));
+    if (!wildfireItem) return;
 
-    announceInfo(actor, game.i18n.localize("DWAUTO.TwinHornWildfire.Available"));
+    // 실제 효과 문구는 이 무브 자체가 컴펜디엄에 없어서 우리가 알 방법이
+    // 없다 — 대신 액터가 갖고 있는 그 무브 아이템에 이미 적혀 있는 설명을
+    // 그대로 안내 메시지에 같이 보여준다(GM이 시트에 직접 적어둔 효과 문구).
+    const description = wildfireItem.system?.description ?? "";
+    announceInfo(
+      actor,
+      `${game.i18n.localize("DWAUTO.TwinHornWildfire.Available")}${description ? `<br>${description}` : ""}`
+    );
   } catch (err) {
     console.error(`${MODULE_ID} | twin-horn-wildfire: onCreateChatMessage failed`, err);
   }
