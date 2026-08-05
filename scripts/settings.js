@@ -1311,4 +1311,24 @@ export function registerSettings() {
     type: String,
     default: "생각의 발신"
   });
+
+  // 소각술사 고급액션(6레벨 이후) 불로 맺은 언약: 자세한 설계는
+  // features/burning-ring-of-fire.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BURNING_RING_OF_FIRE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBurningRingOfFireAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBurningRingOfFireAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BURNING_RING_OF_FIRE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BurningRingOfFireMoveNames.Name",
+    hint: "DWAUTO.Settings.BurningRingOfFireMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Burning Ring Of Fire"
+  });
 }

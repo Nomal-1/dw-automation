@@ -103,5 +103,7 @@ export const SETTINGS = {
   LAST_BREATH_MOVE_NAMES: "lastBreathMoveNames",
   ENABLE_TWIN_HORN_WILDFIRE_ASSISTANT: "enableTwinHornWildfireAssistant",
   TWIN_HORN_WILDFIRE_MOVE_NAMES: "twinHornWildfireMoveNames",
-  SEND_THOUGHTS_MOVE_NAMES: "sendThoughtsMoveNames"
+  SEND_THOUGHTS_MOVE_NAMES: "sendThoughtsMoveNames",
+  ENABLE_BURNING_RING_OF_FIRE_ASSISTANT: "enableBurningRingOfFireAssistant",
+  BURNING_RING_OF_FIRE_MOVE_NAMES: "burningRingOfFireMoveNames"
 };
