@@ -30,6 +30,7 @@ import { registerKnowItAllAssistant } from "./features/know-it-all.js";
 import { registerVitalsAssistant } from "./features/vitals-assistant.js";
 import { registerEncumbranceAssistant } from "./features/encumbrance.js";
 import { registerRecruitAssistant } from "./features/recruit.js";
+import { registerBolsterAssistant } from "./features/bolster.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -71,3 +72,4 @@ registerKnowItAllAssistant();
 registerVitalsAssistant();
 registerEncumbranceAssistant();
 registerRecruitAssistant();
+registerBolsterAssistant();

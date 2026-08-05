@@ -23,6 +23,7 @@ import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
 import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
 import { promptRecruitPreRoll } from "../features/recruit.js";
+import { promptBolsterPreRoll } from "../features/bolster.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -101,7 +102,11 @@ async function wrappedRoll(wrapped, ...args) {
   const iAmTheLaw = await promptIAmTheLawPreRoll(this);
   if (iAmTheLaw.cancel) return undefined;
   const knowItAll = await promptKnowItAllPreRoll(this);
-  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus;
+
+  // 수련(Bolster) 예비도 "이 판정에 쓸지" 매번 물어봐야 하는 사전 확인이라
+  // 같은 자리에서 처리한다(features/bolster.js 참고).
+  const bolster = await promptBolsterPreRoll(this);
+  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus + bolster.bonus;
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

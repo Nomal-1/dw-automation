@@ -36,6 +36,23 @@ import { SelfForwardMovesMenu } from "./apps/self-forward-moves-menu.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "./data/self-forward-moves.js";
 
 export function registerSettings() {
+  // 설정 목록 맨 위에 지금 로드된 모듈 버전을 보여준다. 실제로 저장하거나
+  // 읽는 곳은 없는 순수 표시용이라, choices를 버전 값 하나만 있는 목록으로
+  // 줘서 드롭다운이 사실상 "고정 텍스트"처럼 보이게 한다(일반 문자열
+  // 입력칸으로 만들면 GM이 실수로 값을 고쳐서 뭔가 설정처럼 오해할 수
+  // 있다). Manage Modules 화면에도 버전이 나오지만, 이 모듈 설정을 여는
+  // 김에 지금 로드된 버전을 바로 확인할 수 있게 하기 위함이다.
+  const moduleVersion = game.modules.get(MODULE_ID)?.version ?? "?";
+  game.settings.register(MODULE_ID, SETTINGS.MODULE_VERSION_DISPLAY, {
+    name: "DWAUTO.Settings.ModuleVersion.Name",
+    hint: "DWAUTO.Settings.ModuleVersion.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: { [moduleVersion]: moduleVersion },
+    default: moduleVersion
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR, {
     name: "DWAUTO.Settings.EnableNpcGenerator.Name",
     hint: "DWAUTO.Settings.EnableNpcGenerator.Hint",
@@ -1115,5 +1132,28 @@ export function registerSettings() {
     config: true,
     type: String,
     default: "Recruit"
+  });
+
+  // 던전월드 기본 무브 수련(Bolster): 발동하면 예비(최대 3점)를 얻고,
+  // 나중에 판정 하나마다 예비 1점을 써서 +1을 받는다. 예비는 숫자
+  // 카운터로 관리하고(시트에서 GM이 실시간 조정 가능), "매 판정마다
+  // 물어볼지" 토글은 플레이어/GM 둘 다 조작할 수 있다. 자세한 설계는
+  // features/bolster.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BOLSTER_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBolsterAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBolsterAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BOLSTER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BolsterMoveNames.Name",
+    hint: "DWAUTO.Settings.BolsterMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Bolster"
   });
 }

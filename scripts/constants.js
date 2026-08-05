@@ -85,5 +85,8 @@ export const SETTINGS = {
   ENABLE_VITALS_ASSISTANT: "enableVitalsAssistant",
   ENABLE_ENCUMBRANCE_ASSISTANT: "enableEncumbranceAssistant",
   ENABLE_RECRUIT_ASSISTANT: "enableRecruitAssistant",
-  RECRUIT_MOVE_NAMES: "recruitMoveNames"
+  RECRUIT_MOVE_NAMES: "recruitMoveNames",
+  MODULE_VERSION_DISPLAY: "moduleVersionDisplay",
+  ENABLE_BOLSTER_ASSISTANT: "enableBolsterAssistant",
+  BOLSTER_MOVE_NAMES: "bolsterMoveNames"
 };
