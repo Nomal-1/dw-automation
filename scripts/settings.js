@@ -1231,4 +1231,25 @@ export function registerSettings() {
     type: String,
     default: "Burns Half As Long"
   });
+
+  // 소각술사 고급액션 죽어주는 불꽃(This Killing Fire): 이 무브를 가진 채로
+  // 불타는 낙인을 쓰면 선택지에 태그 5개(messy/forceful/reach/near/far)가
+  // 추가된다. 자세한 설계는 features/burning-brand.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_THIS_KILLING_FIRE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableThisKillingFireAssistant.Name",
+    hint: "DWAUTO.Settings.EnableThisKillingFireAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.THIS_KILLING_FIRE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ThisKillingFireMoveNames.Name",
+    hint: "DWAUTO.Settings.ThisKillingFireMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "This Killing Fire"
+  });
 }

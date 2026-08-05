@@ -95,5 +95,7 @@ export const SETTINGS = {
   DEFEND_MOVE_NAMES: "defendMoveNames",
   ENABLE_TWICE_AS_BRIGHT_ASSISTANT: "enableTwiceAsBrightAssistant",
   TWICE_AS_BRIGHT_MOVE_NAMES: "twiceAsBrightMoveNames",
-  HALF_AS_LONG_MOVE_NAMES: "halfAsLongMoveNames"
+  HALF_AS_LONG_MOVE_NAMES: "halfAsLongMoveNames",
+  ENABLE_THIS_KILLING_FIRE_ASSISTANT: "enableThisKillingFireAssistant",
+  THIS_KILLING_FIRE_MOVE_NAMES: "thisKillingFireMoveNames"
 };

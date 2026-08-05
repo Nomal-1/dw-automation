@@ -24,6 +24,22 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 // 데미지를 굴릴 때마다(근접/사격 구분 없이) 처리한다.
 const BASE_TAGS = ["fiery", "touch", "dangerous", "3 uses"];
 const CHOICE_EFFECTS = [{ addTag: "hand" }, { addTag: "thrown, near" }, { addTag: "+1 damage" }, { removeTag: "dangerous" }];
+
+// 소각술사 고급액션 죽어주는 불꽃(This Killing Fire) 원문: "Add the following
+// tags to your options for Burning Brand: messy, forceful, reach, near, far."
+// — 이 무브를 가진 채로 불타는 낙인을 쓰면 고를 수 있는 선택지에 이 5개가
+// 추가된다(원래 4개 선택지에 이어붙인다). 태그 값 자체는 다른 무기 태그와
+// 마찬가지로 영문 그대로 쓴다(근접/사격 태그 자동 인식 설정 등이 영문
+// 태그와 비교하기 때문). 표시용 문구만 한국어로 직접 적어둔다(불타는
+// 낙인의 기본 4개와 달리 컴펜디엄의 choices 목록에서 자동으로 안 딸려오므로).
+const THIS_KILLING_FIRE_EXTRA_EFFECTS = [
+  { addTag: "messy", labelKey: "DWAUTO.BurningBrand.ThisKillingFireMessy" },
+  { addTag: "forceful", labelKey: "DWAUTO.BurningBrand.ThisKillingFireForceful" },
+  { addTag: "reach", labelKey: "DWAUTO.BurningBrand.ThisKillingFireReach" },
+  { addTag: "near", labelKey: "DWAUTO.BurningBrand.ThisKillingFireNear" },
+  { addTag: "far", labelKey: "DWAUTO.BurningBrand.ThisKillingFireFar" }
+];
+
 const USES_TAG_PATTERN = /^(\d+)\s*uses?$/i;
 
 function parseTagsArray(item) {
@@ -97,10 +113,16 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
-async function createBrandWeapon(actor, moveItem, chosenIndexes) {
+function hasThisKillingFire(actor) {
+  if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_THIS_KILLING_FIRE_ASSISTANT)) return false;
+  const names = splitCommaList(SETTINGS.THIS_KILLING_FIRE_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
+async function createBrandWeapon(actor, moveItem, chosenIndexes, effectsList = CHOICE_EFFECTS) {
   let tags = [...BASE_TAGS];
   for (const idx of chosenIndexes) {
-    const effect = CHOICE_EFFECTS[idx - 1];
+    const effect = effectsList[idx - 1];
     if (!effect) continue;
     if (effect.removeTag) tags = tags.filter((t) => t !== effect.removeTag);
     else if (effect.addTag) tags.push(effect.addTag);
@@ -148,7 +170,14 @@ async function onCreateChatMessage(message, options, userId) {
     if (!moveItem) return;
 
     const count = result === "success" ? 2 : result === "partial" ? 1 : 0;
-    const { options: choiceOptions } = getMoveChoiceData(moveItem, result);
+    const { options: baseChoiceOptions } = getMoveChoiceData(moveItem, result);
+
+    let choiceOptions = baseChoiceOptions;
+    let effectsList = CHOICE_EFFECTS;
+    if (hasThisKillingFire(actor)) {
+      choiceOptions = [...baseChoiceOptions, ...THIS_KILLING_FIRE_EXTRA_EFFECTS.map((e) => game.i18n.localize(e.labelKey))];
+      effectsList = [...CHOICE_EFFECTS, ...THIS_KILLING_FIRE_EXTRA_EFFECTS];
+    }
 
     let indexes = [];
     if (count > 0 && choiceOptions.length > 0) {
@@ -163,7 +192,7 @@ async function onCreateChatMessage(message, options, userId) {
       });
     }
 
-    await createBrandWeapon(actor, moveItem, indexes);
+    await createBrandWeapon(actor, moveItem, indexes, effectsList);
   } catch (err) {
     console.error(`${MODULE_ID} | burning-brand: onCreateChatMessage failed`, err);
   }
