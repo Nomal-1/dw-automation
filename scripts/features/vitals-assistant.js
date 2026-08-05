@@ -4,9 +4,18 @@ import { getClassNameMap } from "../lib/translation-import.js";
 
 // 장갑(armor-assistant.js) 재계산 버튼과 완전히 같은 패턴으로, 캐릭터 시트의
 // '체력'/'무게' 라벨을 클릭 가능한 버튼으로 바꿔서 최대 체력/기본 하중을
-// 자동으로 계산해준다. 던전월드 규칙: 최대 체력 = 직업 기본값 + 체력(CON)
-// 점수, 기본 하중 = 직업 기본값 + 근력(STR) 점수(수정치가 아니라 능력치
-// 원점수를 더한다). 직업별 기본값은 data/class-base-stats.js 참고.
+// 자동으로 계산해준다.
+//
+// 던전월드 시스템 자체(actor-sheet.js의 레벨업/직업 선택 처리)가 이미 이
+// 계산을 하고 있어서, 그 로직을 그대로 따른다 — 확인해보니 체력과 하중이
+// 서로 다른 공식을 쓰는 게 시스템/룰북의 의도된 비대칭 규칙이다:
+//   - 최대 체력 = 직업 기본값 + 체력(CON) "원점수"(system.abilities.con.value)
+//   - 기본 하중 = 직업 기본값 + 근력(STR) "수정치"(system.abilities.str.mod,
+//     시스템의 DwUtility.getAbilityMod와 동일한 값)
+// 던전월드 시스템 자체 설정(월드 설정, 이 모듈 설정이 아님)인
+// "noConstitutionToHP"/"noSTRToMaxLoad"가 켜져 있으면 그 능력치 기여분을
+// 아예 0으로 두는 것까지 시스템과 동일하게 반영한다. 직업별 기본값은
+// data/class-base-stats.js 참고.
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_VITALS_ASSISTANT);
 }
@@ -34,6 +43,10 @@ async function resolveClassKey(actor) {
   return null;
 }
 
+function formatSigned(n) {
+  return n >= 0 ? `+${n}` : `${n}`;
+}
+
 function buildTooltip(classKey, base, formulaKey) {
   if (!classKey) return game.i18n.localize("DWAUTO.Vitals.NoClassTooltip");
   return `${game.i18n.format(formulaKey, { base })}\n${game.i18n.localize("DWAUTO.Vitals.ClickHint")}`;
@@ -50,7 +63,8 @@ async function recalcHp(actor) {
   }
 
   const { hp: base } = CLASS_BASE_STATS[classKey];
-  const con = Number(actor.system.abilities?.con?.value) || 0;
+  const noConstitutionToHp = game.settings.get("dungeonworld", "noConstitutionToHP");
+  const con = noConstitutionToHp ? 0 : Number(actor.system.abilities?.con?.value) || 0;
   const total = base + con;
   await actor.update({ "system.attributes.hp.max": total });
   ChatMessage.create({
@@ -67,12 +81,13 @@ async function recalcLoad(actor) {
   }
 
   const { load: base } = CLASS_BASE_STATS[classKey];
-  const str = Number(actor.system.abilities?.str?.value) || 0;
-  const total = base + str;
+  const noStrToMaxLoad = game.settings.get("dungeonworld", "noSTRToMaxLoad");
+  const strMod = noStrToMaxLoad ? 0 : Number(actor.system.abilities?.str?.mod) || 0;
+  const total = base + strMod;
   await actor.update({ "system.attributes.weight.max": total });
   ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),
-    content: `<p class="dwauto-action-applied"><i class="fas fa-check-circle"></i> ${game.i18n.format("DWAUTO.Vitals.LoadApplied", { base, str, total })}</p>`
+    content: `<p class="dwauto-action-applied"><i class="fas fa-check-circle"></i> ${game.i18n.format("DWAUTO.Vitals.LoadApplied", { base, str: formatSigned(strMod), total })}</p>`
   });
 }
 
