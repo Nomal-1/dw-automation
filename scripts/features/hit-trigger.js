@@ -12,6 +12,8 @@ import { isHungerPenaltyActive, setHungerPenaltyActive } from "../lib/hunger-pen
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
+import { findBurningBrandWeapon, addBurningBrandUses } from "./burning-brand.js";
+import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -275,6 +277,90 @@ export function getOngoingPenaltyMalus(actor) {
   return isHungerPenaltyActive(actor) ? -1 : 0;
 }
 
+// 소각술사 불에는 불(Fighting Fire with Fire) 전용 선택 다이얼로그. "불타는
+// 낙인 사용 횟수를 추가한다"는 지금 활성화된 불타는 낙인 무기가 있을 때만
+// 보여준다(원문 "if active").
+function promptFireAidChoice(row, amount, hasBurningBrand) {
+  return new Promise((resolve) => {
+    const buttons = {};
+    if (hasBurningBrand) {
+      buttons.addUses = {
+        label: game.i18n.format("DWAUTO.HitTrigger.FireAidAddUses", { amount }),
+        callback: () => resolve("addUses")
+      };
+    }
+    buttons.forward = {
+      label: game.i18n.format("DWAUTO.HitTrigger.FireAidForward", { amount }),
+      callback: () => resolve("forward")
+    };
+    buttons.reduceDamage = {
+      label: game.i18n.format("DWAUTO.HitTrigger.FireAidReduceDamage", { amount }),
+      callback: () => resolve("reduceDamage")
+    };
+
+    new Dialog({
+      title: row.name,
+      content: `<p>${game.i18n.format("DWAUTO.HitTrigger.FireAidInstruction", { amount })}</p>`,
+      buttons,
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
+// 소각술사 불에는 불 원문: "홀수 피해를 받으면(방어구 적용 후) 1d4를 굴려서,
+// 그 결과만큼 (1) 활성화된 불타는 낙인의 사용 횟수에 더하거나 (2) 다음
+// 불타는 낙인 판정에 forward로 받거나 (3) 받는 피해를 그만큼 줄인다 중
+// 하나를 고른다." (1)/(2)는 피해 자체를 줄이지 않으므로 원래 피해를 그대로
+// 적용하도록 null을 반환하고(호출부가 originalChanges를 그대로 적용한다),
+// (3)만 applySpellDefense와 같은 방식으로 직접 재계산한 피해를 적용하고
+// true를 반환한다. 선택을 취소하면(대화상자 닫기 포함) 굴린 1d4는 그냥
+// 버려지고 원래 피해가 그대로 적용된다.
+async function applyFireAid(actor, row, damage, originalChanges, originalOptions) {
+  const roll = new Roll("1d4");
+  await roll.evaluate();
+  await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: row.name });
+  const amount = roll.total;
+
+  const burningBrandWeapon = findBurningBrandWeapon(actor);
+  const choice = await promptFireAidChoice(row, amount, Boolean(burningBrandWeapon));
+  if (!choice) return null;
+
+  if (choice === "addUses") {
+    await addBurningBrandUses(burningBrandWeapon, amount);
+    announceActionApplied(
+      actor,
+      row.name,
+      game.i18n.format("DWAUTO.HitTrigger.FireAidAddUsesApplied", { amount, weapon: burningBrandWeapon.name })
+    );
+    return null;
+  }
+
+  if (choice === "forward") {
+    const burningBrandNames = new Set(splitCommaList(SETTINGS.BURNING_BRAND_MOVE_NAMES));
+    try {
+      const nameMap = await getMoveNameMap();
+      const translated = nameMap.get("Burning Brand");
+      if (translated) burningBrandNames.add(translated);
+    } catch (err) {
+      // 번역 데이터를 못 읽으면 설정값만으로 제한한다.
+    }
+    const restrictToMoveNames = burningBrandNames.size > 0 ? [...burningBrandNames] : null;
+    await setPendingRollBonus(actor, amount, row.name, restrictToMoveNames);
+    announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.FireAidForwardApplied", { amount }));
+    return null;
+  }
+
+  const reducedDamage = Math.max(0, damage - amount);
+  const adjustedChanges = buildHpChange(originalChanges, actor, reducedDamage);
+  await actor.update(adjustedChanges, { ...originalOptions, [SKIP_FLAG]: true });
+  announceActionApplied(
+    actor,
+    row.name,
+    game.i18n.format("DWAUTO.HitTrigger.FireAidReduceDamageApplied", { amount, original: damage, damage: reducedDamage })
+  );
+  return true;
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
@@ -285,6 +371,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
     if (row.effect === "hold") return getHold(actor) > 0;
     if (row.effect === "animalCompanion") return !isFerocitySpent(actor);
     if (row.effect === "ongoingPenalty") return !isHungerPenaltyActive(actor);
+    if (row.effect === "fireAid") return damage % 2 !== 0;
     return true;
   });
   if (usable.length === 0) {
@@ -341,6 +428,9 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
             await applyAnimalCompanionNegation(actor, row);
           } else if (row.effect === "ongoingPenalty") {
             await applyOngoingPenaltyNegation(actor, row);
+          } else if (row.effect === "fireAid") {
+            const applied = await applyFireAid(actor, row, damage, originalChanges, originalOptions);
+            if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else {
             const applied = await applyArmorNegation(actor, row, damage);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });

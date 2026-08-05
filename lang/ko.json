@@ -544,7 +544,8 @@
         "spellDefense": "지속 주문 종료 + 레벨만큼 경감",
         "hold": "hold 소비 + 완전 무효화",
         "animalCompanion": "동반 동물이 대신 맞음 + 완전 무효화",
-        "ongoingPenalty": "욕구를 채울 때까지 -1 ongoing + 완전 무효화"
+        "ongoingPenalty": "욕구를 채울 때까지 -1 ongoing + 완전 무효화",
+        "fireAid": "홀수 피해일 때 1d4 굴려 선택(사용 횟수/forward/경감)"
       },
       "GrantsForward": "forward +1 부여",
       "AddRow": "행 추가",
@@ -576,7 +577,14 @@
       "OngoingPenaltyApplied": "욕구를 채울 때까지 모든 판정에 -1 ongoing을 지게 되었습니다",
       "HungerPenaltyToggleTitle": "클릭하면 욕구 페널티 상태를 켜고 끕니다. 페널티가 있는 동안에는 이 무브를 쓸 수 없고, 욕구를 채우면(예: 식사) 다시 클릭해서 정상으로 되돌리세요.",
       "HungerPenaltyActive": "페널티 적용중",
-      "HungerPenaltyReady": "정상"
+      "HungerPenaltyReady": "정상",
+      "FireAidInstruction": "1d4를 굴려 {amount}가 나왔습니다. 무엇에 쓰시겠습니까?",
+      "FireAidAddUses": "불타는 낙인 사용 횟수에 {amount} 추가",
+      "FireAidForward": "다음 불타는 낙인 판정에 forward로 {amount} 가져가기",
+      "FireAidReduceDamage": "받는 피해를 {amount}만큼 경감",
+      "FireAidAddUsesApplied": "1d4({amount})를 굴려 \"{weapon}\"의 사용 횟수에 {amount}를 더했습니다",
+      "FireAidForwardApplied": "1d4({amount})를 굴려 다음 불타는 낙인 판정에 forward로 {amount}를 가져갑니다",
+      "FireAidReduceDamageApplied": "1d4({amount})를 굴려 원래 피해 {original}에서 {amount}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",

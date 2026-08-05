@@ -24,6 +24,53 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 // 데미지를 굴릴 때마다(근접/사격 구분 없이) 처리한다.
 const BASE_TAGS = ["fiery", "touch", "dangerous", "3 uses"];
 const CHOICE_EFFECTS = [{ addTag: "hand" }, { addTag: "thrown, near" }, { addTag: "+1 damage" }, { removeTag: "dangerous" }];
+const USES_TAG_PATTERN = /^(\d+)\s*uses?$/i;
+
+function parseTagsArray(item) {
+  try {
+    const raw = item.system?.tags;
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function tagsArrayToString(tagsArray) {
+  return tagsArray.map((t) => t?.value ?? "").join(", ");
+}
+
+// features/hit-trigger.js(불에는 불)가 재사용한다. 이 액터가 지금 갖고
+// 있는 불타는 낙인 무기(이 파일이 만든 이름이 같고, "N uses" 태그를 가진
+// 장비)를 찾는다 — 원문의 "if active"를 판정하는 데 쓴다. 없으면 null.
+export function findBurningBrandWeapon(actor) {
+  const weaponName = game.i18n.localize("DWAUTO.BurningBrand.WeaponName");
+  return (
+    actor.items.find((i) => {
+      if (i.type !== "equipment" || i.name !== weaponName) return false;
+      return parseTagsArray(i).some((t) => USES_TAG_PATTERN.test((t?.value ?? "").trim()));
+    }) ?? null
+  );
+}
+
+// features/hit-trigger.js가 재사용한다. 불타는 낙인 무기의 "N uses" 태그에
+// amount를 더한다(공격 소모는 attack-assistant.js의 consumeWeaponUses가
+// 반대로 깎는다). 상한은 두지 않는다 — 화살 등 다른 소모품 태그도 이
+// 모듈이 별도 상한을 두지 않는 것과 같다.
+export async function addBurningBrandUses(weapon, amount) {
+  const tags = parseTagsArray(weapon);
+  const idx = tags.findIndex((t) => USES_TAG_PATTERN.test((t?.value ?? "").trim()));
+  if (idx === -1) return;
+
+  const match = USES_TAG_PATTERN.exec(tags[idx].value.trim());
+  const current = Number(match[1]) || 0;
+  const nextTags = [...tags];
+  nextTags[idx] = { value: `${current + amount} uses` };
+
+  await weapon.update({
+    "system.tags": JSON.stringify(nextTags),
+    "system.tagsString": tagsArrayToString(nextTags)
+  });
+}
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_BURNING_BRAND_ASSISTANT);

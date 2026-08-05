@@ -19,7 +19,13 @@
 //   페널티를 지고 있으면 이 무브 자체를 쓸 수 없고(원문 그대로), "욕구를
 //   채움"은 animalCompanion과 같은 이유로 채팅 트리거로 자동 감지할 수
 //   없어서 캐릭터 시트의 배지를 눌러 수동으로 되돌린다. -1은 모든 판정에
-//   실시간으로 적용되며 lib/roll-wrapper.js가 매 판정마다 확인한다)
+//   실시간으로 적용되며 lib/roll-wrapper.js가 매 판정마다 확인한다) |
+//   "fireAid"(소각술사 Fighting Fire with Fire 전용 — 완전 무효화가 아니라
+//   피해가 "홀수"일 때만 쓸 수 있고, 1d4를 굴려 그 결과만큼 [불타는 낙인
+//   사용 횟수 추가(불타는 낙인이 활성 상태일 때만) / 다음 불타는 낙인
+//   판정에 forward로 그대로 가져가기 / 피해 경감] 중 하나를 고른다.
+//   피해 경감을 고르면 굴림 값이 받은 피해보다 크거나 같을 때 체력이
+//   원상복구된다)
 // - grantsForward: 무효화에 성공하면 +1 forward도 함께 받는지(Armored
 //   Perfection). 던전월드 시스템의 forward는 다음 굴림에 자동으로 붙었다가
 //   소모되는 값(system.attributes.forward.value)이라 별도 계산이 필요 없다.
@@ -32,7 +38,8 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Divine Intervention", effect: "hold", grantsForward: false },
   { name: "Divine Invincibility", effect: "hold", grantsForward: false },
   { name: "Man's Best Friend", effect: "animalCompanion", grantsForward: false },
-  { name: "Indestructible Hunger", effect: "ongoingPenalty", grantsForward: false }
+  { name: "Indestructible Hunger", effect: "ongoingPenalty", grantsForward: false },
+  { name: "Fighting Fire with Fire", effect: "fireAid", grantsForward: false }
 ];
 
 // 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,

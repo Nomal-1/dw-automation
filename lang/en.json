@@ -544,7 +544,8 @@
         "spellDefense": "End ongoing spell + reduce by its level",
         "hold": "Spend hold + full negation",
         "animalCompanion": "Animal companion takes the blow + full negation",
-        "ongoingPenalty": "-1 ongoing until sated + full negation"
+        "ongoingPenalty": "-1 ongoing until sated + full negation",
+        "fireAid": "On odd damage, roll 1d4 and choose (add uses/forward/reduce)"
       },
       "GrantsForward": "Grants +1 forward",
       "AddRow": "Add Row",
@@ -576,7 +577,14 @@
       "OngoingPenaltyApplied": "Took -1 ongoing on all rolls until an appetite is sated",
       "HungerPenaltyToggleTitle": "Click to toggle the hunger penalty. This move can't be used while the penalty is active — click again once it's sated (e.g. by eating) to reset.",
       "HungerPenaltyActive": "Penalty active",
-      "HungerPenaltyReady": "Ready"
+      "HungerPenaltyReady": "Ready",
+      "FireAidInstruction": "You rolled 1d4 and got {amount}. What do you want to do with it?",
+      "FireAidAddUses": "Add {amount} uses to your Burning Brand",
+      "FireAidForward": "Take {amount} forward to your next Burning Brand roll",
+      "FireAidReduceDamage": "Reduce the damage you take by {amount}",
+      "FireAidAddUsesApplied": "Rolled 1d4 ({amount}) and added {amount} uses to \"{weapon}\"",
+      "FireAidForwardApplied": "Rolled 1d4 ({amount}) and took {amount} forward to your next Burning Brand roll",
+      "FireAidReduceDamageApplied": "Rolled 1d4 ({amount}) — original damage {original} reduced by {amount}, so you actually take {damage}"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
