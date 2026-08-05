@@ -420,6 +420,51 @@
   color: #fff !important;
 }
 
+.dwauto-monster-reminders ul {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}
+
+.dwauto-monster-builder fieldset {
+  margin: 0 0 10px;
+  padding: 6px 10px 10px;
+  border: 1px solid #782e22;
+  border-radius: 4px;
+}
+
+.dwauto-monster-builder legend {
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.dwauto-monster-builder .dwauto-check-row,
+.dwauto-monster-builder .dwauto-radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 4px 0;
+  line-height: 1.3;
+}
+
+.dwauto-monster-builder .dwauto-sub-choice {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(120, 46, 34, 0.5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.dwauto-monster-builder .dwauto-sub-choice-label {
+  font-weight: bold;
+  width: 100%;
+}
+
+.dwauto-monster-builder .dwauto-inline {
+  margin: 2px 0;
+}
+
 .dwauto-upgrade-info {
   margin: 0 0 8px;
   padding: 4px 8px;

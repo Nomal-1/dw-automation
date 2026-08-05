@@ -1,0 +1,88 @@
+<form class="dwauto-monster-builder">
+  <p class="notes">{{localize "DWAUTO.MonsterBuilder.Hint"}}</p>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.Organization"}}</legend>
+    {{#each organizationOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="organization" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.Size"}}</legend>
+    {{#each sizeOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="size" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.Armor"}}</legend>
+    {{#each armorOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="armor" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.Fame"}}</legend>
+    {{#each fameOptions}}
+    <label class="dwauto-check-row">
+      <input type="checkbox" name="fame.{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+    <div class="dwauto-sub-choice">
+      <span class="dwauto-sub-choice-label">{{localize "DWAUTO.MonsterBuilder.BlessedChoiceLabel"}}</span>
+      {{#each blessedChoiceOptions}}
+      <label class="dwauto-radio-row dwauto-inline">
+        <input type="radio" name="blessedChoice" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+        {{this.label}}
+      </label>
+      {{/each}}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.AttackName"}}</legend>
+    <input type="text" name="attackName" value="{{attackName}}" placeholder="{{localize 'DWAUTO.MonsterBuilder.AttackNamePlaceholder'}}">
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.AttackTraits"}}</legend>
+    {{#each attackTraitOptions}}
+    <label class="dwauto-check-row">
+      <input type="checkbox" name="attackTraits.{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.MonsterBuilder.Q.Traits"}}</legend>
+    {{#each traitOptions}}
+    <label class="dwauto-check-row">
+      <input type="checkbox" name="traits.{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <label class="dwauto-check-row">
+      <input type="checkbox" name="applyDuplicateBonus" {{#if applyDuplicateBonus}}checked{{/if}}>
+      {{localize "DWAUTO.MonsterBuilder.ApplyDuplicateBonus"}}
+    </label>
+  </fieldset>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-dice-d20"></i> {{localize "DWAUTO.MonsterBuilder.Submit"}}</button>
+  </footer>
+</form>
