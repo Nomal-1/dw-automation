@@ -409,14 +409,20 @@ async function handleIncomingDefend({ defender, victim, damage, changes, options
   await reapplyToVictim(victim, changes, options);
 }
 
-// 이 victim을 지금 지키고 있는(hold>0, 보호대상==victim) 첫 번째 방어자를
-// 찾는다. 자기 자신을 지키는 경우도 protectedActorId==defender.id==victim.id
-// 조건으로 자연스럽게 포함된다. 같은 대상을 동시에 지키는 방어자가 둘 이상
-// 있는 경우는(드문 상황이라) 첫 번째만 처리한다.
+// 방어 원문 그대로: "본인이나 지정한 대상이 피격당할 때 자동으로 발동" —
+// 이 victim이 (a) 지금 예비를 갖고 방어 태세인 사람 본인이거나, (b) 그
+// 사람이 지키기로 한 보호대상인 경우 둘 다 트리거된다. 방어자가 다른
+// 사람을 지키고 있는 도중에 방어자 자신이 맞아도(보호대상이 아니어도)
+// 예비를 쓸지 물어봐야 한다는 뜻이다 — "대신 맞기" 선택지만 그 경우
+// isSelfHit으로 따로 비활성화한다. 같은 대상을 동시에 트리거하는 방어자가
+// 둘 이상 있는 경우는(드문 상황이라) 첫 번째만 처리한다.
 function findFirstDefenderFor(victim) {
   return (
     game.actors.find(
-      (a) => a.type === "character" && getDefendReserve(a) > 0 && getDefendProtectedActorId(a) === victim.id
+      (a) =>
+        a.type === "character" &&
+        getDefendReserve(a) > 0 &&
+        (a.id === victim.id || getDefendProtectedActorId(a) === victim.id)
     ) ?? null
   );
 }
