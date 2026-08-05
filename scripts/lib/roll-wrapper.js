@@ -21,6 +21,7 @@ import { announceActionApplied } from "./announce.js";
 import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
 import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
 import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
+import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -86,15 +87,21 @@ async function consumePendingRollBonus(item, pendingBonus) {
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
+  // 하중 초과(+3 이상)로 짐을 버리지 않으면 판정 자체가 열리지 않으므로,
+  // 아래의 다른 사전 확인들보다 먼저 처리해서 어차피 취소될 판정에 쓸데없는
+  // 팝업이 뜨지 않게 한다.
+  const encumbrance = await promptEncumbrancePreRoll(this);
+  if (encumbrance.cancel) return undefined;
+
   // I Am The Law/Know-It-All이 대기 중이면 이 액터가 어떤 판정을 하든(ask
-  // 타입 포함) 먼저 확인을 받아야 하므로, 다른 분기보다 가장 먼저 처리한다.
+  // 타입 포함) 먼저 확인을 받아야 하므로, 다른 분기보다 먼저 처리한다.
   // cancel이면 이 판정 자체가 열리지 않는다(대기 중에 I Am The Law를 또
   // 굴리려는 경우 — Know-It-All은 대상 쪽에 걸리는 보정치라 재굴림을 막을
   // 이유가 없어 항상 cancel이 없다).
   const iAmTheLaw = await promptIAmTheLawPreRoll(this);
   if (iAmTheLaw.cancel) return undefined;
   const knowItAll = await promptKnowItAllPreRoll(this);
-  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus;
+  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor);
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

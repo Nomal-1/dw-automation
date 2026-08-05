@@ -350,6 +350,10 @@
         "Name": "Know-It-All Move Names",
         "Hint": "Comma-separated list (default: Know-It-All)."
       },
+      "EnableEncumbranceAssistant": {
+        "Name": "Enable Encumbrance Automation",
+        "Hint": "Compares current load against max load on every roll and applies a penalty automatically. At or under max: no effect. Over by 1-2: a quiet -1 (stays until you shed weight). Over by 3+: before the roll, asks whether you want to drop something — dropping at least 1 weight still gives -1 and lets the roll proceed; declining (or having nothing to drop) cancels the roll entirely and posts a chat notice that it's treated as an automatic 6 (failure)."
+      },
       "EnableVitalsAssistant": {
         "Name": "Enable Max HP/Load Recalculation Buttons",
         "Hint": "Same idea as the armor recalculation button: turns the sheet's HP and Weight labels into clickable buttons. Clicking one applies class base + Constitution score for max HP, and class base + Strength modifier for base load (matching the dungeonworld system's own class-selection calculation exactly — HP and load intentionally use different formulas). Hovering shows the formula first. If the sheet's class field is empty or unrecognized, only a warning is shown and nothing changes."
@@ -963,6 +967,16 @@
       "NoClassWarning": "Set a class for {name} first.",
       "HpApplied": "Max HP recalculation applied: {base}+CON({con}) = {total}",
       "LoadApplied": "Base load recalculation applied: {base}+STR({str}) = {total}"
+    },
+    "Encumbrance": {
+      "Weight": "Weight",
+      "Quantity": "Quantity",
+      "DropTitle": "Drop an Item",
+      "DropItemLabel": "Item to drop",
+      "DropCountLabel": "How many to drop",
+      "GateTitle": "Overloaded",
+      "GatePrompt": "You're over your load by {over}. To roll, you need to drop at least 1 weight worth of gear (you'll still take -1). Drop something now?",
+      "ForcedFailure": "{name} is overloaded and didn't drop anything, so the roll is treated as an automatic 6 (failure)."
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",

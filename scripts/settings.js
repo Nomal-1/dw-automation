@@ -1079,4 +1079,18 @@ export function registerSettings() {
     type: Boolean,
     default: true
   });
+
+  // 던전월드 기본 무브 짐(Encumbrance): 판정마다 현재 짐/최대 하중을 비교해서
+  // 자동으로 페널티를 반영한다. 하중+1~+2면 조용히 -1(짐을 덜 때까지 계속),
+  // +3 이상이면 판정 전에 짐을 버리라고 물어보고 버리지 않으면 판정 자체가
+  // 자동으로 6(실패)으로 처리된다. 자세한 설계는 features/encumbrance.js
+  // 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_ENCUMBRANCE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableEncumbranceAssistant.Name",
+    hint: "DWAUTO.Settings.EnableEncumbranceAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
 }

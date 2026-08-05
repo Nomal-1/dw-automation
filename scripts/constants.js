@@ -82,5 +82,6 @@ export const SETTINGS = {
   I_AM_THE_LAW_MOVE_NAMES: "iAmTheLawMoveNames",
   ENABLE_KNOW_IT_ALL_ASSISTANT: "enableKnowItAllAssistant",
   KNOW_IT_ALL_MOVE_NAMES: "knowItAllMoveNames",
-  ENABLE_VITALS_ASSISTANT: "enableVitalsAssistant"
+  ENABLE_VITALS_ASSISTANT: "enableVitalsAssistant",
+  ENABLE_ENCUMBRANCE_ASSISTANT: "enableEncumbranceAssistant"
 };
