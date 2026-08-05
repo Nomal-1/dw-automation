@@ -97,5 +97,8 @@ export const SETTINGS = {
   TWICE_AS_BRIGHT_MOVE_NAMES: "twiceAsBrightMoveNames",
   HALF_AS_LONG_MOVE_NAMES: "halfAsLongMoveNames",
   ENABLE_THIS_KILLING_FIRE_ASSISTANT: "enableThisKillingFireAssistant",
-  THIS_KILLING_FIRE_MOVE_NAMES: "thisKillingFireMoveNames"
+  THIS_KILLING_FIRE_MOVE_NAMES: "thisKillingFireMoveNames",
+  ENABLE_BURNING_BRIDGES_ASSISTANT: "enableBurningBridgesAssistant",
+  BURNING_BRIDGES_MOVE_NAMES: "burningBridgesMoveNames",
+  LAST_BREATH_MOVE_NAMES: "lastBreathMoveNames"
 };

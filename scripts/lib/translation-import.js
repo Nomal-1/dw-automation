@@ -518,6 +518,20 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, thisKillingFireMoveNames, stats)
   );
 
+  const burningBridgesMoveNames = game.settings.get(MODULE_ID, SETTINGS.BURNING_BRIDGES_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.BURNING_BRIDGES_MOVE_NAMES,
+    translateCommaList(moveMap, burningBridgesMoveNames, stats)
+  );
+
+  const lastBreathMoveNames = game.settings.get(MODULE_ID, SETTINGS.LAST_BREATH_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.LAST_BREATH_MOVE_NAMES,
+    translateCommaList(moveMap, lastBreathMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

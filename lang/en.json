@@ -417,6 +417,18 @@
       "ThisKillingFireMoveNames": {
         "Name": "This Killing Fire Move Names",
         "Hint": "Comma-separated (default: This Killing Fire)."
+      },
+      "EnableBurningBridgesAssistant": {
+        "Name": "Enable Burning Bridges Automation",
+        "Hint": "With this move, the moment you'd roll Last Breath you're asked whether to use Burning Bridges instead. If you do and have at least one Bond, that roll is canceled entirely, you choose a Bond to erase, and roll 1d6 to set your HP to that result. If you have no Bonds left, Last Breath proceeds normally."
+      },
+      "BurningBridgesMoveNames": {
+        "Name": "Burning Bridges Move Names",
+        "Hint": "Comma-separated (default: Burning Bridges)."
+      },
+      "LastBreathMoveNames": {
+        "Name": "Last Breath Move Names",
+        "Hint": "Comma-separated (default: Last Breath)."
       }
     },
     "Npc": {
@@ -587,7 +599,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names, Burning Brand Move Names, Defend Move Names, Burns Twice As Bright Move Names, Burns Half As Long Move Names, This Killing Fire Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names, Burning Brand Move Names, Defend Move Names, Burns Twice As Bright Move Names, Burns Half As Long Move Names, This Killing Fire Move Names, Burning Bridges Move Names, Last Breath Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -1146,6 +1158,16 @@
       "NoGmOnline": "No permission on {name} and no GM online, so the request couldn't be sent",
       "VengeanceGrantPermissionTitle": "Approve the vengeance bonus?",
       "VengeanceGrantPermissionContent": "<b>{defender}</b> wants to give <b>{ally}</b> +1 forward on their next roll against whoever attacked <b>{victim}</b>, but only has Observer permission on that target. Allow it?"
+    },
+    "BurningBridges": {
+      "PromptTitle": "Use Burning Bridges?",
+      "PromptContent": "Instead of Last Breath, you may erase one Bond and roll 1d6 to set your HP to that result, alive again. Use it?",
+      "NoBondsLeft": "No Bonds left to erase, so Last Breath proceeds as normal.",
+      "SelectBondTitle": "Choose a Bond to erase",
+      "SelectBondContent": "This is permanent — it also lowers your maximum number of Bonds going forward.",
+      "MoveLabel": "Burning Bridges",
+      "RollFlavor": "Burning Bridges — Revival",
+      "Applied": "Erased the Bond \"{bond}\" and came back alive (HP {hp})"
     },
     "TwiceAsBright": {
       "Locked": "You can't use this move again until you've used Burns Half As Long.",

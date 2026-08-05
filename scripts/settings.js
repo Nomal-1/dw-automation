@@ -1252,4 +1252,33 @@ export function registerSettings() {
     type: String,
     default: "This Killing Fire"
   });
+
+  // 소각술사 고급액션 사그라지는 인연(Burning Bridges): 자세한 설계는
+  // features/burning-bridges.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BURNING_BRIDGES_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBurningBridgesAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBurningBridgesAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BURNING_BRIDGES_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BurningBridgesMoveNames.Name",
+    hint: "DWAUTO.Settings.BurningBridgesMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Burning Bridges"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LAST_BREATH_MOVE_NAMES, {
+    name: "DWAUTO.Settings.LastBreathMoveNames.Name",
+    hint: "DWAUTO.Settings.LastBreathMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Last Breath"
+  });
 }

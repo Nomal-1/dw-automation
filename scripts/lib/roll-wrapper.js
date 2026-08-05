@@ -25,6 +25,7 @@ import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encum
 import { promptRecruitPreRoll } from "../features/recruit.js";
 import { promptBolsterPreRoll } from "../features/bolster.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
+import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -89,6 +90,12 @@ async function consumePendingRollBonus(item, pendingBonus) {
 
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
+
+  // 사그라지는 인연(황천길 대체)은 유대(BOND) 판정이라 rollMod로 개입할 수
+  // 없다 — 판정 자체가 열리기 전에 가장 먼저 물어봐야 한다(그래야 죽어가는
+  // 캐릭터에게 짐/수련 같은 다른 사전 확인 팝업이 먼저 뜨는 혼란도 없다).
+  const burningBridges = await promptBurningBridgesPreRoll(this);
+  if (burningBridges.cancel) return undefined;
 
   // 하중 초과(+3 이상)로 짐을 버리지 않으면(bonus로 거대한 음수를 돌려줘)
   // 판정 자체는 취소하지 않고 그대로 진행시킨다 — 그래야 시스템 자신의
