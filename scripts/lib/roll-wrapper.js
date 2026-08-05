@@ -87,11 +87,10 @@ async function consumePendingRollBonus(item, pendingBonus) {
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
-  // 하중 초과(+3 이상)로 짐을 버리지 않으면 판정 자체가 열리지 않으므로,
-  // 아래의 다른 사전 확인들보다 먼저 처리해서 어차피 취소될 판정에 쓸데없는
-  // 팝업이 뜨지 않게 한다.
+  // 하중 초과(+3 이상)로 짐을 버리지 않으면(bonus로 거대한 음수를 돌려줘)
+  // 판정 자체는 취소하지 않고 그대로 진행시킨다 — 그래야 시스템 자신의
+  // 성공/부분성공/실패 카드(경험치 획득 버튼 포함)가 그대로 뜬다.
   const encumbrance = await promptEncumbrancePreRoll(this);
-  if (encumbrance.cancel) return undefined;
 
   // I Am The Law/Know-It-All이 대기 중이면 이 액터가 어떤 판정을 하든(ask
   // 타입 포함) 먼저 확인을 받아야 하므로, 다른 분기보다 먼저 처리한다.
@@ -101,7 +100,7 @@ async function wrappedRoll(wrapped, ...args) {
   const iAmTheLaw = await promptIAmTheLawPreRoll(this);
   if (iAmTheLaw.cancel) return undefined;
   const knowItAll = await promptKnowItAllPreRoll(this);
-  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor);
+  const preRollBonus = iAmTheLaw.bonus + knowItAll.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus;
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

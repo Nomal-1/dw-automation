@@ -352,7 +352,7 @@
       },
       "EnableEncumbranceAssistant": {
         "Name": "Enable Encumbrance Automation",
-        "Hint": "Compares current load against max load on every roll and applies a penalty automatically. At or under max: no effect. Over by 1-2: a quiet -1 (stays until you shed weight). Over by 3+: before the roll, asks whether you want to drop something — dropping at least 1 weight still gives -1 and lets the roll proceed; declining (or having nothing to drop) cancels the roll entirely and posts a chat notice that it's treated as an automatic 6 (failure)."
+        "Hint": "Compares current load against max load on every roll and applies a penalty automatically. At or under max: no effect. Over by 1-2: a quiet -1 (stays until you shed weight). Over by 3+: before the roll, asks whether you want to drop something — dropping at least 1 weight still gives -1 and lets the roll proceed; declining (or having nothing to drop) doesn't cancel the roll — instead a huge negative modifier is added so the roll actually happens, producing the system's own success/partial/failure result card (mark-XP button included)."
       },
       "EnableVitalsAssistant": {
         "Name": "Enable Max HP/Load Recalculation Buttons",
@@ -976,7 +976,7 @@
       "DropCountLabel": "How many to drop",
       "GateTitle": "Overloaded",
       "GatePrompt": "You're over your load by {over}. To roll, you need to drop at least 1 weight worth of gear (you'll still take -1). Drop something now?",
-      "ForcedFailure": "{name} is overloaded and didn't drop anything, so the roll is treated as an automatic 6 (failure)."
+      "ForcedFailure": "{name} is overloaded and didn't drop anything, so this roll is guaranteed to fail."
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",
