@@ -366,9 +366,10 @@ function weaponTagsArrayToString(tagsArray) {
 
 // 소각술사 불타는 낙인처럼 "N uses" 태그를 가진 무기는 공격할 때마다(근접/
 // 사격 구분 없이) 사용 횟수가 1씩 준다(원문: "Each attack with the weapon
-// consumes one use"). 0이 되면 태그 자체를 지우고 이름 뒤에 소진 표시를
-// 붙인다 — armor-assistant.js의 damageArmorItem(장갑 태그 손상)과 같은
-// 패턴이다. 무기에 이 태그가 아예 없으면 조용히 아무것도 하지 않는다.
+// consumes one use"). 0이 되면 태그만 지우는 게 아니라 아이템 자체를
+// 삭제한다 — 이름만 바꿔두면 인벤토리에 그대로 남아 계속 공격에 쓸 수
+// 있어서, "다 쓴 무기는 더 이상 선택조차 안 되게" 하려면 실제로 지워야
+// 한다. 무기에 이 태그가 아예 없으면 조용히 아무것도 하지 않는다.
 async function consumeWeaponUses(weapon) {
   const tags = parseWeaponTagsArray(weapon);
   let matchedIndex = -1;
@@ -385,27 +386,25 @@ async function consumeWeaponUses(weapon) {
   if (matchedIndex === -1) return;
 
   const newValue = oldValue - 1;
-  const nextTags = [...tags];
   const spent = newValue <= 0;
+  const actor = weapon.actor;
+  const weaponName = weapon.name;
 
   if (spent) {
-    nextTags.splice(matchedIndex, 1);
+    await weapon.delete();
   } else {
+    const nextTags = [...tags];
     nextTags[matchedIndex] = { value: `${newValue} uses` };
+    await weapon.update({
+      "system.tags": JSON.stringify(nextTags),
+      "system.tagsString": weaponTagsArrayToString(nextTags)
+    });
   }
 
-  const nextName = spent ? `${weapon.name}${game.i18n.localize("DWAUTO.Attack.WeaponSpentSuffix")}` : weapon.name;
-
-  await weapon.update({
-    name: nextName,
-    "system.tags": JSON.stringify(nextTags),
-    "system.tagsString": weaponTagsArrayToString(nextTags)
-  });
-
-  if (weapon.actor) {
+  if (actor) {
     announceActionApplied(
-      weapon.actor,
-      weapon.name,
+      actor,
+      weaponName,
       game.i18n.format(
         spent ? "DWAUTO.Attack.WeaponUsesSpent" : "DWAUTO.Attack.WeaponUsesRemaining",
         { remaining: Math.max(0, newValue) }
