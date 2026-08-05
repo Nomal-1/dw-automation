@@ -83,5 +83,7 @@ export const SETTINGS = {
   ENABLE_KNOW_IT_ALL_ASSISTANT: "enableKnowItAllAssistant",
   KNOW_IT_ALL_MOVE_NAMES: "knowItAllMoveNames",
   ENABLE_VITALS_ASSISTANT: "enableVitalsAssistant",
-  ENABLE_ENCUMBRANCE_ASSISTANT: "enableEncumbranceAssistant"
+  ENABLE_ENCUMBRANCE_ASSISTANT: "enableEncumbranceAssistant",
+  ENABLE_RECRUIT_ASSISTANT: "enableRecruitAssistant",
+  RECRUIT_MOVE_NAMES: "recruitMoveNames"
 };

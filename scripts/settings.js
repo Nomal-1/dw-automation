@@ -1093,4 +1093,27 @@ export function registerSettings() {
     type: Boolean,
     default: true
   });
+
+  // 던전월드 기본 무브 구인(Recruit): 실패(6-) 결과에서 제시된 지원자를
+  // 모두 돌려보내면 다음 구인 판정에 -1 forward를 받는다. 구인은 유대(Bond)
+  // rollType이라 rollMod로 자동 반영이 안 되고, 다음 판정 직전에 "유대
+  // 입력창에 직접 -1을 입력하라"는 안내만 띄운다. 자세한 설계는 features/
+  // recruit.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_RECRUIT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableRecruitAssistant.Name",
+    hint: "DWAUTO.Settings.EnableRecruitAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.RECRUIT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.RecruitMoveNames.Name",
+    hint: "DWAUTO.Settings.RecruitMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Recruit"
+  });
 }

@@ -29,6 +29,7 @@ import { registerIAmTheLawAssistant } from "./features/i-am-the-law.js";
 import { registerKnowItAllAssistant } from "./features/know-it-all.js";
 import { registerVitalsAssistant } from "./features/vitals-assistant.js";
 import { registerEncumbranceAssistant } from "./features/encumbrance.js";
+import { registerRecruitAssistant } from "./features/recruit.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -69,3 +70,4 @@ registerIAmTheLawAssistant();
 registerKnowItAllAssistant();
 registerVitalsAssistant();
 registerEncumbranceAssistant();
+registerRecruitAssistant();

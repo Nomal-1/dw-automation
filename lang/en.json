@@ -354,6 +354,14 @@
         "Name": "Enable Encumbrance Automation",
         "Hint": "Compares current load against max load on every roll and applies a penalty automatically. At or under max: no effect. Over by 1-2: a quiet -1 (stays until you shed weight). Over by 3+: before the roll, asks whether you want to drop something — dropping at least 1 weight still gives -1 and lets the roll proceed; declining (or having nothing to drop) doesn't cancel the roll — instead a huge negative modifier is added so the roll actually happens, producing the system's own success/partial/failure result card (mark-XP button included)."
       },
+      "EnableRecruitAssistant": {
+        "Name": "Enable Recruit Automation",
+        "Hint": "When a Recruit roll comes back a failure (6-), asks \"Do you turn away everyone the GM offered?\" — answering yes queues a -1 for your next Recruit roll. Recruit is a Bond roll, so rollMod can't apply it automatically (same system limitation as Aid or Interfere); instead, right before your next Recruit roll, a reminder pops up telling you to enter -1 directly in the bond input that's about to appear."
+      },
+      "RecruitMoveNames": {
+        "Name": "Recruit Move Names",
+        "Hint": "Comma-separated list (default: Recruit)."
+      },
       "EnableVitalsAssistant": {
         "Name": "Enable Max HP/Load Recalculation Buttons",
         "Hint": "Same idea as the armor recalculation button: turns the sheet's HP and Weight labels into clickable buttons. Clicking one applies class base + Constitution score for max HP, and class base + Strength modifier for base load (matching the dungeonworld system's own class-selection calculation exactly — HP and load intentionally use different formulas). Hovering shows the formula first. If the sheet's class field is empty or unrecognized, only a warning is shown and nothing changes."
@@ -490,7 +498,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -977,6 +985,12 @@
       "GateTitle": "Overloaded",
       "GatePrompt": "You're over your load by {over}. To roll, you need to drop at least 1 weight worth of gear (you'll still take -1). Drop something now?",
       "ForcedFailure": "{name} is overloaded and didn't drop anything, so this roll is guaranteed to fail."
+    },
+    "Recruit": {
+      "TurnAwayPrompt": "Do you turn away everyone the GM offered?",
+      "PenaltyPending": "-1 is queued for your next Recruit roll.",
+      "ReminderContent": "You turned away last batch of applicants, so this Recruit roll takes -1. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add -1 directly in the bond input that's about to appear!",
+      "ReminderAck": "Got it (continue)"
     },
     "Underdog": {
       "AskPrompt": "Do you currently meet \"{name}\"'s condition?",

@@ -22,6 +22,7 @@ import { promptAidOrInterferePreRoll } from "../features/aid-or-interfere.js";
 import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
 import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
+import { promptRecruitPreRoll } from "../features/recruit.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -127,6 +128,12 @@ async function wrappedRoll(wrapped, ...args) {
   // rollMod를 읽지 않는 결함이 있다). GM 안내가 끝날 때까지 이 굴림 자체가
   // 대기한다.
   await promptAidOrInterferePreRoll(this);
+
+  // 구인(Recruit)도 원조/방해와 같은 유대(Bond) rollType이라 rollMod로
+  // -1을 반영할 수 없다 — 대기 중인 페널티가 있으면 유대 입력창이 뜨기
+  // 전에 "직접 -1을 입력하라"는 안내를 먼저 띄우고 확인을 받는다
+  // (features/recruit.js 참고).
+  await promptRecruitPreRoll(this);
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
