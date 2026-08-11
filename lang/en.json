@@ -601,6 +601,26 @@
       "ExtremelyCautiousMoveNames": {
         "Name": "Extremely Cautious Move Names",
         "Hint": "Upgrade that replaces Cautious (hold results become 3/2/1, and a 12+ shows an auto-discover-next-trap notice). Comma-separated (default: Extremely Cautious)."
+      },
+      "EnableFirstAidAssistant": {
+        "Name": "Enable First Aid Automation",
+        "Hint": "A character with First Aid treats the named spell (default: Cure Light Wounds) as a cantrip, and a character with Greater First Aid treats the named spell (default: Cure Moderate Wounds) as a cantrip — neither counts against the level cap when preparing spells via Commune. Does nothing if the spell isn't in their spellbook."
+      },
+      "FirstAidMoveNames": {
+        "Name": "First Aid Move Names",
+        "Hint": "Comma-separated (default: First Aid)."
+      },
+      "FirstAidSpellName": {
+        "Name": "First Aid Target Spell Name",
+        "Hint": "Enter the full exact spell name (not a comma-separated list). Default: Cure Light Wounds."
+      },
+      "GreaterFirstAidMoveNames": {
+        "Name": "Greater First Aid Move Names",
+        "Hint": "Upgrade that replaces First Aid. Comma-separated (default: Greater First Aid)."
+      },
+      "GreaterFirstAidSpellName": {
+        "Name": "Greater First Aid Target Spell Name",
+        "Hint": "Enter the full exact spell name (not a comma-separated list). Default: Cure Moderate Wounds."
       }
     },
     "Npc": {

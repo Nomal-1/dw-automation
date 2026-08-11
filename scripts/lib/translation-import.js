@@ -703,5 +703,32 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, extremelyCautiousMoveNames, stats)
   );
 
+  const firstAidMoveNames = game.settings.get(MODULE_ID, SETTINGS.FIRST_AID_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.FIRST_AID_MOVE_NAMES,
+    translateCommaList(moveMap, firstAidMoveNames, stats)
+  );
+
+  // 응급처치가 대상으로 삼는 주문 이름은 무브가 아니라 주문 이름이라
+  // spellMap(주문 팩 번역)으로 찾고, 쉼표 목록이 아니라 단일 이름이라
+  // translateOne을 직접 쓴다.
+  const firstAidSpellName = game.settings.get(MODULE_ID, SETTINGS.FIRST_AID_SPELL_NAME);
+  await game.settings.set(MODULE_ID, SETTINGS.FIRST_AID_SPELL_NAME, translateOne(spellMap, firstAidSpellName, stats));
+
+  const greaterFirstAidMoveNames = game.settings.get(MODULE_ID, SETTINGS.GREATER_FIRST_AID_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.GREATER_FIRST_AID_MOVE_NAMES,
+    translateCommaList(moveMap, greaterFirstAidMoveNames, stats)
+  );
+
+  const greaterFirstAidSpellName = game.settings.get(MODULE_ID, SETTINGS.GREATER_FIRST_AID_SPELL_NAME);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.GREATER_FIRST_AID_SPELL_NAME,
+    translateOne(spellMap, greaterFirstAidSpellName, stats)
+  );
+
   return stats;
 }

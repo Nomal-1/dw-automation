@@ -1706,4 +1706,54 @@ export function registerSettings() {
     type: String,
     default: "Extremely Cautious"
   });
+
+  // 클레릭 고급액션 응급처치/상급 응급처치: 자세한 설계는 features/first-aid.js
+  // 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_FIRST_AID_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableFirstAidAssistant.Name",
+    hint: "DWAUTO.Settings.EnableFirstAidAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FIRST_AID_MOVE_NAMES, {
+    name: "DWAUTO.Settings.FirstAidMoveNames.Name",
+    hint: "DWAUTO.Settings.FirstAidMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "First Aid"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FIRST_AID_SPELL_NAME, {
+    name: "DWAUTO.Settings.FirstAidSpellName.Name",
+    hint: "DWAUTO.Settings.FirstAidSpellName.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Cure Light Wounds"
+  });
+
+  // 상급 응급처치(Greater First Aid, 응급처치 대체)는 별도 무브 이름 설정을
+  // 두되(대상 주문이 소치유가 아니라 치유로 바뀌므로) 자동화 기능 자체는
+  // 같은 파일이 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.GREATER_FIRST_AID_MOVE_NAMES, {
+    name: "DWAUTO.Settings.GreaterFirstAidMoveNames.Name",
+    hint: "DWAUTO.Settings.GreaterFirstAidMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Greater First Aid"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.GREATER_FIRST_AID_SPELL_NAME, {
+    name: "DWAUTO.Settings.GreaterFirstAidSpellName.Name",
+    hint: "DWAUTO.Settings.GreaterFirstAidSpellName.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Cure Moderate Wounds"
+  });
 }

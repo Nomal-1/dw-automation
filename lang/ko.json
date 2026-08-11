@@ -601,6 +601,26 @@
       "ExtremelyCautiousMoveNames": {
         "Name": "극도로 신중함 무브 이름",
         "Hint": "신중함을 대체하는 업그레이드입니다(예비 결과가 3/2/1이 되고, 12+에서 다음 덫 자동 발견 안내가 뜹니다). 쉼표로 구분해서 입력하세요(기본값: Extremely Cautious)."
+      },
+      "EnableFirstAidAssistant": {
+        "Name": "응급처치 자동화 사용",
+        "Hint": "응급처치를 가진 캐릭터는 지정한 주문(기본값: 소치유)을, 상급 응급처치를 가진 캐릭터는 지정한 주문(기본값: 치유)을 암송주문(0레벨)으로 취급해 예배/주문 준비 시 레벨 한도에 포함시키지 않습니다. 스펠북에 그 주문이 없으면 아무 일도 일어나지 않습니다."
+      },
+      "FirstAidMoveNames": {
+        "Name": "응급처치 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: First Aid)."
+      },
+      "FirstAidSpellName": {
+        "Name": "응급처치 대상 주문 이름",
+        "Hint": "정식 명칭 전체를 그대로 입력하세요(쉼표 목록이 아닙니다). 기본값: Cure Light Wounds."
+      },
+      "GreaterFirstAidMoveNames": {
+        "Name": "상급 응급처치 무브 이름",
+        "Hint": "응급처치를 대체하는 업그레이드입니다. 쉼표로 구분해서 입력하세요(기본값: Greater First Aid)."
+      },
+      "GreaterFirstAidSpellName": {
+        "Name": "상급 응급처치 대상 주문 이름",
+        "Hint": "정식 명칭 전체를 그대로 입력하세요(쉼표 목록이 아닙니다). 기본값: Cure Moderate Wounds."
       }
     },
     "Npc": {

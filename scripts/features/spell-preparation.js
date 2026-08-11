@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "../data/prepare-spells-moves.js";
 import { getDiscountedSpellIds } from "./spell-discount.js";
+import { getFirstAidDiscountedSpellIds } from "./first-aid.js";
 import { COMMUNE_PENALTY_FLAG } from "../lib/ongoing-spells-state.js";
 import { getHold, setHold } from "../lib/divine-hold-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -41,12 +42,17 @@ function getHoldGrantRow(actor) {
   return rows.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
 }
 
-// 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문은 준비 시 레벨을 1 낮춰서
-// 계산한다(features/spell-discount.js 참고). 레벨 1 주문이 할인되면 0이 되어
-// 칸트립처럼 항상 무료로 준비된다.
+// 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문, 그리고 클레릭 응급처치/
+// 상급 응급처치가 고정으로 지정하는 주문(features/first-aid.js)은 준비 시
+// 레벨을 1 낮춰서 계산한다(features/spell-discount.js 참고). 레벨 1 주문이
+// 할인되면 0이 되어 칸트립처럼 항상 무료로 준비된다.
 function effectiveSpellLevel(spell, discountedIds) {
   const raw = Number(spell.system?.spellLevel) || 0;
   return discountedIds.has(spell.id) ? Math.max(0, raw - 1) : raw;
+}
+
+function getAllDiscountedSpellIds(actor) {
+  return new Set([...getDiscountedSpellIds(actor), ...getFirstAidDiscountedSpellIds(actor)]);
 }
 
 // 설정("주문 준비 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
@@ -73,7 +79,7 @@ async function matchesConfiguredRow(title) {
 // 레벨 1 이상인 주문 중에서 고를 수 있는 목록을 보여주고, 고른 주문들의 레벨
 // 합이 한도(자기 레벨+1)를 넘지 않게 실시간으로 제한한다. 취소하면 null.
 function promptSpellPreparation(actor, moveItem, row) {
-  const discountedIds = new Set(getDiscountedSpellIds(actor));
+  const discountedIds = getAllDiscountedSpellIds(actor);
   const allSpells = actor.items.filter((i) => i.type === "spell");
   const cantrips = allSpells.filter((s) => effectiveSpellLevel(s, discountedIds) === 0);
   const level = getActorLevel(actor);
@@ -187,7 +193,7 @@ function promptSpellPreparation(actor, moveItem, row) {
 // system.prepared만 바꾸고 이 페널티는 그대로 둬서, 캐릭터 시트의 배너를
 // 수동으로 눌러 지우기 전까지 영원히 남아있는 버그가 있었다.
 async function applySelection(actor, chosenIds) {
-  const discountedIds = new Set(getDiscountedSpellIds(actor));
+  const discountedIds = getAllDiscountedSpellIds(actor);
   const allSpells = actor.items.filter((i) => i.type === "spell");
   const updates = [];
   const preparedNames = [];

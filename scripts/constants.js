@@ -143,5 +143,10 @@ export const SETTINGS = {
   ENABLE_HEIST_ASSISTANT: "enableHeistAssistant",
   HEIST_MOVE_NAMES: "heistMoveNames",
   ALCHEMIST_MOVE_NAMES: "alchemistMoveNames",
-  EXTREMELY_CAUTIOUS_MOVE_NAMES: "extremelyCautiousMoveNames"
+  EXTREMELY_CAUTIOUS_MOVE_NAMES: "extremelyCautiousMoveNames",
+  ENABLE_FIRST_AID_ASSISTANT: "enableFirstAidAssistant",
+  FIRST_AID_MOVE_NAMES: "firstAidMoveNames",
+  FIRST_AID_SPELL_NAME: "firstAidSpellName",
+  GREATER_FIRST_AID_MOVE_NAMES: "greaterFirstAidMoveNames",
+  GREATER_FIRST_AID_SPELL_NAME: "greaterFirstAidSpellName"
 };

@@ -51,6 +51,7 @@ import { registerPoisonerAssistant } from "./features/poisoner.js";
 import { registerPoisonTrackerAssistant } from "./features/poison-tab.js";
 import { registerStrongArmAssistant } from "./features/strong-arm.js";
 import { registerHeistAssistant } from "./features/heist.js";
+import { registerFirstAidAssistant } from "./features/first-aid.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -113,3 +114,4 @@ registerPoisonerAssistant();
 registerPoisonTrackerAssistant();
 registerStrongArmAssistant();
 registerHeistAssistant();
+registerFirstAidAssistant();
