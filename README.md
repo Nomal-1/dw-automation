@@ -19,6 +19,14 @@ Foundry 모듈 설치 화면에서 아래 매니페스트 URL을 사용하세요
 https://github.com/Nomal-1/dw-automation/releases/latest/download/module.json
 ```
 
+### 필수 모듈: 던전월드 한글화(dungeonworld-ko)
+
+이 모듈의 UI와 자동화 문구는 한국어 전용으로 만들어져 있어, [던전월드 한글화 모듈](https://github.com/Nomal-1/t2)이 반드시 설치·활성화되어 있어야 합니다. 아래 매니페스트 URL로 먼저(또는 같이) 설치하세요:
+
+```
+https://github.com/Nomal-1/t2/releases/latest/download/module.json
+```
+
 ## 이전 모듈과의 관계
 
 이 모듈은 [dw-instant-npc](https://github.com/Nomal-1/dw-instant-npc)의 NPC 생성 기능을 포함하며, 이를 대체합니다.

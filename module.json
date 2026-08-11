@@ -1,8 +1,8 @@
 {
   "id": "dw-automation",
   "title": "던전월드 자동화 툴킷",
-  "description": "던전월드(Dungeon World)용 GM 자동화 기능 모음입니다. NPC/몬스터 스탯 자동 생성, 근접·사격 공격 성공 시 데미지 자동 굴림 등의 기능을 모듈 설정에서 개별적으로 켜고 끌 수 있습니다.",
-  "version": "0.71.2",
+  "description": "던전월드(Dungeon World)용 GM 자동화 기능 모음입니다. NPC/몬스터 스탯 자동 생성, 근접·사격 공격 성공 시 데미지 자동 굴림 등의 기능을 모듈 설정에서 개별적으로 켜고 끌 수 있습니다. 필수 모듈인 던전월드 한글화(dungeonworld-ko)는 다음 매니페스트 링크로 설치하세요: https://github.com/Nomal-1/t2/releases/latest/download/module.json",
+  "version": "0.71.3",
   "socket": true,
   "compatibility": {
     "minimum": "12",
@@ -28,7 +28,7 @@
         "id": "dungeonworld-ko",
         "type": "module",
         "compatibility": {},
-        "reason": "이 모듈의 UI와 자동화 문구 대부분이 한국어 전용으로 만들어져 있어, 던전월드 한글화 모듈이 없으면 무브·주문 이름을 제대로 인식하지 못합니다."
+        "reason": "이 모듈의 UI와 자동화 문구 대부분이 한국어 전용으로 만들어져 있어, 던전월드 한글화 모듈이 없으면 무브·주문 이름을 제대로 인식하지 못합니다. 매니페스트 링크: https://github.com/Nomal-1/t2/releases/latest/download/module.json"
       }
     ]
   },
