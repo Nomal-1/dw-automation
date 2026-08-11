@@ -40,6 +40,7 @@ import { registerBurningRingOfFireAssistant } from "./features/burning-ring-of-f
 import { registerSignatureWeaponAssistant } from "./features/signature-weapon.js";
 import { registerIronHideAssistant } from "./features/iron-hide.js";
 import { registerMercilessAssistant } from "./features/merciless.js";
+import { registerInterrogatorAssistant } from "./features/interrogator.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -91,3 +92,4 @@ registerBurningRingOfFireAssistant();
 registerSignatureWeaponAssistant();
 registerIronHideAssistant();
 registerMercilessAssistant();
+registerInterrogatorAssistant();

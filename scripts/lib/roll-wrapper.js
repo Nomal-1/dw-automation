@@ -26,6 +26,7 @@ import { promptRecruitPreRoll } from "../features/recruit.js";
 import { promptBolsterPreRoll } from "../features/bolster.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
 import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
+import { promptInterrogatorPreRoll } from "../features/interrogator.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -127,6 +128,11 @@ async function wrappedRoll(wrapped, ...args) {
     return handleAskRoll(this, wrapped, args, preRollBonus);
   }
 
+  // 협박(Interrogator)처럼 "이번 판정에 한해 판정 능력치 자체를
+  // 바꿔치기하는" 자동화(features/interrogator.js 참고).
+  const interrogator = await promptInterrogatorPreRoll(this);
+  const statOverride = interrogator.statOverride;
+
   let spellPenalty = 0;
   if (game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT) && isCastSpellMove(this)) {
     const { blocked, amount } = computeCastPenalty(this.actor);
@@ -167,14 +173,17 @@ async function wrappedRoll(wrapped, ...args) {
     ongoingPenaltyMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
     preRollBonus;
-  if (!totalMod && !pendingBonusApplies) return wrapped(...args);
+  if (!totalMod && !pendingBonusApplies && !statOverride) return wrapped(...args);
 
   const original = this.system.rollMod;
+  const originalRollType = this.system.rollType;
   this.system.rollMod = (Number(original) || 0) + totalMod;
+  if (statOverride) this.system.rollType = statOverride;
   try {
     return await wrapped(...args);
   } finally {
     this.system.rollMod = original;
+    this.system.rollType = originalRollType;
     if (pendingBonusApplies) await consumePendingRollBonus(this, pendingBonus);
   }
 }

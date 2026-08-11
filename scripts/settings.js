@@ -1388,4 +1388,32 @@ export function registerSettings() {
     type: String,
     default: "Merciless"
   });
+
+  // 전사 고급액션 협박: 자세한 설계는 features/interrogator.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_INTERROGATOR_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableInterrogatorAssistant.Name",
+    hint: "DWAUTO.Settings.EnableInterrogatorAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.INTERROGATOR_MOVE_NAMES, {
+    name: "DWAUTO.Settings.InterrogatorMoveNames.Name",
+    hint: "DWAUTO.Settings.InterrogatorMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Interrogator"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.PARLEY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ParleyMoveNames.Name",
+    hint: "DWAUTO.Settings.ParleyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Parley"
+  });
 }

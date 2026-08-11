@@ -111,5 +111,8 @@ export const SETTINGS = {
   ENABLE_IRON_HIDE_ASSISTANT: "enableIronHideAssistant",
   IRON_HIDE_MOVE_NAMES: "ironHideMoveNames",
   ENABLE_MERCILESS_ASSISTANT: "enableMercilessAssistant",
-  MERCILESS_MOVE_NAMES: "mercilessMoveNames"
+  MERCILESS_MOVE_NAMES: "mercilessMoveNames",
+  ENABLE_INTERROGATOR_ASSISTANT: "enableInterrogatorAssistant",
+  INTERROGATOR_MOVE_NAMES: "interrogatorMoveNames",
+  PARLEY_MOVE_NAMES: "parleyMoveNames"
 };
