@@ -549,6 +549,14 @@
       "BackstabMoveNames": {
         "Name": "Backstab Move Names",
         "Hint": "Used to identify whether a roll is Backstab for Cheap Shot. Comma-separated (default: Backstab)."
+      },
+      "EnablePoisonerAssistant": {
+        "Name": "Enable Poisoner Automation",
+        "Hint": "The first time it triggers, lets you pick one of 4 poisons and adds 3 uses to your inventory. Once chosen, every later trigger asks whether to brew more, and adds 3 uses if you say yes."
+      },
+      "PoisonerMoveNames": {
+        "Name": "Poisoner Move Names",
+        "Hint": "Comma-separated (default: Poisoner)."
       }
     },
     "Npc": {
@@ -1322,6 +1330,12 @@
     },
     "CheapShot": {
       "Applied": "Cheap Shot triggers — adding 1d6 to the damage"
+    },
+    "Poisoner": {
+      "ChoosePrompt": "Choose one poison to master. From now on it's not dangerous for you to use.",
+      "Chosen": "Chose \"{name}\" — {total} use(s) in inventory",
+      "BrewPrompt": "Brew 3 more uses of \"{name}\"?",
+      "Brewed": "Brewed \"{name}\" — {total} use(s) in inventory"
     },
     "ThroughDeathsEyes": {
       "Activated": "Through Death's Eyes failed — the ominous effect is now active. Every roll gets -1 for as long as combat lasts (until the GM turns it off)",

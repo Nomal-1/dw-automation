@@ -656,5 +656,12 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, backstabMoveNames, stats)
   );
 
+  const poisonerMoveNames = game.settings.get(MODULE_ID, SETTINGS.POISONER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.POISONER_MOVE_NAMES,
+    translateCommaList(moveMap, poisonerMoveNames, stats)
+  );
+
   return stats;
 }

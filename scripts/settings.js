@@ -1575,4 +1575,23 @@ export function registerSettings() {
     type: String,
     default: "Backstab"
   });
+
+  // 도적 핵심액션 독의 기술: 자세한 설계는 features/poisoner.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_POISONER_ASSISTANT, {
+    name: "DWAUTO.Settings.EnablePoisonerAssistant.Name",
+    hint: "DWAUTO.Settings.EnablePoisonerAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.POISONER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.PoisonerMoveNames.Name",
+    hint: "DWAUTO.Settings.PoisonerMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Poisoner"
+  });
 }
