@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getFormshaperArmorContribution } from "./druid.js";
 import { getOutnumberedArmorContribution } from "./underdog.js";
 import { getCommandArmorContribution } from "./command.js";
+import { getIronHideArmorContribution } from "./iron-hide.js";
 
 // 던전월드 공식 방어구 컴펜디엄 기준(가죽 갑옷 "1 armor", 방패 "+1 armor" 등)
 // 태그 문구에서 숫자만 뽑아낸다. "+" 유무는 그 방어구가 기본 장갑값인지
@@ -115,6 +116,8 @@ function getModifierBreakdown(actor) {
   contributions.push(...getOutnumberedArmorContribution(actor));
   const command = getCommandArmorContribution(actor);
   if (command) contributions.push(command);
+  const ironHide = getIronHideArmorContribution(actor);
+  if (ironHide) contributions.push(ironHide);
   return contributions;
 }
 

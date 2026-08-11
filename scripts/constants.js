@@ -107,5 +107,7 @@ export const SETTINGS = {
   ENABLE_BURNING_RING_OF_FIRE_ASSISTANT: "enableBurningRingOfFireAssistant",
   BURNING_RING_OF_FIRE_MOVE_NAMES: "burningRingOfFireMoveNames",
   ENABLE_SIGNATURE_WEAPON_ASSISTANT: "enableSignatureWeaponAssistant",
-  SIGNATURE_WEAPON_MOVE_NAMES: "signatureWeaponMoveNames"
+  SIGNATURE_WEAPON_MOVE_NAMES: "signatureWeaponMoveNames",
+  ENABLE_IRON_HIDE_ASSISTANT: "enableIronHideAssistant",
+  IRON_HIDE_MOVE_NAMES: "ironHideMoveNames"
 };

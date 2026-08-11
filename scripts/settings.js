@@ -1350,4 +1350,23 @@ export function registerSettings() {
     type: String,
     default: "Signature Weapon"
   });
+
+  // 전사 고급액션 무쇠의 몸: 자세한 설계는 features/iron-hide.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_IRON_HIDE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableIronHideAssistant.Name",
+    hint: "DWAUTO.Settings.EnableIronHideAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.IRON_HIDE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.IronHideMoveNames.Name",
+    hint: "DWAUTO.Settings.IronHideMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Iron Hide"
+  });
 }
