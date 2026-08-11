@@ -489,6 +489,18 @@
       "EnablePreciseWeaponAssistant": {
         "Name": "Enable Precise Tag Automation",
         "Hint": "Before rolling Hack & Slash (per the melee move names setting), asks which weapon is being used. If it has the precise tag, that roll uses DEX instead of STR. Reuses the melee weapon tags setting."
+      },
+      "EnableSeeingRedAssistant": {
+        "Name": "Enable Seeing Red Automation",
+        "Hint": "If the character has this move and rolls Discern Realities while not yet \"active\", asks after the roll whether it's currently combat. If yes, the badge switches to \"active\" and every later Discern Realities roll automatically gets +1. Only the GM can click the badge to toggle it."
+      },
+      "SeeingRedMoveNames": {
+        "Name": "Seeing Red Move Names",
+        "Hint": "Comma-separated (default: Seeing Red)."
+      },
+      "DiscernRealitiesMoveNames": {
+        "Name": "Discern Realities Move Names",
+        "Hint": "Comma-separated (default: Discern Realities)."
       }
     },
     "Npc": {
@@ -659,7 +671,7 @@
     },
     "TranslationImport": {
       "Title": "Auto-fill from Translation Module",
-      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names, Burning Brand Move Names, Defend Move Names, Burns Twice As Bright Move Names, Burns Half As Long Move Names, This Killing Fire Move Names, Burning Bridges Move Names, Last Breath Move Names, Burning Ring Of Fire Move Names, Signature Weapon Move Names, Iron Hide Move Names, Merciless Move Names, Interrogator Move Names, Parley Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
+      "Hint": "Reads the move/spell name pairs bundled with the Nomal-1/dungeonworld-ko Korean translation module and uses them to fill in this module's move/spell name settings (melee/ranged move names, Cast a Spell move names, Spell Augmentation move names, Special Attack Moves, Ongoing Spells, Hit-Taken Moves, Indomitable Move Names, Healing Moves, Hospitaller Moves, Move Upgrades, Damage Reduction Moves, Conditional Damage Moves, Conditional Damage Tag Moves, Superior Warrior Move Names, Smash! Move Names, Musclebound Move Names, Druid Balance Move Names, Druid Shapeshifter Move Names, Note-Taking Move Names, Class Grant Moves, Prepare Spells Moves, Spell Discount Move Names, Expanded Spellbook Move Names, Counterspell Move Names, Ongoing Penalty Reduction Moves, Empower Moves, Hold Grant Moves, Command Move Names, Moves That Receive the Animal's Cunning, Well-trained Move Names, Unnatural Ally Move Names, Aid or Interfere Move Names, Arcane Art Move Names, Self Forward Moves, A Good Day To Die Move Names, Samson Move Names, Invigorate Move Names, A Little Help From My Friends Move Names, I Am The Law Move Names, Know-It-All Move Names, Recruit Move Names, Bolster Move Names, Burning Brand Move Names, Defend Move Names, Burns Twice As Bright Move Names, Burns Half As Long Move Names, This Killing Fire Move Names, Burning Bridges Move Names, Last Breath Move Names, Burning Ring Of Fire Move Names, Signature Weapon Move Names, Iron Hide Move Names, Merciless Move Names, Interrogator Move Names, Parley Move Names, Seeing Red Move Names, Discern Realities Move Names). Names not found in the translation data (third-party moves, names you already edited by hand) are left untouched.",
       "Detected": "dungeonworld-ko detected and active.",
       "InactiveWarning": "The \"{moduleId}\" module isn't installed/active, so nothing can be auto-filled.",
       "RunButton": "Run Auto-fill Now",
@@ -1261,6 +1273,13 @@
       "SelectTitle": "Choose the weapon you're using",
       "SelectLabel": "Weapon",
       "Applied": "Precise's effect rolls DEX instead"
+    },
+    "SeeingRed": {
+      "Prompt": "Is it currently combat?",
+      "Activated": "Seeing Red is now active — every Discern Realities roll gets +1 from here on (until the GM turns it off)",
+      "ToggleTitle": "Click to toggle Seeing Red's active state (GM only).",
+      "Active": "Active",
+      "Inactive": "Inactive"
     },
     "TwinHornWildfire": {
       "Available": "[Twin-Horn Wildfire available]"

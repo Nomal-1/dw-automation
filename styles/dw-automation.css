@@ -420,6 +420,19 @@
   color: #fff !important;
 }
 
+.dwauto-seeing-red-badge {
+  cursor: pointer;
+}
+
+.dwauto-seeing-red-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-seeing-red-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-twice-as-bright-badge {
   cursor: pointer;
 }

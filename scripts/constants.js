@@ -115,5 +115,8 @@ export const SETTINGS = {
   ENABLE_INTERROGATOR_ASSISTANT: "enableInterrogatorAssistant",
   INTERROGATOR_MOVE_NAMES: "interrogatorMoveNames",
   PARLEY_MOVE_NAMES: "parleyMoveNames",
-  ENABLE_PRECISE_WEAPON_ASSISTANT: "enablePreciseWeaponAssistant"
+  ENABLE_PRECISE_WEAPON_ASSISTANT: "enablePreciseWeaponAssistant",
+  ENABLE_SEEING_RED_ASSISTANT: "enableSeeingRedAssistant",
+  SEEING_RED_MOVE_NAMES: "seeingRedMoveNames",
+  DISCERN_REALITIES_MOVE_NAMES: "discernRealitiesMoveNames"
 };

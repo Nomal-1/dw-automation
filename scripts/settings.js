@@ -1428,4 +1428,32 @@ export function registerSettings() {
     type: Boolean,
     default: true
   });
+
+  // 전사 고급액션 전사의 눈: 자세한 설계는 features/seeing-red.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SEEING_RED_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSeeingRedAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSeeingRedAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SEEING_RED_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SeeingRedMoveNames.Name",
+    hint: "DWAUTO.Settings.SeeingRedMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Seeing Red"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DISCERN_REALITIES_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DiscernRealitiesMoveNames.Name",
+    hint: "DWAUTO.Settings.DiscernRealitiesMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Discern Realities"
+  });
 }

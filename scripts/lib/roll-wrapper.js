@@ -28,6 +28,7 @@ import { promptDefendVengeancePreRoll } from "../features/defend.js";
 import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
 import { promptInterrogatorPreRoll } from "../features/interrogator.js";
 import { promptPrecisePreRoll } from "../features/precise-weapon.js";
+import { getSeeingRedBonus } from "../features/seeing-red.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -120,8 +121,17 @@ async function wrappedRoll(wrapped, ...args) {
   // 수련(Bolster) 예비도 "이 판정에 쓸지" 매번 물어봐야 하는 사전 확인이라
   // 같은 자리에서 처리한다(features/bolster.js 참고).
   const bolster = await promptBolsterPreRoll(this);
+
+  // 전사의 눈(Seeing Red)의 "적용중" 지속 +1은 다이얼로그 없이 조용히
+  // 붙는다(features/seeing-red.js 참고) — 물어보는 건 판정이 끝난 뒤의 몫이다.
   const preRollBonus =
-    iAmTheLaw.bonus + knowItAll.bonus + defendVengeance.bonus + getEncumbranceMalus(this.actor) + encumbrance.bonus + bolster.bonus;
+    iAmTheLaw.bonus +
+    knowItAll.bonus +
+    defendVengeance.bonus +
+    getEncumbranceMalus(this.actor) +
+    encumbrance.bonus +
+    bolster.bonus +
+    getSeeingRedBonus(this);
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

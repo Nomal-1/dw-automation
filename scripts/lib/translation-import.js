@@ -566,6 +566,20 @@ export async function runTranslationImport() {
   const parleyMoveNames = game.settings.get(MODULE_ID, SETTINGS.PARLEY_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.PARLEY_MOVE_NAMES, translateCommaList(moveMap, parleyMoveNames, stats));
 
+  const seeingRedMoveNames = game.settings.get(MODULE_ID, SETTINGS.SEEING_RED_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.SEEING_RED_MOVE_NAMES,
+    translateCommaList(moveMap, seeingRedMoveNames, stats)
+  );
+
+  const discernRealitiesMoveNames = game.settings.get(MODULE_ID, SETTINGS.DISCERN_REALITIES_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DISCERN_REALITIES_MOVE_NAMES,
+    translateCommaList(moveMap, discernRealitiesMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,
