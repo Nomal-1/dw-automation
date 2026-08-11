@@ -1369,4 +1369,23 @@ export function registerSettings() {
     type: String,
     default: "Iron Hide"
   });
+
+  // 전사 고급액션 무자비: 자세한 설계는 features/merciless.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_MERCILESS_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableMercilessAssistant.Name",
+    hint: "DWAUTO.Settings.EnableMercilessAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.MERCILESS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.MercilessMoveNames.Name",
+    hint: "DWAUTO.Settings.MercilessMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Merciless"
+  });
 }

@@ -39,6 +39,7 @@ import { registerTwinHornWildfireAssistant } from "./features/twin-horn-wildfire
 import { registerBurningRingOfFireAssistant } from "./features/burning-ring-of-fire.js";
 import { registerSignatureWeaponAssistant } from "./features/signature-weapon.js";
 import { registerIronHideAssistant } from "./features/iron-hide.js";
+import { registerMercilessAssistant } from "./features/merciless.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -89,3 +90,4 @@ registerTwinHornWildfireAssistant();
 registerBurningRingOfFireAssistant();
 registerSignatureWeaponAssistant();
 registerIronHideAssistant();
+registerMercilessAssistant();

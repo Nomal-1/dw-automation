@@ -9,6 +9,7 @@ import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBonus } from "./druid.js";
 import { getCommandDamageBonus } from "./command.js";
 import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damage-forward-state.js";
+import { getMercilessBonus } from "./merciless.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -427,9 +428,10 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   const conditionalExtra = await promptConditionalDamageBonuses(actor);
   const conditionalTags = await promptConditionalTagMoves(actor);
   const commandBonus = getCommandDamageBonus(actor);
+  const mercilessBonus = getMercilessBonus(actor);
   const damageForward = getPendingDamageForward(actor);
   const finalExtraDice = appendTerm(
-    appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus),
+    appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
     damageForward ? String(damageForward.amount) : ""
   );
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
