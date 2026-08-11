@@ -7,6 +7,8 @@ import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive }
 import { findDecidingUser } from "../lib/deciding-user.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getHold, setHold } from "../lib/divine-hold-state.js";
+import { getProtectedAllies } from "../lib/divine-protection-state.js";
+import { getHoldGrantRow } from "./spell-preparation.js";
 import { isFerocitySpent, setFerocitySpent } from "../lib/animal-companion-state.js";
 import { isHungerPenaltyActive, setHungerPenaltyActive } from "../lib/hunger-penalty-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -33,6 +35,34 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
+// 클레릭 신의 보우(Divine Intervention)/신의 가호(Divine Invincibility) 원문
+// "you or an ally"의 "아군" 쪽: 예배 때 그 캐릭터를 보호 대상으로 지정해둔
+// 다른 액터가 씬(또는 월드) 어딘가에 있으면, 그 시전자의 예비를 대신 쓰는
+// 선택지를 후보에 끼워 넣는다(features/spell-preparation.js가 예배 시점에
+// 보호 대상을 저장한다). 자기 자신을 지키는 경우는 이미 위 표의 "hold"
+// 행이 처리하므로 여기서는 "다른 사람의 예비를 빌려 쓰는" 경우만 추가한다.
+function getAllyHoldCandidates(actor) {
+  const candidates = [];
+  for (const caster of game.actors) {
+    if (!caster || caster.id === actor.id) continue;
+    if (caster.type !== "character") continue;
+
+    const protectedIds = getProtectedAllies(caster);
+    if (!protectedIds.includes(actor.id)) continue;
+
+    const holdGrantRow = getHoldGrantRow(caster);
+    if (!holdGrantRow) continue;
+
+    candidates.push({
+      name: game.i18n.format("DWAUTO.HitTrigger.AllyHoldOptionLabel", { caster: caster.name, move: holdGrantRow.name }),
+      effect: "allyHold",
+      casterId: caster.id,
+      casterMoveName: holdGrantRow.name
+    });
+  }
+  return candidates;
+}
+
 // Druid Shed(변신 중 피해를 무효화하며 변신 해제)는 설정 표가 아니라
 // druid.js가 관리하는 상태(변신 중인지)에 딸려 있어서, 매번 이 표 기반
 // 후보 목록에 조건부로 끼워 넣는다. 변신 중이 아니면 애초에 후보에
@@ -43,6 +73,8 @@ function getHitTriggerCandidates(actor) {
 
   const shed = getShedCandidate(actor);
   if (shed) candidates.push(shed);
+
+  candidates.push(...getAllyHoldCandidates(actor));
 
   return candidates;
 }
@@ -241,9 +273,9 @@ async function applySpellDefense(actor, row, damage, originalChanges, originalOp
 
 // 클레릭 Divine Intervention/Invincibility 전용: 기원(Commune)으로 얻어둔
 // hold를 하나 써서 완전 무효화한다(Armor Mastery류와 달리 장비/약화 대가가
-// 없다). 원문은 "you or an ally"지만, 이 모듈의 피격 무효화 체계가 "피해를
-// 받는 그 캐릭터 자신의 무브"만 후보로 삼는 구조라 자신을 지키는 경우만
-// 자동화한다(data/hold-grant-moves.js 참고).
+// 없다). 이건 "자기 자신"을 지키는 경우다 — 원문의 "you or an ally" 중
+// "아군" 쪽은 아래 applyAllyHoldNegation/getAllyHoldCandidates가 담당한다
+// (data/hold-grant-moves.js 참고).
 async function applyHoldNegation(actor, row) {
   const current = getHold(actor);
   if (current <= 0) return null;
@@ -252,6 +284,64 @@ async function applyHoldNegation(actor, row) {
   await setHold(actor, next);
   announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.HoldApplied", { remaining: next }));
 
+  return true;
+}
+
+// 아군의 예비를 빌려 쓸 때, 그 시전자 액터에 수정 권한이 있으면(같은
+// 플레이어가 두 캐릭터를 다 갖고 있거나, 지금 이 클라이언트가 GM인 경우)
+// 바로 소모하고, 없으면(보통 경우 — 다른 플레이어의 캐릭터) 접속 중인
+// GM에게 넘겨서 대신 소모해달라고 요청한다. 이미 그 캐릭터 자신의 판단으로
+// "쓰겠다"고 고른 뒤라 별도 승인 대화상자 없이(원조/방해의 보너스 부여와
+// 달리 임의의 수치를 정하는 것도 아니라서) 그대로 처리한다.
+const pendingHoldSpendResolvers = new Map();
+
+function findApprovingGM() {
+  return game.users.find((u) => u.active && u.isGM) ?? null;
+}
+
+async function spendCasterHold(caster) {
+  if (caster.isOwner) {
+    const current = getHold(caster);
+    if (current <= 0) return false;
+    await setHold(caster, current - 1);
+    return true;
+  }
+
+  return new Promise((resolve) => {
+    const gm = findApprovingGM();
+    if (!gm) {
+      resolve(false);
+      return;
+    }
+
+    const requestId = foundry.utils.randomID();
+    pendingHoldSpendResolvers.set(requestId, resolve);
+    game.socket.emit(SOCKET_NAME, {
+      type: "allyHoldSpendRequest",
+      requestId,
+      requesterUserId: game.user.id,
+      casterActorId: caster.id
+    });
+  });
+}
+
+// 클레릭 신의 보우/신의 가호 전용: 아군을 지켜주는 시전자의 예비를 하나
+// 소모해서 완전 무효화한다(applyHoldNegation과 같은 효과, 대상 액터만 다르다).
+async function applyAllyHoldNegation(actor, row) {
+  const caster = game.actors.get(row.casterId);
+  if (!caster) return null;
+
+  const spent = await spendCasterHold(caster);
+  if (!spent) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.HitTrigger.AllyHoldFailed", { caster: caster.name }));
+    return null;
+  }
+
+  announceActionApplied(
+    actor,
+    row.casterMoveName,
+    game.i18n.format("DWAUTO.HitTrigger.AllyHoldApplied", { caster: caster.name })
+  );
   return true;
 }
 
@@ -392,6 +482,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
     if (row.effect === "debility") return !hasAllDebilities(actor);
     if (row.effect === "spellDefense") return getActiveOngoingSpells(actor).length > 0;
     if (row.effect === "hold") return getHold(actor) > 0;
+    if (row.effect === "allyHold") return getHold(game.actors.get(row.casterId)) > 0;
     if (row.effect === "animalCompanion") return !isFerocitySpent(actor);
     if (row.effect === "ongoingPenalty") return !isHungerPenaltyActive(actor);
     if (row.effect === "fireAid") return damage % 2 !== 0;
@@ -446,6 +537,9 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else if (row.effect === "hold") {
             const applied = await applyHoldNegation(actor, row);
+            if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
+          } else if (row.effect === "allyHold") {
+            const applied = await applyAllyHoldNegation(actor, row);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
           } else if (row.effect === "animalCompanion") {
             await applyAnimalCompanionNegation(actor, row);
@@ -594,23 +688,56 @@ function onPreUpdateActor(actor, changes, options, userId) {
 }
 
 function onSocketEvent(data) {
-  if (data?.type !== "hitTriggerRequest") return;
-  console.log(`${MODULE_ID} | hit-trigger: socket event received`, data);
-  if (data.targetUserId !== game.user.id) return;
-  const actor = game.actors.get(data.actorId);
-  if (!actor) {
-    console.warn(`${MODULE_ID} | hit-trigger: actor ${data.actorId} not found on this client`);
+  if (data?.type === "hitTriggerRequest") {
+    console.log(`${MODULE_ID} | hit-trigger: socket event received`, data);
+    if (data.targetUserId !== game.user.id) return;
+    const actor = game.actors.get(data.actorId);
+    if (!actor) {
+      console.warn(`${MODULE_ID} | hit-trigger: actor ${data.actorId} not found on this client`);
+      return;
+    }
+    console.log(`${MODULE_ID} | hit-trigger: showing prompt for ${actor.name}`);
+    handleIncomingDamage({
+      actor,
+      damage: data.damage,
+      changes: data.changes,
+      options: data.options,
+      candidates: data.candidates,
+      outnumberedCandidates: data.outnumberedCandidates
+    });
     return;
   }
-  console.log(`${MODULE_ID} | hit-trigger: showing prompt for ${actor.name}`);
-  handleIncomingDamage({
-    actor,
-    damage: data.damage,
-    changes: data.changes,
-    options: data.options,
-    candidates: data.candidates,
-    outnumberedCandidates: data.outnumberedCandidates
-  });
+
+  if (data?.type === "allyHoldSpendRequest") {
+    if (!game.user.isGM) return;
+    (async () => {
+      const caster = game.actors.get(data.casterActorId);
+      let success = false;
+      if (caster) {
+        const current = getHold(caster);
+        if (current > 0) {
+          await setHold(caster, current - 1);
+          success = true;
+        }
+      }
+      game.socket.emit(SOCKET_NAME, {
+        type: "allyHoldSpendResponse",
+        requestId: data.requestId,
+        targetUserId: data.requesterUserId,
+        success
+      });
+    })();
+    return;
+  }
+
+  if (data?.type === "allyHoldSpendResponse") {
+    if (data.targetUserId !== game.user.id) return;
+    const resolve = pendingHoldSpendResolvers.get(data.requestId);
+    if (resolve) {
+      pendingHoldSpendResolvers.delete(data.requestId);
+      resolve(data.success);
+    }
+  }
 }
 
 // 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인 불문) Indomitable을

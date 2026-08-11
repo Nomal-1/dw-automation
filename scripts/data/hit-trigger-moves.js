@@ -7,8 +7,11 @@
 //   중인 지속 주문 하나를 끝내고 그 주문의 레벨만큼만 피해를 경감한다.
 //   유지 중인 지속 주문이 하나도 없으면 이 무브 자체를 쓸 수 없음) |
 //   "hold"(클레릭 Divine Intervention/Invincibility 전용 — 기원(Commune)
-//   때 얻은 hold를 하나 써서 완전 무효화한다. hold가 0이면 이 무브 자체를
-//   쓸 수 없음. hold를 얻는 쪽은 data/hold-grant-moves.js 참고) |
+//   때 얻은 hold를 하나 써서 자기 자신에 대한 피해를 완전 무효화한다.
+//   hold가 0이면 이 무브 자체를 쓸 수 없음. hold를 얻는 쪽은
+//   data/hold-grant-moves.js 참고. "아군"을 지켜주는 쪽은 이 표에 행을
+//   추가하는 게 아니라 features/hit-trigger.js의 getAllyHoldCandidates가
+//   예배 때 지정해둔 보호 대상에게만 동적으로 "allyHold" 후보를 끼워 넣는다) |
 //   "animalCompanion"(레인저 Man's Best Friend 전용 — 동반 동물이 대신
 //   맞아줘서 완전 무효화한다. 원문의 "사나움(ferocity)" 수치 자체는 이
 //   모듈이 추적하지 않아서 "이미 썼는지" boolean으로 단순화했다 — 이미

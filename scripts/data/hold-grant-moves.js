@@ -13,11 +13,11 @@
 // 무효화" 부분은 features/hit-trigger.js의 HIT_TRIGGER_MOVES 표에 effect:
 // "hold"로 등록되어 있다(data/hit-trigger-moves.js 참고).
 //
-// 원문은 "you or an ally"라서 아군을 대신 지켜주는 것도 가능하지만, 이
-// 모듈의 피격 무효화 체계는 지금 "피해를 받는 그 캐릭터 자신의 무브"만
-// 후보로 삼는 구조라 다른 캐릭터가 대신 hold를 써주는 것까지는 자동화하지
-// 않는다(자신을 지키는 경우만 자동화됨 — GM이 아군을 지키는 경우는 수동으로
-// 처리해야 한다).
+// 원문은 "you or an ally"라서 아군을 대신 지켜주는 것도 가능하다. 예배를
+// 올려 이 표의 hold를 받을 때 features/spell-preparation.js가 "이 예비로
+// 함께 지켜줄 아군"을 추가로 물어보고(lib/divine-protection-state.js에
+// 저장), features/hit-trigger.js가 그 보호 대상이 피격당할 때마다 시전자의
+// hold를 대신 소모하는 선택지를 끼워 넣는다(getAllyHoldCandidates 참고).
 //
 // 상급형(Divine Invincibility)은 features/move-upgrades.js에 이미 "대체"
 // 관계(deletesPrevious:true)로 등록되어 있어서, 한 캐릭터가 둘을 동시에

@@ -8,6 +8,8 @@ import { getFirstAidDiscountedSpellIds } from "./first-aid.js";
 import { COMMUNE_PENALTY_FLAG } from "../lib/ongoing-spells-state.js";
 import { getHold, setHold } from "../lib/divine-hold-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { promptActorMultiTarget } from "../lib/actor-target-picker.js";
+import { setProtectedAllies } from "../lib/divine-protection-state.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -37,7 +39,9 @@ function getActorLevel(actor) {
 // (누적이 아니라 "이전 hold는 소멸" — data/hold-grant-moves.js 참고). 위저드
 // Prepare Spells를 발동한 경우는 이 무브 자체를 가질 수 없으므로 자연히
 // 아무 일도 일어나지 않는다.
-function getHoldGrantRow(actor) {
+// features/hit-trigger.js도 아군 보호 후보를 만들 때 이 함수로 "이 캐릭터가
+// 신의 보우/가호 중 무엇을 가졌는지"(표시용 이름)를 그대로 재사용한다.
+export function getHoldGrantRow(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES);
   return rows.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
 }
@@ -255,6 +259,26 @@ async function onCreateChatMessage(message, options, userId) {
         holdGrantRow.name,
         game.i18n.format("DWAUTO.PrepareSpells.HoldGranted", { amount: holdGrantRow.holdAmount })
       );
+
+      // 원문 "you or an ally" 중 "아군" 쪽: 자기 자신은 features/hit-trigger.js의
+      // 기존 "hold" 효과가 이미 처리하므로, 여기서는 그 예비로 추가로 지켜줄
+      // 아군만 고른다(0명이어도 된다 — 자기 자신 보호는 그대로 유지된다).
+      // 예배를 다시 올릴 때마다 이 선택도 새로 덮어쓴다(예비 자체가 리셋되는
+      // 시점과 같다).
+      const allies = await promptActorMultiTarget(actor, {
+        title: holdGrantRow.name,
+        label: game.i18n.localize("DWAUTO.PrepareSpells.ProtectAlliesLabel"),
+        excludeSelf: true,
+        filter: (a) => a.type === "character"
+      });
+      await setProtectedAllies(actor, allies.map((a) => a.id));
+      if (allies.length > 0) {
+        announceActionApplied(
+          actor,
+          holdGrantRow.name,
+          game.i18n.format("DWAUTO.PrepareSpells.ProtectedAllies", { names: allies.map((a) => a.name).join(", ") })
+        );
+      }
     }
   } catch (err) {
     console.error(`${MODULE_ID} | spell-preparation: onCreateChatMessage failed`, err);
