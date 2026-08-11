@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { TAG_CATALOG } from "../data/tag-catalog.js";
 import { DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
+import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "../data/conditional-damage-moves.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -10,6 +11,7 @@ import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBo
 import { getCommandDamageBonus } from "./command.js";
 import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damage-forward-state.js";
 import { getMercilessBonus } from "./merciless.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -776,7 +778,48 @@ function onRenderActorSheet(app, html) {
   }
 }
 
+// v0.73.x 전수조사로 전사 피의 향기/맛본 피(Scent Of Blood/Taste Of Blood)를
+// 새로 찾아 DEFAULT_CONDITIONAL_DAMAGE_MOVES에 추가했다. 이미 세계를
+// 설정해둔 GM에게는 코드 기본값을 바꾸는 것만으로 반영되지 않으므로
+// (game.settings 기본값은 한 번도 저장된 적 없는 세계에만 적용된다), 이미
+// 저장된 표에 없는 이름만 골라 한 번 추가해준다 — features/class-grant.js의
+// migrateAddSurveyedDefaults와 같은 패턴.
+async function migrateAddSurveyedDefaults() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
+  const existingNames = new Set(rows.map((r) => r.name));
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
+  }
+
+  const toAdd = [];
+  for (const row of DEFAULT_CONDITIONAL_DAMAGE_MOVES) {
+    if (existingNames.has(row.name)) continue;
+
+    const translatedName = nameMap?.get(row.name);
+    if (translatedName && existingNames.has(translatedName)) continue;
+
+    toAdd.push(translatedName ? { ...row, name: translatedName } : row);
+  }
+
+  if (toAdd.length === 0) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES, [...rows, ...toAdd]);
+  console.log(
+    `${MODULE_ID} | attack-assistant: added ${toAdd.length} newly-surveyed default(s) to Conditional Damage Moves`,
+    toAdd.map((r) => r.name)
+  );
+}
+
 export function registerAttackAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateAddSurveyedDefaults();
+  });
 }

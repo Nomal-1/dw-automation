@@ -15,5 +15,7 @@ export const DEFAULT_CONDITIONAL_DAMAGE_MOVES = [
   { name: "Holy Smite", yesFormula: "1d8", noFormula: "0", requiresDesignation: false },
   { name: "Exterminatus", yesFormula: "2d4", noFormula: "-4", requiresDesignation: true },
   { name: "Viper’s Strike", yesFormula: "1d4", noFormula: "0", requiresDesignation: false },
-  { name: "Viper’s Fangs", yesFormula: "1d8", noFormula: "0", requiresDesignation: false }
+  { name: "Viper’s Fangs", yesFormula: "1d8", noFormula: "0", requiresDesignation: false },
+  { name: "Scent Of Blood", yesFormula: "1d4", noFormula: "0", requiresDesignation: false },
+  { name: "Taste Of Blood", yesFormula: "1d8", noFormula: "0", requiresDesignation: false }
 ];
