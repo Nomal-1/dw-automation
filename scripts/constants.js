@@ -120,5 +120,9 @@ export const SETTINGS = {
   SEEING_RED_MOVE_NAMES: "seeingRedMoveNames",
   DISCERN_REALITIES_MOVE_NAMES: "discernRealitiesMoveNames",
   ENABLE_IMPROVED_WEAPON_ASSISTANT: "enableImprovedWeaponAssistant",
-  IMPROVED_WEAPON_MOVE_NAMES: "improvedWeaponMoveNames"
+  IMPROVED_WEAPON_MOVE_NAMES: "improvedWeaponMoveNames",
+  STEEL_HIDE_MOVE_NAMES: "steelHideMoveNames",
+  BLOODTHIRSTY_MOVE_NAMES: "bloodthirstyMoveNames",
+  ENABLE_THROUGH_DEATHS_EYES_ASSISTANT: "enableThroughDeathsEyesAssistant",
+  THROUGH_DEATHS_EYES_MOVE_NAMES: "throughDeathsEyesMoveNames"
 };

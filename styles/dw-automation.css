@@ -433,6 +433,19 @@
   color: #fff !important;
 }
 
+.dwauto-through-deaths-eyes-badge {
+  cursor: pointer;
+}
+
+.dwauto-through-deaths-eyes-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-through-deaths-eyes-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-seeing-red-badge {
   cursor: pointer;
 }

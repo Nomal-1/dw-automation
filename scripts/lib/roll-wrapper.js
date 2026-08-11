@@ -29,6 +29,7 @@ import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
 import { promptInterrogatorPreRoll } from "../features/interrogator.js";
 import { promptPrecisePreRoll } from "../features/precise-weapon.js";
 import { getSeeingRedBonus } from "../features/seeing-red.js";
+import { getThroughDeathsEyesMalus } from "../features/through-deaths-eyes.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -176,6 +177,7 @@ async function wrappedRoll(wrapped, ...args) {
   const commandMod = getCommandCunningBonus(this);
   const goodDayToDieMod = getGoodDayToDieBonus(this.actor);
   const ongoingPenaltyMod = getOngoingPenaltyMalus(this.actor);
+  const throughDeathsEyesMod = getThroughDeathsEyesMalus(this.actor);
   const pendingBonus = getPendingRollBonus(this.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, this.name);
   const totalMod =
@@ -184,6 +186,7 @@ async function wrappedRoll(wrapped, ...args) {
     commandMod +
     goodDayToDieMod +
     ongoingPenaltyMod +
+    throughDeathsEyesMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
     preRollBonus;
   if (!totalMod && !pendingBonusApplies && !statOverride) return wrapped(...args);

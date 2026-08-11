@@ -44,6 +44,7 @@ import { registerInterrogatorAssistant } from "./features/interrogator.js";
 import { registerPreciseWeaponAssistant } from "./features/precise-weapon.js";
 import { registerSeeingRedAssistant } from "./features/seeing-red.js";
 import { registerImprovedWeaponAssistant } from "./features/improved-weapon.js";
+import { registerThroughDeathsEyesAssistant } from "./features/through-deaths-eyes.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -99,3 +100,4 @@ registerInterrogatorAssistant();
 registerPreciseWeaponAssistant();
 registerSeeingRedAssistant();
 registerImprovedWeaponAssistant();
+registerThroughDeathsEyesAssistant();

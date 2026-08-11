@@ -1475,4 +1475,45 @@ export function registerSettings() {
     type: String,
     default: "Improved Weapon"
   });
+
+  // 강철의 몸(Steel Hide, 무쇠의 몸 대체)/살기등등(Bloodthirsty, 무자비
+  // 대체)은 각각 features/iron-hide.js, features/merciless.js가 그대로
+  // 재사용해서 별도 사용/미사용 설정 없이 이름 설정만 둔다.
+  game.settings.register(MODULE_ID, SETTINGS.STEEL_HIDE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SteelHideMoveNames.Name",
+    hint: "DWAUTO.Settings.SteelHideMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Steel Hide"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BLOODTHIRSTY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BloodthirstyMoveNames.Name",
+    hint: "DWAUTO.Settings.BloodthirstyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Bloodthirsty"
+  });
+
+  // 전사 고급액션 죽음의 예감: 자세한 설계는 features/through-deaths-eyes.js
+  // 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_THROUGH_DEATHS_EYES_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableThroughDeathsEyesAssistant.Name",
+    hint: "DWAUTO.Settings.EnableThroughDeathsEyesAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.THROUGH_DEATHS_EYES_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ThroughDeathsEyesMoveNames.Name",
+    hint: "DWAUTO.Settings.ThroughDeathsEyesMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Through Death’s Eyes"
+  });
 }

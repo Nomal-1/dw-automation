@@ -587,6 +587,27 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, improvedWeaponMoveNames, stats)
   );
 
+  const steelHideMoveNames = game.settings.get(MODULE_ID, SETTINGS.STEEL_HIDE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.STEEL_HIDE_MOVE_NAMES,
+    translateCommaList(moveMap, steelHideMoveNames, stats)
+  );
+
+  const bloodthirstyMoveNames = game.settings.get(MODULE_ID, SETTINGS.BLOODTHIRSTY_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.BLOODTHIRSTY_MOVE_NAMES,
+    translateCommaList(moveMap, bloodthirstyMoveNames, stats)
+  );
+
+  const throughDeathsEyesMoveNames = game.settings.get(MODULE_ID, SETTINGS.THROUGH_DEATHS_EYES_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.THROUGH_DEATHS_EYES_MOVE_NAMES,
+    translateCommaList(moveMap, throughDeathsEyesMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,
