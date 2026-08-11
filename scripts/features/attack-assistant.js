@@ -11,6 +11,7 @@ import { incrementBalanceOnDamage, applyDamageDieOverride, getFormshaperDamageBo
 import { getCommandDamageBonus } from "./command.js";
 import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damage-forward-state.js";
 import { getMercilessBonus } from "./merciless.js";
+import { getCheapShotBonus } from "./cheap-shot.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 
 function splitCommaList(settingKey) {
@@ -416,7 +417,7 @@ async function consumeWeaponUses(weapon) {
   }
 }
 
-async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
+async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice, moveTitle) {
   let consumed = null;
 
   if (isRangedWeapon(weapon)) {
@@ -431,9 +432,13 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   const conditionalTags = await promptConditionalTagMoves(actor);
   const commandBonus = getCommandDamageBonus(actor);
   const mercilessBonus = getMercilessBonus(actor);
+  const cheapShotBonus = await getCheapShotBonus(actor, moveTitle, weapon);
   const damageForward = getPendingDamageForward(actor);
   const finalExtraDice = appendTerm(
-    appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
+    appendTerm(
+      appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
+      cheapShotBonus
+    ),
     damageForward ? String(damageForward.amount) : ""
   );
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
@@ -463,7 +468,7 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice) {
   }
 }
 
-function promptWeaponChoice(actor, ranged, extraDice) {
+function promptWeaponChoice(actor, ranged, extraDice, moveTitle) {
   const allWeapons = actor.items.filter(
     (i) => i.type === "equipment" && i.system?.itemType === "weapon" && !isAmmoItem(i)
   );
@@ -503,7 +508,7 @@ function promptWeaponChoice(actor, ranged, extraDice) {
         callback: (html) => {
           const weapon = actor.items.get(html.find('[name="weapon"]').val());
           const dmgMod = Number(html.find('[name="mod"]').val()) || 0;
-          if (weapon) handleAmmoAndRoll(actor, weapon, dmgMod, extraDice);
+          if (weapon) handleAmmoAndRoll(actor, weapon, dmgMod, extraDice, moveTitle);
         }
       },
       cancel: { label: game.i18n.localize("DWAUTO.Cancel") }
@@ -569,7 +574,7 @@ function handleGatedChoiceAttack(actor, moveItem, result, ranged, overrideCount)
 
       const bonusDice = selected.map(extractInlineRoll).find((d) => d);
       if (bonusDice) {
-        promptWeaponChoice(actor, ranged, bonusDice);
+        promptWeaponChoice(actor, ranged, bonusDice, moveItem.name);
       }
     }
   });

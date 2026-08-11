@@ -1547,4 +1547,32 @@ export function registerSettings() {
     type: String,
     default: "Cautious"
   });
+
+  // 도적 고급액션 급소 가격: 자세한 설계는 features/cheap-shot.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CHEAP_SHOT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableCheapShotAssistant.Name",
+    hint: "DWAUTO.Settings.EnableCheapShotAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CHEAP_SHOT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CheapShotMoveNames.Name",
+    hint: "DWAUTO.Settings.CheapShotMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Cheap Shot"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BACKSTAB_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BackstabMoveNames.Name",
+    hint: "DWAUTO.Settings.BackstabMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Backstab"
+  });
 }

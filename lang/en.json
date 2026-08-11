@@ -537,6 +537,18 @@
       "CautiousMoveNames": {
         "Name": "Cautious Move Names",
         "Hint": "A modifier move that doesn't replace Trap Expert. Comma-separated (default: Cautious)."
+      },
+      "EnableCheapShotAssistant": {
+        "Name": "Enable Cheap Shot Automation",
+        "Hint": "When you pick the '+1d6 damage' option on Backstab and choose a weapon, if that weapon has the precise or Hand tag, an extra 1d6 is added to the damage automatically."
+      },
+      "CheapShotMoveNames": {
+        "Name": "Cheap Shot Move Names",
+        "Hint": "Comma-separated (default: Cheap Shot)."
+      },
+      "BackstabMoveNames": {
+        "Name": "Backstab Move Names",
+        "Hint": "Used to identify whether a roll is Backstab for Cheap Shot. Comma-separated (default: Backstab)."
       }
     },
     "Npc": {
@@ -1307,6 +1319,9 @@
       "BadgeLabel": "Hold {hold}",
       "Gained": "Gained {hold} hold",
       "GainedWithCautious": "Gained {hold} hold (+1 from Cautious)"
+    },
+    "CheapShot": {
+      "Applied": "Cheap Shot triggers — adding 1d6 to the damage"
     },
     "ThroughDeathsEyes": {
       "Activated": "Through Death's Eyes failed — the ominous effect is now active. Every roll gets -1 for as long as combat lasts (until the GM turns it off)",

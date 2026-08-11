@@ -642,5 +642,19 @@ export async function runTranslationImport() {
   const cautiousMoveNames = game.settings.get(MODULE_ID, SETTINGS.CAUTIOUS_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.CAUTIOUS_MOVE_NAMES, translateCommaList(moveMap, cautiousMoveNames, stats));
 
+  const cheapShotMoveNames = game.settings.get(MODULE_ID, SETTINGS.CHEAP_SHOT_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.CHEAP_SHOT_MOVE_NAMES,
+    translateCommaList(moveMap, cheapShotMoveNames, stats)
+  );
+
+  const backstabMoveNames = game.settings.get(MODULE_ID, SETTINGS.BACKSTAB_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.BACKSTAB_MOVE_NAMES,
+    translateCommaList(moveMap, backstabMoveNames, stats)
+  );
+
   return stats;
 }
