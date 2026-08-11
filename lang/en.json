@@ -1220,7 +1220,7 @@
       "HealRollFlavor": "{name} healing",
       "DamageForwardRollFlavor": "{name} damage bonus",
       "DamageForwardApplied": "{amount} queued for {target}'s next damage roll",
-      "DamageForwardConsumed": "Applied the {amount} damage bonus from Arcane Art",
+      "DamageForwardConsumed": "Applied {amount} to this damage roll",
       "DamageForwardDescription": "{amount} on their next damage roll",
       "EnchantmentCleared": "One enchantment on {target}'s mind was cleared",
       "AidEnhanced": "The next time {target} is aided, they'll get +2 instead of +1",

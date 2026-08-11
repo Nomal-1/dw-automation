@@ -1220,7 +1220,7 @@
       "HealRollFlavor": "{name} 치유",
       "DamageForwardRollFlavor": "{name} 피해 보너스",
       "DamageForwardApplied": "{target}의 다음 피해 굴림에 {amount} 적용 예정",
-      "DamageForwardConsumed": "마법의 곡조가 걸어둔 피해 보너스 {amount} 적용됨",
+      "DamageForwardConsumed": "다음 피해 굴림에 {amount} 적용됨",
       "DamageForwardDescription": "다음 피해 굴림에 {amount}",
       "EnchantmentCleared": "{target}의 정신에 걸린 마법 하나가 해제되었습니다",
       "AidEnhanced": "{target}이(가) 다음에 원조를 받으면 +1 대신 +2를 받습니다",
