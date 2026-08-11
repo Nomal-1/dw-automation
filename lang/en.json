@@ -488,11 +488,11 @@
       },
       "EnablePreciseWeaponAssistant": {
         "Name": "Enable Precise Tag Automation",
-        "Hint": "Before rolling Hack & Slash (per the melee move names setting), asks which weapon is being used. If it has the precise tag, that roll uses DEX instead of STR. Reuses the melee weapon tags setting."
+        "Hint": "Before rolling Hack & Slash (per the melee move names setting), asks whether the weapon has the Precise tag (adjustable via a 3-state badge next to the melee move: ask every time / always precise / never precise, clickable by both players and the GM). If precise, that roll uses DEX instead of STR."
       },
       "EnableSeeingRedAssistant": {
         "Name": "Enable Seeing Red Automation",
-        "Hint": "If the character has this move and rolls Discern Realities while not yet \"active\", asks after the roll whether it's currently combat. If yes, the badge switches to \"active\" and every later Discern Realities roll automatically gets +1. Only the GM can click the badge to toggle it."
+        "Hint": "If the character has this move and rolls Discern Realities while not yet \"active\", asks after the roll whether it's currently combat. If yes, the badge switches to \"active\" and every roll this character makes automatically gets +1 for as long as combat lasts. Only the GM can click the badge to toggle it."
       },
       "SeeingRedMoveNames": {
         "Name": "Seeing Red Move Names",
@@ -1278,9 +1278,12 @@
       "Applied": "Interrogator applied — rolling STR instead of CHA"
     },
     "PreciseWeapon": {
-      "SelectTitle": "Choose the weapon you're using",
-      "SelectLabel": "Weapon",
-      "Applied": "Precise's effect rolls DEX instead"
+      "Prompt": "Does it have the Precise tag?",
+      "Applied": "Precise's effect rolls DEX instead",
+      "ToggleTitle": "Click to cycle how Precise is checked: ask every time → always precise → never precise.",
+      "ModeAsk": "Ask every time",
+      "ModeAlways": "Always precise",
+      "ModeNever": "Never precise"
     },
     "ImprovedWeapon": {
       "NoWeapon": "You don't have a Signature Weapon.",
@@ -1291,7 +1294,7 @@
     },
     "SeeingRed": {
       "Prompt": "Is it currently combat?",
-      "Activated": "Seeing Red is now active — every Discern Realities roll gets +1 from here on (until the GM turns it off)",
+      "Activated": "Seeing Red is now active — every roll gets +1 from here on (until the GM turns it off)",
       "ToggleTitle": "Click to toggle Seeing Red's active state (GM only).",
       "Active": "Active",
       "Inactive": "Inactive"

@@ -420,6 +420,19 @@
   color: #fff !important;
 }
 
+.dwauto-precise-mode-badge {
+  cursor: pointer;
+}
+
+.dwauto-precise-mode-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-precise-mode-on {
+  background: #2e5a7a !important;
+  color: #fff !important;
+}
+
 .dwauto-seeing-red-badge {
   cursor: pointer;
 }

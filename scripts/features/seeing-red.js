@@ -5,13 +5,13 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isSeeingRedActive, setSeeingRedActive } from "../lib/seeing-red-state.js";
 
-// 전사 고급액션 전사의 눈(Seeing Red) 원문: "When you Discern Realities
-// during combat, you take +1." 상황파악 판정 자체가 끝난 뒤(원래 판정
-// 결과에는 영향을 주지 않고), 아직 "적용중" 상태가 아니라면 "지금이
+// 전사 고급액션 전사의 눈(Seeing Red): 상황파악 판정 자체가 끝난 뒤(원래
+// 판정 결과에는 영향을 주지 않고), 아직 "적용중" 상태가 아니라면 "지금이
 // 전투중인가요?"를 물어본다. 그렇다고 답하면 배지를 "적용중"으로 바꾸고,
-// 그 뒤로는 이 액터가 상황파악을 굴릴 때마다(다시 묻지 않고) 자동으로 +1을
-// 준다. 끄는 시점은 원문상 자동으로 알 수 없어 마스터가 배지를 직접
-// 클릭해서 끈다 — 플레이어는 배지를 건드릴 수 없다.
+// 그 뒤로는 전투가 지속되는 동안 이 액터의 모든 판정에 자동으로 +1을
+// 준다(상황파악 한정이 아니라 전투 지속시간 전체). 끄는 시점은 자동으로
+// 알 수 없어 마스터가 배지를 직접 클릭해서 끈다 — 플레이어는 배지를
+// 건드릴 수 없다.
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_SEEING_RED_ASSISTANT);
 }
@@ -43,17 +43,15 @@ async function matchesDiscernRealities(title) {
 }
 
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다(다른 사전 보정치들과 같은
-// 자리). 상황파악이 아니거나, 전사의 눈이 없거나, 아직 "적용중"이 아니면
-// 0을 반환한다 — 다이얼로그 없이 조용히 통과한다(물어보는 건 판정이 끝난
-// 뒤 onCreateChatMessage 쪽 몫이다).
+// 자리). 전사의 눈이 없거나 아직 "적용중"이 아니면 0을 반환한다 —
+// 다이얼로그 없이 조용히 통과한다(물어보는 건 판정이 끝난 뒤
+// onCreateChatMessage 쪽 몫이다). "적용중"이면 어떤 판정이든 +1이 붙는다
+// (상황파악으로 한정하지 않는다 — 전투 지속시간 내내 적용).
 export function getSeeingRedBonus(item) {
   if (!isEnabled()) return 0;
 
   const actor = item.actor;
   if (!actor || actor.type !== "character") return 0;
-
-  const discernNames = splitCommaList(SETTINGS.DISCERN_REALITIES_MOVE_NAMES);
-  if (!discernNames.includes(item.name)) return 0;
 
   if (!findSeeingRedMove(actor)) return 0;
   if (!isSeeingRedActive(actor)) return 0;
