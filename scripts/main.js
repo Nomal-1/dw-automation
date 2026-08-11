@@ -41,6 +41,7 @@ import { registerSignatureWeaponAssistant } from "./features/signature-weapon.js
 import { registerIronHideAssistant } from "./features/iron-hide.js";
 import { registerMercilessAssistant } from "./features/merciless.js";
 import { registerInterrogatorAssistant } from "./features/interrogator.js";
+import { registerPreciseWeaponAssistant } from "./features/precise-weapon.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -93,3 +94,4 @@ registerSignatureWeaponAssistant();
 registerIronHideAssistant();
 registerMercilessAssistant();
 registerInterrogatorAssistant();
+registerPreciseWeaponAssistant();

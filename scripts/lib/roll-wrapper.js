@@ -27,6 +27,7 @@ import { promptBolsterPreRoll } from "../features/bolster.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
 import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
 import { promptInterrogatorPreRoll } from "../features/interrogator.js";
+import { promptPrecisePreRoll } from "../features/precise-weapon.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -128,10 +129,12 @@ async function wrappedRoll(wrapped, ...args) {
     return handleAskRoll(this, wrapped, args, preRollBonus);
   }
 
-  // 협박(Interrogator)처럼 "이번 판정에 한해 판정 능력치 자체를
-  // 바꿔치기하는" 자동화(features/interrogator.js 참고).
+  // 협박(Interrogator)/정밀(Precise) 태그처럼 "이번 판정에 한해 판정
+  // 능력치 자체를 바꿔치기하는" 자동화들. 서로 다른 무브(협상 vs 접근전)를
+  // 대상으로 하므로 같은 판정에서 동시에 걸릴 일은 없다.
   const interrogator = await promptInterrogatorPreRoll(this);
-  const statOverride = interrogator.statOverride;
+  const precise = await promptPrecisePreRoll(this);
+  const statOverride = interrogator.statOverride ?? precise.statOverride;
 
   let spellPenalty = 0;
   if (game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT) && isCastSpellMove(this)) {

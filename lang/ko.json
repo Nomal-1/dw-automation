@@ -485,6 +485,10 @@
       "ParleyMoveNames": {
         "Name": "협상 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Parley)."
+      },
+      "EnablePreciseWeaponAssistant": {
+        "Name": "정밀 태그 자동화 사용",
+        "Hint": "접근전(근접 무브 이름 설정 기준) 판정을 굴리기 전에 사용할 무기를 먼저 물어봅니다. 고른 무기가 정밀(precise) 태그를 갖고 있으면 이번 판정에 한해 근력 대신 민첩으로 굴립니다. 근접 무기 태그 설정을 재사용합니다."
       }
     },
     "Npc": {
@@ -1252,6 +1256,11 @@
     "Interrogator": {
       "Prompt": "협박을 적용하시겠습니까? (매력 대신 근력으로 판정합니다)",
       "Applied": "협박 발동 — 매력 대신 근력으로 판정합니다"
+    },
+    "PreciseWeapon": {
+      "SelectTitle": "사용할 무기를 선택하세요",
+      "SelectLabel": "무기",
+      "Applied": "정밀의 효과로 민첩 다이스가 굴려집니다"
     },
     "TwinHornWildfire": {
       "Available": "[쌍각의 들불 적용 가능]"

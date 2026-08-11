@@ -1416,4 +1416,16 @@ export function registerSettings() {
     type: String,
     default: "Parley"
   });
+
+  // 무기 태그 정밀(Precise): 자세한 설계는 features/precise-weapon.js
+  // 참고. 근접 무브 이름(MELEE_MOVE_NAMES)/근접 무기 태그(MELEE_WEAPON_TAGS)
+  // 설정을 그대로 재사용하므로 별도 무브 이름 설정은 없다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_PRECISE_WEAPON_ASSISTANT, {
+    name: "DWAUTO.Settings.EnablePreciseWeaponAssistant.Name",
+    hint: "DWAUTO.Settings.EnablePreciseWeaponAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
 }

@@ -114,5 +114,6 @@ export const SETTINGS = {
   MERCILESS_MOVE_NAMES: "mercilessMoveNames",
   ENABLE_INTERROGATOR_ASSISTANT: "enableInterrogatorAssistant",
   INTERROGATOR_MOVE_NAMES: "interrogatorMoveNames",
-  PARLEY_MOVE_NAMES: "parleyMoveNames"
+  PARLEY_MOVE_NAMES: "parleyMoveNames",
+  ENABLE_PRECISE_WEAPON_ASSISTANT: "enablePreciseWeaponAssistant"
 };

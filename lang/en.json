@@ -485,6 +485,10 @@
       "ParleyMoveNames": {
         "Name": "Parley Move Names",
         "Hint": "Comma-separated (default: Parley)."
+      },
+      "EnablePreciseWeaponAssistant": {
+        "Name": "Enable Precise Tag Automation",
+        "Hint": "Before rolling Hack & Slash (per the melee move names setting), asks which weapon is being used. If it has the precise tag, that roll uses DEX instead of STR. Reuses the melee weapon tags setting."
       }
     },
     "Npc": {
@@ -1252,6 +1256,11 @@
     "Interrogator": {
       "Prompt": "Apply Interrogator? (roll STR instead of CHA)",
       "Applied": "Interrogator applied — rolling STR instead of CHA"
+    },
+    "PreciseWeapon": {
+      "SelectTitle": "Choose the weapon you're using",
+      "SelectLabel": "Weapon",
+      "Applied": "Precise's effect rolls DEX instead"
     },
     "TwinHornWildfire": {
       "Available": "[Twin-Horn Wildfire available]"
