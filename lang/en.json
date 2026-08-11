@@ -849,7 +849,9 @@
       "FireAidReduceDamage": "Reduce the damage you take by {amount}",
       "FireAidAddUsesApplied": "Rolled 1d4 ({amount}) and added {amount} uses to \"{weapon}\"",
       "FireAidForwardApplied": "Rolled 1d4 ({amount}) and took {amount} forward to your next Burning Brand roll",
-      "FireAidReduceDamageApplied": "Rolled 1d4 ({amount}) — original damage {original} reduced by {amount}, so you actually take {damage}"
+      "FireAidReduceDamageApplied": "Rolled 1d4 ({amount}) — original damage {original} reduced by {amount}, so you actually take {damage}",
+      "EmbracePainApplied": "Embracing the pain, you take an extra 1d4 ({extra}) damage (ignoring armor) — {total} total. You take +1 forward to cast a spell",
+      "EmbracePainSpellLevelReminder": "Remember to add your level to that spell's damage or healing (a narrative effect, not calculated automatically)"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",

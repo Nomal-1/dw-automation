@@ -361,6 +361,29 @@ async function applyFireAid(actor, row, damage, originalChanges, originalOptions
   return true;
 }
 
+// 클레릭 속죄(Penitent)/회개(Martyr, 속죄 대체) 전용: 다른 선택지들과 반대로
+// 피해를 줄이는 게 아니라, 고통을 받아들여 1d4 피해를 추가로 받는 대신
+// 이득을 얻는다. 그래서 취소/실패 개념이 없다 — 고르는 순간 무조건 적용된다.
+async function applyEmbracePain(actor, row, damage, originalChanges, originalOptions) {
+  const roll = new Roll("1d4");
+  await roll.evaluate();
+  await roll.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: row.name });
+  const extra = roll.total;
+  const total = damage + extra;
+
+  const adjustedChanges = buildHpChange(originalChanges, actor, total);
+  await actor.update(adjustedChanges, { ...originalOptions, [SKIP_FLAG]: true });
+
+  const castSpellNames = splitCommaList(SETTINGS.CAST_SPELL_MOVE_NAMES);
+  await setPendingRollBonus(actor, 1, row.name, castSpellNames.length > 0 ? castSpellNames : null);
+
+  announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.EmbracePainApplied", { extra, total }));
+
+  if (row.addLevelToSpellEffect) {
+    announceActionApplied(actor, row.name, game.i18n.localize("DWAUTO.HitTrigger.EmbracePainSpellLevelReminder"));
+  }
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
@@ -431,6 +454,8 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
           } else if (row.effect === "fireAid") {
             const applied = await applyFireAid(actor, row, damage, originalChanges, originalOptions);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });
+          } else if (row.effect === "embracePain") {
+            await applyEmbracePain(actor, row, damage, originalChanges, originalOptions);
           } else {
             const applied = await applyArmorNegation(actor, row, damage);
             if (applied === null) await actor.update(originalChanges, { ...originalOptions, [SKIP_FLAG]: true });

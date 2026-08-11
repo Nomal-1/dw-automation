@@ -849,7 +849,9 @@
       "FireAidReduceDamage": "받는 피해를 {amount}만큼 경감",
       "FireAidAddUsesApplied": "1d4({amount})를 굴려 \"{weapon}\"의 사용 횟수에 {amount}를 더했습니다",
       "FireAidForwardApplied": "1d4({amount})를 굴려 다음 불타는 낙인 판정에 forward로 {amount}를 가져갑니다",
-      "FireAidReduceDamageApplied": "1d4({amount})를 굴려 원래 피해 {original}에서 {amount}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다"
+      "FireAidReduceDamageApplied": "1d4({amount})를 굴려 원래 피해 {original}에서 {amount}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다",
+      "EmbracePainApplied": "고통을 받아들여 1d4({extra})의 피해를 추가로 입습니다(장갑 무시) — 총 {total}의 피해. 다음 번 주문 시전 판정에 +1을 받습니다",
+      "EmbracePainSpellLevelReminder": "그 주문으로 가하는 피해나 치유에 자기 레벨만큼을 더하는 것을 잊지 마세요(서사 효과라 자동 계산되지 않습니다)"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",

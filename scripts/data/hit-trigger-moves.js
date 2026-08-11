@@ -25,7 +25,13 @@
 //   사용 횟수 추가(불타는 낙인이 활성 상태일 때만) / 다음 불타는 낙인
 //   판정에 forward로 그대로 가져가기 / 피해 경감] 중 하나를 고른다.
 //   피해 경감을 고르면 굴림 값이 받은 피해보다 크거나 같을 때 체력이
-//   원상복구된다)
+//   원상복구된다) | "embracePain"(클레릭 Penitent/Martyr 전용 — 다른
+//   효과들과 반대로 피해를 줄이는 게 아니라 자원해서 1d4 피해를 추가로
+//   받는다(장갑 무시). 그 대신 다음 번 주문 시전 판정에 +1을 받는다.
+//   Martyr(속죄 대체)는 추가로 "그 주문의 피해/치유에 자기 레벨을 더한다"는
+//   문구가 있는데, 이 모듈이 주문 피해/치유를 구조화된 굴림으로 다루지
+//   않아(자유 서술형) 그 부분은 채팅 안내로만 남긴다 —
+//   addLevelToSpellEffect: true인 행에서만 그 안내가 붙는다)
 // - grantsForward: 무효화에 성공하면 +1 forward도 함께 받는지(Armored
 //   Perfection). 던전월드 시스템의 forward는 다음 굴림에 자동으로 붙었다가
 //   소모되는 값(system.attributes.forward.value)이라 별도 계산이 필요 없다.
@@ -39,7 +45,9 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Divine Invincibility", effect: "hold", grantsForward: false },
   { name: "Man's Best Friend", effect: "animalCompanion", grantsForward: false },
   { name: "Indestructible Hunger", effect: "ongoingPenalty", grantsForward: false },
-  { name: "Fighting Fire with Fire", effect: "fireAid", grantsForward: false }
+  { name: "Fighting Fire with Fire", effect: "fireAid", grantsForward: false },
+  { name: "Penitent", effect: "embracePain", grantsForward: false },
+  { name: "Martyr", effect: "embracePain", grantsForward: false, addLevelToSpellEffect: true }
 ];
 
 // 8개 기본 직업 + 바바리안/이몰레이터 컴펜디엄(1.8.2) 전수조사로 찾은,
