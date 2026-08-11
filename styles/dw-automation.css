@@ -574,3 +574,8 @@
   flex-direction: column;
   gap: 8px;
 }
+
+.dwauto-poison-effect {
+  width: 100%;
+  resize: vertical;
+}

@@ -593,6 +593,10 @@
       "HeistMoveNames": {
         "Name": "대도적 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Heist)."
+      },
+      "AlchemistMoveNames": {
+        "Name": "독학박사 무브 이름",
+        "Hint": "독제사를 대체하는 업그레이드입니다(독 제조 버튼에 '독 창작' 선택지가 추가됩니다). 쉼표로 구분해서 입력하세요(기본값: Alchemist)."
       }
     },
     "Npc": {
@@ -1402,7 +1406,16 @@
       "BrewTitle": "제조할 독을 정해주세요",
       "BrewSelectLabel": "독 선택",
       "BrewNoneWarning": "먼저 사용한 독을 추가하세요.",
-      "Brewed": "\"{name}\" 3회분이 조제되어 인벤토리에 추가되었습니다 (총 {total}회분)"
+      "Brewed": "\"{name}\" 3회분이 조제되어 인벤토리에 추가되었습니다 (총 {total}회분)",
+      "InventOption": "독 창작",
+      "InventTitle": "독 창작",
+      "EffectLabel": "원하는 효과",
+      "ConditionsLabel": "마스터가 제시한 조건을 체크하세요(0개 이상)",
+      "ConditionsPrefix": "조건",
+      "Condition1": "특정한 상황에서만 효과를 발휘한다.",
+      "Condition2": "원하는 것보다 약하다.",
+      "Condition3": "효과가 발휘되는 데 시간이 꽤 걸린다.",
+      "Condition4": "뚜렷한 부작용이 일어난다."
     },
     "ThroughDeathsEyes": {
       "Activated": "죽음의 예감 실패 — 불길함이 적용되었습니다. 전투가 지속되는 동안 모든 판정에 -1이 붙습니다(마스터가 직접 끌 때까지)",

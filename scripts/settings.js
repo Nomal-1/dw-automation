@@ -1684,4 +1684,15 @@ export function registerSettings() {
     type: String,
     default: "Heist"
   });
+
+  // 독학박사(Alchemist, 독제사 대체)는 features/poison-tab.js가 그대로
+  // 재사용해서 별도 사용/미사용 설정 없이 이름 설정만 둔다.
+  game.settings.register(MODULE_ID, SETTINGS.ALCHEMIST_MOVE_NAMES, {
+    name: "DWAUTO.Settings.AlchemistMoveNames.Name",
+    hint: "DWAUTO.Settings.AlchemistMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Alchemist"
+  });
 }

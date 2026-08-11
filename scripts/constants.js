@@ -141,5 +141,6 @@ export const SETTINGS = {
   STRONG_ARM_MOVE_NAMES: "strongArmMoveNames",
   STRONG_ARM_AMMO_CHOICE_INDEX: "strongArmAmmoChoiceIndex",
   ENABLE_HEIST_ASSISTANT: "enableHeistAssistant",
-  HEIST_MOVE_NAMES: "heistMoveNames"
+  HEIST_MOVE_NAMES: "heistMoveNames",
+  ALCHEMIST_MOVE_NAMES: "alchemistMoveNames"
 };

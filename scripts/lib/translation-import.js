@@ -690,5 +690,12 @@ export async function runTranslationImport() {
   const heistMoveNames = game.settings.get(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES, translateCommaList(moveMap, heistMoveNames, stats));
 
+  const alchemistMoveNames = game.settings.get(MODULE_ID, SETTINGS.ALCHEMIST_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.ALCHEMIST_MOVE_NAMES,
+    translateCommaList(moveMap, alchemistMoveNames, stats)
+  );
+
   return stats;
 }

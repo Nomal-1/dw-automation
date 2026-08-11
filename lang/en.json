@@ -593,6 +593,10 @@
       "HeistMoveNames": {
         "Name": "Heist Move Names",
         "Hint": "Comma-separated (default: Heist)."
+      },
+      "AlchemistMoveNames": {
+        "Name": "Alchemist Move Names",
+        "Hint": "Upgrade that replaces Brewer (adds an 'invent poison' option to the brew button). Comma-separated (default: Alchemist)."
       }
     },
     "Npc": {
@@ -1402,7 +1406,16 @@
       "BrewTitle": "Choose the poison to brew",
       "BrewSelectLabel": "Poison",
       "BrewNoneWarning": "Add a used poison first.",
-      "Brewed": "Brewed 3 uses of \"{name}\" into inventory (total {total})"
+      "Brewed": "Brewed 3 uses of \"{name}\" into inventory (total {total})",
+      "InventOption": "Invent poison",
+      "InventTitle": "Invent Poison",
+      "EffectLabel": "Desired effect",
+      "ConditionsLabel": "Check any conditions the GM imposed (0 or more)",
+      "ConditionsPrefix": "Conditions",
+      "Condition1": "It only works in certain circumstances.",
+      "Condition2": "It's weaker than you wanted.",
+      "Condition3": "It takes a while to take effect.",
+      "Condition4": "It has a notable side effect."
     },
     "ThroughDeathsEyes": {
       "Activated": "Through Death's Eyes failed — the ominous effect is now active. Every roll gets -1 for as long as combat lasts (until the GM turns it off)",
