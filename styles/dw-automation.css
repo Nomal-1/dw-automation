@@ -553,6 +553,19 @@
   color: #fff !important;
 }
 
+.dwauto-strong-arm-mode-badge {
+  cursor: pointer;
+}
+
+.dwauto-strong-arm-mode-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-strong-arm-mode-on {
+  background: #2e5a7a !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

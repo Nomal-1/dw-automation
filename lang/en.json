@@ -1381,7 +1381,10 @@
     },
     "StrongArm": {
       "Prompt": "Throw a melee weapon?",
-      "Applied": "Strong Arm, True Aim triggers — throwing a melee weapon to volley"
+      "Applied": "Strong Arm, True Aim triggers — throwing a melee weapon to volley",
+      "ToggleTitle": "Click to cycle the throw-check mode: Always Ask → Off.",
+      "ModeAsk": "Always Ask",
+      "ModeOff": "Off"
     },
     "Heist": {
       "SelectAlliesLabel": "Select all your allies (you're included automatically)",
