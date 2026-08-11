@@ -3,7 +3,7 @@ import { TAG_CATALOG } from "../data/tag-catalog.js";
 import { DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "../data/conditional-damage-moves.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
-import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
+import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll, extractSignedInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -120,7 +120,17 @@ async function rollDamage(actor, weapon, dmgMod, extraDice, extraRawTags = []) {
   const { rawTags, notes } = getTagDisplay(weapon, actor);
   rawTags.push(...extraRawTags);
 
-  const rollHtml = await roll.render();
+  let rollHtml = await roll.render();
+  // 급소 가격의 보너스와 사격의 "-1d6" 페널티처럼 서로 반대 부호 항이 섞이면
+  // 총합이 음수가 될 수 있다. 던전월드에 음수 데미지는 없으므로(치유가 아니라
+  // 그냥 "0에 가까운 빗나감"으로 취급) 표시/적용되는 합계를 0으로 clamp한다.
+  // 시스템의 데미지 적용 버튼(_chatActionDamage)이 렌더된 .dice-total을 그대로
+  // 읽어 적용하므로, 여기서 그 DOM 텍스트 자체를 고쳐써야 실제로도 반영된다.
+  if (roll.total < 0) {
+    const $rollHtml = $("<div>").html(rollHtml);
+    $rollHtml.find(".dice-total").first().text("0");
+    rollHtml = $rollHtml.html();
+  }
 
   const content = `
     <h3>${game.i18n.format("DWAUTO.Attack.DamageFlavor", { weapon: weapon.name })}</h3>
@@ -582,12 +592,15 @@ function handleGatedChoiceAttack(actor, moveItem, result, ranged, overrideCount)
 
 // 무브의 choices가 데미지 여부를 좌우하지 않는 경우(Called Shot: 선택지는
 // 머리/팔/다리 같은 연출용이고, 데미지는 결과 등급만으로 결정됨). 선택지를
-// 먼저 보여주고, 그 뒤 필요하면 원래 데미지 굴림 절차로 이어간다.
+// 먼저 보여주고, 그 뒤 필요하면 원래 데미지 굴림 절차로 이어간다. Volley(사격)
+// 7-9의 "-1d6 damage"처럼 선택지 자체에 데미지 보정 다이스가 실려 있을 수도
+// 있어서(부호 있는 다이스만 뽑는다 — Called Shot류는 애초에 안 걸린다),
+// 골랐다면 그 값을 데미지 공식에 그대로 이어붙인다.
 function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage, isExtreme, overrideCount) {
   const { options, count } = getMoveChoiceData(moveItem, result);
 
-  const proceed = () => {
-    if (shouldDamage) promptDamageRoll(actor, ranged, isExtreme);
+  const proceed = (extraDice = "") => {
+    if (shouldDamage) promptDamageRoll(actor, ranged, isExtreme, extraDice);
   };
 
   if (options.length === 0) {
@@ -601,7 +614,8 @@ function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage,
     count: resolvePickCount(count, overrideCount),
     onConfirm: (selected) => {
       announceActionApplied(actor, moveItem.name, selected.join(", "));
-      proceed();
+      const dice = selected.map(extractSignedInlineRoll).find((d) => d);
+      proceed(dice ?? "");
     },
     onCancel: proceed
   });

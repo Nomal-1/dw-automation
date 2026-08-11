@@ -116,3 +116,18 @@ export function extractInlineRoll(optionHtml) {
   const bare = text.match(/\d+d\d+/i);
   return bare ? bare[0] : null;
 }
+
+/**
+ * extractInlineRoll과 같지만 부호(+/-)까지 포함해서 뽑는다. Volley(사격)
+ * 7-9 선택지의 "-1d6 damage"처럼 페널티 다이스를 구분해야 하는 곳에 쓴다
+ * (extractInlineRoll은 항상 보너스로만 쓰여서 부호를 무시했다).
+ */
+export function extractSignedInlineRoll(optionHtml) {
+  const text = $("<div>").html(optionHtml ?? "").text();
+
+  const bracketed = text.match(/\[\[\s*\/?(?:r|roll)?\s*([+-]?\d+d\d+)\s*\]\]/i);
+  if (bracketed) return bracketed[1].trim();
+
+  const bare = text.match(/[+-]?\d+d\d+/i);
+  return bare ? bare[0] : null;
+}
