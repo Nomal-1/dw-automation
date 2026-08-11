@@ -1634,4 +1634,35 @@ export function registerSettings() {
     type: String,
     default: "Dirty Fighter"
   });
+
+  // 도적 고급액션 철완의 투척: 자세한 설계는 features/strong-arm.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_STRONG_ARM_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableStrongArmAssistant.Name",
+    hint: "DWAUTO.Settings.EnableStrongArmAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES, {
+    name: "DWAUTO.Settings.StrongArmMoveNames.Name",
+    hint: "DWAUTO.Settings.StrongArmMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Strong Arm, True Aim"
+  });
+
+  // 사격(Volley) 7-9 선택지 중 "발수 소비" 항목이 몇 번째인지(던전월드
+  // 기본 문구 기준 3번째). 텍스트로 판별하면 번역에 따라 깨질 수 있어
+  // 숫자로 지정한다(Cast a Spell 부분성공과 같은 이유).
+  game.settings.register(MODULE_ID, SETTINGS.STRONG_ARM_AMMO_CHOICE_INDEX, {
+    name: "DWAUTO.Settings.StrongArmAmmoChoiceIndex.Name",
+    hint: "DWAUTO.Settings.StrongArmAmmoChoiceIndex.Hint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 3
+  });
 }

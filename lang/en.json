@@ -573,6 +573,18 @@
       "DirtyFighterMoveNames": {
         "Name": "Dirty Fighter Move Names",
         "Hint": "Upgrade that replaces Cheap Shot (Backstab +1d8, Hack & Slash/Volley +1d4 when using a precise or Hand weapon). Comma-separated (default: Dirty Fighter)."
+      },
+      "EnableStrongArmAssistant": {
+        "Name": "Enable Strong Arm, True Aim Automation",
+        "Hint": "Every Volley roll asks whether to throw a melee weapon. Answering yes switches the weapon list to melee weapons (ammo consumption is skipped automatically) and removes the 'reduce ammo' option from the 7-9 choices."
+      },
+      "StrongArmMoveNames": {
+        "Name": "Strong Arm, True Aim Move Names",
+        "Hint": "Comma-separated (default: Strong Arm, True Aim)."
+      },
+      "StrongArmAmmoChoiceIndex": {
+        "Name": "Volley 'Reduce Ammo' Choice Index",
+        "Hint": "Which position (1-based) the 'reduce your ammo' option is in Volley's 7-9 choice list. Default position 3 per the core text."
       }
     },
     "Npc": {
@@ -1348,6 +1360,10 @@
       "Applied": "Cheap Shot triggers — adding 1d6 to the damage",
       "DirtyFighterBackstabApplied": "Dirty Fighter triggers — adding 1d8 to the Backstab damage",
       "DirtyFighterOtherApplied": "Dirty Fighter triggers — adding 1d4 to the damage"
+    },
+    "StrongArm": {
+      "Prompt": "Throw a melee weapon?",
+      "Applied": "Strong Arm, True Aim triggers — throwing a melee weapon to volley"
     },
     "Poisoner": {
       "ChoosePrompt": "Choose one poison to master. From now on it's not dangerous for you to use.",

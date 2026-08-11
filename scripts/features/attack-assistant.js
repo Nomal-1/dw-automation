@@ -12,6 +12,7 @@ import { getCommandDamageBonus } from "./command.js";
 import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damage-forward-state.js";
 import { getMercilessBonus } from "./merciless.js";
 import { getCheapShotBonus } from "./cheap-shot.js";
+import { promptStrongArmThrow, removeAmmoChoice } from "./strong-arm.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 
 function splitCommaList(settingKey) {
@@ -596,11 +597,20 @@ function handleGatedChoiceAttack(actor, moveItem, result, ranged, overrideCount)
 // 7-9의 "-1d6 damage"처럼 선택지 자체에 데미지 보정 다이스가 실려 있을 수도
 // 있어서(부호 있는 다이스만 뽑는다 — Called Shot류는 애초에 안 걸린다),
 // 골랐다면 그 값을 데미지 공식에 그대로 이어붙인다.
-function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage, isExtreme, overrideCount) {
-  const { options, count } = getMoveChoiceData(moveItem, result);
+//
+// 사격일 때는 철완의 투척(Strong Arm, True Aim) 여부를 먼저 물어본다(다른
+// 무브에는 영향 없음 — features/strong-arm.js가 사격이 아니면 즉시
+// throwing:false를 돌려준다). 던지기로 답하면 "발수 소비" 선택지를 목록에서
+// 빼고, 이후 무기 선택도 근접 무기 목록으로 바뀐다(ranged를 false로 덮어씀).
+async function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage, isExtreme, overrideCount) {
+  const { options: rawOptions, count } = getMoveChoiceData(moveItem, result);
+
+  const strongArm = await promptStrongArmThrow(actor, moveItem.name);
+  const options = strongArm.throwing ? removeAmmoChoice(rawOptions) : rawOptions;
+  const effectiveRanged = strongArm.throwing ? false : ranged;
 
   const proceed = (extraDice = "") => {
-    if (shouldDamage) promptDamageRoll(actor, ranged, isExtreme, extraDice, moveItem.name);
+    if (shouldDamage) promptDamageRoll(actor, effectiveRanged, isExtreme, extraDice, moveItem.name);
   };
 
   if (options.length === 0) {
@@ -693,14 +703,16 @@ function onCreateChatMessage(message, options, userId) {
       moveItem &&
       splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(title);
 
-    if (isHackAndSlash) {
-      (async () => {
-        const bonusDice = await promptHackAndSlashBonus(actor, moveItem);
-        promptDamageRoll(actor, behavior.ranged, info.isExtreme, bonusDice, title);
-      })();
-    } else {
-      promptDamageRoll(actor, behavior.ranged, info.isExtreme, "", title);
-    }
+    (async () => {
+      // 사격 10+(선택지 없이 곧바로 데미지)도 철완의 투척 여부를 물어야
+      // 근접무기 던지기가 반영된다 — 선택지가 있는 7-9는 handleFlavorChoiceAttack이
+      // 이미 처리한다.
+      const strongArm = behavior.ranged ? await promptStrongArmThrow(actor, title) : { throwing: false };
+      const effectiveRanged = strongArm.throwing ? false : behavior.ranged;
+
+      const bonusDice = isHackAndSlash ? await promptHackAndSlashBonus(actor, moveItem) : "";
+      promptDamageRoll(actor, effectiveRanged, info.isExtreme, bonusDice, title);
+    })();
   }
 }
 

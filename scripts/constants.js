@@ -136,5 +136,8 @@ export const SETTINGS = {
   ENABLE_POISON_TRACKER_ASSISTANT: "enablePoisonTrackerAssistant",
   POISON_MASTER_MOVE_NAMES: "poisonMasterMoveNames",
   BREWER_MOVE_NAMES: "brewerMoveNames",
-  DIRTY_FIGHTER_MOVE_NAMES: "dirtyFighterMoveNames"
+  DIRTY_FIGHTER_MOVE_NAMES: "dirtyFighterMoveNames",
+  ENABLE_STRONG_ARM_ASSISTANT: "enableStrongArmAssistant",
+  STRONG_ARM_MOVE_NAMES: "strongArmMoveNames",
+  STRONG_ARM_AMMO_CHOICE_INDEX: "strongArmAmmoChoiceIndex"
 };

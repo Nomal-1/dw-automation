@@ -680,5 +680,12 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, dirtyFighterMoveNames, stats)
   );
 
+  const strongArmMoveNames = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.STRONG_ARM_MOVE_NAMES,
+    translateCommaList(moveMap, strongArmMoveNames, stats)
+  );
+
   return stats;
 }

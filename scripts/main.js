@@ -49,6 +49,7 @@ import { registerTrapExpertAssistant } from "./features/trap-expert.js";
 import { registerCheapShotAssistant } from "./features/cheap-shot.js";
 import { registerPoisonerAssistant } from "./features/poisoner.js";
 import { registerPoisonTrackerAssistant } from "./features/poison-tab.js";
+import { registerStrongArmAssistant } from "./features/strong-arm.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -109,3 +110,4 @@ registerTrapExpertAssistant();
 registerCheapShotAssistant();
 registerPoisonerAssistant();
 registerPoisonTrackerAssistant();
+registerStrongArmAssistant();
