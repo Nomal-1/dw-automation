@@ -663,5 +663,15 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, poisonerMoveNames, stats)
   );
 
+  const poisonMasterMoveNames = game.settings.get(MODULE_ID, SETTINGS.POISON_MASTER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.POISON_MASTER_MOVE_NAMES,
+    translateCommaList(moveMap, poisonMasterMoveNames, stats)
+  );
+
+  const brewerMoveNames = game.settings.get(MODULE_ID, SETTINGS.BREWER_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.BREWER_MOVE_NAMES, translateCommaList(moveMap, brewerMoveNames, stats));
+
   return stats;
 }

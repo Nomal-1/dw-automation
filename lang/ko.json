@@ -557,6 +557,18 @@
       "PoisonerMoveNames": {
         "Name": "독의 기술 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Poisoner)."
+      },
+      "EnablePoisonTrackerAssistant": {
+        "Name": "독의 달인/독제사 자동화 사용",
+        "Hint": "독의 달인 또는 독제사를 가진 캐릭터 시트에 '사용한 독' 탭을 추가합니다. 탭에서 사용한 독을 추가(기본 4종 또는 이름·태그를 직접 입력하는 커스텀 독)할 수 있고, 독제사를 가지고 있으면 사용한 독 중 하나를 골라 3회분을 조제해 인벤토리에 추가하는 버튼도 함께 뜹니다. 두 무브를 둘 다 가지고 있어도 탭은 하나로 합쳐집니다."
+      },
+      "PoisonMasterMoveNames": {
+        "Name": "독의 달인 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Poison Master)."
+      },
+      "BrewerMoveNames": {
+        "Name": "독제사 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Brewer)."
       }
     },
     "Npc": {
@@ -1336,6 +1348,22 @@
       "Chosen": "\"{name}\"을(를) 선택했습니다 — 인벤토리에 {total}회분이 있습니다",
       "BrewPrompt": "\"{name}\"을(를) 3회분 조제하시겠습니까?",
       "Brewed": "\"{name}\"을(를) 조제했습니다 — 인벤토리에 {total}회분이 있습니다"
+    },
+    "Poison": {
+      "TabLabel": "사용한 독",
+      "Empty": "아직 사용한 독이 없습니다.",
+      "AddTitle": "사용한 독 추가",
+      "AddButton": "사용한 독 추가",
+      "CustomOption": "커스텀 독",
+      "CustomNameLabel": "독 이름",
+      "CustomTagLabel": "독 태그",
+      "CustomTagPlaceholder": "예: 투여, 접촉",
+      "CustomNameRequired": "커스텀 독의 이름을 입력하세요.",
+      "BrewButton": "독 제조",
+      "BrewTitle": "제조할 독을 정해주세요",
+      "BrewSelectLabel": "독 선택",
+      "BrewNoneWarning": "먼저 사용한 독을 추가하세요.",
+      "Brewed": "\"{name}\" 3회분이 조제되어 인벤토리에 추가되었습니다 (총 {total}회분)"
     },
     "ThroughDeathsEyes": {
       "Activated": "죽음의 예감 실패 — 불길함이 적용되었습니다. 전투가 지속되는 동안 모든 판정에 -1이 붙습니다(마스터가 직접 끌 때까지)",

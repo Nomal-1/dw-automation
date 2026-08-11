@@ -557,6 +557,18 @@
       "PoisonerMoveNames": {
         "Name": "Poisoner Move Names",
         "Hint": "Comma-separated (default: Poisoner)."
+      },
+      "EnablePoisonTrackerAssistant": {
+        "Name": "Enable Poison Master/Brewer Automation",
+        "Hint": "Adds a 'Used Poisons' tab to the sheet of a character who has Poison Master or Brewer. From the tab you can add a used poison (one of the 4 defaults, or a custom poison with your own name/tag), and if the character has Brewer a button also lets you pick one of the used poisons and brew 3 uses into inventory. Having both moves still merges into a single tab."
+      },
+      "PoisonMasterMoveNames": {
+        "Name": "Poison Master Move Names",
+        "Hint": "Comma-separated (default: Poison Master)."
+      },
+      "BrewerMoveNames": {
+        "Name": "Brewer Move Names",
+        "Hint": "Comma-separated (default: Brewer)."
       }
     },
     "Npc": {
@@ -1336,6 +1348,22 @@
       "Chosen": "Chose \"{name}\" — {total} use(s) in inventory",
       "BrewPrompt": "Brew 3 more uses of \"{name}\"?",
       "Brewed": "Brewed \"{name}\" — {total} use(s) in inventory"
+    },
+    "Poison": {
+      "TabLabel": "Used Poisons",
+      "Empty": "No poisons used yet.",
+      "AddTitle": "Add Used Poison",
+      "AddButton": "Add Used Poison",
+      "CustomOption": "Custom poison",
+      "CustomNameLabel": "Poison name",
+      "CustomTagLabel": "Poison tag",
+      "CustomTagPlaceholder": "e.g. applied, touch",
+      "CustomNameRequired": "Enter a name for the custom poison.",
+      "BrewButton": "Brew Poison",
+      "BrewTitle": "Choose the poison to brew",
+      "BrewSelectLabel": "Poison",
+      "BrewNoneWarning": "Add a used poison first.",
+      "Brewed": "Brewed 3 uses of \"{name}\" into inventory (total {total})"
     },
     "ThroughDeathsEyes": {
       "Activated": "Through Death's Eyes failed — the ominous effect is now active. Every roll gets -1 for as long as combat lasts (until the GM turns it off)",

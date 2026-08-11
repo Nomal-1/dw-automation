@@ -552,3 +552,25 @@
   background: #2e6a7a !important;
   color: #fff !important;
 }
+
+.dwauto-poison-list {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.dwauto-poison-tag {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.dwauto-poison-empty {
+  margin: 0 0 10px;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.dwauto-poison-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

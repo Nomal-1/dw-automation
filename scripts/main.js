@@ -48,6 +48,7 @@ import { registerThroughDeathsEyesAssistant } from "./features/through-deaths-ey
 import { registerTrapExpertAssistant } from "./features/trap-expert.js";
 import { registerCheapShotAssistant } from "./features/cheap-shot.js";
 import { registerPoisonerAssistant } from "./features/poisoner.js";
+import { registerPoisonTrackerAssistant } from "./features/poison-tab.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -107,3 +108,4 @@ registerThroughDeathsEyesAssistant();
 registerTrapExpertAssistant();
 registerCheapShotAssistant();
 registerPoisonerAssistant();
+registerPoisonTrackerAssistant();

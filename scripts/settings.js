@@ -1594,4 +1594,32 @@ export function registerSettings() {
     type: String,
     default: "Poisoner"
   });
+
+  // 도적 고급액션 독의 달인/독제사: 자세한 설계는 features/poison-tab.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_POISON_TRACKER_ASSISTANT, {
+    name: "DWAUTO.Settings.EnablePoisonTrackerAssistant.Name",
+    hint: "DWAUTO.Settings.EnablePoisonTrackerAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.POISON_MASTER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.PoisonMasterMoveNames.Name",
+    hint: "DWAUTO.Settings.PoisonMasterMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Poison Master"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BREWER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BrewerMoveNames.Name",
+    hint: "DWAUTO.Settings.BrewerMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Brewer"
+  });
 }
