@@ -632,5 +632,15 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, druidFormshaperNames, stats)
   );
 
+  const trapExpertMoveNames = game.settings.get(MODULE_ID, SETTINGS.TRAP_EXPERT_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.TRAP_EXPERT_MOVE_NAMES,
+    translateCommaList(moveMap, trapExpertMoveNames, stats)
+  );
+
+  const cautiousMoveNames = game.settings.get(MODULE_ID, SETTINGS.CAUTIOUS_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.CAUTIOUS_MOVE_NAMES, translateCommaList(moveMap, cautiousMoveNames, stats));
+
   return stats;
 }

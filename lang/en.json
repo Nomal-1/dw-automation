@@ -525,6 +525,18 @@
       "ThroughDeathsEyesMoveNames": {
         "Name": "Through Death's Eyes Move Names",
         "Hint": "Comma-separated (default: Through Death’s Eyes)."
+      },
+      "EnableTrapExpertAssistant": {
+        "Name": "Enable Trap Expert Automation",
+        "Hint": "Shows the hold gained from a Trap Expert roll (failure 0/partial 1/success 3) as a badge next to the move. If the character also has Cautious, a failure still grants 1 hold. Either the player or the GM can click the badge, and each click spends 1 hold."
+      },
+      "TrapExpertMoveNames": {
+        "Name": "Trap Expert Move Names",
+        "Hint": "Comma-separated (default: Trap Expert)."
+      },
+      "CautiousMoveNames": {
+        "Name": "Cautious Move Names",
+        "Hint": "A modifier move that doesn't replace Trap Expert. Comma-separated (default: Cautious)."
       }
     },
     "Npc": {
@@ -1289,6 +1301,12 @@
     "Merciless": {
       "Applied": "Merciless triggers — adding 1d4 to the damage",
       "BloodthirstyApplied": "Bloodthirsty triggers — adding 1d8 to the damage"
+    },
+    "TrapExpert": {
+      "BadgeTitle": "Click to spend 1 hold (both players and the GM can).",
+      "BadgeLabel": "Hold {hold}",
+      "Gained": "Gained {hold} hold",
+      "GainedWithCautious": "Gained {hold} hold (+1 from Cautious)"
     },
     "ThroughDeathsEyes": {
       "Activated": "Through Death's Eyes failed — the ominous effect is now active. Every roll gets -1 for as long as combat lasts (until the GM turns it off)",

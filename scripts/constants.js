@@ -124,5 +124,16 @@ export const SETTINGS = {
   STEEL_HIDE_MOVE_NAMES: "steelHideMoveNames",
   BLOODTHIRSTY_MOVE_NAMES: "bloodthirstyMoveNames",
   ENABLE_THROUGH_DEATHS_EYES_ASSISTANT: "enableThroughDeathsEyesAssistant",
-  THROUGH_DEATHS_EYES_MOVE_NAMES: "throughDeathsEyesMoveNames"
+  THROUGH_DEATHS_EYES_MOVE_NAMES: "throughDeathsEyesMoveNames",
+  ENABLE_TRAP_EXPERT_ASSISTANT: "enableTrapExpertAssistant",
+  TRAP_EXPERT_MOVE_NAMES: "trapExpertMoveNames",
+  CAUTIOUS_MOVE_NAMES: "cautiousMoveNames",
+  ENABLE_CHEAP_SHOT_ASSISTANT: "enableCheapShotAssistant",
+  CHEAP_SHOT_MOVE_NAMES: "cheapShotMoveNames",
+  BACKSTAB_MOVE_NAMES: "backstabMoveNames",
+  ENABLE_POISONER_ASSISTANT: "enablePoisonerAssistant",
+  POISONER_MOVE_NAMES: "poisonerMoveNames",
+  ENABLE_POISON_TRACKER_ASSISTANT: "enablePoisonTrackerAssistant",
+  POISON_MASTER_MOVE_NAMES: "poisonMasterMoveNames",
+  BREWER_MOVE_NAMES: "brewerMoveNames"
 };

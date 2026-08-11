@@ -1516,4 +1516,35 @@ export function registerSettings() {
     type: String,
     default: "Through Death’s Eyes"
   });
+
+  // 도적 핵심액션 덫 전문가: 자세한 설계는 features/trap-expert.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TRAP_EXPERT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableTrapExpertAssistant.Name",
+    hint: "DWAUTO.Settings.EnableTrapExpertAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TRAP_EXPERT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.TrapExpertMoveNames.Name",
+    hint: "DWAUTO.Settings.TrapExpertMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Trap Expert"
+  });
+
+  // 도적 고급액션 신중함(Cautious, 덫 전문가 대상 예비 보정)은
+  // features/trap-expert.js가 그대로 재사용해서 별도 사용/미사용 설정 없이
+  // 이름 설정만 둔다(강철의 몸/살기등등과 같은 패턴).
+  game.settings.register(MODULE_ID, SETTINGS.CAUTIOUS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CautiousMoveNames.Name",
+    hint: "DWAUTO.Settings.CautiousMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Cautious"
+  });
 }

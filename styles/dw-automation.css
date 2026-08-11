@@ -539,3 +539,16 @@
 .dwauto-learn-move {
   margin-top: 6px;
 }
+
+.dwauto-trap-expert-badge {
+  cursor: pointer;
+}
+
+.dwauto-trap-expert-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-trap-expert-on {
+  background: #2e6a7a !important;
+  color: #fff !important;
+}
