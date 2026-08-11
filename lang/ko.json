@@ -597,6 +597,10 @@
       "AlchemistMoveNames": {
         "Name": "독학박사 무브 이름",
         "Hint": "독제사를 대체하는 업그레이드입니다(독 제조 버튼에 '독 창작' 선택지가 추가됩니다). 쉼표로 구분해서 입력하세요(기본값: Alchemist)."
+      },
+      "ExtremelyCautiousMoveNames": {
+        "Name": "극도로 신중함 무브 이름",
+        "Hint": "신중함을 대체하는 업그레이드입니다(예비 결과가 3/2/1이 되고, 12+에서 다음 덫 자동 발견 안내가 뜹니다). 쉼표로 구분해서 입력하세요(기본값: Extremely Cautious)."
       }
     },
     "Npc": {
@@ -1366,7 +1370,9 @@
       "BadgeTitle": "클릭하면 예비를 1점 소비합니다(플레이어/마스터 모두 가능).",
       "BadgeLabel": "예비 {hold}점",
       "Gained": "예비 {hold}점을 얻었습니다",
-      "GainedWithCautious": "예비 {hold}점을 얻었습니다 (신중함 효과로 +1)"
+      "GainedWithCautious": "예비 {hold}점을 얻었습니다 (신중함 효과로 +1)",
+      "GainedWithExtremelyCautious": "예비 {hold}점을 얻었습니다 (극도로 신중함 적용)",
+      "ExtremeAutoReveal": "극도로 신중함 발동 — 다음에 만나는 덫을 자동으로 발견하고, 발동 방식·설치자·역이용 방법을 마스터가 알려줍니다"
     },
     "CheapShot": {
       "Applied": "급소 가격 발동 — 피해에 1d6을 추가합니다",

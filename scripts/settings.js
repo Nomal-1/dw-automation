@@ -1695,4 +1695,15 @@ export function registerSettings() {
     type: String,
     default: "Alchemist"
   });
+
+  // 극도로 신중함(Extremely Cautious, 신중함 대체)은 features/trap-expert.js가
+  // 그대로 재사용해서 별도 사용/미사용 설정 없이 이름 설정만 둔다.
+  game.settings.register(MODULE_ID, SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ExtremelyCautiousMoveNames.Name",
+    hint: "DWAUTO.Settings.ExtremelyCautiousMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Extremely Cautious"
+  });
 }

@@ -597,6 +597,10 @@
       "AlchemistMoveNames": {
         "Name": "Alchemist Move Names",
         "Hint": "Upgrade that replaces Brewer (adds an 'invent poison' option to the brew button). Comma-separated (default: Alchemist)."
+      },
+      "ExtremelyCautiousMoveNames": {
+        "Name": "Extremely Cautious Move Names",
+        "Hint": "Upgrade that replaces Cautious (hold results become 3/2/1, and a 12+ shows an auto-discover-next-trap notice). Comma-separated (default: Extremely Cautious)."
       }
     },
     "Npc": {
@@ -1366,7 +1370,9 @@
       "BadgeTitle": "Click to spend 1 hold (both players and the GM can).",
       "BadgeLabel": "Hold {hold}",
       "Gained": "Gained {hold} hold",
-      "GainedWithCautious": "Gained {hold} hold (+1 from Cautious)"
+      "GainedWithCautious": "Gained {hold} hold (+1 from Cautious)",
+      "GainedWithExtremelyCautious": "Gained {hold} hold (Extremely Cautious applied)",
+      "ExtremeAutoReveal": "Extremely Cautious triggers — you automatically spot the next trap you come near, and the GM tells you how it's triggered, who set it, and how to use it to your advantage"
     },
     "CheapShot": {
       "Applied": "Cheap Shot triggers — adding 1d6 to the damage",

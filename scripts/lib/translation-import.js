@@ -697,5 +697,12 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, alchemistMoveNames, stats)
   );
 
+  const extremelyCautiousMoveNames = game.settings.get(MODULE_ID, SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES,
+    translateCommaList(moveMap, extremelyCautiousMoveNames, stats)
+  );
+
   return stats;
 }

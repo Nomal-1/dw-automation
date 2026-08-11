@@ -13,6 +13,12 @@ import { getTrapExpertHold, setTrapExpertHold } from "../lib/trap-expert-state.j
 // 예비와는 다른 무브). 시스템 자체의 Hold 속성 대신 무브 옆 배지 숫자로만
 // 보여주고, 플레이어/마스터 누구나 배지를 클릭하면 1씩 줄어든다(요청대로
 // 다이얼로그 없이 단순 카운터).
+//
+// 극도로 신중함(Extremely Cautious, 6레벨, 신중함 대체) 결과값은 사용자
+// 지시대로 4/2/1이 아니라 3/2/1로 둔다(성공만 3으로 낮추고 부분성공/실패는
+// 신중함과 동일) — 12+일 때 "다음에 만나는 덫을 자동으로 발견한다"는
+// 부분은 게임 상태로 표현할 대상이 없는 순수 서사 효과라, 값 대신 채팅
+// 안내만 남긴다(Fighter Superior Warrior/바바리안 Smash!와 같은 패턴).
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_TRAP_EXPERT_ASSISTANT);
 }
@@ -35,6 +41,11 @@ function hasCautious(actor) {
   return actor.items.some((i) => i.type === "move" && names.includes(i.name));
 }
 
+function findExtremelyCautiousMove(actor) {
+  const names = splitCommaList(SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES);
+  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+}
+
 async function matchesConfiguredName(title) {
   const configured = splitCommaList(SETTINGS.TRAP_EXPERT_MOVE_NAMES);
   if (configured.includes(title)) return true;
@@ -49,6 +60,7 @@ async function matchesConfiguredName(title) {
 }
 
 const BASE_HOLD = { success: 3, partial: 1, failure: 0 };
+const EXTREMELY_CAUTIOUS_HOLD = { success: 3, partial: 2, failure: 1 };
 
 async function onCreateChatMessage(message, options, userId) {
   try {
@@ -58,7 +70,7 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, result } = info;
+    const { actor, title, result, isExtreme } = info;
     if (actor.type !== "character") return;
     if (!result) return;
 
@@ -67,15 +79,25 @@ async function onCreateChatMessage(message, options, userId) {
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
 
+    const extremelyCautious = findExtremelyCautiousMove(actor);
     const cautious = hasCautious(actor);
-    const hold = (BASE_HOLD[result] ?? 0) + (cautious ? 1 : 0);
+
+    let hold;
+    let detailKey;
+    if (extremelyCautious) {
+      hold = EXTREMELY_CAUTIOUS_HOLD[result] ?? 0;
+      detailKey = "DWAUTO.TrapExpert.GainedWithExtremelyCautious";
+    } else {
+      hold = (BASE_HOLD[result] ?? 0) + (cautious ? 1 : 0);
+      detailKey = cautious ? "DWAUTO.TrapExpert.GainedWithCautious" : "DWAUTO.TrapExpert.Gained";
+    }
 
     await setTrapExpertHold(actor, hold);
+    announceActionApplied(actor, moveItem.name, game.i18n.format(detailKey, { hold }));
 
-    const detail = cautious
-      ? game.i18n.format("DWAUTO.TrapExpert.GainedWithCautious", { hold })
-      : game.i18n.format("DWAUTO.TrapExpert.Gained", { hold });
-    announceActionApplied(actor, moveItem.name, detail);
+    if (extremelyCautious && result === "success" && isExtreme) {
+      announceActionApplied(actor, extremelyCautious.name, game.i18n.localize("DWAUTO.TrapExpert.ExtremeAutoReveal"));
+    }
   } catch (err) {
     console.error(`${MODULE_ID} | trap-expert: onCreateChatMessage failed`, err);
   }
