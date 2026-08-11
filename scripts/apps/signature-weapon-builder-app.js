@@ -4,6 +4,11 @@ import { computeSignatureWeapon } from "../lib/signature-weapon-builder.js";
 import { announceActionApplied } from "../lib/announce.js";
 
 const ITEM_ID_FLAG = "signatureWeaponItemId";
+// features/improved-weapon.js가 재사용한다 — 무기 강화를 발동했을 때
+// "이미 고른 강화가 뭔지"를 알아야 나머지 중에서만 다시 고르게 할 수
+// 있다(플래그 이름을 두 곳에서 따로 관리하면 어긋날 위험이 있어 여기서만
+// 정의해 그대로 export한다).
+export const ENHANCEMENTS_FLAG = "signatureWeaponEnhancements"; // string[] (ENHANCEMENT_OPTIONS의 value들)
 
 function mapRadioOptions(options, current) {
   return options.map((o) => ({ ...o, checked: o.value === current }));
@@ -79,7 +84,10 @@ export class SignatureWeaponBuilderApp extends FormApplication {
       }
     ]);
 
+    const chosenEnhancements = ENHANCEMENT_OPTIONS.filter((o) => data.enhancements?.[o.value]).map((o) => o.value);
+
     await this.actor.setFlag(MODULE_ID, ITEM_ID_FLAG, created.id);
+    await this.actor.setFlag(MODULE_ID, ENHANCEMENTS_FLAG, chosenEnhancements);
 
     announceActionApplied(
       this.actor,

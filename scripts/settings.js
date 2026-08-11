@@ -1456,4 +1456,23 @@ export function registerSettings() {
     type: String,
     default: "Discern Realities"
   });
+
+  // 전사 고급액션 무기 강화: 자세한 설계는 features/improved-weapon.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_IMPROVED_WEAPON_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableImprovedWeaponAssistant.Name",
+    hint: "DWAUTO.Settings.EnableImprovedWeaponAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.IMPROVED_WEAPON_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ImprovedWeaponMoveNames.Name",
+    hint: "DWAUTO.Settings.ImprovedWeaponMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Improved Weapon"
+  });
 }

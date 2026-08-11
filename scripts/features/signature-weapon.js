@@ -36,7 +36,10 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
-function getExistingSignatureWeapon(actor) {
+// features/improved-weapon.js가 재사용한다 — 무기 강화 발동 시 "이미 고유
+// 병기가 있는지"를 판단하는 근거가 이것과 완전히 같아야 하므로(플래그
+// 이름을 두 곳에서 따로 관리하면 어긋날 위험이 있다).
+export function getExistingSignatureWeapon(actor) {
   const itemId = actor.getFlag(MODULE_ID, ITEM_ID_FLAG);
   if (!itemId) return null;
   return actor.items.get(itemId) ?? null;

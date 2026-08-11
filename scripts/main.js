@@ -43,6 +43,7 @@ import { registerMercilessAssistant } from "./features/merciless.js";
 import { registerInterrogatorAssistant } from "./features/interrogator.js";
 import { registerPreciseWeaponAssistant } from "./features/precise-weapon.js";
 import { registerSeeingRedAssistant } from "./features/seeing-red.js";
+import { registerImprovedWeaponAssistant } from "./features/improved-weapon.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -97,3 +98,4 @@ registerMercilessAssistant();
 registerInterrogatorAssistant();
 registerPreciseWeaponAssistant();
 registerSeeingRedAssistant();
+registerImprovedWeaponAssistant();

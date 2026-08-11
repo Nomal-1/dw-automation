@@ -580,6 +580,13 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, discernRealitiesMoveNames, stats)
   );
 
+  const improvedWeaponMoveNames = game.settings.get(MODULE_ID, SETTINGS.IMPROVED_WEAPON_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.IMPROVED_WEAPON_MOVE_NAMES,
+    translateCommaList(moveMap, improvedWeaponMoveNames, stats)
+  );
+
   const druidDamageDieMoves = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   await game.settings.set(
     MODULE_ID,

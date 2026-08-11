@@ -118,5 +118,7 @@ export const SETTINGS = {
   ENABLE_PRECISE_WEAPON_ASSISTANT: "enablePreciseWeaponAssistant",
   ENABLE_SEEING_RED_ASSISTANT: "enableSeeingRedAssistant",
   SEEING_RED_MOVE_NAMES: "seeingRedMoveNames",
-  DISCERN_REALITIES_MOVE_NAMES: "discernRealitiesMoveNames"
+  DISCERN_REALITIES_MOVE_NAMES: "discernRealitiesMoveNames",
+  ENABLE_IMPROVED_WEAPON_ASSISTANT: "enableImprovedWeaponAssistant",
+  IMPROVED_WEAPON_MOVE_NAMES: "improvedWeaponMoveNames"
 };
