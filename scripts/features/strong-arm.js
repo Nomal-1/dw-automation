@@ -1,15 +1,18 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // 도적 고급액션 철완의 투척(Strong Arm, True Aim) 원문: "아무 근거리 무기나
 // 던져서 사격을 할 수 있습니다. 한 번 던진 근거리 무기는 손을 떠나기
 // 때문에, 7~9가 나왔을 때 발수를 소비하는 선택지를 고를 수 없습니다."
 //
-// 사격(Volley)이 굴려질 때마다 이 무브를 가진 캐릭터에게 "근접무기를
-// 던지시겠습니까?"를 물어본다. "예"면 features/attack-assistant.js가 무기
-// 선택 목록을 근접 무기로 바꾸고(자연히 화살 소모 확인도 건너뛴다 —
-// isRangedWeapon(근접무기)가 항상 false이므로), 7-9 선택지 중 "발수 소비"
-// 항목을 제외한다(원문상 던진 무기는 애초에 선택할 수 없는 선택지이므로).
+// 이 무브의 공식 영문 이름 자체에 쉼표가 들어있어("Strong Arm, True Aim"),
+// 다른 무브 이름 설정들처럼 splitCommaList로 쪼개면 "Strong Arm"과
+// "True Aim" 두 조각으로 갈라져 실제 아이템 이름과 절대 일치하지 않는다
+// (번역 자동 채우기도 같은 이유로 조각마다 따로 찾다 실패해 원문 그대로
+// 남는다). 그래서 이 설정만 쉼표 목록이 아니라 "정식 명칭 전체"를 담는
+// 단일 값으로 다루고, 다른 무브들처럼 번역 매핑(getMoveNameMap)도 함께
+// 확인한다.
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_STRONG_ARM_ASSISTANT);
 }
@@ -22,9 +25,25 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-function findStrongArmMove(actor) {
-  const names = splitCommaList(SETTINGS.STRONG_ARM_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+async function matchesStrongArmName(title) {
+  const configured = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES).trim();
+  if (configured && configured === title) return true;
+
+  try {
+    const nameMap = await getMoveNameMap();
+    if (nameMap.get("Strong Arm, True Aim") === title) return true;
+  } catch (err) {
+    // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
+  }
+  return false;
+}
+
+async function findStrongArmMove(actor) {
+  for (const item of actor.items) {
+    if (item.type !== "move") continue;
+    if (await matchesStrongArmName(item.name)) return item;
+  }
+  return null;
 }
 
 function isRangedTitle(title) {
@@ -37,7 +56,7 @@ export async function promptStrongArmThrow(actor, moveTitle) {
   if (!isEnabled()) return { throwing: false };
   if (!isRangedTitle(moveTitle)) return { throwing: false };
 
-  const moveItem = findStrongArmMove(actor);
+  const moveItem = await findStrongArmMove(actor);
   if (!moveItem) return { throwing: false };
 
   const throwing = await Dialog.confirm({

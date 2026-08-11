@@ -580,7 +580,7 @@
       },
       "StrongArmMoveNames": {
         "Name": "Strong Arm, True Aim Move Names",
-        "Hint": "Comma-separated (default: Strong Arm, True Aim)."
+        "Hint": "Enter the full exact move name (this is not a comma-separated list — the move's own name contains a comma). Default: Strong Arm, True Aim."
       },
       "StrongArmAmmoChoiceIndex": {
         "Name": "Volley 'Reduce Ammo' Choice Index",

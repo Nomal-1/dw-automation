@@ -680,12 +680,11 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, dirtyFighterMoveNames, stats)
   );
 
+  // 철완의 투척은 정식 명칭 자체에 쉼표가 들어있어("Strong Arm, True Aim")
+  // 쉼표 목록으로 쪼개 번역하면 조각마다 매칭에 실패한다(features/strong-arm.js
+  // 참고). 그래서 이 값만 통째로 하나의 이름으로 번역한다.
   const strongArmMoveNames = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES);
-  await game.settings.set(
-    MODULE_ID,
-    SETTINGS.STRONG_ARM_MOVE_NAMES,
-    translateCommaList(moveMap, strongArmMoveNames, stats)
-  );
+  await game.settings.set(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES, translateOne(moveMap, strongArmMoveNames, stats));
 
   const heistMoveNames = game.settings.get(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES, translateCommaList(moveMap, heistMoveNames, stats));

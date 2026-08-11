@@ -580,7 +580,7 @@
       },
       "StrongArmMoveNames": {
         "Name": "철완의 투척 무브 이름",
-        "Hint": "쉼표로 구분해서 입력하세요(기본값: Strong Arm, True Aim)."
+        "Hint": "정식 명칭 전체를 그대로 입력하세요(쉼표로 여러 이름을 나열하는 목록이 아닙니다 — 이 무브는 이름 자체에 쉼표가 들어갑니다). 기본값: Strong Arm, True Aim."
       },
       "StrongArmAmmoChoiceIndex": {
         "Name": "사격 '발수 소비' 선택지 순번",
