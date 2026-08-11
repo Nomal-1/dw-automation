@@ -1331,4 +1331,23 @@ export function registerSettings() {
     type: String,
     default: "Burning Ring Of Fire"
   });
+
+  // 전사 핵심액션 고유병기: 자세한 설계는 features/signature-weapon.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SIGNATURE_WEAPON_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSignatureWeaponAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSignatureWeaponAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SIGNATURE_WEAPON_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SignatureWeaponMoveNames.Name",
+    hint: "DWAUTO.Settings.SignatureWeaponMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Signature Weapon"
+  });
 }

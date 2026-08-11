@@ -1,0 +1,64 @@
+<form class="dwauto-wizard-form">
+  <p class="notes">{{localize "DWAUTO.SignatureWeapon.Hint"}}</p>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.SignatureWeapon.Q.Base"}}</legend>
+    {{#each baseOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="base" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.SignatureWeapon.Q.Range"}}</legend>
+    {{#each rangeOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="range" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.SignatureWeapon.Q.Enhancements"}}</legend>
+    {{#each enhancementOptions}}
+    <label class="dwauto-check-row">
+      <input type="checkbox" name="enhancements.{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+    <div class="dwauto-sub-choice">
+      <span class="dwauto-sub-choice-label">{{localize "DWAUTO.SignatureWeapon.VersatileLabel"}}</span>
+      <select name="extraRange">
+        {{#each extraRangeOptions}}
+        <option value="{{this.value}}">{{this.label}}</option>
+        {{/each}}
+      </select>
+    </div>
+    <div class="dwauto-sub-choice">
+      <span class="dwauto-sub-choice-label">{{localize "DWAUTO.SignatureWeapon.GlowsLabel"}}</span>
+      <input type="text" name="glowsCreature" placeholder="{{localize 'DWAUTO.SignatureWeapon.GlowsPlaceholder'}}">
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.SignatureWeapon.Q.Look"}}</legend>
+    {{#each lookOptions}}
+    <label class="dwauto-radio-row">
+      <input type="radio" name="look" value="{{this.value}}" {{#if this.checked}}checked{{/if}}>
+      {{this.label}}
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "DWAUTO.SignatureWeapon.Q.Name"}}</legend>
+    <input type="text" name="name" placeholder="{{localize 'DWAUTO.SignatureWeapon.NamePlaceholder'}}">
+  </fieldset>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit"><i class="fas fa-sword"></i> {{localize "DWAUTO.SignatureWeapon.Submit"}}</button>
+  </footer>
+</form>

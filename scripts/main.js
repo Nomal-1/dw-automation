@@ -37,6 +37,7 @@ import { registerTwiceAsBrightAssistant } from "./features/twice-as-bright.js";
 import { registerBurningBridgesAssistant } from "./features/burning-bridges.js";
 import { registerTwinHornWildfireAssistant } from "./features/twin-horn-wildfire.js";
 import { registerBurningRingOfFireAssistant } from "./features/burning-ring-of-fire.js";
+import { registerSignatureWeaponAssistant } from "./features/signature-weapon.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -85,3 +86,4 @@ registerTwiceAsBrightAssistant();
 registerBurningBridgesAssistant();
 registerTwinHornWildfireAssistant();
 registerBurningRingOfFireAssistant();
+registerSignatureWeaponAssistant();

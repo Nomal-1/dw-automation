@@ -438,20 +438,20 @@
   padding-left: 18px;
 }
 
-.dwauto-monster-builder fieldset {
+.dwauto-wizard-form fieldset {
   margin: 0 0 10px;
   padding: 6px 10px 10px;
   border: 1px solid #782e22;
   border-radius: 4px;
 }
 
-.dwauto-monster-builder legend {
+.dwauto-wizard-form legend {
   font-weight: bold;
   padding: 0 4px;
 }
 
-.dwauto-monster-builder .dwauto-check-row,
-.dwauto-monster-builder .dwauto-radio-row {
+.dwauto-wizard-form .dwauto-check-row,
+.dwauto-wizard-form .dwauto-radio-row {
   display: flex;
   align-items: flex-start;
   gap: 6px;
@@ -459,7 +459,7 @@
   line-height: 1.3;
 }
 
-.dwauto-monster-builder .dwauto-sub-choice {
+.dwauto-wizard-form .dwauto-sub-choice {
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed rgba(120, 46, 34, 0.5);
@@ -469,12 +469,12 @@
   gap: 4px 12px;
 }
 
-.dwauto-monster-builder .dwauto-sub-choice-label {
+.dwauto-wizard-form .dwauto-sub-choice-label {
   font-weight: bold;
   width: 100%;
 }
 
-.dwauto-monster-builder .dwauto-inline {
+.dwauto-wizard-form .dwauto-inline {
   margin: 2px 0;
 }
 
