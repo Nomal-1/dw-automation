@@ -135,5 +135,6 @@ export const SETTINGS = {
   POISONER_MOVE_NAMES: "poisonerMoveNames",
   ENABLE_POISON_TRACKER_ASSISTANT: "enablePoisonTrackerAssistant",
   POISON_MASTER_MOVE_NAMES: "poisonMasterMoveNames",
-  BREWER_MOVE_NAMES: "brewerMoveNames"
+  BREWER_MOVE_NAMES: "brewerMoveNames",
+  DIRTY_FIGHTER_MOVE_NAMES: "dirtyFighterMoveNames"
 };

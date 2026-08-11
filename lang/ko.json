@@ -569,6 +569,10 @@
       "BrewerMoveNames": {
         "Name": "독제사 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Brewer)."
+      },
+      "DirtyFighterMoveNames": {
+        "Name": "치사한 수법 무브 이름",
+        "Hint": "급소 가격을 대체하는 업그레이드입니다(정밀/반걸음 무기 사용 시 암습 +1d8, 접근전·사격 +1d4). 쉼표로 구분해서 입력하세요(기본값: Dirty Fighter)."
       }
     },
     "Npc": {
@@ -1341,7 +1345,9 @@
       "GainedWithCautious": "예비 {hold}점을 얻었습니다 (신중함 효과로 +1)"
     },
     "CheapShot": {
-      "Applied": "급소 가격 발동 — 피해에 1d6을 추가합니다"
+      "Applied": "급소 가격 발동 — 피해에 1d6을 추가합니다",
+      "DirtyFighterBackstabApplied": "치사한 수법 발동 — 암습 피해에 1d8을 추가합니다",
+      "DirtyFighterOtherApplied": "치사한 수법 발동 — 피해에 1d4를 추가합니다"
     },
     "Poisoner": {
       "ChoosePrompt": "다룰 독을 하나 고르십시오. 앞으로 이 독은 위험 없이 다룰 수 있습니다.",

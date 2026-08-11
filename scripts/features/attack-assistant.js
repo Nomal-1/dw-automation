@@ -527,7 +527,7 @@ function promptWeaponChoice(actor, ranged, extraDice, moveTitle) {
   }).render(true);
 }
 
-async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "") {
+async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "", moveTitle) {
   const content = isExtreme
     ? `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContentExtreme", { name: actor.name })}</p>`
     : `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContent", { name: actor.name })}</p>`;
@@ -539,7 +539,7 @@ async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "") {
   });
   if (!confirmed) return;
 
-  promptWeaponChoice(actor, ranged, extraDice);
+  promptWeaponChoice(actor, ranged, extraDice, moveTitle);
 }
 
 // 접근전(Hack & Slash) 원문 성공(10+) 결과: "적에게 데미지를 주고 반격을
@@ -600,7 +600,7 @@ function handleFlavorChoiceAttack(actor, moveItem, result, ranged, shouldDamage,
   const { options, count } = getMoveChoiceData(moveItem, result);
 
   const proceed = (extraDice = "") => {
-    if (shouldDamage) promptDamageRoll(actor, ranged, isExtreme, extraDice);
+    if (shouldDamage) promptDamageRoll(actor, ranged, isExtreme, extraDice, moveItem.name);
   };
 
   if (options.length === 0) {
@@ -696,10 +696,10 @@ function onCreateChatMessage(message, options, userId) {
     if (isHackAndSlash) {
       (async () => {
         const bonusDice = await promptHackAndSlashBonus(actor, moveItem);
-        promptDamageRoll(actor, behavior.ranged, info.isExtreme, bonusDice);
+        promptDamageRoll(actor, behavior.ranged, info.isExtreme, bonusDice, title);
       })();
     } else {
-      promptDamageRoll(actor, behavior.ranged, info.isExtreme);
+      promptDamageRoll(actor, behavior.ranged, info.isExtreme, "", title);
     }
   }
 }

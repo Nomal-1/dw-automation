@@ -569,6 +569,10 @@
       "BrewerMoveNames": {
         "Name": "Brewer Move Names",
         "Hint": "Comma-separated (default: Brewer)."
+      },
+      "DirtyFighterMoveNames": {
+        "Name": "Dirty Fighter Move Names",
+        "Hint": "Upgrade that replaces Cheap Shot (Backstab +1d8, Hack & Slash/Volley +1d4 when using a precise or Hand weapon). Comma-separated (default: Dirty Fighter)."
       }
     },
     "Npc": {
@@ -1341,7 +1345,9 @@
       "GainedWithCautious": "Gained {hold} hold (+1 from Cautious)"
     },
     "CheapShot": {
-      "Applied": "Cheap Shot triggers — adding 1d6 to the damage"
+      "Applied": "Cheap Shot triggers — adding 1d6 to the damage",
+      "DirtyFighterBackstabApplied": "Dirty Fighter triggers — adding 1d8 to the Backstab damage",
+      "DirtyFighterOtherApplied": "Dirty Fighter triggers — adding 1d4 to the damage"
     },
     "Poisoner": {
       "ChoosePrompt": "Choose one poison to master. From now on it's not dangerous for you to use.",

@@ -673,5 +673,12 @@ export async function runTranslationImport() {
   const brewerMoveNames = game.settings.get(MODULE_ID, SETTINGS.BREWER_MOVE_NAMES);
   await game.settings.set(MODULE_ID, SETTINGS.BREWER_MOVE_NAMES, translateCommaList(moveMap, brewerMoveNames, stats));
 
+  const dirtyFighterMoveNames = game.settings.get(MODULE_ID, SETTINGS.DIRTY_FIGHTER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DIRTY_FIGHTER_MOVE_NAMES,
+    translateCommaList(moveMap, dirtyFighterMoveNames, stats)
+  );
+
   return stats;
 }

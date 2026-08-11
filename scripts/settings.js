@@ -1622,4 +1622,16 @@ export function registerSettings() {
     type: String,
     default: "Brewer"
   });
+
+  // 치사한 수법(Dirty Fighter, 급소 가격 대체)은 features/cheap-shot.js가
+  // 그대로 재사용해서 별도 사용/미사용 설정 없이 이름 설정만 둔다(강철의
+  // 몸/살기등등과 같은 패턴).
+  game.settings.register(MODULE_ID, SETTINGS.DIRTY_FIGHTER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DirtyFighterMoveNames.Name",
+    hint: "DWAUTO.Settings.DirtyFighterMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Dirty Fighter"
+  });
 }
