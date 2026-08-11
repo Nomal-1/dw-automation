@@ -24,6 +24,7 @@ import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
 import { promptRecruitPreRoll } from "../features/recruit.js";
 import { promptBolsterPreRoll } from "../features/bolster.js";
+import { promptHeistPreRoll } from "../features/heist.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
 import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
 import { promptInterrogatorPreRoll } from "../features/interrogator.js";
@@ -123,6 +124,11 @@ async function wrappedRoll(wrapped, ...args) {
   // 같은 자리에서 처리한다(features/bolster.js 참고).
   const bolster = await promptBolsterPreRoll(this);
 
+  // 대도적(Heist) 대기 중인 +1 기회도 "그 대답에 의거한 것인가요?"를 매번
+  // 물어봐야 하는 사전 확인이다(features/heist.js 참고). 예/아니오 관계없이
+  // 기회 자체는 이 시점에 소모된다.
+  const heist = await promptHeistPreRoll(this);
+
   // 전사의 눈(Seeing Red)의 "적용중" 지속 +1은 다이얼로그 없이 조용히
   // 붙는다(features/seeing-red.js 참고) — 물어보는 건 판정이 끝난 뒤의 몫이다.
   const preRollBonus =
@@ -132,6 +138,7 @@ async function wrappedRoll(wrapped, ...args) {
     getEncumbranceMalus(this.actor) +
     encumbrance.bonus +
     bolster.bonus +
+    heist.bonus +
     getSeeingRedBonus(this);
 
   const rollType = (this.system.rollType || "").toLowerCase();

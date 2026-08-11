@@ -139,5 +139,7 @@ export const SETTINGS = {
   DIRTY_FIGHTER_MOVE_NAMES: "dirtyFighterMoveNames",
   ENABLE_STRONG_ARM_ASSISTANT: "enableStrongArmAssistant",
   STRONG_ARM_MOVE_NAMES: "strongArmMoveNames",
-  STRONG_ARM_AMMO_CHOICE_INDEX: "strongArmAmmoChoiceIndex"
+  STRONG_ARM_AMMO_CHOICE_INDEX: "strongArmAmmoChoiceIndex",
+  ENABLE_HEIST_ASSISTANT: "enableHeistAssistant",
+  HEIST_MOVE_NAMES: "heistMoveNames"
 };

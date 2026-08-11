@@ -82,3 +82,54 @@ export function promptActorTarget(self, { title, label, excludeSelf = false, sel
     }).render(true);
   });
 }
+
+// promptActorTarget과 같은 후보 목록(씬에 있는 토큰의 액터)을 쓰되, 하나가
+// 아니라 원하는 만큼(0개 포함) 체크박스로 고르게 한다. 대도적(Heist)의
+// "필드 위 아군 토큰을 임의의 수만큼 선택"처럼 다중 대상이 필요한 경우를
+// 위한 것 — 후보가 하나도 없으면 다이얼로그 없이 바로 빈 배열을 돌려준다.
+export function promptActorMultiTarget(self, { title, label, excludeSelf = false, filter = null } = {}) {
+  const candidates = getCandidateActors(self, { excludeSelf, filter });
+  if (candidates.length === 0) return Promise.resolve([]);
+
+  const optionsHtml = candidates
+    .map(
+      (a) => `
+        <div class="form-group dwauto-choice-option">
+          <label><input type="checkbox" name="dwautoMultiTarget" value="${a.id}"> ${a.name}</label>
+        </div>
+      `
+    )
+    .join("");
+
+  return new Promise((resolve) => {
+    let resolved = false;
+    const finish = (value) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(value);
+    };
+
+    new Dialog({
+      title,
+      content: `<form><p>${label}</p>${optionsHtml}</form>`,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const ids = html
+              .find('[name="dwautoMultiTarget"]:checked')
+              .map((_, el) => el.value)
+              .get();
+            finish(candidates.filter((a) => ids.includes(a.id)));
+          }
+        },
+        cancel: {
+          label: game.i18n.localize("DWAUTO.Cancel"),
+          callback: () => finish([])
+        }
+      },
+      default: "ok",
+      close: () => finish([])
+    }).render(true);
+  });
+}

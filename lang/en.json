@@ -585,6 +585,14 @@
       "StrongArmAmmoChoiceIndex": {
         "Name": "Volley 'Reduce Ammo' Choice Index",
         "Hint": "Which position (1-based) the 'reduce your ammo' option is in Volley's 7-9 choice list. Default position 3 per the core text."
+      },
+      "EnableHeistAssistant": {
+        "Name": "Enable Heist Automation",
+        "Hint": "Triggering it lets you pick, in addition to yourself, any number of allied character tokens on the scene. Each one gets a pending +1 opportunity, and right before their next roll they're asked 'Is this based on the GM's answers?' Answering yes or no either way consumes the opportunity."
+      },
+      "HeistMoveNames": {
+        "Name": "Heist Move Names",
+        "Hint": "Comma-separated (default: Heist)."
       }
     },
     "Npc": {
@@ -1364,6 +1372,15 @@
     "StrongArm": {
       "Prompt": "Throw a melee weapon?",
       "Applied": "Strong Arm, True Aim triggers — throwing a melee weapon to volley"
+    },
+    "Heist": {
+      "SelectAlliesLabel": "Select all your allies (you're included automatically)",
+      "ConfirmPrompt": "Is this based on the GM's answers?",
+      "ConfirmedApplied": "Heist triggers — +1 to this roll",
+      "Applied": "A next-roll +1 opportunity was granted to: {names}",
+      "NoGmOnline": "Couldn't apply it to {name} — no permission and no GM online.",
+      "PermissionTitle": "Approve Heist +1 Opportunity",
+      "PermissionContent": "Grant {target} Heist's 'next roll +1' opportunity?"
     },
     "Poisoner": {
       "ChoosePrompt": "Choose one poison to master. From now on it's not dangerous for you to use.",

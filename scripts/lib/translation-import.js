@@ -687,5 +687,8 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, strongArmMoveNames, stats)
   );
 
+  const heistMoveNames = game.settings.get(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES, translateCommaList(moveMap, heistMoveNames, stats));
+
   return stats;
 }

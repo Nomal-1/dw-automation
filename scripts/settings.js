@@ -1665,4 +1665,23 @@ export function registerSettings() {
     type: Number,
     default: 3
   });
+
+  // 도적 고급액션 대도적: 자세한 설계는 features/heist.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_HEIST_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableHeistAssistant.Name",
+    hint: "DWAUTO.Settings.EnableHeistAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HEIST_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HeistMoveNames.Name",
+    hint: "DWAUTO.Settings.HeistMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Heist"
+  });
 }
