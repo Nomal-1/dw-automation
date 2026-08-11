@@ -559,12 +559,12 @@
         "Label": "방어구 무시 (Ignores Armor) — 피해 적용 버튼 클릭 시 자동 반영"
       },
       "Forceful": {
-        "Label": "밀쳐내기 (Forceful) — 참고 문구로만 표시",
-        "Note": "밀쳐내기: 상대를 넘어뜨리거나 물러나게 할 수 있습니다"
+        "Label": "괴력 (Forceful) — 참고 문구로만 표시",
+        "Note": "괴력: 상대를 넘어뜨리거나 물러나게 할 수 있습니다"
       },
       "Messy": {
-        "Label": "지저분함 (Messy) — 참고 문구로만 표시",
-        "Note": "지저분함: 패배한 쪽에게 힘든 선택을 강요합니다"
+        "Label": "파괴적 (Messy) — 참고 문구로만 표시",
+        "Note": "파괴적: 패배한 쪽에게 힘든 선택을 강요합니다"
       }
     },
     "TagSettings": {
@@ -1146,11 +1146,11 @@
       "WeaponName": "불타는 낙인",
       "WeaponDescription": "순수한 불꽃으로 만들어진 무기입니다.",
       "Created": "무기를 소환했습니다: {tags}",
-      "ThisKillingFireMessy": "지저분함(messy) 태그를 추가한다",
-      "ThisKillingFireForceful": "밀쳐내기(forceful) 태그를 추가한다",
-      "ThisKillingFireReach": "사정거리(reach) 태그를 추가한다",
-      "ThisKillingFireNear": "근접(near) 태그를 추가한다",
-      "ThisKillingFireFar": "원거리(far) 태그를 추가한다"
+      "ThisKillingFireMessy": "파괴적(messy) 태그를 추가한다",
+      "ThisKillingFireForceful": "괴력(forceful) 태그를 추가한다",
+      "ThisKillingFireReach": "몇걸음(reach) 태그를 추가한다",
+      "ThisKillingFireNear": "중거리(near) 태그를 추가한다",
+      "ThisKillingFireFar": "장거리(far) 태그를 추가한다"
     },
     "Defend": {
       "FailedNoReserve": "판정에 실패해서 예비를 얻지 못했습니다",
