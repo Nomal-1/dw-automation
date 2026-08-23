@@ -46,17 +46,26 @@ export function getHoldGrantRow(actor) {
   return rows.find((row) => actor.items.some((i) => i.type === "move" && i.name === row.name)) ?? null;
 }
 
-// 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문, 그리고 클레릭 응급처치/
-// 상급 응급처치가 고정으로 지정하는 주문(features/first-aid.js)은 준비 시
-// 레벨을 1 낮춰서 계산한다(features/spell-discount.js 참고). 레벨 1 주문이
-// 할인되면 0이 되어 칸트립처럼 항상 무료로 준비된다.
-function effectiveSpellLevel(spell, discountedIds) {
+// 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문은 준비 시 레벨을 1 낮춰서
+// 계산한다(features/spell-discount.js 참고) — 레벨 1 주문이 할인되면 0이
+// 되어 칸트립처럼 항상 무료로 준비된다. 반면 클레릭 응급처치/상급 응급처치가
+// 고정으로 지정하는 주문(features/first-aid.js)은 원문이 "한 레벨 낮게
+// 취급"이 아니라 "그 주문 자체가 암송주문(칸트립)"이라, 레벨이 몇이든
+// 무조건 0으로 만든다(상급 응급처치의 치유는 2레벨이라 -1만 해서는 1레벨로
+// 남아 한도 계산에 계속 들어가는 버그가 있었다) — reduction을 Infinity로
+// 두면 raw가 몇이든 Math.max(0, raw - Infinity)가 항상 0이 되어 간단히
+// 해결된다.
+function effectiveSpellLevel(spell, discountMap) {
   const raw = Number(spell.system?.spellLevel) || 0;
-  return discountedIds.has(spell.id) ? Math.max(0, raw - 1) : raw;
+  const reduction = discountMap.get(spell.id);
+  return reduction !== undefined ? Math.max(0, raw - reduction) : raw;
 }
 
 function getAllDiscountedSpellIds(actor) {
-  return new Set([...getDiscountedSpellIds(actor), ...getFirstAidDiscountedSpellIds(actor)]);
+  const discountMap = new Map();
+  for (const id of getDiscountedSpellIds(actor)) discountMap.set(id, 1);
+  for (const id of getFirstAidDiscountedSpellIds(actor)) discountMap.set(id, Infinity);
+  return discountMap;
 }
 
 // 설정("주문 준비 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이

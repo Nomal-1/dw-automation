@@ -259,6 +259,11 @@ export async function runTranslationImport() {
   const hospitallerMoves = game.settings.get(MODULE_ID, SETTINGS.HOSPITALLER_MOVES);
   await game.settings.set(MODULE_ID, SETTINGS.HOSPITALLER_MOVES, translateRows(moveMap, hospitallerMoves, stats));
 
+  // 공격 주문 표는 이름이 전부 주문(Magic Missile, Fireball, Harm 등)이라
+  // spellMap만으로 번역한다.
+  const spellDamageMoves = game.settings.get(MODULE_ID, SETTINGS.SPELL_DAMAGE_MOVES);
+  await game.settings.set(MODULE_ID, SETTINGS.SPELL_DAMAGE_MOVES, translateRows(spellMap, spellDamageMoves, stats));
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번
