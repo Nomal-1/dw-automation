@@ -148,5 +148,7 @@ export const SETTINGS = {
   FIRST_AID_MOVE_NAMES: "firstAidMoveNames",
   FIRST_AID_SPELL_NAME: "firstAidSpellName",
   GREATER_FIRST_AID_MOVE_NAMES: "greaterFirstAidMoveNames",
-  GREATER_FIRST_AID_SPELL_NAME: "greaterFirstAidSpellName"
+  GREATER_FIRST_AID_SPELL_NAME: "greaterFirstAidSpellName",
+  ENABLE_SPELL_DAMAGE_ASSISTANT: "enableSpellDamageAssistant",
+  SPELL_DAMAGE_MOVES: "spellDamageMoves"
 };

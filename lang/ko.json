@@ -621,6 +621,15 @@
       "GreaterFirstAidSpellName": {
         "Name": "상급 응급처치 대상 주문 이름",
         "Hint": "정식 명칭 전체를 그대로 입력하세요(쉼표 목록이 아닙니다). 기본값: Cure Moderate Wounds."
+      },
+      "EnableSpellDamageAssistant": {
+        "Name": "공격 주문 자동 피해 굴림 사용",
+        "Hint": "주문 시전에서 '공격 주문 설정'에 등록된 주문을 고르면 자동으로 피해를 굴려 적용 버튼과 함께 채팅에 올립니다. 회개(Martyr)가 걸어둔 '다음 주문 피해에 레벨 추가'도 여기서 소모됩니다."
+      },
+      "SpellDamageMovesMenu": {
+        "Name": "공격 주문 설정",
+        "Label": "공격 주문 설정 열기",
+        "Hint": "매직 미사일/파이어볼처럼 피해를 굴리는 주문을 이름·공식으로 등록/수정합니다. 기본값은 클레릭/위저드 주문 컴펜디엄 전수조사로 채워뒀습니다."
       }
     },
     "Npc": {
@@ -854,7 +863,7 @@
       "FireAidForwardApplied": "1d4({amount})를 굴려 다음 불타는 낙인 판정에 forward로 {amount}를 가져갑니다",
       "FireAidReduceDamageApplied": "1d4({amount})를 굴려 원래 피해 {original}에서 {amount}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다",
       "EmbracePainApplied": "고통을 받아들여 1d4({extra})의 피해를 추가로 입습니다(장갑 무시) — 총 {total}의 피해. 다음 번 주문 시전 판정에 +1을 받습니다",
-      "EmbracePainSpellLevelReminder": "그 주문으로 가하는 피해나 치유에 자기 레벨만큼을 더하는 것을 잊지 마세요(서사 효과라 자동 계산되지 않습니다)"
+      "EmbracePainSpellLevelBonus": "다음 번 주문 시전으로 주는 피해나 치유에 자기 레벨({level})만큼이 자동으로 더해집니다"
     },
     "DamageReductionMoves": {
       "Title": "조건부 장갑 보너스 무브 설정",
@@ -983,6 +992,15 @@
       "ResetConfirmTitle": "치료사 계열 무브 표 재설정",
       "ResetConfirmContent": "지금 표의 내용을 지우고, 이 모듈이 실제 무브 원문을 확인해서 정리해둔 영문 기본값으로 되돌립니다. 그 뒤에 이 창을 닫고 '번역 모듈에서 자동 채우기'를 실행하면 이름이 번역됩니다. 계속하시겠습니까?"
     },
+    "SpellDamageMoves": {
+      "Title": "공격 주문 설정",
+      "Hint": "주문 이름은 지금 게임에서 실제로 보이는 그대로(번역됐다면 번역된 이름으로) 입력하세요. 주문 시전에서 이 표에 등록된 주문을 고르면 자동으로 피해를 굴려 적용 버튼과 함께 채팅에 올립니다. '자동'은 주문 아이템의 공식 피해 필드를 그대로 읽고, '직접 입력한 공식'은 옆 칸의 값을 그대로 씁니다.",
+      "IgnoresArmor": "장갑 무시",
+      "SelfDamageFormula": "시전자 자해 공식(선택)",
+      "ResetDefaultsButton": "공식 기본값으로 재설정(영문)",
+      "ResetConfirmTitle": "공격 주문 표 재설정",
+      "ResetConfirmContent": "지금 표의 내용을 지우고, 이 모듈이 클레릭/위저드 주문 원문을 확인해서 정리해둔 영문 기본값으로 되돌립니다. 그 뒤에 이 창을 닫고 '번역 모듈에서 자동 채우기'를 실행하면 이름이 번역됩니다. 계속하시겠습니까?"
+    },
     "Healing": {
       "TargetTitle": "치유 대상 선택",
       "TargetLabel": "누구를 치유하시겠습니까?",
@@ -999,10 +1017,18 @@
       "PermissionContent": "<b>{healer}</b>이(가) \"{item}\"(으)로 <b>{target}</b>에게 {amount}만큼 치유를 주려고 하는데, 그 대상에 대해 관찰 권한만 갖고 있습니다. 허용하시겠습니까?",
       "PermissionAllow": "허용",
       "PermissionDeny": "거부",
-      "PermissionDenied": "GM이 \"{name}\"에 대한 치유를 승인하지 않았습니다."
+      "PermissionDenied": "GM이 \"{name}\"에 대한 치유를 승인하지 않았습니다.",
+      "LevelBonusApplied": "{amount}만큼 치유량에 추가되었습니다"
     },
     "Invigorate": {
       "Applied": "{target}의 다음 피해 굴림에 +2 forward 적용 예정"
+    },
+    "SpellDamage": {
+      "Flavor": "{spell} 피해",
+      "NoFormula": "\"{name}\"의 피해 공식을 판별하지 못했습니다. '공격 주문 설정'에서 직접 지정해주세요.",
+      "LevelBonusApplied": "{amount}만큼 피해량에 추가되었습니다",
+      "SelfDamageFlavor": "{spell} 자해",
+      "SelfDamageApplied": "그 대가로 자기 자신도 {amount}의 피해를 입었습니다"
     },
     "MoveUpgrades": {
       "Title": "무브 업그레이드 설정",

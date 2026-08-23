@@ -9,6 +9,8 @@ import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
 import { HealingMovesMenu } from "./apps/healing-moves-menu.js";
 import { HospitallerMovesMenu } from "./apps/hospitaller-moves-menu.js";
 import { DEFAULT_HEALING_MOVES, DEFAULT_HOSPITALLER_MOVES } from "./data/healing-moves.js";
+import { SpellDamageMovesMenu } from "./apps/spell-damage-moves-menu.js";
+import { DEFAULT_SPELL_DAMAGE_MOVES } from "./data/spell-damage-moves.js";
 import { MoveUpgradesMenu } from "./apps/move-upgrades-menu.js";
 import { DEFAULT_MOVE_UPGRADES } from "./data/move-upgrades.js";
 import { DamageReductionMovesMenu } from "./apps/damage-reduction-moves-menu.js";
@@ -327,6 +329,32 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.HospitallerMovesMenu.Hint",
     icon: "fas fa-hand-holding-heart",
     type: HospitallerMovesMenu,
+    restricted: true
+  });
+
+  // 공격 주문 자동 피해 굴림: 자세한 설계는 features/spell-damage.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELL_DAMAGE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSpellDamageAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSpellDamageAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SPELL_DAMAGE_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: DEFAULT_SPELL_DAMAGE_MOVES
+  });
+
+  game.settings.registerMenu(MODULE_ID, "spellDamageMovesMenu", {
+    name: "DWAUTO.Settings.SpellDamageMovesMenu.Name",
+    label: "DWAUTO.Settings.SpellDamageMovesMenu.Label",
+    hint: "DWAUTO.Settings.SpellDamageMovesMenu.Hint",
+    icon: "fas fa-burst",
+    type: SpellDamageMovesMenu,
     restricted: true
   });
 

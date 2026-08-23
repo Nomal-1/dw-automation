@@ -6,6 +6,7 @@ import { DEFAULT_HOSPITALLER_MOVES } from "../data/healing-moves.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingDamageForward } from "../lib/damage-forward-state.js";
+import { consumePendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
 
 // 관찰(Observer) 권한만 있는 대상(적인지 아군인지 애매한 NPC 등)도 치유
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
@@ -265,6 +266,21 @@ async function performHeal({ healer, target, item, row, resultTag }) {
       flavor: game.i18n.format("DWAUTO.Healing.RollFlavor", { name: item.name })
     });
     total += roll.total;
+  }
+
+  // 클레릭 회개(Martyr)가 걸어둔 "다음 주문 피해/치유에 레벨만큼 추가"는
+  // 주문으로 치유했을 때만 소모한다(무브형 치유는 원문 "그 주문"에 해당하지
+  // 않는다 — features/hit-trigger.js 참고).
+  if (item?.type === "spell") {
+    const bonus = await consumePendingSpellEffectBonus(healer);
+    if (bonus) {
+      total += bonus.amount;
+      announceActionApplied(
+        healer,
+        bonus.source,
+        game.i18n.format("DWAUTO.Healing.LevelBonusApplied", { amount: bonus.amount })
+      );
+    }
   }
 
   if (target.id !== healer.id) {

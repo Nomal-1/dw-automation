@@ -16,6 +16,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 import { findBurningBrandWeapon, addBurningBrandUses } from "./burning-brand.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
+import { setPendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -470,7 +471,9 @@ async function applyEmbracePain(actor, row, damage, originalChanges, originalOpt
   announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.EmbracePainApplied", { extra, total }));
 
   if (row.addLevelToSpellEffect) {
-    announceActionApplied(actor, row.name, game.i18n.localize("DWAUTO.HitTrigger.EmbracePainSpellLevelReminder"));
+    const level = Number(actor.system.attributes?.level?.value) || 1;
+    await setPendingSpellEffectBonus(actor, level, row.name);
+    announceActionApplied(actor, row.name, game.i18n.format("DWAUTO.HitTrigger.EmbracePainSpellLevelBonus", { level }));
   }
 }
 

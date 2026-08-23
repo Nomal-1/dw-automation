@@ -621,6 +621,15 @@
       "GreaterFirstAidSpellName": {
         "Name": "Greater First Aid Target Spell Name",
         "Hint": "Enter the full exact spell name (not a comma-separated list). Default: Cure Moderate Wounds."
+      },
+      "EnableSpellDamageAssistant": {
+        "Name": "Enable Attack Spell Auto Damage",
+        "Hint": "Choosing a spell registered in the Attack Spells settings while casting a spell automatically rolls its damage and posts it to chat with apply buttons. Also consumes Martyr's 'add level to next spell damage' bonus here."
+      },
+      "SpellDamageMovesMenu": {
+        "Name": "Attack Spells",
+        "Label": "Open Attack Spells Settings",
+        "Hint": "Register/edit damage-dealing spells (Magic Missile, Fireball, etc.) by name and formula. Defaults were filled in from a survey of the Cleric/Wizard spell compendiums."
       }
     },
     "Npc": {
@@ -854,7 +863,7 @@
       "FireAidForwardApplied": "Rolled 1d4 ({amount}) and took {amount} forward to your next Burning Brand roll",
       "FireAidReduceDamageApplied": "Rolled 1d4 ({amount}) — original damage {original} reduced by {amount}, so you actually take {damage}",
       "EmbracePainApplied": "Embracing the pain, you take an extra 1d4 ({extra}) damage (ignoring armor) — {total} total. You take +1 forward to cast a spell",
-      "EmbracePainSpellLevelReminder": "Remember to add your level to that spell's damage or healing (a narrative effect, not calculated automatically)"
+      "EmbracePainSpellLevelBonus": "Your level ({level}) will be added automatically to the damage or healing dealt by your next spell cast"
     },
     "DamageReductionMoves": {
       "Title": "Conditional Armor Bonus Moves",
@@ -983,6 +992,15 @@
       "ResetConfirmTitle": "Reset Hospitaller Moves Table",
       "ResetConfirmContent": "This clears the current table and restores the English defaults this module has verified against the actual move text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
     },
+    "SpellDamageMoves": {
+      "Title": "Attack Spells",
+      "Hint": "Enter the spell name exactly as it appears in your game (translated, if applicable). Choosing a spell registered here while casting a spell automatically rolls its damage and posts it to chat with apply buttons. \"Auto\" reads the spell item's own damage formula field; \"custom formula\" uses the value you type.",
+      "IgnoresArmor": "Ignores Armor",
+      "SelfDamageFormula": "Self-Damage Formula (optional)",
+      "ResetDefaultsButton": "Reset to Verified Defaults (English)",
+      "ResetConfirmTitle": "Reset Attack Spells Table",
+      "ResetConfirmContent": "This clears the current table and restores the English defaults this module verified against the Cleric/Wizard spell text. Afterward, close this window and run \"Auto-Fill From Translation Module\" to translate the names. Continue?"
+    },
     "Healing": {
       "TargetTitle": "Choose Recipient",
       "TargetLabel": "Who are you healing?",
@@ -999,10 +1017,18 @@
       "PermissionContent": "<b>{healer}</b> wants to heal <b>{target}</b> for {amount} using \"{item}\", but only has observer access to that character/creature. Allow it?",
       "PermissionAllow": "Allow",
       "PermissionDeny": "Deny",
-      "PermissionDenied": "The GM didn't approve healing \"{name}\"."
+      "PermissionDenied": "The GM didn't approve healing \"{name}\".",
+      "LevelBonusApplied": "Added {amount} to the healing"
     },
     "Invigorate": {
       "Applied": "+2 forward queued for {target}'s next damage roll"
+    },
+    "SpellDamage": {
+      "Flavor": "{spell} Damage",
+      "NoFormula": "Couldn't determine a damage formula for \"{name}\"; set one manually in the Attack Spells setting.",
+      "LevelBonusApplied": "Added {amount} to the damage",
+      "SelfDamageFlavor": "{spell} Self-Damage",
+      "SelfDamageApplied": "In exchange, you took {amount} damage yourself"
     },
     "MoveUpgrades": {
       "Title": "Move Upgrades",

@@ -9,6 +9,7 @@ import {
   COMMUNE_PENALTY_FLAG
 } from "../lib/ongoing-spells-state.js";
 import { handleSpellHeal } from "./healing.js";
+import { handleSpellDamage } from "./spell-damage.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -188,6 +189,7 @@ function promptSpellChoice(actor, result, moveItem, isExtreme) {
           }
 
           await handleSpellHeal(actor, spell);
+          await handleSpellDamage(actor, spell);
 
           if (result === "partial") {
             promptPartialConsequence(actor, moveItem, spell);

@@ -31,10 +31,10 @@
 //   원상복구된다) | "embracePain"(클레릭 Penitent/Martyr 전용 — 다른
 //   효과들과 반대로 피해를 줄이는 게 아니라 자원해서 1d4 피해를 추가로
 //   받는다(장갑 무시). 그 대신 다음 번 주문 시전 판정에 +1을 받는다.
-//   Martyr(속죄 대체)는 추가로 "그 주문의 피해/치유에 자기 레벨을 더한다"는
-//   문구가 있는데, 이 모듈이 주문 피해/치유를 구조화된 굴림으로 다루지
-//   않아(자유 서술형) 그 부분은 채팅 안내로만 남긴다 —
-//   addLevelToSpellEffect: true인 행에서만 그 안내가 붙는다)
+//   addLevelToSpellEffect: true인 행(Martyr, 속죄 대체)은 추가로 "다음 주문
+//   피해/치유에 레벨만큼 추가"를 lib/spell-effect-bonus-state.js에 걸어두고,
+//   그 다음 번 주문 시전이 features/spell-damage.js(공격 주문 표에 등록된
+//   경우)나 features/healing.js(치유 주문)로 실제 수치를 만들어낼 때 소모된다)
 // - grantsForward: 무효화에 성공하면 +1 forward도 함께 받는지(Armored
 //   Perfection). 던전월드 시스템의 forward는 다음 굴림에 자동으로 붙었다가
 //   소모되는 값(system.attributes.forward.value)이라 별도 계산이 필요 없다.
