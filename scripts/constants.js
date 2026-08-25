@@ -152,5 +152,7 @@ export const SETTINGS = {
   ENABLE_SPELL_DAMAGE_ASSISTANT: "enableSpellDamageAssistant",
   SPELL_DAMAGE_MOVES: "spellDamageMoves",
   ENABLE_UPPER_HAND_ASSISTANT: "enableUpperHandAssistant",
-  UPPER_HAND_MOVE_NAMES: "upperHandMoveNames"
+  UPPER_HAND_MOVE_NAMES: "upperHandMoveNames",
+  ENABLE_WHAT_ARE_YOU_WAITING_FOR_ASSISTANT: "enableWhatAreYouWaitingForAssistant",
+  WHAT_ARE_YOU_WAITING_FOR_MOVE_NAMES: "whatAreYouWaitingForMoveNames"
 };

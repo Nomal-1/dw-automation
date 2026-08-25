@@ -638,6 +638,14 @@
       "UpperHandMoveNames": {
         "Name": "The Upper Hand Move Names",
         "Hint": "Comma-separated (default: The Upper Hand)."
+      },
+      "EnableWhatAreYouWaitingForAssistant": {
+        "Name": "Enable What Are You Waiting For? Automation",
+        "Hint": "When this move succeeds with 10+, the badge next to it automatically turns 'active', and while active this character's damage rolls all get +2 automatically. Only the GM can turn the badge on while it's off; once on, either the player or the GM can turn it off."
+      },
+      "WhatAreYouWaitingForMoveNames": {
+        "Name": "What Are You Waiting For? Move Names",
+        "Hint": "Comma-separated (default: What Are You Waiting For?)."
       }
     },
     "Npc": {
@@ -1337,6 +1345,12 @@
     "UpperHand": {
       "ReminderContent": "The Upper Hand gives you a permanent +1 to Last Breath. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add +1 directly in the bond input that's about to appear!",
       "ReminderAck": "Got it (continue)"
+    },
+    "WaitingFor": {
+      "Activated": "What Are You Waiting For? triggers — enemies ignore your allies and rush you. From now on this character's damage rolls all get +2 automatically (until the GM turns it off)",
+      "ToggleTitle": "Click to toggle active state (only the GM can turn it on while it's off).",
+      "Active": "Active",
+      "Inactive": "Inactive"
     },
     "Bolster": {
       "GainPromptLabel": "How much preparation did you gain? (up to 3)",

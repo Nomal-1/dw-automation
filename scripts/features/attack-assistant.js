@@ -13,6 +13,7 @@ import { getPendingDamageForward, clearPendingDamageForward } from "../lib/damag
 import { getMercilessBonus } from "./merciless.js";
 import { getCheapShotBonus } from "./cheap-shot.js";
 import { promptStrongArmThrow, removeAmmoChoice } from "./strong-arm.js";
+import { getWhatAreYouWaitingForBonus } from "./what-are-you-waiting-for.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 
 function splitCommaList(settingKey) {
@@ -444,11 +445,15 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice, moveTitle) {
   const commandBonus = getCommandDamageBonus(actor);
   const mercilessBonus = getMercilessBonus(actor);
   const cheapShotBonus = await getCheapShotBonus(actor, moveTitle, weapon);
+  const waitingForBonus = getWhatAreYouWaitingForBonus(actor);
   const damageForward = getPendingDamageForward(actor);
   const finalExtraDice = appendTerm(
     appendTerm(
-      appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
-      cheapShotBonus
+      appendTerm(
+        appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
+        cheapShotBonus
+      ),
+      waitingForBonus
     ),
     damageForward ? String(damageForward.amount) : ""
   );

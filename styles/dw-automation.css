@@ -566,6 +566,19 @@
   color: #fff !important;
 }
 
+.dwauto-waiting-for-badge {
+  cursor: pointer;
+}
+
+.dwauto-waiting-for-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-waiting-for-on {
+  background: #7a2e2e !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

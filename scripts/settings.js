@@ -377,6 +377,26 @@ export function registerSettings() {
     default: "The Upper Hand"
   });
 
+  // 야만전사 고급액션 뭘 기다리는 거야?: 자세한 설계는
+  // features/what-are-you-waiting-for.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_WHAT_ARE_YOU_WAITING_FOR_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableWhatAreYouWaitingForAssistant.Name",
+    hint: "DWAUTO.Settings.EnableWhatAreYouWaitingForAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WHAT_ARE_YOU_WAITING_FOR_MOVE_NAMES, {
+    name: "DWAUTO.Settings.WhatAreYouWaitingForMoveNames.Name",
+    hint: "DWAUTO.Settings.WhatAreYouWaitingForMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "What Are You Waiting For?"
+  });
+
   // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전
   // 단계 무브(치료사)를 자동으로 삭제한다. 대상 쌍은 던전월드 8개 기본 직업
   // 컴펜디엄의 requiresMove 필드를 전수 조사해서 기본값으로 채워뒀다. 자세한

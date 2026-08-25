@@ -638,6 +638,14 @@
       "UpperHandMoveNames": {
         "Name": "주도권 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: The Upper Hand)."
+      },
+      "EnableWhatAreYouWaitingForAssistant": {
+        "Name": "뭘 기다리는 거야? 자동화 사용",
+        "Hint": "이 무브가 10+로 성공하면 무브 옆 배지가 자동으로 '적용중'이 되고, 적용중인 동안 이 캐릭터의 모든 피해 굴림에 +2가 자동으로 더해집니다. 배지가 꺼져 있을 때 켜는 건 마스터만 할 수 있고, 켜진 뒤에는 플레이어와 마스터 누구나 꺼서 끝낼 수 있습니다."
+      },
+      "WhatAreYouWaitingForMoveNames": {
+        "Name": "뭘 기다리는 거야? 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: What Are You Waiting For?)."
       }
     },
     "Npc": {
@@ -1337,6 +1345,12 @@
     "UpperHand": {
       "ReminderContent": "주도권 효과로 황천길 판정에 +1 상시 보너스를 받습니다. 던전월드 시스템이 유대(Bond) 판정에는 외부 보정치를 자동으로 반영하지 못하므로, 잠시 후 뜰 유대 입력창에 직접 +1을 더해서 입력해주세요!",
       "ReminderAck": "확인했습니다 (계속 진행)"
+    },
+    "WaitingFor": {
+      "Activated": "뭘 기다리는 거야? 발동 — 적들이 동료를 무시하고 달려듭니다. 이제부터 이 캐릭터의 모든 피해 굴림에 +2가 자동으로 붙습니다(마스터가 직접 끌 때까지)",
+      "ToggleTitle": "클릭하면 적용 상태를 켜고 끕니다(꺼져 있을 때 켜는 건 마스터만 가능).",
+      "Active": "적용중",
+      "Inactive": "적용안됨"
     },
     "Bolster": {
       "GainPromptLabel": "예비를 몇 점 쌓습니까? (최대 3점)",
