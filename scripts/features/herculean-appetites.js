@@ -77,14 +77,23 @@ async function performHerculeanRoll(item, actor, effectiveAbility, totalMod, pen
   const resultText = item.system?.moveResults?.[result]?.value ?? "";
   const choicesText = item.system?.choices ?? "";
 
+  // move-card.js의 getMoveCardInfo는 $(message.content).find(".chat-card.move-card")로
+  // 카드를 찾는데, jQuery의 .find()는 최상위 요소 자체는 뒤지지 않고 그
+  // 자식만 검색한다(던전월드 시스템의 실제 템플릿도 <section> 안에
+  // .chat-card.move-card를 넣는 구조라 이게 항상 통했다). 여기서 감싸는
+  // <section> 없이 .chat-card.move-card를 최상위로 바로 만들면 다른 모든
+  // 자동화(공격 도우미, 피격 무효화 등)가 이 카드를 영원히 못 찾는다 —
+  // 반드시 한 겹 감싸야 한다.
   const content = `
-    <div class="chat-card move-card" data-roll-total="${total}">
-      <h2 class="cell__title">${item.name}</h2>
-      ${rollHtml}
-      <div class="row result ${result}">
-        <div class="cell result-text">${resultText}${choicesText}</div>
+    <section>
+      <div class="chat-card move-card" data-roll-total="${total}">
+        <h2 class="cell__title">${item.name}</h2>
+        ${rollHtml}
+        <div class="row result ${result}">
+          <div class="cell result-text">${resultText}${choicesText}</div>
+        </div>
       </div>
-    </div>
+    </section>
   `;
 
   const chatData = { user: game.user.id, speaker: ChatMessage.getSpeaker({ actor }), content };
@@ -134,6 +143,9 @@ export async function maybeRollHerculeanAppetites(
       content: `<p>${game.i18n.localize("DWAUTO.HerculeanAppetites.Prompt")}</p>`,
       defaultYes: false
     });
+    // 물어봤을 때의 답을 적용중/적용안됨 배지에도 그대로 반영해둔다 — 나중에
+    // "묻지 않기" 모드로 바꾸면 그 시점의 마지막 답이 그대로 이어진다.
+    await setHeraclesActive(actor, apply);
   } else {
     apply = isHeraclesActive(actor);
   }
