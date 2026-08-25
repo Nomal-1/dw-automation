@@ -53,6 +53,7 @@ import { registerStrongArmAssistant } from "./features/strong-arm.js";
 import { registerHeistAssistant } from "./features/heist.js";
 import { registerFirstAidAssistant } from "./features/first-aid.js";
 import { registerSpellDamageAssistant } from "./features/spell-damage.js";
+import { registerUpperHandAssistant } from "./features/upper-hand.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -117,3 +118,4 @@ registerStrongArmAssistant();
 registerHeistAssistant();
 registerFirstAidAssistant();
 registerSpellDamageAssistant();
+registerUpperHandAssistant();

@@ -630,6 +630,14 @@
         "Name": "Attack Spells",
         "Label": "Open Attack Spells Settings",
         "Hint": "Register/edit damage-dealing spells (Magic Missile, Fireball, etc.) by name and formula. Defaults were filled in from a survey of the Cleric/Wizard spell compendiums."
+      },
+      "EnableUpperHandAssistant": {
+        "Name": "Enable The Upper Hand Automation",
+        "Hint": "Shows a reminder to add +1 manually right before a Last Breath roll (Last Breath is a Bond roll, so this module can't inject the bonus automatically)."
+      },
+      "UpperHandMoveNames": {
+        "Name": "The Upper Hand Move Names",
+        "Hint": "Comma-separated (default: The Upper Hand)."
       }
     },
     "Npc": {
@@ -1324,6 +1332,10 @@
       "TurnAwayPrompt": "Do you turn away everyone the GM offered?",
       "PenaltyPending": "-1 is queued for your next Recruit roll.",
       "ReminderContent": "You turned away last batch of applicants, so this Recruit roll takes -1. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add -1 directly in the bond input that's about to appear!",
+      "ReminderAck": "Got it (continue)"
+    },
+    "UpperHand": {
+      "ReminderContent": "The Upper Hand gives you a permanent +1 to Last Breath. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add +1 directly in the bond input that's about to appear!",
       "ReminderAck": "Got it (continue)"
     },
     "Bolster": {

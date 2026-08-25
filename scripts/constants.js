@@ -150,5 +150,7 @@ export const SETTINGS = {
   GREATER_FIRST_AID_MOVE_NAMES: "greaterFirstAidMoveNames",
   GREATER_FIRST_AID_SPELL_NAME: "greaterFirstAidSpellName",
   ENABLE_SPELL_DAMAGE_ASSISTANT: "enableSpellDamageAssistant",
-  SPELL_DAMAGE_MOVES: "spellDamageMoves"
+  SPELL_DAMAGE_MOVES: "spellDamageMoves",
+  ENABLE_UPPER_HAND_ASSISTANT: "enableUpperHandAssistant",
+  UPPER_HAND_MOVE_NAMES: "upperHandMoveNames"
 };

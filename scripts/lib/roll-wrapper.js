@@ -27,6 +27,7 @@ import { promptBolsterPreRoll } from "../features/bolster.js";
 import { promptHeistPreRoll } from "../features/heist.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
 import { promptBurningBridgesPreRoll } from "../features/burning-bridges.js";
+import { promptUpperHandPreRoll } from "../features/upper-hand.js";
 import { promptInterrogatorPreRoll } from "../features/interrogator.js";
 import { promptPrecisePreRoll } from "../features/precise-weapon.js";
 import { getSeeingRedBonus } from "../features/seeing-red.js";
@@ -101,6 +102,11 @@ async function wrappedRoll(wrapped, ...args) {
   // 캐릭터에게 짐/수련 같은 다른 사전 확인 팝업이 먼저 뜨는 혼란도 없다).
   const burningBridges = await promptBurningBridgesPreRoll(this);
   if (burningBridges.cancel) return undefined;
+
+  // 야만전사 주도권(The Upper Hand)의 "황천길 +1 상시"도 사그라지는 인연과
+  // 같은 황천길(BOND) 판정이라 여기서 먼저 처리한다(features/upper-hand.js
+  // 참고) — 사그라지는 인연으로 판정 자체가 취소됐다면 이미 위에서 빠져나갔다.
+  await promptUpperHandPreRoll(this);
 
   // 하중 초과(+3 이상)로 짐을 버리지 않으면(bonus로 거대한 음수를 돌려줘)
   // 판정 자체는 취소하지 않고 그대로 진행시킨다 — 그래야 시스템 자신의
