@@ -397,6 +397,26 @@ export function registerSettings() {
     default: "What Are You Waiting For?"
   });
 
+  // 야만전사 고급액션 헤라클레스의 욕망: 자세한 설계는
+  // features/herculean-appetites.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_HERCULEAN_APPETITES_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableHerculeanAppetitesAssistant.Name",
+    hint: "DWAUTO.Settings.EnableHerculeanAppetitesAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HERCULEAN_APPETITES_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HerculeanAppetitesMoveNames.Name",
+    hint: "DWAUTO.Settings.HerculeanAppetitesMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Herculean Appetites"
+  });
+
   // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전
   // 단계 무브(치료사)를 자동으로 삭제한다. 대상 쌍은 던전월드 8개 기본 직업
   // 컴펜디엄의 requiresMove 필드를 전수 조사해서 기본값으로 채워뒀다. 자세한

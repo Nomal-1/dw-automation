@@ -55,6 +55,7 @@ import { registerFirstAidAssistant } from "./features/first-aid.js";
 import { registerSpellDamageAssistant } from "./features/spell-damage.js";
 import { registerUpperHandAssistant } from "./features/upper-hand.js";
 import { registerWhatAreYouWaitingForAssistant } from "./features/what-are-you-waiting-for.js";
+import { registerHerculeanAppetitesAssistant } from "./features/herculean-appetites.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -121,3 +122,4 @@ registerFirstAidAssistant();
 registerSpellDamageAssistant();
 registerUpperHandAssistant();
 registerWhatAreYouWaitingForAssistant();
+registerHerculeanAppetitesAssistant();

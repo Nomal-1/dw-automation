@@ -154,5 +154,7 @@ export const SETTINGS = {
   ENABLE_UPPER_HAND_ASSISTANT: "enableUpperHandAssistant",
   UPPER_HAND_MOVE_NAMES: "upperHandMoveNames",
   ENABLE_WHAT_ARE_YOU_WAITING_FOR_ASSISTANT: "enableWhatAreYouWaitingForAssistant",
-  WHAT_ARE_YOU_WAITING_FOR_MOVE_NAMES: "whatAreYouWaitingForMoveNames"
+  WHAT_ARE_YOU_WAITING_FOR_MOVE_NAMES: "whatAreYouWaitingForMoveNames",
+  ENABLE_HERCULEAN_APPETITES_ASSISTANT: "enableHerculeanAppetitesAssistant",
+  HERCULEAN_APPETITES_MOVE_NAMES: "herculeanAppetitesMoveNames"
 };

@@ -32,6 +32,7 @@ import { promptInterrogatorPreRoll } from "../features/interrogator.js";
 import { promptPrecisePreRoll } from "../features/precise-weapon.js";
 import { getSeeingRedBonus } from "../features/seeing-red.js";
 import { getThroughDeathsEyesMalus } from "../features/through-deaths-eyes.js";
+import { maybeRollHerculeanAppetites } from "../features/herculean-appetites.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -202,6 +203,19 @@ async function wrappedRoll(wrapped, ...args) {
     throughDeathsEyesMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
     preRollBonus;
+
+  // 야만전사 헤라클레스의 욕망(Herculean Appetites): 2d6 대신 1d6+1d8을
+  // 굴려야 해서 시스템의 원래 굴림 경로 자체를 못 탄다(features/
+  // herculean-appetites.js 참고) — 다른 보정치를 전부 반영한 뒤, 여기서
+  // 적용 여부를 최종 결정하고 적용되면 이 모듈이 직접 굴려서 끝낸다.
+  const heracles = await maybeRollHerculeanAppetites(this, {
+    effectiveAbility: (statOverride || rollType || "").toLowerCase(),
+    totalMod,
+    pendingBonus,
+    pendingBonusApplies
+  });
+  if (heracles.handled) return undefined;
+
   if (!totalMod && !pendingBonusApplies && !statOverride) return wrapped(...args);
 
   const original = this.system.rollMod;

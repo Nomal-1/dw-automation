@@ -579,6 +579,21 @@
   color: #fff !important;
 }
 
+.dwauto-heracles-ask-badge,
+.dwauto-heracles-active-badge {
+  cursor: pointer;
+}
+
+.dwauto-heracles-ask-badge:hover,
+.dwauto-heracles-active-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-heracles-on {
+  background: #7a4a2e !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

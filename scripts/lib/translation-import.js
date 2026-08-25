@@ -278,6 +278,13 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, whatAreYouWaitingForMoveNames, stats)
   );
 
+  const herculeanAppetitesMoveNames = game.settings.get(MODULE_ID, SETTINGS.HERCULEAN_APPETITES_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.HERCULEAN_APPETITES_MOVE_NAMES,
+    translateCommaList(moveMap, herculeanAppetitesMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

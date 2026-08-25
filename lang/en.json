@@ -646,6 +646,14 @@
       "WhatAreYouWaitingForMoveNames": {
         "Name": "What Are You Waiting For? Move Names",
         "Hint": "Comma-separated (default: What Are You Waiting For?)."
+      },
+      "EnableHerculeanAppetitesAssistant": {
+        "Name": "Enable Herculean Appetites Automation",
+        "Hint": "When a character with this move makes an ability check and the condition is met, this module rolls 1d6+1d8 directly instead of 2d6 and judges the result itself (the dungeonworld system always rolls 2d6, so this roll bypasses the system's own path entirely). In 'Always Ask' mode it asks 'Is this pursuing a desire?' every time; in 'Don't Ask' mode it just uses the Active/Inactive toggle state."
+      },
+      "HerculeanAppetitesMoveNames": {
+        "Name": "Herculean Appetites Move Names",
+        "Hint": "Comma-separated (default: Herculean Appetites)."
       }
     },
     "Npc": {
@@ -1349,6 +1357,17 @@
     "WaitingFor": {
       "Activated": "What Are You Waiting For? triggers — enemies ignore your allies and rush you. From now on this character's damage rolls all get +2 automatically (until the GM turns it off)",
       "ToggleTitle": "Click to toggle active state (only the GM can turn it on while it's off).",
+      "Active": "Active",
+      "Inactive": "Inactive"
+    },
+    "HerculeanAppetites": {
+      "Prompt": "Is this roll pursuing a desire?",
+      "Applied": "Herculean Appetites triggers — rolling 1d6+1d8 instead of 2d6",
+      "DangerNote": "The 1d6 beat the 1d8 — the GM will describe trouble or danger from your recklessness",
+      "AskToggleTitle": "Click to toggle whether to ask every roll or not.",
+      "AskOn": "Always Ask",
+      "AskOff": "Don't Ask",
+      "ActiveToggleTitle": "Click to toggle active state (only consulted in 'Don't Ask' mode).",
       "Active": "Active",
       "Inactive": "Inactive"
     },
