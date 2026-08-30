@@ -53,6 +53,31 @@ function formatModifier(n) {
   return n >= 0 ? `+${n}` : `${n}`;
 }
 
+// 시스템 rolls.js의 유리/불리 처리(module/rolls.js 약 260~304줄)를 그대로
+// 재현한다: flags.dungeonworld.rollMode(adv/dis/def)를 읽고, disDebility
+// 설정이 켜져 있고 해당 능력치에 약화가 있으면 유리는 상쇄되고(→def) 그 외엔
+// 불리로 강제 전환된다. 시스템은 이 로직을 "2d6" 또는 아무 d6 항목에나
+// 적용하는데, 이 무브의 판정식 1d6+1d8은 두 주사위 종류가 달라 그대로 못
+// 쓴다 — GM 요청에 따라 불리는 원래처럼 d6 쪽에(2d6kl1), 유리는 d8 쪽에
+// (2d8kh1) 적용하기로 정했다(약한 주사위는 더 깎이고, 강한 주사위는 더
+// 살아나는 방향).
+function getEffectiveRollMode(actor, effectiveAbility) {
+  const original = actor.flags?.dungeonworld?.rollMode ?? "def";
+  let mode = original;
+  const debilityActive = actor.system.abilities?.[effectiveAbility]?.debility ?? false;
+  if (game.settings.get("dungeonworld", "disDebility") && debilityActive) {
+    mode = mode === "adv" ? "def" : "dis";
+  }
+  const rollModeUsed = original !== "def" || mode !== "def";
+  return { mode, rollModeUsed };
+}
+
+function buildDiceFormula(mode) {
+  if (mode === "adv") return "1d6+2d8kh1";
+  if (mode === "dis") return "2d6kl1+1d8";
+  return "1d6+1d8";
+}
+
 async function performHerculeanRoll(item, actor, effectiveAbility, totalMod, pendingBonus, pendingBonusApplies) {
   const abilityMod = Number(actor.system.abilities?.[effectiveAbility]?.mod) || 0;
   const ownRollMod = Number(item.system?.rollMod) || 0;
@@ -60,7 +85,8 @@ async function performHerculeanRoll(item, actor, effectiveAbility, totalMod, pen
   const ongoing = Number(actor.system.attributes?.ongoing?.value) || 0;
   const flatMod = abilityMod + ownRollMod + totalMod + forward + ongoing;
 
-  const formula = `1d6+1d8${flatMod ? formatModifier(flatMod) : ""}`;
+  const { mode: rollMode, rollModeUsed } = getEffectiveRollMode(actor, effectiveAbility);
+  const formula = `${buildDiceFormula(rollMode)}${flatMod ? formatModifier(flatMod) : ""}`;
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
 
@@ -69,8 +95,16 @@ async function performHerculeanRoll(item, actor, effectiveAbility, totalMod, pen
   const total = roll.total;
   const result = total >= 10 ? "success" : total >= 7 ? "partial" : "failure";
 
-  if (forward) {
-    await actor.update({ "system.attributes.forward.value": 0 });
+  // 시스템과 동일하게, 유리/불리 토글을 소모했고(rollModeUsed) 세계 설정
+  // advForward(유리/불리도 forward처럼 한 판정만 유지)가 켜져 있으면 사용 후
+  // 플래그를 def로 되돌린다(module/rolls.js 407~415줄과 동일한 조건).
+  const updates = {};
+  if (forward) updates["system.attributes.forward.value"] = 0;
+  if (rollModeUsed && game.settings.get("dungeonworld", "advForward")) {
+    updates["flags.dungeonworld.rollMode"] = "def";
+  }
+  if (Object.keys(updates).length) {
+    await actor.update(updates);
   }
 
   const rollHtml = await roll.render();
