@@ -573,7 +573,67 @@ export function registerSettings() {
     scope: "world",
     config: true,
     type: String,
-    default: "Bamboozle"
+    default: "Bamboozle, Con"
+  });
+
+  // 바드 무브 이계의 화음/치유의 합창/날카로운 폭발음: 각각 이계의 음률/
+  // 치유의 노래/날카로운 불협화음의 6레벨 상위 무브라(무브 업그레이드
+  // 자동화가 하위 무브를 대체해서 지운다) 별도 사용 스위치 없이
+  // ENABLE_ARCANE_ART_ASSISTANT 하나로 같이 켜고 끈다. 자세한 설계는
+  // features/arcane-art.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ELDRITCH_CHORD_MOVE_NAMES, {
+    name: "DWAUTO.Settings.EldritchChordMoveNames.Name",
+    hint: "DWAUTO.Settings.EldritchChordMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Eldritch Chord"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HEALING_CHORUS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HealingChorusMoveNames.Name",
+    hint: "DWAUTO.Settings.HealingChorusMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Healing Chorus"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.VICIOUS_BLAST_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ViciousBlastMoveNames.Name",
+    hint: "DWAUTO.Settings.ViciousBlastMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Vicious Blast"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CHARMING_OPEN_MOVE_NAMES, {
+    name: "DWAUTO.Settings.CharmingOpenMoveNames.Name",
+    hint: "DWAUTO.Settings.CharmingOpenMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Charming & Open"
+  });
+
+  // 바드 무브 교활: 자세한 설계는 features/devious.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_DEVIOUS_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableDeviousAssistant.Name",
+    hint: "DWAUTO.Settings.EnableDeviousAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DEVIOUS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DeviousMoveNames.Name",
+    hint: "DWAUTO.Settings.DeviousMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Devious"
   });
 
   // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전

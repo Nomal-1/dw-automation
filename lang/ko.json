@@ -717,7 +717,31 @@
       },
       "BamboozleMoveNames": {
         "Name": "현란한 말솜씨 무브 이름",
-        "Hint": "쉼표로 구분해서 입력하세요(기본값: Bamboozle)."
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Bamboozle, Con — 청산유수(Con)는 현란한 말솜씨의 6레벨 상위 무브라 같은 자동화를 그대로 씁니다)."
+      },
+      "EldritchChordMoveNames": {
+        "Name": "이계의 화음 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Eldritch Chord). 마법의 곡조 자동화(사제/바드 공용 설정) 사용 스위치를 그대로 씁니다 — 이계의 음률과 마찬가지로 효과를 2개까지 선택할 수 있고, 그 중 하나를 골라 최종 수치를 두 배로 적용할 수 있습니다."
+      },
+      "HealingChorusMoveNames": {
+        "Name": "치유의 합창 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Healing Chorus). 치유의 노래의 상위 무브로, 마법의 곡조로 치유를 고르면 +1d8 대신 +2d8을 추가로 치유합니다."
+      },
+      "ViciousBlastMoveNames": {
+        "Name": "날카로운 폭발음 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Vicious Blast). 날카로운 불협화음의 상위 무브로, 마법의 곡조로 피해 보너스를 고르면 +1d4 대신 +2d4를 추가로 줍니다."
+      },
+      "CharmingOpenMoveNames": {
+        "Name": "진솔한 대화 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Charming & Open)."
+      },
+      "EnableDeviousAssistant": {
+        "Name": "교활 자동화 사용",
+        "Hint": "이 무브를 가진 캐릭터가 진솔한 대화를 발동하면, 이 무브로 추가된 질문 선택지를 알려주는 채팅 메시지를 자동으로 띄웁니다."
+      },
+      "DeviousMoveNames": {
+        "Name": "교활 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Devious)."
       }
     },
     "Npc": {
@@ -1369,6 +1393,9 @@
       "AidEnhanced": "{target}이(가) 다음에 원조를 받으면 +1 대신 +2를 받습니다",
       "AidEnhanceDescription": "다음 원조 판정에서 +1 대신 +2",
       "AppliedUnknown": "{target}에게 효과를 적용했습니다",
+      "DoublePrompt": "두 배로 적용할 효과는 무엇입니까?",
+      "DoubleNone": "두 배로 하지 않는다",
+      "DoubledAmount": "이계의 화음으로 두 배 적용 — 최종 수치 {amount}",
       "NoGmOnline": "\"{name}\"에 대한 직접 수정 권한이 없는데, 승인해줄 GM이 지금 접속해 있지 않습니다.",
       "PermissionDenied": "GM이 \"{name}\"에 대한 효과 적용을 승인하지 않았습니다.",
       "FlagPermissionTitle": "효과 적용을 승인하시겠습니까?",
@@ -1455,6 +1482,9 @@
     },
     "EyeForWeakness": {
       "ExtraChoice": "상황 파악 질문 목록에 다음 선택지가 추가됩니다: \"여기서 약하거나 취약한 곳은 어디입니까?\""
+    },
+    "Devious": {
+      "ExtraChoice": "질문 목록에 다음 선택지가 추가됩니다: \"내가 이용할 수 있는 당신의 약점은 무엇인가?\"(상대는 이 질문을 할 수 없습니다)"
     },
     "MetalHurlant": {
       "Flavor": "{name} 피해",

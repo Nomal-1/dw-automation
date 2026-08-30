@@ -18,13 +18,26 @@ import { setPendingDamageForward } from "../lib/damage-forward-state.js";
 // Spell 부분성공과 같은 이유) 설정에서 숫자(순번)로 지정한다 — 던전월드
 // 기본 순서(치유/피해보너스/마법해제/원조강화)를 기본값으로 쓴다.
 //
-// 이계의 음률(Eldritch Tones)을 갖고 있으면 "효과 하나" 대신 "효과 둘"을
-// 고를 수 있다(원문: "당신의 마법의 곡조는 강력해서, 효과 하나 대신 둘을
-// 고를 수 있습니다") — count를 2로 올리고 선택된 둘을 순서대로 각각
-// 적용한다. 치유의 노래(Healing Song)/날카로운 불협화음(Vicious Cacophony)는
-// 각각 치유·피해보너스 선택지에 주사위를 더 얹는 보조 무브다(applyHeal/
-// applyDamageForward 참고). 셋 다 마법의 곡조를 강화하는 보조 무브라 별도
-// 사용 스위치 없이 ENABLE_ARCANE_ART_ASSISTANT 하나로 같이 켜고 끈다.
+// 이계의 음률(Eldritch Tones)/이계의 화음(Eldritch Chord, 이계의 음률의
+// 6레벨 상위 무브)을 갖고 있으면 "효과 하나" 대신 "효과 둘까지" 고를 수
+// 있다(원문: "당신의 마법의 곡조는 강력해서, 효과 하나 대신 둘을 고를 수
+// 있습니다" — 꼭 둘을 다 고를 필요는 없어서 최대 개수로만 다룬다) —
+// count를 2로 올리고 선택된 만큼(1개 또는 2개) 순서대로 각각 적용한다.
+// 이계의 화음은 추가로 "그 중 하나를 골라 두 배로 적용"할 수 있다(원문:
+// "효과 하나를 골라 두 배로 만들 수 있다") — 주사위 개수를 두 배로 굴리는
+// 게 아니라, 다른 보조 무브(치유의 노래/치유의 합창, 날카로운 불협화음/
+// 폭발음 등)까지 다 반영된 그 효과의 최종 수치를 두 배로 적용한다
+// (promptDoubleChoice/applyEffect의 multiplier 참고).
+//
+// 치유의 노래(Healing Song, +1d8)/치유의 합창(Healing Chorus, 치유의
+// 노래의 6레벨 상위 무브, +2d8)은 치유 선택지에, 날카로운 불협화음
+// (Vicious Cacophony, +1d4)/날카로운 폭발음(Vicious Blast, 날카로운
+// 불협화음의 6레벨 상위 무브, +2d4)은 피해 보너스 선택지에 주사위를 더
+// 얹는다(getHealBonusDie/getDamageForwardBonusDie 참고) — 상위 무브를
+// 배우면 무브 업그레이드 자동화가 하위 무브를 지우므로 둘 다 갖고 있는
+// 경우는 없다고 가정하고 상위 쪽을 우선 확인한다. 이 보조 무브들은 전부
+// 마법의 곡조를 강화만 할 뿐이라 별도 사용 스위치 없이
+// ENABLE_ARCANE_ART_ASSISTANT 하나로 같이 켜고 끈다.
 //
 // (2) 피해 보너스는 lib/damage-forward-state.js(다음 데미지 굴림 자동 적용,
 // features/attack-assistant.js가 소모)에 얹는다. (4) 원조 강화는 이 파일이
@@ -64,19 +77,29 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
+function hasAnyMove(actor, settingKey) {
+  const names = splitCommaList(settingKey);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
 function hasEldritchTones(actor) {
-  const names = splitCommaList(SETTINGS.ELDRITCH_TONES_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return hasAnyMove(actor, SETTINGS.ELDRITCH_TONES_MOVE_NAMES);
 }
 
-function hasHealingSong(actor) {
-  const names = splitCommaList(SETTINGS.HEALING_SONG_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+function hasEldritchChord(actor) {
+  return hasAnyMove(actor, SETTINGS.ELDRITCH_CHORD_MOVE_NAMES);
 }
 
-function hasViciousCacophony(actor) {
-  const names = splitCommaList(SETTINGS.VICIOUS_CACOPHONY_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+function getHealBonusDie(actor) {
+  if (hasAnyMove(actor, SETTINGS.HEALING_CHORUS_MOVE_NAMES)) return "+2d8";
+  if (hasAnyMove(actor, SETTINGS.HEALING_SONG_MOVE_NAMES)) return "+1d8";
+  return "";
+}
+
+function getDamageForwardBonusDie(actor) {
+  if (hasAnyMove(actor, SETTINGS.VICIOUS_BLAST_MOVE_NAMES)) return "+2d4";
+  if (hasAnyMove(actor, SETTINGS.VICIOUS_CACOPHONY_MOVE_NAMES)) return "+1d4";
+  return "";
 }
 
 // features/aid-or-interfere.js가 "원조"를 적용하기 직전에 재사용한다.
@@ -184,21 +207,26 @@ function onSocketEvent(data) {
   }
 }
 
-async function applyHeal(actor, target, moveItem, optionHtml) {
+async function applyHeal(actor, target, moveItem, optionHtml, multiplier = 1) {
   const baseFormula = extractInlineRoll(optionHtml) || "1d8";
-  const formula = hasHealingSong(actor) ? `${baseFormula}+1d8` : baseFormula;
+  const formula = `${baseFormula}${getHealBonusDie(actor)}`;
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
   await roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
     flavor: game.i18n.format("DWAUTO.ArcaneArt.HealRollFlavor", { name: moveItem.name })
   });
-  await applyHealAmount(actor, target, moveItem.name, roll.total);
+
+  const finalAmount = roll.total * multiplier;
+  if (multiplier > 1) {
+    announceInfo(actor, game.i18n.format("DWAUTO.ArcaneArt.DoubledAmount", { amount: finalAmount }));
+  }
+  await applyHealAmount(actor, target, moveItem.name, finalAmount);
 }
 
-async function applyDamageForward(actor, target, moveItem, optionHtml) {
+async function applyDamageForward(actor, target, moveItem, optionHtml, multiplier = 1) {
   const baseFormula = extractInlineRoll(optionHtml) || "1d4";
-  const formula = hasViciousCacophony(actor) ? `${baseFormula}+1d4` : baseFormula;
+  const formula = `${baseFormula}${getDamageForwardBonusDie(actor)}`;
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
   await roll.toMessage({
@@ -206,12 +234,17 @@ async function applyDamageForward(actor, target, moveItem, optionHtml) {
     flavor: game.i18n.format("DWAUTO.ArcaneArt.DamageForwardRollFlavor", { name: moveItem.name })
   });
 
+  const finalAmount = roll.total * multiplier;
+  if (multiplier > 1) {
+    announceInfo(actor, game.i18n.format("DWAUTO.ArcaneArt.DoubledAmount", { amount: finalAmount }));
+  }
+
   if (target.isOwner) {
-    await setPendingDamageForward(target, roll.total, moveItem.name);
+    await setPendingDamageForward(target, finalAmount, moveItem.name);
     announceActionApplied(
       actor,
       moveItem.name,
-      game.i18n.format("DWAUTO.ArcaneArt.DamageForwardApplied", { target: target.name, amount: roll.total })
+      game.i18n.format("DWAUTO.ArcaneArt.DamageForwardApplied", { target: target.name, amount: finalAmount })
     );
     return;
   }
@@ -219,15 +252,15 @@ async function applyDamageForward(actor, target, moveItem, optionHtml) {
   const approved = await requestFlagApproval({
     target,
     granterName: actor.name,
-    description: game.i18n.format("DWAUTO.ArcaneArt.DamageForwardDescription", { amount: roll.total }),
+    description: game.i18n.format("DWAUTO.ArcaneArt.DamageForwardDescription", { amount: finalAmount }),
     kind: "damageForward",
-    payload: { amount: roll.total, source: moveItem.name }
+    payload: { amount: finalAmount, source: moveItem.name }
   });
   if (approved) {
     announceActionApplied(
       actor,
       moveItem.name,
-      game.i18n.format("DWAUTO.ArcaneArt.DamageForwardApplied", { target: target.name, amount: roll.total })
+      game.i18n.format("DWAUTO.ArcaneArt.DamageForwardApplied", { target: target.name, amount: finalAmount })
     );
   } else {
     ui.notifications.warn(game.i18n.format("DWAUTO.ArcaneArt.PermissionDenied", { name: target.name }));
@@ -255,16 +288,16 @@ async function applyEnhanceAid(actor, target, moveItem) {
   }
 }
 
-async function applyEffect(actor, target, moveItem, picked, optionHtml) {
+async function applyEffect(actor, target, moveItem, picked, optionHtml, multiplier = 1) {
   const healIndex = Number(game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_HEAL_INDEX)) || 0;
   const forwardIndex = Number(game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_DAMAGE_FORWARD_INDEX)) || 0;
   const enchantIndex = Number(game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_CLEAR_ENCHANTMENT_INDEX)) || 0;
   const aidIndex = Number(game.settings.get(MODULE_ID, SETTINGS.ARCANE_ART_ENHANCE_AID_INDEX)) || 0;
 
   if (picked === healIndex) {
-    await applyHeal(actor, target, moveItem, optionHtml);
+    await applyHeal(actor, target, moveItem, optionHtml, multiplier);
   } else if (picked === forwardIndex) {
-    await applyDamageForward(actor, target, moveItem, optionHtml);
+    await applyDamageForward(actor, target, moveItem, optionHtml, multiplier);
   } else if (picked === enchantIndex) {
     announceActionApplied(
       actor,
@@ -278,6 +311,56 @@ async function applyEffect(actor, target, moveItem, picked, optionHtml) {
     // 무엇을 골랐는지만 채팅에 남긴다.
     announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.ArcaneArt.AppliedUnknown", { target: target.name }));
   }
+}
+
+// 이계의 화음이 있으면 방금 고른 효과(들) 중 하나를 두 배로 만들지
+// 물어본다. selectedOptions는 방금 promptChoiceSelection에서 실제로 고른
+// 선택지 텍스트들(1개 또는 2개) — 그대로 라디오 버튼 목록으로 보여주고,
+// 맨 끝에 "두 배로 하지 않는다"를 항상 덧붙인다(하나만 골랐어도 그 하나
+// + "두 배로 하지 않는다" 총 2개짜리 선택지가 된다). 반환값은
+// selectedOptions 안에서의 인덱스(0부터) 또는 아무것도 두 배로 하지
+// 않으면 -1.
+function promptDoubleChoice(moveName, selectedOptions) {
+  return new Promise((resolve) => {
+    const optionsHtml =
+      selectedOptions
+        .map(
+          (opt, i) => `
+            <div class="form-group dwauto-choice-option">
+              <label><input type="radio" name="dwautoDouble" value="${i}"> ${opt}</label>
+            </div>
+          `
+        )
+        .join("") +
+      `
+        <div class="form-group dwauto-choice-option">
+          <label><input type="radio" name="dwautoDouble" value="none" checked> ${game.i18n.localize("DWAUTO.ArcaneArt.DoubleNone")}</label>
+        </div>
+      `;
+
+    let resolved = false;
+    const finish = (value) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(value);
+    };
+
+    new Dialog({
+      title: moveName,
+      content: `<p>${game.i18n.localize("DWAUTO.ArcaneArt.DoublePrompt")}</p><form>${optionsHtml}</form>`,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => {
+            const value = html.find('[name="dwautoDouble"]:checked').val();
+            finish(value === "none" ? -1 : Number(value));
+          }
+        }
+      },
+      default: "ok",
+      close: () => finish(-1)
+    }).render(true);
+  });
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -312,20 +395,23 @@ async function onCreateChatMessage(message, options, userId) {
     });
     if (!target) return;
 
-    const eldritchTones = hasEldritchTones(actor);
-    const choiceCount = eldritchTones ? 2 : 1;
+    const eldritchChord = hasEldritchChord(actor);
+    const multiEffect = eldritchChord || hasEldritchTones(actor);
+    const choiceCount = multiEffect ? 2 : 1;
 
     promptChoiceSelection({
       title: moveItem.name,
       instruction: game.i18n.localize(
-        eldritchTones ? "DWAUTO.ArcaneArt.EffectInstructionTwo" : "DWAUTO.ArcaneArt.EffectInstruction"
+        multiEffect ? "DWAUTO.ArcaneArt.EffectInstructionTwo" : "DWAUTO.ArcaneArt.EffectInstruction"
       ),
       options: choiceOptions,
       count: choiceCount,
-      minCount: eldritchTones ? 1 : choiceCount,
+      minCount: multiEffect ? 1 : choiceCount,
       onConfirm: async (selected, indexes) => {
+        const doubleLocalIndex = eldritchChord ? await promptDoubleChoice(moveItem.name, selected) : -1;
         for (let i = 0; i < indexes.length; i++) {
-          await applyEffect(actor, target, moveItem, indexes[i], selected[i]);
+          const multiplier = i === doubleLocalIndex ? 2 : 1;
+          await applyEffect(actor, target, moveItem, indexes[i], selected[i], multiplier);
         }
         if (result === "partial") {
           announceInfo(actor, game.i18n.localize("DWAUTO.ArcaneArt.PartialNotice"));

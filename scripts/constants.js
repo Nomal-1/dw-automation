@@ -172,5 +172,11 @@ export const SETTINGS = {
   ENABLE_DUELIST_PARRY_ASSISTANT: "enableDuelistParryAssistant",
   DUELIST_PARRY_MOVE_NAMES: "duelistParryMoveNames",
   ENABLE_BAMBOOZLE_ASSISTANT: "enableBamboozleAssistant",
-  BAMBOOZLE_MOVE_NAMES: "bamboozleMoveNames"
+  BAMBOOZLE_MOVE_NAMES: "bamboozleMoveNames",
+  ELDRITCH_CHORD_MOVE_NAMES: "eldritchChordMoveNames",
+  HEALING_CHORUS_MOVE_NAMES: "healingChorusMoveNames",
+  VICIOUS_BLAST_MOVE_NAMES: "viciousBlastMoveNames",
+  CHARMING_OPEN_MOVE_NAMES: "charmingOpenMoveNames",
+  ENABLE_DEVIOUS_ASSISTANT: "enableDeviousAssistant",
+  DEVIOUS_MOVE_NAMES: "deviousMoveNames"
 };

@@ -355,6 +355,41 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, bamboozleMoveNames, stats)
   );
 
+  const eldritchChordMoveNames = game.settings.get(MODULE_ID, SETTINGS.ELDRITCH_CHORD_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.ELDRITCH_CHORD_MOVE_NAMES,
+    translateCommaList(moveMap, eldritchChordMoveNames, stats)
+  );
+
+  const healingChorusMoveNames = game.settings.get(MODULE_ID, SETTINGS.HEALING_CHORUS_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.HEALING_CHORUS_MOVE_NAMES,
+    translateCommaList(moveMap, healingChorusMoveNames, stats)
+  );
+
+  const viciousBlastMoveNames = game.settings.get(MODULE_ID, SETTINGS.VICIOUS_BLAST_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.VICIOUS_BLAST_MOVE_NAMES,
+    translateCommaList(moveMap, viciousBlastMoveNames, stats)
+  );
+
+  const charmingOpenMoveNames = game.settings.get(MODULE_ID, SETTINGS.CHARMING_OPEN_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.CHARMING_OPEN_MOVE_NAMES,
+    translateCommaList(moveMap, charmingOpenMoveNames, stats)
+  );
+
+  const deviousMoveNames = game.settings.get(MODULE_ID, SETTINGS.DEVIOUS_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DEVIOUS_MOVE_NAMES,
+    translateCommaList(moveMap, deviousMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

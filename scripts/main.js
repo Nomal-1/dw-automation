@@ -62,6 +62,7 @@ import { registerEyeForWeaknessAssistant } from "./features/eye-for-weakness.js"
 import { registerMetalHurlantAssistant } from "./features/metal-hurlant.js";
 import { registerDuelistParryAssistant } from "./features/duelist-parry.js";
 import { registerBamboozleAssistant } from "./features/bamboozle.js";
+import { registerDeviousAssistant } from "./features/devious.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -135,3 +136,4 @@ registerEyeForWeaknessAssistant();
 registerMetalHurlantAssistant();
 registerDuelistParryAssistant();
 registerBamboozleAssistant();
+registerDeviousAssistant();

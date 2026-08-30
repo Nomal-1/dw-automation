@@ -717,7 +717,31 @@
       },
       "BamboozleMoveNames": {
         "Name": "Bamboozle Move Names",
-        "Hint": "Comma-separated (default: Bamboozle)."
+        "Hint": "Comma-separated (default: Bamboozle, Con — Con is Bamboozle's level 6 upgrade and shares the same automation)."
+      },
+      "EldritchChordMoveNames": {
+        "Name": "Eldritch Chord Move Names",
+        "Hint": "Comma-separated (default: Eldritch Chord). Uses the same enable switch as Arcane Art Automation (shared by Cleric/Bard) — like Eldritch Tones, lets you pick up to 2 effects, and lets you choose one of them to double the final amount."
+      },
+      "HealingChorusMoveNames": {
+        "Name": "Healing Chorus Move Names",
+        "Hint": "Comma-separated (default: Healing Chorus). Healing Song's upgrade — adds +2d8 instead of +1d8 when you choose the heal effect with Arcane Art."
+      },
+      "ViciousBlastMoveNames": {
+        "Name": "Vicious Blast Move Names",
+        "Hint": "Comma-separated (default: Vicious Blast). Vicious Cacophony's upgrade — adds +2d4 instead of +1d4 when you choose the bonus damage effect with Arcane Art."
+      },
+      "CharmingOpenMoveNames": {
+        "Name": "Charming & Open Move Names",
+        "Hint": "Comma-separated (default: Charming & Open)."
+      },
+      "EnableDeviousAssistant": {
+        "Name": "Enable Devious Automation",
+        "Hint": "When a character with this move triggers Charming & Open, automatically posts a chat message noting the extra question option this move adds."
+      },
+      "DeviousMoveNames": {
+        "Name": "Devious Move Names",
+        "Hint": "Comma-separated (default: Devious)."
       }
     },
     "Npc": {
@@ -1369,6 +1393,9 @@
       "AidEnhanced": "The next time {target} is aided, they'll get +2 instead of +1",
       "AidEnhanceDescription": "+2 instead of +1 on their next aid roll",
       "AppliedUnknown": "Applied the effect to {target}",
+      "DoublePrompt": "Which effect do you want to double?",
+      "DoubleNone": "Don't double",
+      "DoubledAmount": "Doubled via Eldritch Chord — final amount {amount}",
       "NoGmOnline": "You don't have edit permission over \"{name}\" and no GM is currently online to approve it.",
       "PermissionDenied": "The GM didn't approve the effect on \"{name}\".",
       "FlagPermissionTitle": "Approve this effect?",
@@ -1455,6 +1482,9 @@
     },
     "EyeForWeakness": {
       "ExtraChoice": "Added to the Discern Realities question list: \"What here is weak or vulnerable?\""
+    },
+    "Devious": {
+      "ExtraChoice": "Added to the question list: \"How are you vulnerable to me?\" (your subject may not ask this of you)"
     },
     "MetalHurlant": {
       "Flavor": "{name} damage",
