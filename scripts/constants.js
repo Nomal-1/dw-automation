@@ -156,5 +156,12 @@ export const SETTINGS = {
   ENABLE_WHAT_ARE_YOU_WAITING_FOR_ASSISTANT: "enableWhatAreYouWaitingForAssistant",
   WHAT_ARE_YOU_WAITING_FOR_MOVE_NAMES: "whatAreYouWaitingForMoveNames",
   ENABLE_HERCULEAN_APPETITES_ASSISTANT: "enableHerculeanAppetitesAssistant",
-  HERCULEAN_APPETITES_MOVE_NAMES: "herculeanAppetitesMoveNames"
+  HERCULEAN_APPETITES_MOVE_NAMES: "herculeanAppetitesMoveNames",
+  ENABLE_ON_THE_MOVE_ASSISTANT: "enableOnTheMoveAssistant",
+  ON_THE_MOVE_MOVE_NAMES: "onTheMoveMoveNames",
+  DEFY_DANGER_MOVE_NAMES: "defyDangerMoveNames",
+  ENABLE_LOVE_TRUCK_ASSISTANT: "enableLoveTruckAssistant",
+  LOVE_TRUCK_MOVE_NAMES: "loveTruckMoveNames",
+  ENABLE_EYE_FOR_WEAKNESS_ASSISTANT: "enableEyeForWeaknessAssistant",
+  EYE_FOR_WEAKNESS_MOVE_NAMES: "eyeForWeaknessMoveNames"
 };

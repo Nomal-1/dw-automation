@@ -56,6 +56,9 @@ import { registerSpellDamageAssistant } from "./features/spell-damage.js";
 import { registerUpperHandAssistant } from "./features/upper-hand.js";
 import { registerWhatAreYouWaitingForAssistant } from "./features/what-are-you-waiting-for.js";
 import { registerHerculeanAppetitesAssistant } from "./features/herculean-appetites.js";
+import { registerOnTheMoveAssistant } from "./features/on-the-move.js";
+import { registerLoveTruckAssistant } from "./features/love-truck.js";
+import { registerEyeForWeaknessAssistant } from "./features/eye-for-weakness.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -123,3 +126,6 @@ registerSpellDamageAssistant();
 registerUpperHandAssistant();
 registerWhatAreYouWaitingForAssistant();
 registerHerculeanAppetitesAssistant();
+registerOnTheMoveAssistant();
+registerLoveTruckAssistant();
+registerEyeForWeaknessAssistant();

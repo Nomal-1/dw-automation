@@ -33,6 +33,8 @@ import { promptPrecisePreRoll } from "../features/precise-weapon.js";
 import { getSeeingRedBonus } from "../features/seeing-red.js";
 import { getThroughDeathsEyesMalus } from "../features/through-deaths-eyes.js";
 import { maybeRollHerculeanAppetites } from "../features/herculean-appetites.js";
+import { promptOnTheMovePreRoll } from "../features/on-the-move.js";
+import { getLoveTruckBonus } from "../features/love-truck.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -136,8 +138,15 @@ async function wrappedRoll(wrapped, ...args) {
   // 기회 자체는 이 시점에 소모된다.
   const heist = await promptHeistPreRoll(this);
 
-  // 전사의 눈(Seeing Red)의 "적용중" 지속 +1은 다이얼로그 없이 조용히
-  // 붙는다(features/seeing-red.js 참고) — 물어보는 건 판정이 끝난 뒤의 몫이다.
+  // 야만전사 재빠른 몸놀림(On The Move)의 "이동으로 인한 위험돌파 +1"도
+  // 협박/정밀처럼 판정 직전 매번 확인이 필요한 사전 보정치라 같은 자리에서
+  // 처리한다(features/on-the-move.js 참고).
+  const onTheMove = await promptOnTheMovePreRoll(this);
+
+  // 전사의 눈(Seeing Red)/너에 대한 내 사랑은 트럭 같아(Love Truck)의
+  // "적용중" 지속 +1은 다이얼로그 없이 조용히 붙는다(features/seeing-red.js,
+  // features/love-truck.js 참고) — 물어보는 건 판정이 끝난 뒤(또는 발동
+  // 시점)의 몫이다.
   const preRollBonus =
     iAmTheLaw.bonus +
     knowItAll.bonus +
@@ -146,7 +155,9 @@ async function wrappedRoll(wrapped, ...args) {
     encumbrance.bonus +
     bolster.bonus +
     heist.bonus +
-    getSeeingRedBonus(this);
+    onTheMove.bonus +
+    getSeeingRedBonus(this) +
+    getLoveTruckBonus(this);
 
   const rollType = (this.system.rollType || "").toLowerCase();
 

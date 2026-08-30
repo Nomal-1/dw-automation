@@ -594,6 +594,34 @@
   color: #fff !important;
 }
 
+.dwauto-on-the-move-ask-badge,
+.dwauto-on-the-move-active-badge {
+  cursor: pointer;
+}
+
+.dwauto-on-the-move-ask-badge:hover,
+.dwauto-on-the-move-active-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-on-the-move-on {
+  background: #2e6b5a !important;
+  color: #fff !important;
+}
+
+.dwauto-love-truck-badge {
+  cursor: pointer;
+}
+
+.dwauto-love-truck-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-love-truck-on {
+  background: #a13d5c !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

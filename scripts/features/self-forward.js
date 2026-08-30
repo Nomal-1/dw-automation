@@ -6,10 +6,10 @@ import { getPendingRollBonus, setPendingRollBonus, clearPendingRollBonus } from 
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "../data/self-forward-moves.js";
 
-// Reaper(클레릭)/Quick Study(위저드)/An Ear For Magic(바드)/My Love For You Is
-// Like A Truck(바바리안)/Unforgettable Face(바드)/Usurper(바바리안)처럼
-// "따로 판정 없이, 특정 상황이 벌어지면 자기 자신에게 +1 forward를 받는다"는
-// 동일한 구조의 무브들을 이름 목록(테이블) 하나로 처리한다. rollType이
+// Reaper(클레릭)/Quick Study(위저드)/An Ear For Magic(바드)/
+// Unforgettable Face(바드)/Usurper(바바리안)처럼 "따로 판정 없이, 특정
+// 상황이 벌어지면 자기 자신에게 +1 forward를 받는다"는 동일한 구조의
+// 무브들을 이름 목록(테이블) 하나로 처리한다. rollType이
 // 아예 없는 무브라 클릭해도 성공/부분성공/실패 구분이 없다 — getMoveCardInfo가
 // title/actor만 뽑아주면 충분하다.
 //
@@ -149,6 +149,31 @@ function onRenderActorSheet(app, html) {
   }
 }
 
+// My Love For You Is Like A Truck은 features/love-truck.js의 지속 효과로
+// 옮겨졌다(data/self-forward-moves.js 상단 주석 참고). 이 표를 예전에 이미
+// 저장해둔 GM은 새 기본값에서 빠진 것만으로는 기존 행이 지워지지 않으므로,
+// 저장된 표에 아직 남아있으면(원문 이름이든 번역된 이름이든) 직접 걸러낸다
+// — 그대로 두면 협상 판정에서 이 표(한 번 쓰면 소모)와 love-truck.js(적용중
+// 동안 계속 유지)가 동시에 걸려 중복 적용된다.
+async function migrateRemoveLoveTruck() {
+  if (!game.user.isGM) return;
+
+  const rows = getRows();
+  let loveTruckName = "My Love For You Is Like A Truck";
+  try {
+    const nameMap = await getMoveNameMap();
+    loveTruckName = nameMap.get("My Love For You Is Like A Truck") ?? loveTruckName;
+  } catch (err) {
+    // 번역 데이터를 못 읽으면 영문 이름만으로 걸러낸다.
+  }
+
+  const filtered = rows.filter((r) => r.name !== "My Love For You Is Like A Truck" && r.name !== loveTruckName);
+  if (filtered.length === rows.length) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.SELF_FORWARD_MOVES, filtered);
+  console.log(`${MODULE_ID} | self-forward: removed My Love For You Is Like A Truck (moved to love-truck.js)`);
+}
+
 // v0.44.0에서 Unforgettable Face/Usurper가 추가됐다. 이미 이 표를 저장해둔
 // GM(설정 화면을 한 번이라도 열고 저장한 경우)에게는 새 기본값이 자동
 // 반영되지 않으므로, 다른 표들과 같은 패턴으로 누락된 행만 채워 넣는다.
@@ -188,6 +213,7 @@ export function registerSelfForwardAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
+    migrateRemoveLoveTruck();
     migrateAddSurveyedDefaults();
   });
 }

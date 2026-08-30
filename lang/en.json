@@ -307,7 +307,7 @@
       },
       "EnableSelfForwardAssistant": {
         "Name": "Enable Self-Forward Move Automation",
-        "Hint": "When a move like Reaper (Cleric) / Quick Study (Wizard) / An Ear For Magic, Unforgettable Face (Bard) / My Love For You Is Like A Truck, Usurper (Barbarian) — \"when X happens (no roll), take +1 forward\" — is triggered, automatically queues that +1 for your next roll (or, for moves restricted to a specific move in the table, only that move's next roll). A badge next to the move shows whether it's currently queued, and the GM can click it to toggle on/off directly (players can only see it) — for Unforgettable Face/Usurper, where the +1 only applies against a specific NPC (or their underlings), the GM judges whether the situation applies and flips the badge accordingly."
+        "Hint": "When a move like Reaper (Cleric) / Quick Study (Wizard) / An Ear For Magic, Unforgettable Face (Bard) / Usurper (Barbarian) — \"when X happens (no roll), take +1 forward\" — is triggered, automatically queues that +1 for your next roll (or, for moves restricted to a specific move in the table, only that move's next roll). A badge next to the move shows whether it's currently queued, and the GM can click it to toggle on/off directly (players can only see it) — for Unforgettable Face/Usurper, where the +1 only applies against a specific NPC (or their underlings), the GM judges whether the situation applies and flips the badge accordingly. My Love For You Is Like A Truck (Barbarian) is a non-consumed persistent effect on Parley, so it moved to its own automation (Love Truck Automation)."
       },
       "SelfForwardMovesMenu": {
         "Name": "Self-Forward Moves",
@@ -654,6 +654,34 @@
       "HerculeanAppetitesMoveNames": {
         "Name": "Herculean Appetites Move Names",
         "Hint": "Comma-separated (default: Herculean Appetites)."
+      },
+      "EnableOnTheMoveAssistant": {
+        "Name": "Enable On The Move Automation",
+        "Hint": "When a character with this move makes a Defy Danger roll, in 'Always Ask' mode it asks 'Is this danger caused by movement?' every time and applies +1 based on the answer. In 'Don't Ask' mode it just uses the Active/Inactive toggle state."
+      },
+      "OnTheMoveMoveNames": {
+        "Name": "On The Move Move Names",
+        "Hint": "Comma-separated (default: On The Move)."
+      },
+      "DefyDangerMoveNames": {
+        "Name": "Defy Danger Move Names",
+        "Hint": "Comma-separated (default: Defy Danger)."
+      },
+      "EnableLoveTruckAssistant": {
+        "Name": "Enable My Love For You Is Like A Truck Automation",
+        "Hint": "When this move is triggered, the badge next to it automatically turns 'Active', and while active +1 keeps applying to this character's Parley rolls (it does not get consumed even after multiple Parley rolls). Only the GM can turn it off."
+      },
+      "LoveTruckMoveNames": {
+        "Name": "My Love For You Is Like A Truck Move Names",
+        "Hint": "Comma-separated (default: My Love For You Is Like A Truck)."
+      },
+      "EnableEyeForWeaknessAssistant": {
+        "Name": "Enable Eye for Weakness Automation",
+        "Hint": "When a character with this move rolls Discern Realities, automatically posts a chat message noting the extra question option this move adds."
+      },
+      "EyeForWeaknessMoveNames": {
+        "Name": "Eye for Weakness Move Names",
+        "Hint": "Comma-separated (default: Eye for Weakness)."
       }
     },
     "Npc": {
@@ -1370,6 +1398,25 @@
       "ActiveToggleTitle": "Click to toggle active state (only consulted in 'Don't Ask' mode).",
       "Active": "Active",
       "Inactive": "Inactive"
+    },
+    "OnTheMove": {
+      "Prompt": "Is this danger caused by movement?",
+      "Applied": "On The Move triggers — +1 on this Defy Danger roll",
+      "AskToggleTitle": "Click to toggle whether to ask every roll or not.",
+      "AskOn": "Always Ask",
+      "AskOff": "Don't Ask",
+      "ActiveToggleTitle": "Click to toggle active state (only consulted in 'Don't Ask' mode).",
+      "Active": "Active",
+      "Inactive": "Inactive"
+    },
+    "LoveTruck": {
+      "Activated": "My Love For You Is Like A Truck triggers — from now on this character's Parley rolls keep getting +1 (until the GM turns it off; it is not consumed)",
+      "ToggleTitle": "Click to toggle active state (GM only).",
+      "Active": "Active",
+      "Inactive": "Inactive"
+    },
+    "EyeForWeakness": {
+      "ExtraChoice": "Added to the Discern Realities question list: \"What here is weak or vulnerable?\""
     },
     "Bolster": {
       "GainPromptLabel": "How much preparation did you gain? (up to 3)",

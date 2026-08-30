@@ -417,6 +417,75 @@ export function registerSettings() {
     default: "Herculean Appetites"
   });
 
+  // 야만전사 무브 재빠른 몸놀림: 자세한 설계는 features/on-the-move.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_ON_THE_MOVE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableOnTheMoveAssistant.Name",
+    hint: "DWAUTO.Settings.EnableOnTheMoveAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ON_THE_MOVE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.OnTheMoveMoveNames.Name",
+    hint: "DWAUTO.Settings.OnTheMoveMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "On The Move"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DEFY_DANGER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DefyDangerMoveNames.Name",
+    hint: "DWAUTO.Settings.DefyDangerMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Defy Danger"
+  });
+
+  // 야만전사 무브 너에 대한 내 사랑은 트럭 같아: 자세한 설계는
+  // features/love-truck.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_LOVE_TRUCK_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableLoveTruckAssistant.Name",
+    hint: "DWAUTO.Settings.EnableLoveTruckAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LOVE_TRUCK_MOVE_NAMES, {
+    name: "DWAUTO.Settings.LoveTruckMoveNames.Name",
+    hint: "DWAUTO.Settings.LoveTruckMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "My Love For You Is Like A Truck"
+  });
+
+  // 야만전사 무브 약점을 보는 눈: 자세한 설계는 features/eye-for-weakness.js
+  // 참고. 협상 판정 이름은 PARLEY_MOVE_NAMES, 상황 파악 판정 이름은
+  // DISCERN_REALITIES_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_EYE_FOR_WEAKNESS_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableEyeForWeaknessAssistant.Name",
+    hint: "DWAUTO.Settings.EnableEyeForWeaknessAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.EYE_FOR_WEAKNESS_MOVE_NAMES, {
+    name: "DWAUTO.Settings.EyeForWeaknessMoveNames.Name",
+    hint: "DWAUTO.Settings.EyeForWeaknessMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Eye for Weakness"
+  });
+
   // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전
   // 단계 무브(치료사)를 자동으로 삭제한다. 대상 쌍은 던전월드 8개 기본 직업
   // 컴펜디엄의 requiresMove 필드를 전수 조사해서 기본값으로 채워뒀다. 자세한
