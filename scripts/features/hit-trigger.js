@@ -17,6 +17,7 @@ import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 import { findBurningBrandWeapon, addBurningBrandUses } from "./burning-brand.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { setPendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
+import { deactivateDuelistParryOnHit } from "./duelist-parry.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -655,6 +656,14 @@ function onPreUpdateActor(actor, changes, options, userId) {
   const oldHp = Number(actor.system.attributes?.hp?.value ?? 0);
   const damage = oldHp - Number(newHp);
   if (damage <= 0) return true;
+
+  // 바드 결투사의 호신술(Duelist's Parry)의 "다음 피격까지 장갑 +1"은
+  // 무효화/경감 후보가 아니라 그냥 "맞았으니 꺼진다"는 부수 효과라, 아래
+  // 후보 목록/소켓 릴레이/재캡슐화 분기와 완전히 무관하게 여기서 바로
+  // (기다리지 않고) 처리한다. 이번 피해 자체는 이미 시스템이 계산을
+  // 끝낸 뒤라 영향이 없다 — 그저 다음 피격부터 보너스가 빠지도록 끄는
+  // 것뿐이다(features/duelist-parry.js 참고).
+  deactivateDuelistParryOnHit(actor);
 
   const candidates = getHitTriggerCandidates(actor);
   const outnumberedCandidates = getOutnumberedAskCandidate(actor);

@@ -35,6 +35,7 @@ import { getThroughDeathsEyesMalus } from "../features/through-deaths-eyes.js";
 import { maybeRollHerculeanAppetites } from "../features/herculean-appetites.js";
 import { promptOnTheMovePreRoll } from "../features/on-the-move.js";
 import { getLoveTruckBonus } from "../features/love-truck.js";
+import { promptBamboozlePreRoll } from "../features/bamboozle.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -143,6 +144,11 @@ async function wrappedRoll(wrapped, ...args) {
   // 처리한다(features/on-the-move.js 참고).
   const onTheMove = await promptOnTheMovePreRoll(this);
 
+  // 바드 현란한 말솜씨(Bamboozle)의 "적용중이면 판정마다 대상인지 묻기"도
+  // 같은 자리에서 처리한다(features/bamboozle.js 참고) — 특정 무브로
+  // 제한되지 않고 이 액터의 모든 판정 앞에서 물어본다.
+  const bamboozle = await promptBamboozlePreRoll(this);
+
   // 전사의 눈(Seeing Red)/너에 대한 내 사랑은 트럭 같아(Love Truck)의
   // "적용중" 지속 +1은 다이얼로그 없이 조용히 붙는다(features/seeing-red.js,
   // features/love-truck.js 참고) — 물어보는 건 판정이 끝난 뒤(또는 발동
@@ -156,6 +162,7 @@ async function wrappedRoll(wrapped, ...args) {
     bolster.bonus +
     heist.bonus +
     onTheMove.bonus +
+    bamboozle.bonus +
     getSeeingRedBonus(this) +
     getLoveTruckBonus(this);
 

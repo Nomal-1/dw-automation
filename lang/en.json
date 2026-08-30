@@ -682,6 +682,42 @@
       "EyeForWeaknessMoveNames": {
         "Name": "Eye for Weakness Move Names",
         "Hint": "Comma-separated (default: Eye for Weakness)."
+      },
+      "EnableMetalHurlantAssistant": {
+        "Name": "Enable Metal Hurlant Automation",
+        "Hint": "On a 10+ or 7-9, posts a 1d10 damage roll to chat with apply buttons (narrative effects like deafening or the partial's extra target are not automated)."
+      },
+      "MetalHurlantMoveNames": {
+        "Name": "Metal Hurlant Move Names",
+        "Hint": "Comma-separated (default: Metal Hurlant)."
+      },
+      "EldritchTonesMoveNames": {
+        "Name": "Eldritch Tones Move Names",
+        "Hint": "Comma-separated (default: Eldritch Tones). Uses the same enable switch as Arcane Art Automation (shared by Cleric/Bard) — having this move lets you pick up to 2 effects."
+      },
+      "HealingSongMoveNames": {
+        "Name": "Healing Song Move Names",
+        "Hint": "Comma-separated (default: Healing Song). Adds an extra +1d8 when you choose the heal effect with Arcane Art."
+      },
+      "ViciousCacophonyMoveNames": {
+        "Name": "Vicious Cacophony Move Names",
+        "Hint": "Comma-separated (default: Vicious Cacophony). Adds an extra +1d4 when you choose the bonus damage effect with Arcane Art."
+      },
+      "EnableDuelistParryAssistant": {
+        "Name": "Enable Duelist's Parry Automation",
+        "Hint": "When you make a Hack & Slash roll (regardless of result), the badge next to the move automatically turns 'Active' and armor gets +1. The moment this character actually takes damage, it automatically turns 'Inactive' and armor drops back by 1. Either the player or the GM can toggle the badge directly (armor is adjusted accordingly)."
+      },
+      "DuelistParryMoveNames": {
+        "Name": "Duelist's Parry Move Names",
+        "Hint": "Comma-separated (default: Duelist’s Parry)."
+      },
+      "EnableBamboozleAssistant": {
+        "Name": "Enable Bamboozle Automation",
+        "Hint": "When a Parley roll succeeds at 7+, the badge next to the move automatically turns 'Active'. While active, every roll this character makes asks 'Is this roll against the target of Bamboozle?' — answering yes grants +1 and immediately turns it back to 'Inactive'."
+      },
+      "BamboozleMoveNames": {
+        "Name": "Bamboozle Move Names",
+        "Hint": "Comma-separated (default: Bamboozle)."
       }
     },
     "Npc": {
@@ -1321,6 +1357,7 @@
     "ArcaneArt": {
       "TargetLabel": "Which ally is this for?",
       "EffectInstruction": "Choose one effect.",
+      "EffectInstructionTwo": "Eldritch Tones lets you choose up to 2 effects.",
       "PartialNotice": "The spell still works, but it draws unwanted attention or affects other targets too — GM's call on the details.",
       "HealRollFlavor": "{name} healing",
       "DamageForwardRollFlavor": "{name} damage bonus",
@@ -1417,6 +1454,25 @@
     },
     "EyeForWeakness": {
       "ExtraChoice": "Added to the Discern Realities question list: \"What here is weak or vulnerable?\""
+    },
+    "MetalHurlant": {
+      "Flavor": "{name} damage",
+      "PartialNotice": "It's out of control on a partial success — the GM decides whether a nearby extra target is also affected."
+    },
+    "DuelistParry": {
+      "Activated": "Duelist's Parry triggers — armor rises to {armor} (lasts until the next hit)",
+      "Deactivated": "Duelist's Parry is spent — armor drops back to {armor}",
+      "ToggleTitle": "Click to toggle active state (armor is adjusted accordingly).",
+      "Active": "Active",
+      "Inactive": "Inactive"
+    },
+    "Bamboozle": {
+      "Activated": "Bamboozle triggers — starting with the next roll, it will ask whether the target applies",
+      "TargetPrompt": "Is this roll against the target of Bamboozle?",
+      "Applied": "Bamboozle applied — +1 on this roll",
+      "ToggleTitle": "Click to toggle active state.",
+      "Active": "Active",
+      "Inactive": "Inactive"
     },
     "Bolster": {
       "GainPromptLabel": "How much preparation did you gain? (up to 3)",

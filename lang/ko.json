@@ -682,6 +682,42 @@
       "EyeForWeaknessMoveNames": {
         "Name": "약점을 보는 눈 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Eye for Weakness)."
+      },
+      "EnableMetalHurlantAssistant": {
+        "Name": "쇳소리 자동화 사용",
+        "Hint": "10+ 또는 7-9로 성공하면 1d10 피해 굴림을 적용 버튼과 함께 채팅에 올립니다(귀먹음, 부분성공의 추가 대상 지정 같은 서사적 효과는 자동화하지 않습니다)."
+      },
+      "MetalHurlantMoveNames": {
+        "Name": "쇳소리 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Metal Hurlant)."
+      },
+      "EldritchTonesMoveNames": {
+        "Name": "이계의 음률 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Eldritch Tones). 마법의 곡조 자동화(사제/바드 공용 설정) 사용 스위치를 그대로 씁니다 — 이 무브를 가지고 있으면 효과를 2개까지 선택할 수 있습니다."
+      },
+      "HealingSongMoveNames": {
+        "Name": "치유의 노래 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Healing Song). 마법의 곡조로 치유를 고르면 +1d8을 추가로 치유합니다."
+      },
+      "ViciousCacophonyMoveNames": {
+        "Name": "날카로운 불협화음 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Vicious Cacophony). 마법의 곡조로 피해 보너스를 고르면 +1d4를 추가로 줍니다."
+      },
+      "EnableDuelistParryAssistant": {
+        "Name": "결투사의 호신술 자동화 사용",
+        "Hint": "접근전 판정을 하면(성공 여부 무관) 무브 옆 배지가 자동으로 '적용중'이 되고 장갑이 +1 됩니다. 이후 이 캐릭터가 실제로 피해를 입는 첫 순간 자동으로 '적용안됨'으로 바뀌면서 장갑도 -1 됩니다. 배지는 플레이어/마스터 누구나 직접 켜고 끌 수 있습니다(장갑도 그때그때 같이 조정됩니다)."
+      },
+      "DuelistParryMoveNames": {
+        "Name": "결투사의 호신술 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Duelist’s Parry)."
+      },
+      "EnableBamboozleAssistant": {
+        "Name": "현란한 말솜씨 자동화 사용",
+        "Hint": "협상 판정이 7+로 성공하면 무브 옆 배지가 자동으로 '적용중'이 됩니다. 적용중인 동안 이 캐릭터가 어떤 판정을 하든 매번 '이 판정이 현란한 말솜씨의 대상입니까?'를 묻고, 예라고 답하면 +1을 주고 바로 '적용안됨'으로 꺼집니다."
+      },
+      "BamboozleMoveNames": {
+        "Name": "현란한 말솜씨 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Bamboozle)."
       }
     },
     "Npc": {
@@ -1321,6 +1357,7 @@
     "ArcaneArt": {
       "TargetLabel": "어느 아군을 대상으로 하시겠습니까?",
       "EffectInstruction": "효과를 하나 선택해주세요.",
+      "EffectInstructionTwo": "이계의 음률 효과로 효과를 2개까지 선택할 수 있습니다.",
       "PartialNotice": "마법은 효과를 발휘하지만, 원치 않은 주의를 끌거나 다른 대상에게도 영향을 줍니다 — 세부 사항은 마스터가 정해주세요.",
       "HealRollFlavor": "{name} 치유",
       "DamageForwardRollFlavor": "{name} 피해 보너스",
@@ -1417,6 +1454,25 @@
     },
     "EyeForWeakness": {
       "ExtraChoice": "상황 파악 질문 목록에 다음 선택지가 추가됩니다: \"여기서 약하거나 취약한 곳은 어디입니까?\""
+    },
+    "MetalHurlant": {
+      "Flavor": "{name} 피해",
+      "PartialNotice": "부분성공이라 통제가 되지 않습니다 — 근처의 다른 대상 하나가 추가로 영향을 받을지는 마스터가 정해주세요."
+    },
+    "DuelistParry": {
+      "Activated": "결투사의 호신술 발동 — 장갑이 {armor}(으)로 증가했습니다(다음 피격까지 유지)",
+      "Deactivated": "결투사의 호신술 소모 — 장갑이 {armor}(으)로 돌아왔습니다",
+      "ToggleTitle": "클릭하면 적용 상태를 켜고 끕니다(장갑 수치도 같이 조정됩니다).",
+      "Active": "적용중",
+      "Inactive": "적용안됨"
+    },
+    "Bamboozle": {
+      "Activated": "현란한 말솜씨 발동 — 다음 판정부터 대상 여부를 묻습니다",
+      "TargetPrompt": "이 판정이 현란한 말솜씨의 대상입니까?",
+      "Applied": "현란한 말솜씨 적용 — 이번 판정에 +1",
+      "ToggleTitle": "클릭하면 적용 상태를 켜고 끕니다.",
+      "Active": "적용중",
+      "Inactive": "적용안됨"
     },
     "Bolster": {
       "GainPromptLabel": "예비를 몇 점 쌓습니까? (최대 3점)",

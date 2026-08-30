@@ -622,6 +622,32 @@
   color: #fff !important;
 }
 
+.dwauto-duelist-parry-badge {
+  cursor: pointer;
+}
+
+.dwauto-duelist-parry-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-duelist-parry-on {
+  background: #3d5ca1 !important;
+  color: #fff !important;
+}
+
+.dwauto-bamboozle-badge {
+  cursor: pointer;
+}
+
+.dwauto-bamboozle-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-bamboozle-on {
+  background: #7a5c2e !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

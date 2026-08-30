@@ -18,6 +18,14 @@ import { setPendingDamageForward } from "../lib/damage-forward-state.js";
 // Spell 부분성공과 같은 이유) 설정에서 숫자(순번)로 지정한다 — 던전월드
 // 기본 순서(치유/피해보너스/마법해제/원조강화)를 기본값으로 쓴다.
 //
+// 이계의 음률(Eldritch Tones)을 갖고 있으면 "효과 하나" 대신 "효과 둘"을
+// 고를 수 있다(원문: "당신의 마법의 곡조는 강력해서, 효과 하나 대신 둘을
+// 고를 수 있습니다") — count를 2로 올리고 선택된 둘을 순서대로 각각
+// 적용한다. 치유의 노래(Healing Song)/날카로운 불협화음(Vicious Cacophony)는
+// 각각 치유·피해보너스 선택지에 주사위를 더 얹는 보조 무브다(applyHeal/
+// applyDamageForward 참고). 셋 다 마법의 곡조를 강화하는 보조 무브라 별도
+// 사용 스위치 없이 ENABLE_ARCANE_ART_ASSISTANT 하나로 같이 켜고 끈다.
+//
 // (2) 피해 보너스는 lib/damage-forward-state.js(다음 데미지 굴림 자동 적용,
 // features/attack-assistant.js가 소모)에 얹는다. (4) 원조 강화는 이 파일이
 // 관리하는 플래그를 features/aid-or-interfere.js가 읽어서 "원조" 선택 시
@@ -54,6 +62,21 @@ async function matchesConfiguredName(title) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
   return false;
+}
+
+function hasEldritchTones(actor) {
+  const names = splitCommaList(SETTINGS.ELDRITCH_TONES_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
+function hasHealingSong(actor) {
+  const names = splitCommaList(SETTINGS.HEALING_SONG_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
+function hasViciousCacophony(actor) {
+  const names = splitCommaList(SETTINGS.VICIOUS_CACOPHONY_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
 }
 
 // features/aid-or-interfere.js가 "원조"를 적용하기 직전에 재사용한다.
@@ -162,7 +185,8 @@ function onSocketEvent(data) {
 }
 
 async function applyHeal(actor, target, moveItem, optionHtml) {
-  const formula = extractInlineRoll(optionHtml) || "1d8";
+  const baseFormula = extractInlineRoll(optionHtml) || "1d8";
+  const formula = hasHealingSong(actor) ? `${baseFormula}+1d8` : baseFormula;
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
   await roll.toMessage({
@@ -173,7 +197,8 @@ async function applyHeal(actor, target, moveItem, optionHtml) {
 }
 
 async function applyDamageForward(actor, target, moveItem, optionHtml) {
-  const formula = extractInlineRoll(optionHtml) || "1d4";
+  const baseFormula = extractInlineRoll(optionHtml) || "1d4";
+  const formula = hasViciousCacophony(actor) ? `${baseFormula}+1d4` : baseFormula;
   const roll = new Roll(formula, actor.getRollData());
   await roll.evaluate();
   await roll.toMessage({
@@ -287,13 +312,19 @@ async function onCreateChatMessage(message, options, userId) {
     });
     if (!target) return;
 
+    const choiceCount = hasEldritchTones(actor) ? 2 : 1;
+
     promptChoiceSelection({
       title: moveItem.name,
-      instruction: game.i18n.localize("DWAUTO.ArcaneArt.EffectInstruction"),
+      instruction: game.i18n.localize(
+        choiceCount === 2 ? "DWAUTO.ArcaneArt.EffectInstructionTwo" : "DWAUTO.ArcaneArt.EffectInstruction"
+      ),
       options: choiceOptions,
-      count: 1,
+      count: choiceCount,
       onConfirm: async (selected, indexes) => {
-        await applyEffect(actor, target, moveItem, indexes[0], selected[0]);
+        for (let i = 0; i < indexes.length; i++) {
+          await applyEffect(actor, target, moveItem, indexes[i], selected[i]);
+        }
         if (result === "partial") {
           announceInfo(actor, game.i18n.localize("DWAUTO.ArcaneArt.PartialNotice"));
         }

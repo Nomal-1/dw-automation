@@ -163,5 +163,14 @@ export const SETTINGS = {
   ENABLE_LOVE_TRUCK_ASSISTANT: "enableLoveTruckAssistant",
   LOVE_TRUCK_MOVE_NAMES: "loveTruckMoveNames",
   ENABLE_EYE_FOR_WEAKNESS_ASSISTANT: "enableEyeForWeaknessAssistant",
-  EYE_FOR_WEAKNESS_MOVE_NAMES: "eyeForWeaknessMoveNames"
+  EYE_FOR_WEAKNESS_MOVE_NAMES: "eyeForWeaknessMoveNames",
+  ENABLE_METAL_HURLANT_ASSISTANT: "enableMetalHurlantAssistant",
+  METAL_HURLANT_MOVE_NAMES: "metalHurlantMoveNames",
+  ELDRITCH_TONES_MOVE_NAMES: "eldritchTonesMoveNames",
+  HEALING_SONG_MOVE_NAMES: "healingSongMoveNames",
+  VICIOUS_CACOPHONY_MOVE_NAMES: "viciousCacophonyMoveNames",
+  ENABLE_DUELIST_PARRY_ASSISTANT: "enableDuelistParryAssistant",
+  DUELIST_PARRY_MOVE_NAMES: "duelistParryMoveNames",
+  ENABLE_BAMBOOZLE_ASSISTANT: "enableBamboozleAssistant",
+  BAMBOOZLE_MOVE_NAMES: "bamboozleMoveNames"
 };

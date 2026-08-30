@@ -59,6 +59,9 @@ import { registerHerculeanAppetitesAssistant } from "./features/herculean-appeti
 import { registerOnTheMoveAssistant } from "./features/on-the-move.js";
 import { registerLoveTruckAssistant } from "./features/love-truck.js";
 import { registerEyeForWeaknessAssistant } from "./features/eye-for-weakness.js";
+import { registerMetalHurlantAssistant } from "./features/metal-hurlant.js";
+import { registerDuelistParryAssistant } from "./features/duelist-parry.js";
+import { registerBamboozleAssistant } from "./features/bamboozle.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -129,3 +132,6 @@ registerHerculeanAppetitesAssistant();
 registerOnTheMoveAssistant();
 registerLoveTruckAssistant();
 registerEyeForWeaknessAssistant();
+registerMetalHurlantAssistant();
+registerDuelistParryAssistant();
+registerBamboozleAssistant();

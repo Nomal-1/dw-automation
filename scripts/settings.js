@@ -486,6 +486,96 @@ export function registerSettings() {
     default: "Eye for Weakness"
   });
 
+  // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",
+    hint: "DWAUTO.Settings.EnableMetalHurlantAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.METAL_HURLANT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.MetalHurlantMoveNames.Name",
+    hint: "DWAUTO.Settings.MetalHurlantMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Metal Hurlant"
+  });
+
+  // 바드 무브 이계의 음률/치유의 노래/날카로운 불협화음: 마법의 곡조(Arcane
+  // Art)의 효과를 강화하는 보조 무브라 별도 사용 스위치 없이
+  // ENABLE_ARCANE_ART_ASSISTANT 하나로 같이 켜고 끈다. 자세한 설계는
+  // features/arcane-art.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ELDRITCH_TONES_MOVE_NAMES, {
+    name: "DWAUTO.Settings.EldritchTonesMoveNames.Name",
+    hint: "DWAUTO.Settings.EldritchTonesMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Eldritch Tones"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HEALING_SONG_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HealingSongMoveNames.Name",
+    hint: "DWAUTO.Settings.HealingSongMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Healing Song"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.VICIOUS_CACOPHONY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ViciousCacophonyMoveNames.Name",
+    hint: "DWAUTO.Settings.ViciousCacophonyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Vicious Cacophony"
+  });
+
+  // 바드 무브 결투사의 호신술: 자세한 설계는 features/duelist-parry.js 참고.
+  // 근접 무브 이름은 MELEE_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_DUELIST_PARRY_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableDuelistParryAssistant.Name",
+    hint: "DWAUTO.Settings.EnableDuelistParryAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DUELIST_PARRY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DuelistParryMoveNames.Name",
+    hint: "DWAUTO.Settings.DuelistParryMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Duelist’s Parry"
+  });
+
+  // 바드 무브 현란한 말솜씨: 자세한 설계는 features/bamboozle.js 참고.
+  // 협상 무브 이름은 PARLEY_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_BAMBOOZLE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableBamboozleAssistant.Name",
+    hint: "DWAUTO.Settings.EnableBamboozleAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.BAMBOOZLE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.BamboozleMoveNames.Name",
+    hint: "DWAUTO.Settings.BamboozleMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Bamboozle"
+  });
+
   // 상급 무브를 새로 배우면(예: 치료사의 모범) 같은 액터가 갖고 있는 그 이전
   // 단계 무브(치료사)를 자동으로 삭제한다. 대상 쌍은 던전월드 8개 기본 직업
   // 컴펜디엄의 requiresMove 필드를 전수 조사해서 기본값으로 채워뒀다. 자세한
