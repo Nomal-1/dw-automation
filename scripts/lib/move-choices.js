@@ -56,11 +56,14 @@ export function getMoveChoiceData(moveItem, result) {
 }
 
 /**
- * 선택지 다이얼로그를 띄운다. 정확히 count개를 고를 때까지 다시 띄운다.
- * onConfirm(selectedOptionHtmls: string[], selectedIndexes: number[]) — indexes는
- * 1부터 시작한다(설정 화면에서 GM이 "몇 번째 선택지"라고 지정할 때와 맞추기 위함).
+ * 선택지 다이얼로그를 띄운다. minCount~count개(기본은 minCount === count라
+ * 정확히 count개) 사이로 고를 때까지 다시 띄운다 — 이계의 음률(Eldritch
+ * Tones)처럼 "최대 2개까지 고를 수 있지만 1개만 골라도 되는" 경우
+ * minCount를 1로 낮춰서 쓴다. onConfirm(selectedOptionHtmls: string[],
+ * selectedIndexes: number[]) — indexes는 1부터 시작한다(설정 화면에서
+ * GM이 "몇 번째 선택지"라고 지정할 때와 맞추기 위함).
  */
-export function promptChoiceSelection({ title, instruction, options, count, onConfirm, onCancel }) {
+export function promptChoiceSelection({ title, instruction, options, count, minCount = count, onConfirm, onCancel }) {
   const inputType = count === 1 ? "radio" : "checkbox";
   const optionsHtml = options
     .map((opt, i) => `
@@ -81,9 +84,13 @@ export function promptChoiceSelection({ title, instruction, options, count, onCo
         label: game.i18n.localize("DWAUTO.Confirm"),
         callback: (html) => {
           const checked = html.find('[name="dwautoChoice"]:checked');
-          if (checked.length !== count) {
-            ui.notifications.warn(game.i18n.format("DWAUTO.Choice.WrongCount", { count }));
-            promptChoiceSelection({ title, instruction, options, count, onConfirm, onCancel });
+          if (checked.length < minCount || checked.length > count) {
+            const warning =
+              minCount === count
+                ? game.i18n.format("DWAUTO.Choice.WrongCount", { count })
+                : game.i18n.format("DWAUTO.Choice.WrongCountRange", { min: minCount, max: count });
+            ui.notifications.warn(warning);
+            promptChoiceSelection({ title, instruction, options, count, minCount, onConfirm, onCancel });
             return;
           }
           const selectedIndexes = checked.map((_, el) => Number(el.value) + 1).get();

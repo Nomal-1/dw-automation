@@ -774,7 +774,8 @@
     "ActionApplied": "\"{move}\" 액션 적용!",
     "Choice": {
       "Instruction": "선택지 중 {count}개를 골라주세요.",
-      "WrongCount": "정확히 {count}개를 선택해야 합니다."
+      "WrongCount": "정확히 {count}개를 선택해야 합니다.",
+      "WrongCountRange": "{min}개에서 {max}개 사이로 선택해야 합니다."
     },
     "Hold": {
       "Gained": "Hold {hold} 획득",

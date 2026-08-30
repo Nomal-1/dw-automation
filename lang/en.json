@@ -774,7 +774,8 @@
     "ActionApplied": "\"{move}\" action applied!",
     "Choice": {
       "Instruction": "Choose {count} from the options below.",
-      "WrongCount": "You must select exactly {count}."
+      "WrongCount": "You must select exactly {count}.",
+      "WrongCountRange": "You must select between {min} and {max}."
     },
     "Hold": {
       "Gained": "Gained Hold {hold}",

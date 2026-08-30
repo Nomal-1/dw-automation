@@ -312,15 +312,17 @@ async function onCreateChatMessage(message, options, userId) {
     });
     if (!target) return;
 
-    const choiceCount = hasEldritchTones(actor) ? 2 : 1;
+    const eldritchTones = hasEldritchTones(actor);
+    const choiceCount = eldritchTones ? 2 : 1;
 
     promptChoiceSelection({
       title: moveItem.name,
       instruction: game.i18n.localize(
-        choiceCount === 2 ? "DWAUTO.ArcaneArt.EffectInstructionTwo" : "DWAUTO.ArcaneArt.EffectInstruction"
+        eldritchTones ? "DWAUTO.ArcaneArt.EffectInstructionTwo" : "DWAUTO.ArcaneArt.EffectInstruction"
       ),
       options: choiceOptions,
       count: choiceCount,
+      minCount: eldritchTones ? 1 : choiceCount,
       onConfirm: async (selected, indexes) => {
         for (let i = 0; i < indexes.length; i++) {
           await applyEffect(actor, target, moveItem, indexes[i], selected[i]);
