@@ -3,6 +3,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isBamboozleActive, setBamboozleActive } from "../lib/bamboozle-state.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // 바드 무브 현란한 말솜씨(Bamboozle) 원문: "누군가와 협상할 때, 7+면 그
 // 사람을 상대로 한 판정에 +1 forward도 함께 받는다." +1이 "그 특정 상대를
@@ -116,7 +117,36 @@ function onRenderActorSheet(app, html) {
   });
 }
 
+// v0.101.0에서 청산유수(Con, 현란한 말솜씨의 6레벨 상위 무브)를 기본값에
+// 추가했다. game.settings의 default는 그 설정을 한 번도 저장한 적 없는
+// 세계에만 적용되므로, 이미 "Bamboozle"(또는 번역된 이름)만 저장해둔 GM은
+// "자동 채우기"를 다시 눌러도 원래 목록에 "Con"이 아예 없어서 번역될 수가
+// 없었다 — 목록에 없으면 그 자리에서 직접 추가해준다.
+async function migrateAddConToBamboozle() {
+  if (!game.user.isGM) return;
+
+  const current = game.settings.get(MODULE_ID, SETTINGS.BAMBOOZLE_MOVE_NAMES);
+  const names = splitCommaList(SETTINGS.BAMBOOZLE_MOVE_NAMES);
+  if (names.includes("Con")) return;
+
+  let conName = "Con";
+  try {
+    const nameMap = await getMoveNameMap();
+    conName = nameMap.get("Con") ?? "Con";
+  } catch (err) {
+    // 번역 데이터를 못 읽으면 영문 이름으로 추가한다.
+  }
+  if (names.includes(conName)) return;
+
+  const next = current ? `${current}, ${conName}` : conName;
+  await game.settings.set(MODULE_ID, SETTINGS.BAMBOOZLE_MOVE_NAMES, next);
+  console.log(`${MODULE_ID} | bamboozle: added "${conName}" to Bamboozle Move Names`);
+}
+
 export function registerBamboozleAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateAddConToBamboozle();
+  });
 }
