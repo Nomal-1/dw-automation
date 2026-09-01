@@ -188,6 +188,21 @@ export function getDopplegangersDanceOngoingMalus(actor) {
   return isHidingTell(actor) ? -1 : 0;
 }
 
+// 변신할 때마다 표식(드루이드의 상징)을 숨길지 물어보고 그 답을 토글에
+// 그대로 반영한다 — GM 요청대로 수동 배지 클릭만이 아니라 변신 시점에도
+// 자동으로 확인한다.
+async function promptDopplegangersDanceToggleOnShapeshiftStart(actor) {
+  const move = getDopplegangersDanceMove(actor);
+  if (!move) return;
+
+  const hide = await Dialog.confirm({
+    title: move.name,
+    content: `<p>${game.i18n.localize("DWAUTO.Druid.DopplegangerPrompt")}</p>`,
+    defaultYes: false
+  });
+  await setHidingTell(actor, hide);
+}
+
 // Formshaper: 변신할 때마다 장갑+1 또는 피해+1d4 중 하나를 고른다. 장갑
 // 선택은 변신 시작/해제 시점에 장갑 값을 직접 올렸다 내리고, 피해 선택은
 // attack-assistant.js의 데미지 굴림에서 소비한다.
@@ -533,6 +548,7 @@ async function startShapeshift(actor) {
 
   await applyEmbracingNoFormOnShapeshiftStart(actor);
   await promptDamageDieToggleOnShapeshiftStart(actor);
+  await promptDopplegangersDanceToggleOnShapeshiftStart(actor);
   await applyFormshaperOnShapeshiftStart(actor);
   await applyFormcrafterOnShapeshiftStart(actor);
 }
@@ -551,6 +567,10 @@ export async function revertShapeshift(actor, { silent = false } = {}) {
   await clearFormcrafterOnShapeshiftEnd(actor);
   await setDamageDieActive(actor, false);
   await setHidingTell(actor, false);
+  // 원문: "Hold가 떨어지면 본래 모습으로 돌아온다. 언제든 Hold를 전부 써서
+  // 본래 모습으로 돌아올 수도 있다" — 어느 경우든 본래 모습으로 돌아오는
+  // 순간 Hold는 0이어야 한다.
+  await actor.update({ "system.attributes.hold.value": 0 });
   if (!silent) announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
 }
 
@@ -602,6 +622,38 @@ function promptSetHold(current) {
       default: "ok",
       close: () => resolve(null)
     }).render(true);
+  });
+}
+
+// 변신(Shapeshifter) 무브 옆에 변신중/변신아님 배지를 보여준다. 변신
+// 탭(renderShapeshiftSection)의 배지와 완전히 같은 상태(getShapeshiftState의
+// active)를 그대로 읽고 그대로 반영하므로, 탭에서 "본래 모습"/"변신 중"이
+// 바뀌면 이 배지도 항상 같이 바뀐다 — 클릭하면 탭의 배지를 누른 것과
+// 똑같이 변신을 걸거나(동물 이름을 물어봄) 해제한다.
+function renderShapeshiftActiveBadge(actor, html) {
+  const move = getShapeshifterMove(actor);
+  if (!move) return;
+
+  const $item = html.find(`.item[data-item-id="${move.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  $tags.find(".dwauto-shapeshift-active-badge").remove();
+
+  const active = isShapeshiftActive(actor);
+  const $badge = $(
+    `<a class="tag dwauto-shapeshift-active-badge${active ? " dwauto-shapeshift-active-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.ShapeshiftActiveToggleTitle")}">${game.i18n.localize(active ? "DWAUTO.Druid.ShapeshiftActiveOn" : "DWAUTO.Druid.ShapeshiftActiveOff")}</a>`
+  );
+  $tags.append($badge);
+
+  $badge.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (active) {
+      await revertShapeshift(actor);
+    } else {
+      await startShapeshift(actor);
+    }
   });
 }
 
@@ -691,6 +743,7 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
 
   renderBalanceBadge(actor, html);
+  renderShapeshiftActiveBadge(actor, html);
   renderShapeshiftHoldBadge(actor, html);
   renderDamageDieToggleBadge(actor, html);
   renderDopplegangersDanceBadge(actor, html);
@@ -795,7 +848,7 @@ export function renderShapeshiftSection($body, actor) {
 // Hold를 "쓰는" 동작은 이 무브 자체에 선택지 목록이 없어 자동화 대상이
 // 아니다(연관된 무브가 무엇인지는 GM이 그때그때 정하는 서술형이라, 아래
 // 메모란에 적어두고 참고하는 방식으로 남겨뒀다).
-function onCreateChatMessage(message, options, userId) {
+async function onCreateChatMessage(message, options, userId) {
   if (game.system.id !== "dungeonworld") return;
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_DRUID_ASSISTANT)) return;
   if (userId !== game.user.id) return;
@@ -809,18 +862,24 @@ function onCreateChatMessage(message, options, userId) {
   if (!shapeshifterNames.includes(title)) return;
 
   if (!isShapeshiftActivated(actor)) {
-    actor.setFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG, true);
+    await actor.setFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG, true);
   }
 
+  // handleHoldMove의 "Hold N" 설정(actor.update)이 실제로 끝날 때까지
+  // 기다린 뒤에 startShapeshift(→ 형태의 자유의 1d4 추가)를 불러야 한다.
+  // 예전에는 이 둘을 기다리지 않고 나란히 호출해서, 형태의 자유가 아직
+  // 갱신되지 않은(0으로 보이는) 옛 Hold 값을 읽고 그 위에 1d4만 얹은
+  // 값으로 덮어써버리는 경합이 있었다(원래 Hold 3/2/1이 통째로 사라지고
+  // 1d4 결과만 남는 것처럼 보였던 원인).
   const moveItem = findMoveItem(actor, title);
-  if (moveItem) handleHoldMove(actor, moveItem, result);
+  if (moveItem) await handleHoldMove(actor, moveItem, result);
 
   // 원문: 실패(6-)해도 "그 밖에 마스터가 말하는 것에 더해 Hold 1"을 받고
   // 그대로 변신한다 — 실패는 "변신이 안 된다"가 아니라 "변신은 되는데
   // 안 좋은 일이 하나 더 생긴다"는 뜻이다. 그래서 위 결과 체크에서 이미
   // 걸러진(success/partial/failure) 세 경우 모두 동물 형태를 물어봐야
   // 한다.
-  startShapeshift(actor);
+  await startShapeshift(actor);
 }
 
 // 이 클라이언트가 GM이면 Formcrafter의 마스터 쪽 능력치 선택 요청을 받아

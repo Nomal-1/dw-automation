@@ -680,10 +680,20 @@
   color: #fff !important;
 }
 
+.dwauto-shapeshift-active-badge,
 .dwauto-shapeshift-hold-badge,
 .dwauto-damage-die-badge,
 .dwauto-doppleganger-badge {
   cursor: pointer;
+}
+
+.dwauto-shapeshift-active-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-shapeshift-active-on {
+  background: #2e7a4a !important;
+  color: #fff !important;
 }
 
 .dwauto-damage-die-badge:hover,
