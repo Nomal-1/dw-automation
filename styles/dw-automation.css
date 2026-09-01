@@ -680,6 +680,32 @@
   color: #fff !important;
 }
 
+.dwauto-shapeshift-hold-badge,
+.dwauto-damage-die-badge,
+.dwauto-doppleganger-badge {
+  cursor: pointer;
+}
+
+.dwauto-damage-die-badge:hover,
+.dwauto-doppleganger-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-damage-die-on {
+  background: #a13d3d !important;
+  color: #fff !important;
+}
+
+.dwauto-doppleganger-on {
+  background: #6b3d7a !important;
+  color: #fff !important;
+}
+
+.dwauto-shapeshift-revert-button {
+  display: block;
+  margin: 4px 0;
+}
+
 .dwauto-cleric-spell-grant-button {
   display: block;
   width: 100%;

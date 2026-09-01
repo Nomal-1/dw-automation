@@ -825,6 +825,20 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, druidFormshaperNames, stats)
   );
 
+  const druidEmbracingNoFormNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_EMBRACING_NO_FORM_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_EMBRACING_NO_FORM_MOVE_NAMES,
+    translateCommaList(moveMap, druidEmbracingNoFormNames, stats)
+  );
+
+  const druidDopplegangersDanceNames = game.settings.get(MODULE_ID, SETTINGS.DRUID_DOPPLEGANGERS_DANCE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DRUID_DOPPLEGANGERS_DANCE_MOVE_NAMES,
+    translateCommaList(moveMap, druidDopplegangersDanceNames, stats)
+  );
+
   const trapExpertMoveNames = game.settings.get(MODULE_ID, SETTINGS.TRAP_EXPERT_MOVE_NAMES);
   await game.settings.set(
     MODULE_ID,

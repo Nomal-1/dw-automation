@@ -12,7 +12,12 @@
 // 함수로 합쳐서 등록을 딱 한 번만 한다.
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { computeCastPenalty } from "./ongoing-spells-state.js";
-import { getFormcrafterRollModifier, shouldInterceptAskRoll, promptAskRollAbility } from "../features/druid.js";
+import {
+  getFormcrafterRollModifier,
+  shouldInterceptAskRoll,
+  promptAskRollAbility,
+  getDopplegangersDanceOngoingMalus
+} from "../features/druid.js";
 import { getCommandCunningBonus } from "../features/command.js";
 import { getGoodDayToDieBonus } from "../features/barbarian.js";
 import { getOngoingPenaltyMalus } from "../features/hit-trigger.js";
@@ -66,6 +71,7 @@ async function handleAskRoll(item, wrapped, args, extraBonus = 0) {
   const mod = getFormcrafterRollModifier(item.actor, chosenStat);
   const goodDayToDieMod = getGoodDayToDieBonus(item.actor);
   const ongoingPenaltyMod = getOngoingPenaltyMalus(item.actor);
+  const dopplegangersDanceMod = getDopplegangersDanceOngoingMalus(item.actor);
   const pendingBonus = getPendingRollBonus(item.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, item.name);
   const originalType = item.system.rollType;
@@ -76,6 +82,7 @@ async function handleAskRoll(item, wrapped, args, extraBonus = 0) {
     mod +
     goodDayToDieMod +
     ongoingPenaltyMod +
+    dopplegangersDanceMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
     extraBonus;
   try {
@@ -219,6 +226,7 @@ async function wrappedRoll(wrapped, ...args) {
   const goodDayToDieMod = getGoodDayToDieBonus(this.actor);
   const ongoingPenaltyMod = getOngoingPenaltyMalus(this.actor);
   const throughDeathsEyesMod = getThroughDeathsEyesMalus(this.actor);
+  const dopplegangersDanceMod = getDopplegangersDanceOngoingMalus(this.actor);
   const pendingBonus = getPendingRollBonus(this.actor);
   const pendingBonusApplies = rollBonusAppliesTo(pendingBonus, this.name);
   const totalMod =
@@ -228,6 +236,7 @@ async function wrappedRoll(wrapped, ...args) {
     goodDayToDieMod +
     ongoingPenaltyMod +
     throughDeathsEyesMod +
+    dopplegangersDanceMod +
     (pendingBonusApplies ? pendingBonus.amount : 0) +
     preRollBonus;
 

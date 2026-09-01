@@ -110,9 +110,12 @@ async function getMovesGroupedByClassPack() {
 }
 
 // 룰북 원문: "자기 레벨보다 하나 이상 낮은 레벨의 액션이면 아무 것이나 골라도
-// 됩니다." — 각 직업 팩에서 캐릭터의 (레벨-1) 이하인 무브만 고를 수 있게
-// 추려내고, 서로 의존하는 핵심 액션 묶음은 하나의 선택지로 합친다. 고를 게
-// 하나도 없는 직업(이론상 없음 — 모든 직업이 레벨 0 시작 무브를 갖고 있다)은
+// 됩니다." — 이 제한은 Multiclass Dabbler/Initiate에만 실제로 적혀있는
+// 문구라, 그 두 행만 (actorLevel-1) 이하로 추려낸다. Hunter's Brother/
+// Appetite For Destruction 등 noLevelCap 행은 이 제한 없이 그 직업의 무브
+// 전체를 보여준다(data/class-grant-moves.js 상단 주석 참고). 어느 쪽이든
+// 서로 의존하는 핵심 액션 묶음은 하나의 선택지로 합치고, 고를 게 하나도
+// 없는 직업(이론상 없음 — 모든 직업이 레벨 0 시작 무브를 갖고 있다)은
 // 목록에서 아예 뺀다.
 // 무브 자체의 requiresLevel(0=핵심, 2=고급 하급 티어, 6=고급 상급 티어)을
 // 그대로 선택지 이름 뒤에 붙여서, 지금 뜨는 목록이 정말 레벨에 맞는 고급
@@ -123,8 +126,8 @@ function tierSuffix(reqLevel) {
   return game.i18n.localize("DWAUTO.ClassGrant.TierCore");
 }
 
-function buildEligiblePicks(classGroups, actorLevel, excludeNames = null) {
-  const maxLevel = actorLevel - 1;
+function buildEligiblePicks(classGroups, actorLevel, excludeNames = null, noLevelCap = false) {
+  const maxLevel = noLevelCap ? Infinity : actorLevel - 1;
   const result = new Map(); // packId -> { label, picks: [{ key, label, docs }] }
 
   for (const [packId, { label, docs }] of classGroups) {
@@ -328,7 +331,7 @@ async function onCreateChatMessage(message, options, userId) {
     if (row.mode === "choice") {
       const classGroups = restrictClassGroups(await getMovesGroupedByClassPack(), row.restrictToClassKeys);
       const excludeNames = row.excludeMulticlassMoves ? new Set(MULTICLASS_MOVE_NAMES) : null;
-      const eligibleGroups = buildEligiblePicks(classGroups, getActorLevel(actor), excludeNames);
+      const eligibleGroups = buildEligiblePicks(classGroups, getActorLevel(actor), excludeNames, row.noLevelCap);
       const chosenPick = await promptChoiceGrant(moveItem, eligibleGroups);
       if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
@@ -401,9 +404,48 @@ async function migrateAddSurveyedDefaults() {
   );
 }
 
+// v0.106.0에서 noLevelCap 필드를 5개 행(Appetite For Destruction/Kill 'Em
+// All/Hunter's Brother/Stalker's Sister/Special Trick)에 추가했다. 이미
+// 이 표를 저장해둔 GM은 새 필드가 자동으로 반영되지 않으므로(game.settings
+// 기본값은 한 번도 저장된 적 없는 세계에만 적용된다), 저장된 행 중 이름이
+// (원문이든 번역이든) 일치하는 것만 찾아 그 자리에서 필드를 채워 넣는다.
+async function migrateAddNoLevelCapFlag() {
+  if (!game.user.isGM) return;
+
+  const noLevelCapDefaults = DEFAULT_CLASS_GRANT_MOVES.filter((r) => r.noLevelCap);
+  if (noLevelCapDefaults.length === 0) return;
+
+  let nameMap = null;
+  try {
+    nameMap = await getMoveNameMap();
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 맞춰본다.
+  }
+
+  const targetNames = new Set();
+  for (const row of noLevelCapDefaults) {
+    targetNames.add(row.name);
+    const translated = nameMap?.get(row.name);
+    if (translated) targetNames.add(translated);
+  }
+
+  const rows = getRows();
+  let changed = false;
+  const next = rows.map((row) => {
+    if (row.noLevelCap || !targetNames.has(row.name)) return row;
+    changed = true;
+    return { ...row, noLevelCap: true };
+  });
+
+  if (!changed) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.CLASS_GRANT_MOVES, next);
+  console.log(`${MODULE_ID} | class-grant: backfilled noLevelCap on existing rows`);
+}
+
 export function registerClassGrantAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.once("ready", () => {
-    migrateAddSurveyedDefaults();
+    migrateAddSurveyedDefaults().then(() => migrateAddNoLevelCapFlag());
   });
 }

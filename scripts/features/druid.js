@@ -4,6 +4,8 @@ import { announceActionApplied } from "../lib/announce.js";
 import { handleHoldMove } from "../lib/hold.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { promptHealTarget, applyHealAmount } from "./healing.js";
+import { isDamageDieActive, setDamageDieActive } from "../lib/druid-damage-die-state.js";
+import { isHidingTell, setHidingTell } from "../lib/dopplegangers-dance-state.js";
 
 const BALANCE_FLAG = "druidBalance";
 const SHAPESHIFT_FLAG = "druidShapeshift";
@@ -105,22 +107,85 @@ function getOwnedDamageDieRows(actor) {
     .filter((row) => row.move);
 }
 
+function getBestDamageDieRow(actor) {
+  const owned = getOwnedDamageDieRows(actor);
+  if (owned.length === 0) return null;
+  return owned.reduce((max, row) => (row.dieSize > (max?.dieSize ?? 0) ? row : max), null);
+}
+
+// "적절한 동물 형태(위험한 것)"인지는 매번 서사적 판단이 필요해서(GM 요청),
+// 변신할 때마다 적용할지 물어보고 그 답을 적용중/적용안됨 토글에 반영한다
+// (변신이 풀리면 다음에 다시 물어보도록 자동으로 꺼둔다 — revertShapeshift/
+// resetShapeshift 참고).
+async function promptDamageDieToggleOnShapeshiftStart(actor) {
+  const best = getBestDamageDieRow(actor);
+  if (!best) return;
+
+  const apply = await Dialog.confirm({
+    title: best.move.name,
+    content: `<p>${game.i18n.format("DWAUTO.Druid.DamageDiePrompt", { name: best.move.name })}</p>`,
+    defaultYes: false
+  });
+  await setDamageDieActive(actor, apply);
+}
+
 export function applyDamageDieOverride(actor, baseDie) {
   if (!isEnabled()) return baseDie;
 
-  const owned = getOwnedDamageDieRows(actor);
-  if (owned.length === 0) return baseDie;
-
-  const best = owned.reduce((max, row) => (row.dieSize > (max?.dieSize ?? 0) ? row : max), null);
+  const best = getBestDamageDieRow(actor);
+  if (!best) return baseDie;
 
   if (!isShapeshiftActive(actor)) {
     announceActionApplied(actor, best.move.name, game.i18n.localize("DWAUTO.Druid.ShapeshiftRequiredNotApplied"));
     return baseDie;
   }
 
+  if (!isDamageDieActive(actor)) return baseDie;
+
   const overriddenDie = `d${best.dieSize}`;
   announceActionApplied(actor, best.move.name, game.i18n.format("DWAUTO.Druid.DamageDieApplied", { die: overriddenDie }));
   return overriddenDie;
+}
+
+// 형태의 자유(Embracing No Form) 원문: "변신할 때 1d4를 굴려 그 합을 hold에
+// 더한다." handleHoldMove가 판정 결과 텍스트로 hold를 이미 정한 뒤에
+// 이 보너스를 더 얹는다.
+function getEmbracingNoFormMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_EMBRACING_NO_FORM_MOVE_NAMES));
+}
+
+async function applyEmbracingNoFormOnShapeshiftStart(actor) {
+  const move = getEmbracingNoFormMove(actor);
+  if (!move) return;
+
+  const roll = new Roll("1d4", actor.getRollData());
+  await roll.evaluate();
+  await roll.toMessage({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor: game.i18n.format("DWAUTO.Druid.EmbracingNoFormFlavor", { name: move.name })
+  });
+
+  const current = Number(actor.system.attributes?.hold?.value) || 0;
+  const next = current + roll.total;
+  await actor.update({ "system.attributes.hold.value": next });
+  announceActionApplied(actor, move.name, game.i18n.format("DWAUTO.Druid.EmbracingNoFormApplied", { hold: next }));
+}
+
+// 흉내(Doppleganger's Dance) 원문: "특정 개인의 정확한 형태를 취할 수
+// 있다. 자신의 표식(tell)을 숨기는 것도 가능하지만, 그렇게 하면 본래
+// 모습으로 돌아올 때까지 -1 ongoing을 받는다." "숨김"은 매번 서사적으로
+// 선택하는 것이라 자동 감지 대신 수동 토글로 두고, 켜져 있는 동안
+// lib/roll-wrapper.js의 totalMod에 -1을 얹는다(getDopplegangersDanceOngoingMalus).
+// 변신이 풀리면(revertShapeshift/resetShapeshift) "본래 모습으로 돌아온
+// 것"으로 보고 자동으로 꺼둔다.
+function getDopplegangersDanceMove(actor) {
+  return findMoveByNames(actor, splitCommaList(SETTINGS.DRUID_DOPPLEGANGERS_DANCE_MOVE_NAMES));
+}
+
+export function getDopplegangersDanceOngoingMalus(actor) {
+  if (!isEnabled()) return 0;
+  if (!getDopplegangersDanceMove(actor)) return 0;
+  return isHidingTell(actor) ? -1 : 0;
 }
 
 // Formshaper: 변신할 때마다 장갑+1 또는 피해+1d4 중 하나를 고른다. 장갑
@@ -466,18 +531,26 @@ async function startShapeshift(actor) {
   await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: true, animalName });
   announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.ShapeshiftStarted", { animal: animalName || "?" }));
 
+  await applyEmbracingNoFormOnShapeshiftStart(actor);
+  await promptDamageDieToggleOnShapeshiftStart(actor);
   await applyFormshaperOnShapeshiftStart(actor);
   await applyFormcrafterOnShapeshiftStart(actor);
 }
 
 // Shed가 피해를 무효화하며 변신을 해제할 때는 { silent: true }로 호출해서
 // "변신 해제" 자체의 알림 대신 Shed 전용 알림만 남긴다(applyShed 참고).
+// "본래 모습으로 돌아왔다"는 것은 이 형태에서 받아뒀던 GM 메모(어떤 무브를
+// 얻었는지)도 더 이상 유효하지 않다는 뜻이라 같이 지우고, 피 묻은 이빨과
+// 발톱/피와 천둥·흉내처럼 "변신 중에만" 유지되는 다른 토글들도 전부 다음에
+// 다시 물어보도록 꺼둔다.
 export async function revertShapeshift(actor, { silent = false } = {}) {
   const moveName = getShapeshifterMove(actor)?.name ?? "Shapeshifter";
   const state = getShapeshiftState(actor);
-  await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: false });
+  await actor.setFlag(MODULE_ID, SHAPESHIFT_FLAG, { ...state, active: false, notes: "" });
   await revertFormshaperOnShapeshiftEnd(actor);
   await clearFormcrafterOnShapeshiftEnd(actor);
+  await setDamageDieActive(actor, false);
+  await setHidingTell(actor, false);
   if (!silent) announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.Druid.ShapeshiftReverted"));
 }
 
@@ -507,6 +580,110 @@ function renderBalanceBadge(actor, html) {
   });
 }
 
+function promptSetHold(current) {
+  return new Promise((resolve) => {
+    new Dialog({
+      title: game.i18n.localize("DWAUTO.Druid.HoldAdjustTitle"),
+      content: `
+        <form>
+          <div class="form-group">
+            <label>${game.i18n.localize("DWAUTO.Druid.HoldAdjustLabel")}</label>
+            <input type="number" name="amount" value="${current}" min="0">
+          </div>
+        </form>
+      `,
+      buttons: {
+        ok: {
+          label: game.i18n.localize("DWAUTO.Confirm"),
+          callback: (html) => resolve(Math.max(0, Number(html.find('[name="amount"]').val()) || 0))
+        },
+        cancel: { label: game.i18n.localize("DWAUTO.Cancel"), callback: () => resolve(null) }
+      },
+      default: "ok",
+      close: () => resolve(null)
+    }).render(true);
+  });
+}
+
+// 변신(Shapeshifter) 무브 옆에 지금 Hold가 몇 개인지 배지로 보여준다.
+// Hold 자체는 던전월드 시스템의 공용 필드(system.attributes.hold)라 다른
+// 곳(예비를 쓰는 무브 등)과 공유되지만, 변신 자동화가 가장 자주 다루는
+// 값이라 여기서도 바로 보이고 GM이 클릭해서 직접 고칠 수 있게 한다.
+function renderShapeshiftHoldBadge(actor, html) {
+  const move = getShapeshifterMove(actor);
+  if (!move) return;
+
+  const $item = html.find(`.item[data-item-id="${move.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  $tags.find(".dwauto-shapeshift-hold-badge").remove();
+
+  const hold = Number(actor.system.attributes?.hold?.value) || 0;
+  const $badge = $(
+    `<a class="tag dwauto-shapeshift-hold-badge" title="${game.i18n.localize("DWAUTO.Druid.HoldBadgeTitle")}">${game.i18n.format("DWAUTO.Druid.HoldBadge", { hold })}</a>`
+  );
+  $tags.append($badge);
+
+  if (!game.user.isGM) return;
+  $badge.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const next = await promptSetHold(hold);
+    if (next !== null) await actor.update({ "system.attributes.hold.value": next });
+  });
+}
+
+// 피 묻은 이빨과 발톱/피와 천둥 옆에 적용중/적용안됨 배지. 변신할 때마다
+// 자동으로 물어봐서 정해지지만, 서사적으로 상황이 바뀌었다고 판단되면
+// 플레이어/마스터가 직접 켜고 꺼도 된다.
+function renderDamageDieToggleBadge(actor, html) {
+  const best = getBestDamageDieRow(actor);
+  if (!best) return;
+
+  const $item = html.find(`.item[data-item-id="${best.move.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  $tags.find(".dwauto-damage-die-badge").remove();
+
+  const active = isDamageDieActive(actor);
+  const $badge = $(
+    `<a class="tag dwauto-damage-die-badge${active ? " dwauto-damage-die-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.DamageDieToggleTitle")}">${game.i18n.localize(active ? "DWAUTO.Druid.DamageDieActive" : "DWAUTO.Druid.DamageDieInactive")}</a>`
+  );
+  $tags.append($badge);
+
+  $badge.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await setDamageDieActive(actor, !active);
+  });
+}
+
+// 흉내 옆에 숨김중/숨기지 않음 배지.
+function renderDopplegangersDanceBadge(actor, html) {
+  const move = getDopplegangersDanceMove(actor);
+  if (!move) return;
+
+  const $item = html.find(`.item[data-item-id="${move.id}"]`);
+  if (!$item.length) return;
+
+  const $tags = getOrCreateTagsContainer($item);
+  $tags.find(".dwauto-doppleganger-badge").remove();
+
+  const hiding = isHidingTell(actor);
+  const $badge = $(
+    `<a class="tag dwauto-doppleganger-badge${hiding ? " dwauto-doppleganger-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.DopplegangerToggleTitle")}">${game.i18n.localize(hiding ? "DWAUTO.Druid.DopplegangerHiding" : "DWAUTO.Druid.DopplegangerNotHiding")}</a>`
+  );
+  $tags.append($badge);
+
+  $badge.on("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await setHidingTell(actor, !hiding);
+  });
+}
+
 function onRenderActorSheet(app, html) {
   if (!isEnabled()) return;
 
@@ -514,6 +691,9 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
 
   renderBalanceBadge(actor, html);
+  renderShapeshiftHoldBadge(actor, html);
+  renderDamageDieToggleBadge(actor, html);
+  renderDopplegangersDanceBadge(actor, html);
 }
 
 // 변신 탭의 GM 초기화 버튼에서 호출한다 — 변신 상태와 활성화 여부, 그리고
@@ -525,6 +705,8 @@ export async function resetShapeshift(actor) {
   // 남는다).
   await revertFormshaperOnShapeshiftEnd(actor);
   await clearFormcrafterOnShapeshiftEnd(actor);
+  await setDamageDieActive(actor, false);
+  await setHidingTell(actor, false);
   await actor.unsetFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG);
   await actor.unsetFlag(MODULE_ID, SHAPESHIFT_FLAG);
 }
@@ -578,6 +760,7 @@ export function renderShapeshiftSection($body, actor) {
     <div class="cell dwauto-druid-shapeshift">
       <h2 class="cell__title">${game.i18n.localize("DWAUTO.Druid.ShapeshiftTitle")}</h2>
       <a class="tag dwauto-shapeshift-badge${state.active ? " dwauto-shapeshift-on" : ""}" title="${game.i18n.localize("DWAUTO.Druid.ShapeshiftToggleTitle")}">${label}</a>
+      ${state.active ? `<button type="button" class="dwauto-shapeshift-revert-button">${game.i18n.localize("DWAUTO.Druid.ShapeshiftRevertButton")}</button>` : ""}
       ${summaryHtml}
       <label class="cell__title dwauto-shapeshift-notes-label">${game.i18n.localize("DWAUTO.Druid.ShapeshiftNotesLabel")}</label>
       <textarea class="dwauto-shapeshift-notes" rows="3">${state.notes ?? ""}</textarea>
@@ -591,6 +774,11 @@ export function renderShapeshiftSection($body, actor) {
     } else {
       await startShapeshift(actor);
     }
+  });
+
+  $section.find(".dwauto-shapeshift-revert-button").on("click", async (event) => {
+    event.preventDefault();
+    await revertShapeshift(actor);
   });
 
   $section.find(".dwauto-shapeshift-notes").on("change", async (event) => {
@@ -627,9 +815,12 @@ function onCreateChatMessage(message, options, userId) {
   const moveItem = findMoveItem(actor, title);
   if (moveItem) handleHoldMove(actor, moveItem, result);
 
-  if (result === "success" || result === "partial") {
-    startShapeshift(actor);
-  }
+  // 원문: 실패(6-)해도 "그 밖에 마스터가 말하는 것에 더해 Hold 1"을 받고
+  // 그대로 변신한다 — 실패는 "변신이 안 된다"가 아니라 "변신은 되는데
+  // 안 좋은 일이 하나 더 생긴다"는 뜻이다. 그래서 위 결과 체크에서 이미
+  // 걸러진(success/partial/failure) 세 경우 모두 동물 형태를 물어봐야
+  // 한다.
+  startShapeshift(actor);
 }
 
 // 이 클라이언트가 GM이면 Formcrafter의 마스터 쪽 능력치 선택 요청을 받아

@@ -37,6 +37,8 @@ export const SETTINGS = {
   DRUID_SHED_MOVE_NAMES: "druidShedMoveNames",
   DRUID_FORMCRAFTER_MOVE_NAMES: "druidFormcrafterMoveNames",
   DRUID_FORMSHAPER_MOVE_NAMES: "druidFormshaperMoveNames",
+  DRUID_EMBRACING_NO_FORM_MOVE_NAMES: "druidEmbracingNoFormMoveNames",
+  DRUID_DOPPLEGANGERS_DANCE_MOVE_NAMES: "druidDopplegangersDanceMoveNames",
   ENABLE_NOTE_MOVES: "enableNoteMoves",
   NOTE_MOVE_NAMES: "noteMoveNames",
   ENABLE_ARMOR_ASSISTANT: "enableArmorAssistant",

@@ -171,6 +171,14 @@
         "Name": "드루이드 Formshaper 무브 이름",
         "Hint": "변신할 때마다 장갑 +1 또는 피해 +1d4 중 하나를 고르게 하는 무브 이름(쉼표로 여러 개 구분)."
       },
+      "DruidEmbracingNoFormMoveNames": {
+        "Name": "드루이드 형태의 자유 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Embracing No Form). 변신할 때마다 1d4를 굴려 Hold에 더합니다."
+      },
+      "DruidDopplegangersDanceMoveNames": {
+        "Name": "드루이드 흉내 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Doppleganger's Dance). 숨김중/숨기지 않음 토글이 켜져 있는 동안 모든 판정에 -1 ongoing이 적용됩니다."
+      },
       "EnableNoteMoves": {
         "Name": "메모형 무브 사용",
         "Hint": "신/신격/동물 상대/퀘스트/대지의 아들딸처럼 주사위 대신 플레이어가 자유롭게 무언가를 정해야 하는(신의 이름과 영역, 결연된 땅 등) 무브를 실제로 발동(무브 목록에서 클릭)하면, 무브 설명에 선택지 목록이 있는 경우 그 목록으로 선택 팝업을 띄운 뒤(직접입력도 가능) 그 무브 이름을 딴 탭을 만들어 무브 설명과 자유 메모란을 보여줍니다. 선택지 목록이 없는 무브는 발동 즉시 탭이 생깁니다. 어떤 무브가 해당하는지는 아래 '메모형 무브 이름' 설정에서 관리합니다."
@@ -1359,8 +1367,22 @@
       "ShapeshiftPromptLabel": "어떤 동물로 변신하시겠습니까?",
       "ShapeshiftStarted": "변신했습니다: {animal}",
       "ShapeshiftReverted": "본래 모습으로 돌아왔습니다",
+      "ShapeshiftRevertButton": "변신 해제",
       "ShapeshiftRequiredNotApplied": "변신 상태가 아니므로 적용되지 않았습니다",
+      "DamageDiePrompt": "변신했을 때 {name} 액션을 적용할까요?",
       "DamageDieApplied": "변신 중이라 데미지 주사위가 {die}로 적용되었습니다",
+      "DamageDieToggleTitle": "클릭하면 적용 상태를 켜고 끕니다.",
+      "DamageDieActive": "적용중",
+      "DamageDieInactive": "적용안됨",
+      "EmbracingNoFormFlavor": "{name} 추가 Hold",
+      "EmbracingNoFormApplied": "형태의 자유 효과로 Hold가 {hold}(으)로 늘었습니다",
+      "DopplegangerToggleTitle": "클릭하면 정체 숨김 상태를 켜고 끕니다(켜져 있는 동안 모든 판정에 -1 ongoing).",
+      "DopplegangerHiding": "숨김중",
+      "DopplegangerNotHiding": "숨기지 않음",
+      "HoldAdjustTitle": "Hold 직접 수정",
+      "HoldAdjustLabel": "Hold",
+      "HoldBadgeTitle": "지금 Hold가 몇 개인지 보여줍니다. 마스터는 클릭해서 직접 고칠 수 있습니다.",
+      "HoldBadge": "Hold: {hold}",
       "ShedApplied": "변신을 해제하고 피해 {damage}를 무효화했습니다",
       "FormshaperPromptTitle": "Formshaper",
       "FormshaperPromptContent": "이번 변신에서 장갑 +1과 피해 +1d4 중 무엇을 선택하시겠습니까?",

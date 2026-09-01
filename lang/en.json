@@ -171,6 +171,14 @@
         "Name": "Druid Formshaper Move Names",
         "Hint": "Move names (comma separated) that let the character choose +1 armor or +1d4 damage each time they shapeshift."
       },
+      "DruidEmbracingNoFormMoveNames": {
+        "Name": "Druid Embracing No Form Move Names",
+        "Hint": "Comma-separated (default: Embracing No Form). Rolls 1d4 and adds it to Hold every time you shapeshift."
+      },
+      "DruidDopplegangersDanceMoveNames": {
+        "Name": "Druid Doppleganger's Dance Move Names",
+        "Hint": "Comma-separated (default: Doppleganger's Dance). While the Hiding/Not Hiding toggle is on, -1 ongoing applies to every roll."
+      },
       "EnableNoteMoves": {
         "Name": "Enable Note-Taking Moves",
         "Hint": "For moves like Deity/Apotheosis/Animal Companion/Quest/Born of the Soil that ask the player to freely define something (a god's name and domain, a chosen land, etc.) rather than roll dice, actually triggering the move (clicking it in the move list) shows a prompt with the choices found in the move's own description (plus a custom option), if any — then adds a tab named after the move with its description and a free-text note area. Moves with no such list in their description skip straight to the tab. Which moves qualify is managed in the Note-Taking Move Names setting below."
@@ -1359,8 +1367,22 @@
       "ShapeshiftPromptLabel": "What animal form are you taking?",
       "ShapeshiftStarted": "Shapeshifted into: {animal}",
       "ShapeshiftReverted": "Reverted to natural form",
+      "ShapeshiftRevertButton": "Revert to Natural Form",
       "ShapeshiftRequiredNotApplied": "Not applied — not currently shapeshifted",
+      "DamageDiePrompt": "Do you want to apply {name} for this shapeshift?",
       "DamageDieApplied": "Damage die upgraded to {die} while shapeshifted",
+      "DamageDieToggleTitle": "Click to toggle active state.",
+      "DamageDieActive": "Active",
+      "DamageDieInactive": "Inactive",
+      "EmbracingNoFormFlavor": "{name} bonus Hold",
+      "EmbracingNoFormApplied": "Embracing No Form raised Hold to {hold}",
+      "DopplegangerToggleTitle": "Click to toggle whether you're hiding your tell (-1 ongoing to every roll while hiding).",
+      "DopplegangerHiding": "Hiding",
+      "DopplegangerNotHiding": "Not Hiding",
+      "HoldAdjustTitle": "Edit Hold",
+      "HoldAdjustLabel": "Hold",
+      "HoldBadgeTitle": "Shows the current Hold count. The GM can click to edit it directly.",
+      "HoldBadge": "Hold: {hold}",
       "ShedApplied": "Reverted to natural form, negating {damage} damage",
       "FormshaperPromptTitle": "Formshaper",
       "FormshaperPromptContent": "Choose +1 armor or +1d4 damage for this shapeshift.",

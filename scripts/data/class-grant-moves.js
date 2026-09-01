@@ -29,6 +29,18 @@
 // Dabbler"/"Multiclass Initiate" 자체를 제외한다 — 같은 원문("You may not
 // take multiclass moves from those classes")을 반영한 것으로, 멀티클래스로
 // 멀티클래스 무브를 또 골라 무한히 다른 직업을 넘나드는 것을 막는다.
+//
+// noLevelCap(선택): "자기 레벨보다 하나 이상 낮은 레벨의 액션만" 제한은
+// 던전월드 핵심 규칙북의 "멀티클래스 하기" 규칙 문구이고, 이 문구가 실제로
+// 붙어있는 건 Multiclass Dabbler/Initiate 둘뿐이다. Appetite For
+// Destruction/Kill 'Em All("Take a move from the X class list")과 Hunter's
+// Brother/Stalker's Sister/Special Trick("Choose/다른 직업의 무브를 하나
+// 고른다")은 원문 어디에도 그런 레벨 제한이 없다 — 그런데도 buildEligiblePicks가
+// 모든 "choice" 행에 똑같이 그 제한을 걸고 있어서, 예를 들어 사냥꾼의 형제를
+// 배우는 시점(레벨 2)에는 max레벨이 1이 되어 레인저 고급 무브가 사실상
+// 하나도 안 뜨는 버그가 있었다(실제로 확인됨). 이 다섯 행은 noLevelCap:true로
+// 그 제한 자체를 건너뛰어 레인저/파이터·바드·도적의 무브 목록 전체(요구
+// 레벨과 무관하게)를 보여준다.
 export const DEFAULT_CLASS_GRANT_MOVES = [
   { name: "Divine Favor", grantedMoveNames: "Commune, Cast A Spell", mode: "fixed" },
   { name: "God Amidst The Wastes", grantedMoveNames: "Commune, Cast A Spell", mode: "fixed" },
@@ -39,14 +51,16 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
     grantedMoveNames: "",
     mode: "choice",
     restrictToClassKeys: "fighter,bard,thief",
-    excludeMulticlassMoves: true
+    excludeMulticlassMoves: true,
+    noLevelCap: true
   },
   {
     name: "Kill 'Em All",
     grantedMoveNames: "",
     mode: "choice",
     restrictToClassKeys: "fighter,bard,thief",
-    excludeMulticlassMoves: true
+    excludeMulticlassMoves: true,
+    noLevelCap: true
   },
   // 이몰레이터 Ogdru Jahad 원문: "Gain the Wizard move Ritual." — Divine
   // Favor와 같은 "고정" 패턴(정해진 무브를 그대로 부여)이지만, "class list"/
@@ -58,8 +72,8 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
   // one move from the ranger class list." — Appetite For Destruction/
   // Kill 'Em All과 완전히 같은 "choice + restrictToClassKeys" 패턴이다
   // (excludeMulticlassMoves는 원문에 언급이 없어 켜지 않는다).
-  { name: "Hunter's Brother", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" },
-  { name: "Stalker's Sister", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger" },
+  { name: "Hunter's Brother", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger", noLevelCap: true },
+  { name: "Stalker's Sister", grantedMoveNames: "", mode: "choice", restrictToClassKeys: "ranger", noLevelCap: true },
   // 레인저 Special Trick 원문: "다른 직업의 무브를 하나 고른다. 동반 동물과
   // 함께 활동하는 동안에만 그 무브를 쓸 수 있다." Multiclass Dabbler/
   // Initiate와 완전히 같은 "제한 없는 choice" 패턴이고(다른 8개 기본 직업
@@ -67,5 +81,5 @@ export const DEFAULT_CLASS_GRANT_MOVES = [
   // 자동으로 판정할 수 없는 서사적 전제라 무시한다(무브를 얻으면 항상 쓸
   // 수 있게 된다) — Multiclass Dabbler/Initiate 자체도 조건 없이 그대로
   // 부여하는 것과 같은 단순화다.
-  { name: "Special Trick", grantedMoveNames: "", mode: "choice" }
+  { name: "Special Trick", grantedMoveNames: "", mode: "choice", noLevelCap: true }
 ];

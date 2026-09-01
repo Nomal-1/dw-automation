@@ -1024,6 +1024,24 @@ export function registerSettings() {
     default: "Formshaper"
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_EMBRACING_NO_FORM_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidEmbracingNoFormMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidEmbracingNoFormMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Embracing No Form"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DRUID_DOPPLEGANGERS_DANCE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DruidDopplegangersDanceMoveNames.Name",
+    hint: "DWAUTO.Settings.DruidDopplegangersDanceMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Doppleganger's Dance"
+  });
+
   // Cleric Deity/Apotheosis, Druid Born of the Soil, Ranger Animal Companion
   // 처럼 이름/영역/증표 같은 걸 자유롭게 정해서 기록해두는 무브들. 자세한
   // 설계는 features/note-moves.js 참고.
