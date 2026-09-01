@@ -584,6 +584,17 @@ export function registerSettings() {
     default: "Ever Onward"
   });
 
+  // 예배(Commune)를 가진 액터의 주문 탭에 "현재 레벨 사제 주문 모두 얻기"
+  // 버튼을 추가한다: 자세한 설계는 features/cleric-spell-grant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CLERIC_SPELL_GRANT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableClericSpellGrantAssistant.Name",
+    hint: "DWAUTO.Settings.EnableClericSpellGrantAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

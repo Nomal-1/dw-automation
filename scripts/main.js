@@ -67,6 +67,7 @@ import { registerChargeAssistant } from "./features/charge.js";
 import { registerSetupStrikeAssistant } from "./features/setup-strike.js";
 import { registerTandemStrikeAssistant } from "./features/tandem-strike.js";
 import { registerEverOnwardAssistant } from "./features/ever-onward.js";
+import { registerClericSpellGrantAssistant } from "./features/cleric-spell-grant.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -145,3 +146,4 @@ registerChargeAssistant();
 registerSetupStrikeAssistant();
 registerTandemStrikeAssistant();
 registerEverOnwardAssistant();
+registerClericSpellGrantAssistant();

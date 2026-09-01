@@ -654,6 +654,12 @@
   color: #fff !important;
 }
 
+.dwauto-cleric-spell-grant-button {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

@@ -782,6 +782,10 @@
       "EverOnwardMoveNames": {
         "Name": "끝없는 전진 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Ever Onward)."
+      },
+      "EnableClericSpellGrantAssistant": {
+        "Name": "예배 - 레벨별 사제 주문 모두 얻기 버튼 사용",
+        "Hint": "예배(Commune)를 가진 액터의 주문 탭에 버튼을 추가합니다. 누르면 (실제 클레릭은 자기 레벨, 신의 은혜로 예배를 얻은 팔라딘은 그 클레릭 레벨 기준으로) 그 레벨 이하의 클레릭 기본 주문 컴펜디엄 전체 중 아직 없는 것만 스펠북에 추가합니다."
       }
     },
     "Npc": {
@@ -1554,6 +1558,12 @@
       "TargetLabel": "돌격을 이끌 아군 한 명을 골라주세요.",
       "Applied": "{name}이(가) 끝없는 전진 효과를 받았습니다 — 다음 판정 +1, 장갑이 {armor}(으)로 증가(다음 피격까지 유지)",
       "ArmorRemoved": "끝없는 전진의 임시 장갑이 소모되어 장갑이 {armor}(으)로 돌아왔습니다"
+    },
+    "ClericSpellGrant": {
+      "ButtonLabel": "현재 레벨 사제 주문 모두 얻기",
+      "ConfirmContent": "레벨 {level} 이하의 클레릭 기본 주문 중 아직 없는 {count}개를 스펠북에 추가합니다:",
+      "NothingToAdd": "레벨 {level} 이하의 클레릭 기본 주문을 이미 모두 갖고 있습니다.",
+      "Added": "레벨 {level} 이하의 클레릭 기본 주문 {count}개를 스펠북에 추가했습니다"
     },
     "MetalHurlant": {
       "Flavor": "{name} 피해",

@@ -174,6 +174,7 @@ export const SETTINGS = {
   IMPERVIOUS_DEFENDER_MOVE_NAMES: "imperviousDefenderMoveNames",
   ENABLE_EVER_ONWARD_ASSISTANT: "enableEverOnwardAssistant",
   EVER_ONWARD_MOVE_NAMES: "everOnwardMoveNames",
+  ENABLE_CLERIC_SPELL_GRANT_ASSISTANT: "enableClericSpellGrantAssistant",
   ENABLE_METAL_HURLANT_ASSISTANT: "enableMetalHurlantAssistant",
   METAL_HURLANT_MOVE_NAMES: "metalHurlantMoveNames",
   ELDRITCH_TONES_MOVE_NAMES: "eldritchTonesMoveNames",

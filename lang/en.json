@@ -782,6 +782,10 @@
       "EverOnwardMoveNames": {
         "Name": "Ever Onward Move Names",
         "Hint": "Comma-separated (default: Ever Onward)."
+      },
+      "EnableClericSpellGrantAssistant": {
+        "Name": "Enable Commune's \"Get All Cleric Spells\" Button",
+        "Hint": "Adds a button to the spell tab of any actor with Commune. Clicking it adds every default cleric spell (from the compendium) at or below the actor's effective level — the actor's own level for real Clerics, or their Divine Favor cleric level for Paladins — skipping spells they already have."
       }
     },
     "Npc": {
@@ -1554,6 +1558,12 @@
       "TargetLabel": "Pick one ally to lead the charge.",
       "Applied": "{name} received the Ever Onward effect — +1 on their next roll, armor rises to {armor} (lasts until their next hit)",
       "ArmorRemoved": "Ever Onward's temporary armor was spent — armor drops back to {armor}"
+    },
+    "ClericSpellGrant": {
+      "ButtonLabel": "Get All Cleric Spells (Current Level)",
+      "ConfirmContent": "This adds {count} default cleric spells at level {level} or below that you don't already have:",
+      "NothingToAdd": "You already have every default cleric spell at level {level} or below.",
+      "Added": "Added {count} default cleric spell(s) at level {level} or below to the spellbook"
     },
     "MetalHurlant": {
       "Flavor": "{name} damage",
