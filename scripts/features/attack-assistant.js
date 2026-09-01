@@ -16,6 +16,7 @@ import { promptStrongArmThrow, removeAmmoChoice } from "./strong-arm.js";
 import { getWhatAreYouWaitingForBonus } from "./what-are-you-waiting-for.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getEffectiveSpellLevel } from "./spell-preparation.js";
+import { getThiefHalflingRangedBonus } from "./thief-halfling.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -450,15 +451,19 @@ async function handleAmmoAndRoll(actor, weapon, dmgMod, extraDice, moveTitle) {
   const cheapShotBonus = await getCheapShotBonus(actor, moveTitle, weapon);
   const waitingForBonus = getWhatAreYouWaitingForBonus(actor);
   const damageForward = getPendingDamageForward(actor);
+  const thiefHalflingBonus = getThiefHalflingRangedBonus(actor, isRangedWeapon(weapon));
   const finalExtraDice = appendTerm(
     appendTerm(
       appendTerm(
-        appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
-        cheapShotBonus
+        appendTerm(
+          appendTerm(appendTerm(appendTerm(extraDice || "", conditionalExtra), commandBonus), mercilessBonus),
+          cheapShotBonus
+        ),
+        waitingForBonus
       ),
-      waitingForBonus
+      damageForward ? String(damageForward.amount) : ""
     ),
-    damageForward ? String(damageForward.amount) : ""
+    thiefHalflingBonus
   );
   const finalDmgMod = (Number(dmgMod) || 0) + augBonus;
 

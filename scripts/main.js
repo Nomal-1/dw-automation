@@ -76,6 +76,9 @@ import { registerSafePlaceAssistant } from "./features/safe-place.js";
 import { registerObservantAssistant } from "./features/observant.js";
 import { registerRaceCoreAssistant } from "./features/race-core.js";
 import { registerWizardElfAssistant } from "./features/wizard-elf.js";
+import { registerRangerElfJourneyAssistant } from "./features/ranger-elf-journey.js";
+import { registerClericDwarfAssistant } from "./features/cleric-dwarf.js";
+import { registerCrossClassSpellAssistant } from "./features/cross-class-spell.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -163,3 +166,6 @@ registerSafePlaceAssistant();
 registerObservantAssistant();
 registerRaceCoreAssistant();
 registerWizardElfAssistant();
+registerRangerElfJourneyAssistant();
+registerClericDwarfAssistant();
+registerCrossClassSpellAssistant();

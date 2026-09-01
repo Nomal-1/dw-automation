@@ -843,6 +843,122 @@ export function registerSettings() {
     default: "Detect Magic"
   });
 
+  // 도적-하플링 종족 핵심 액션: 자세한 설계는 features/thief-halfling.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_THIEF_HALFLING_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableThiefHalflingAssistant.Name",
+    hint: "DWAUTO.Settings.EnableThiefHalflingAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.THIEF_HALFLING_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ThiefHalflingMoveNames.Name",
+    hint: "DWAUTO.Settings.ThiefHalflingMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "도적-하플링"
+  });
+
+  // 도적-인간 종족 핵심 액션: 자세한 설계는 features/thief-human.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_THIEF_HUMAN_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableThiefHumanAssistant.Name",
+    hint: "DWAUTO.Settings.EnableThiefHumanAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.THIEF_HUMAN_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ThiefHumanMoveNames.Name",
+    hint: "DWAUTO.Settings.ThiefHumanMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "도적-인간"
+  });
+
+  // 사냥꾼-엘프의 험난한 여정 자동 성공: 자세한 설계는
+  // features/ranger-elf-journey.js 참고. 사냥꾼-엘프 자체 이름은
+  // RANGER_ELF_MOVE_NAME 설정을 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_RANGER_ELF_JOURNEY_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableRangerElfJourneyAssistant.Name",
+    hint: "DWAUTO.Settings.EnableRangerElfJourneyAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.PERILOUS_JOURNEY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.PerilousJourneyMoveNames.Name",
+    hint: "DWAUTO.Settings.PerilousJourneyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Undertake A Perilous Journey"
+  });
+
+  // 사제-드워프 종족 핵심 액션: 자세한 설계는 features/cleric-dwarf.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CLERIC_DWARF_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableClericDwarfAssistant.Name",
+    hint: "DWAUTO.Settings.EnableClericDwarfAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CLERIC_DWARF_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ClericDwarfMoveNames.Name",
+    hint: "DWAUTO.Settings.ClericDwarfMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "사제-드워프"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WORDS_OF_UNSPEAKING_MOVE_NAMES, {
+    name: "DWAUTO.Settings.WordsOfUnspeakingMoveNames.Name",
+    hint: "DWAUTO.Settings.WordsOfUnspeakingMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Words of the Unspeaking"
+  });
+
+  // 사제-인간/마법사-인간(다른 직업 주문 하나를 선택)은 같은 로직을 공유한다:
+  // 자세한 설계는 features/cross-class-spell.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CROSS_CLASS_SPELL_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableCrossClassSpellAssistant.Name",
+    hint: "DWAUTO.Settings.EnableCrossClassSpellAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CLERIC_HUMAN_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ClericHumanMoveNames.Name",
+    hint: "DWAUTO.Settings.ClericHumanMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "사제-인간"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WIZARD_HUMAN_MOVE_NAMES, {
+    name: "DWAUTO.Settings.WizardHumanMoveNames.Name",
+    hint: "DWAUTO.Settings.WizardHumanMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "마법사-인간"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

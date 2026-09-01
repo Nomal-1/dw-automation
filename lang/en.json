@@ -895,6 +895,54 @@
       "DetectMagicMoveNames": {
         "Name": "Detect Magic Spell Name",
         "Hint": "Comma-separated (default: Detect Magic)."
+      },
+      "EnableThiefHalflingAssistant": {
+        "Name": "Enable Thief-Halfling Assistant",
+        "Hint": "Automatically adds +2 to ranged damage rolls for a character with this move."
+      },
+      "ThiefHalflingMoveNames": {
+        "Name": "Thief-Halfling Race Core Move Name",
+        "Hint": "Comma-separated (default: 도적-하플링)."
+      },
+      "EnableThiefHumanAssistant": {
+        "Name": "Enable Thief-Human Assistant",
+        "Hint": "Before Spout Lore or Discern Realities, asks whether it's about criminal activity, and applies +1 if so."
+      },
+      "ThiefHumanMoveNames": {
+        "Name": "Thief-Human Race Core Move Name",
+        "Hint": "Comma-separated (default: 도적-인간)."
+      },
+      "EnableRangerElfJourneyAssistant": {
+        "Name": "Enable Ranger-Elf Assistant",
+        "Hint": "If an Undertake A Perilous Journey roll isn't already a 10+, posts a note for a character with this move that it counts as a 10+, along with the success result list."
+      },
+      "PerilousJourneyMoveNames": {
+        "Name": "Undertake A Perilous Journey Move Name",
+        "Hint": "Comma-separated (default: Undertake A Perilous Journey)."
+      },
+      "EnableClericDwarfAssistant": {
+        "Name": "Enable Cleric-Dwarf Assistant",
+        "Hint": "Activating this move adds Words of the Unspeaking to the spellbook as a level-0 (stone-only) spell, or just lowers its level to 0 if already owned."
+      },
+      "ClericDwarfMoveNames": {
+        "Name": "Cleric-Dwarf Race Core Move Name",
+        "Hint": "Comma-separated (default: 사제-드워프)."
+      },
+      "WordsOfUnspeakingMoveNames": {
+        "Name": "Words of the Unspeaking Spell Name",
+        "Hint": "Comma-separated (default: Words of the Unspeaking)."
+      },
+      "EnableCrossClassSpellAssistant": {
+        "Name": "Enable Cleric-Human/Wizard-Human Assistant",
+        "Hint": "Activating either move lets you pick one spell from the other class's list and adds it to the spellbook."
+      },
+      "ClericHumanMoveNames": {
+        "Name": "Cleric-Human Race Core Move Name",
+        "Hint": "Comma-separated (default: 사제-인간)."
+      },
+      "WizardHumanMoveNames": {
+        "Name": "Wizard-Human Race Core Move Name",
+        "Hint": "Comma-separated (default: 마법사-인간)."
       }
     },
     "Npc": {
@@ -1740,6 +1788,27 @@
       "Added": "Added {spell} to the spellbook as a level-0 spell",
       "Lowered": "Lowered {spell}'s level to 0",
       "AlreadyCantrip": "{spell} is already a level-0 spell"
+    },
+    "ThiefHalfling": {
+      "Applied": "Thief-Halfling applied — +2 on this ranged damage roll"
+    },
+    "ThiefHuman": {
+      "Prompt": "Is this Spout Lore/Discern Realities about criminal activity?",
+      "Applied": "Thief-Human applied — +1 on this roll"
+    },
+    "RangerElfJourney": {
+      "ForcedSuccess": "{move} treats this roll as a 10+ (success): "
+    },
+    "ClericDwarf": {
+      "Added": "Added {spell} to the spellbook as a level-0 (stone-only) spell",
+      "Lowered": "Lowered {spell}'s level to 0",
+      "AlreadyGranted": "{spell} is already a level-0 spell",
+      "StoneOnlyNote": "Cleric-Dwarf rote — usable only on objects made of stone."
+    },
+    "CrossClassSpell": {
+      "ChooseLabel": "Which spell?",
+      "Added": "Added {spell} to the spellbook",
+      "AlreadyGranted": "Already got {spell} from {move}"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",

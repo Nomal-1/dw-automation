@@ -520,6 +520,23 @@ export async function runTranslationImport() {
     translateCommaList(spellMap, detectMagicMoveNames, stats)
   );
 
+  // 도적-하플링/도적-인간/사제-드워프/사제-인간/마법사-인간 자체 이름은 이
+  // 모듈이 만들어 넣는 이름이라 번역 대상이 아니다(settings.js 상단 주석
+  // 참고). 험난한 여정(공식 무브)과 목석의 말(공식 주문)만 번역한다.
+  const perilousJourneyMoveNames = game.settings.get(MODULE_ID, SETTINGS.PERILOUS_JOURNEY_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.PERILOUS_JOURNEY_MOVE_NAMES,
+    translateCommaList(moveMap, perilousJourneyMoveNames, stats)
+  );
+
+  const wordsOfUnspeakingMoveNames = game.settings.get(MODULE_ID, SETTINGS.WORDS_OF_UNSPEAKING_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.WORDS_OF_UNSPEAKING_MOVE_NAMES,
+    translateCommaList(spellMap, wordsOfUnspeakingMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

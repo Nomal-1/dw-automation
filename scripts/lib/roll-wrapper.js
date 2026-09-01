@@ -46,6 +46,7 @@ import { promptFountOfKnowledgePreRoll } from "../features/fount-of-knowledge.js
 import { promptLogicalPreRoll } from "../features/logical.js";
 import { promptFamiliarPreyPreRoll } from "../features/familiar-prey.js";
 import { promptSaferPlaceForwardPreRoll } from "../features/safe-place.js";
+import { promptThiefHumanPreRoll } from "../features/thief-human.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -182,6 +183,10 @@ async function wrappedRoll(wrapped, ...args) {
   // preRollBonus 합산에는 관여하지 않는다.
   const saferPlace = await promptSaferPlaceForwardPreRoll(this);
 
+  // 도적-인간(종족 핵심 액션)의 "범죄 활동 관련 지식 더듬기/상황 파악 +1"도
+  // 같은 자리에서 처리한다(features/thief-human.js 참고).
+  const thiefHuman = await promptThiefHumanPreRoll(this);
+
   const preRollBonus =
     iAmTheLaw.bonus +
     knowItAll.bonus +
@@ -194,6 +199,7 @@ async function wrappedRoll(wrapped, ...args) {
     bamboozle.bonus +
     fountOfKnowledge.bonus +
     saferPlace.bonus +
+    thiefHuman.bonus +
     getSeeingRedBonus(this) +
     getLoveTruckBonus(this);
 

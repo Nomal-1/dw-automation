@@ -895,6 +895,54 @@
       "DetectMagicMoveNames": {
         "Name": "마법 탐지 주문 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Detect Magic)."
+      },
+      "EnableThiefHalflingAssistant": {
+        "Name": "도적-하플링 자동화 사용",
+        "Hint": "이 액션을 가진 캐릭터의 원거리 무기 피해 굴림에 자동으로 +2를 더합니다."
+      },
+      "ThiefHalflingMoveNames": {
+        "Name": "도적-하플링 종족 핵심 액션 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 도적-하플링)."
+      },
+      "EnableThiefHumanAssistant": {
+        "Name": "도적-인간 자동화 사용",
+        "Hint": "지식 더듬기나 상황 파악 판정 직전에 범죄 활동 관련인지 물어보고, 그렇다고 답하면 +1을 반영합니다."
+      },
+      "ThiefHumanMoveNames": {
+        "Name": "도적-인간 종족 핵심 액션 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 도적-인간)."
+      },
+      "EnableRangerElfJourneyAssistant": {
+        "Name": "사냥꾼-엘프 자동화 사용",
+        "Hint": "험난한 여정 판정이 10+가 아니면, 이 액션을 가진 캐릭터에게는 10+로 취급한다는 안내와 성공 결과 목록을 채팅에 남깁니다."
+      },
+      "PerilousJourneyMoveNames": {
+        "Name": "험난한 여정 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Undertake A Perilous Journey)."
+      },
+      "EnableClericDwarfAssistant": {
+        "Name": "사제-드워프 자동화 사용",
+        "Hint": "이 액션을 발동하면 목석의 말을 레벨 0 주문(돌 전용)으로 스펠북에 추가합니다(이미 갖고 있으면 레벨만 0으로 낮춰줍니다)."
+      },
+      "ClericDwarfMoveNames": {
+        "Name": "사제-드워프 종족 핵심 액션 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 사제-드워프)."
+      },
+      "WordsOfUnspeakingMoveNames": {
+        "Name": "목석의 말 주문 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Words of the Unspeaking)."
+      },
+      "EnableCrossClassSpellAssistant": {
+        "Name": "사제-인간/마법사-인간 자동화 사용",
+        "Hint": "발동하면 다른 직업(마법사/사제) 주문 목록에서 하나를 골라 스펠북에 추가합니다."
+      },
+      "ClericHumanMoveNames": {
+        "Name": "사제-인간 종족 핵심 액션 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 사제-인간)."
+      },
+      "WizardHumanMoveNames": {
+        "Name": "마법사-인간 종족 핵심 액션 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: 마법사-인간)."
       }
     },
     "Npc": {
@@ -1740,6 +1788,27 @@
       "Added": "{spell}을(를) 레벨 0 주문으로 스펠북에 추가했습니다",
       "Lowered": "{spell}의 레벨을 0으로 낮췄습니다",
       "AlreadyCantrip": "{spell}이(가) 이미 레벨 0 주문으로 있습니다"
+    },
+    "ThiefHalfling": {
+      "Applied": "도적-하플링 적용 — 이번 원거리 피해에 +2"
+    },
+    "ThiefHuman": {
+      "Prompt": "범죄 활동에 관한 지식 더듬기/상황 파악입니까?",
+      "Applied": "도적-인간 적용 — 이번 판정에 +1"
+    },
+    "RangerElfJourney": {
+      "ForcedSuccess": "{move} 효과로 이 판정은 10+(성공)로 취급합니다: "
+    },
+    "ClericDwarf": {
+      "Added": "{spell}을(를) 레벨 0 주문(돌 전용)으로 스펠북에 추가했습니다",
+      "Lowered": "{spell}의 레벨을 0으로 낮췄습니다",
+      "AlreadyGranted": "{spell}이(가) 이미 레벨 0 주문으로 있습니다",
+      "StoneOnlyNote": "사제-드워프 전용 암송주문 — 돌로 된 물체에만 사용할 수 있습니다."
+    },
+    "CrossClassSpell": {
+      "ChooseLabel": "어느 주문을 고르시겠습니까?",
+      "Added": "{spell}을(를) 스펠북에 추가했습니다",
+      "AlreadyGranted": "{move}(으)로 이미 {spell}을(를) 얻었습니다"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "현재 레벨 사제 주문 모두 얻기",
