@@ -79,6 +79,11 @@
         "Label": "Open Auto-fill Tool",
         "Hint": "If the Nomal-1/dungeonworld-ko Korean translation module is installed, fill in the move/spell name settings above using its translation data instead of typing them by hand."
       },
+      "RaceCoreCompendiumMenu": {
+        "Name": "Build Race Core Move Compendium",
+        "Label": "Open Compendium Builder",
+        "Hint": "Builds a world compendium with the race core moves for all 8 base classes (e.g. Ranger-Elf, Ranger-Human), organized into per-class folders. Once built, drag any of them onto any character (new or existing)."
+      },
       "EnableHitTriggerAssistant": {
         "Name": "Enable Hit-Taken Automation",
         "Hint": "When a player character's HP is about to drop, asks whether to negate the damage using a move like Armor Mastery or Bloody Aegis (at the cost of armor or a debility) before the HP change is applied. Which moves qualify is managed in the Hit-Taken Moves setting below."
@@ -1055,6 +1060,14 @@
       "RunButton": "Run Auto-fill Now",
       "Close": "Close",
       "Done": "Auto-fill complete: {matched} matched, {unmatched} not found (left unchanged)."
+    },
+    "RaceCoreCompendium": {
+      "Title": "Build Race Core Move Compendium",
+      "Hint": "Builds a world compendium with the race core moves for all 8 base classes, organized into per-class folders. Existing folders/items are left untouched — only missing ones are added.",
+      "PackLabel": "DW Automation - Race Core Moves",
+      "RunButton": "Build/Update Compendium Now",
+      "Close": "Close",
+      "Done": "Done: {created} added, {skipped} already existed and were skipped."
     },
     "HitTriggerMoves": {
       "Title": "Hit-Taken Moves",

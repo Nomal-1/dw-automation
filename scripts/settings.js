@@ -5,6 +5,7 @@ import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
 import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 import { TranslationImportMenu } from "./apps/translation-import-menu.js";
+import { RaceCoreCompendiumMenu } from "./apps/race-core-compendium-menu.js";
 import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
 import { HealingMovesMenu } from "./apps/healing-moves-menu.js";
 import { HospitallerMovesMenu } from "./apps/hospitaller-moves-menu.js";
@@ -89,6 +90,19 @@ export function registerSettings() {
     hint: "DWAUTO.Settings.TranslationImportMenu.Hint",
     icon: "fas fa-language",
     type: TranslationImportMenu,
+    restricted: true
+  });
+
+  // 8개 직업 종족 핵심 액션을 담은 진짜 Foundry 컴펜디엄을 만드는 버튼.
+  // 자세한 설계는 lib/race-core-compendium.js 참고 — 자동으로 실행되지
+  // 않고, GM이 이 버튼을 눌러야만 만들어지거나(이미 있으면) 빠진 항목만
+  // 채워진다.
+  game.settings.registerMenu(MODULE_ID, "raceCoreCompendiumMenu", {
+    name: "DWAUTO.Settings.RaceCoreCompendiumMenu.Name",
+    label: "DWAUTO.Settings.RaceCoreCompendiumMenu.Label",
+    hint: "DWAUTO.Settings.RaceCoreCompendiumMenu.Hint",
+    icon: "fas fa-book",
+    type: RaceCoreCompendiumMenu,
     restricted: true
   });
 
