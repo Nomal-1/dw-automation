@@ -46,7 +46,7 @@ export const DEFAULT_HIT_TRIGGER_MOVES = [
   { name: "Spell Defense", effect: "spellDefense", grantsForward: false },
   { name: "Divine Intervention", effect: "hold", grantsForward: false },
   { name: "Divine Invincibility", effect: "hold", grantsForward: false },
-  { name: "Man's Best Friend", effect: "animalCompanion", grantsForward: false },
+  { name: "Man’s Best Friend", effect: "animalCompanion", grantsForward: false },
   { name: "Indestructible Hunger", effect: "ongoingPenalty", grantsForward: false },
   { name: "Fighting Fire with Fire", effect: "fireAid", grantsForward: false },
   { name: "Penitent", effect: "embracePain", grantsForward: false },

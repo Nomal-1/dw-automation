@@ -827,6 +827,36 @@ async function migrateAddSurveyedDefaults() {
   );
 }
 
+// Man's Best Friend의 기본값이 작은따옴표(')로 잘못 들어가 있었다(공식
+// 컴펜디엄 원문은 어퍼스트로피(’)). translateOne은 정확히 일치하는 이름만
+// 번역하므로, 이 오타 때문에 일괄 번역을 몇 번을 돌려도 이 행만 계속 영문
+// 그대로 남아 있었다 — Duelist's Parry/Kill 'Em All 등에서 이미 겪은 것과
+// 같은 부류의 실수다. data/hit-trigger-moves.js는 이제 고쳐졌지만, 이미
+// migrateAddSurveyedDefaults로 저장돼버린 GM의 표에는 옛 오타가 그대로
+// 남아있으므로, 그 이름을 찾아 고쳐 쓰고 번역까지 한 번에 적용한다.
+const MANS_BEST_FRIEND_TYPO = "Man's Best Friend";
+
+async function migrateFixMansBestFriendApostrophe() {
+  if (!game.user.isGM) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
+  const index = rows.findIndex((r) => r.name === MANS_BEST_FRIEND_TYPO);
+  if (index === -1) return;
+
+  let correctedName = DEFAULT_HIT_TRIGGER_MOVES.find((r) => r.effect === "animalCompanion")?.name ?? MANS_BEST_FRIEND_TYPO;
+  try {
+    const nameMap = await getMoveNameMap();
+    correctedName = nameMap.get(correctedName) ?? correctedName;
+  } catch (err) {
+    // 번역 데이터를 못 읽어도 최소한 올바른 어퍼스트로피의 영문 이름으로는 고친다.
+  }
+
+  const next = [...rows];
+  next[index] = { ...next[index], name: correctedName };
+  await game.settings.set(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES, next);
+  console.log(`${MODULE_ID} | hit-trigger: fixed Man's Best Friend apostrophe typo -> "${correctedName}"`);
+}
+
 // 레인저 Man's Best Friend 옆에 사나움 상태를, 바바리안 Indestructible
 // Hunger 옆에 페널티 상태를 배지로 보여준다. 둘 다 "언제 원래대로 돌아오는지"
 // (몇 시간 휴식 / 욕구를 채움)를 채팅 트리거로 자동 감지할 수 없어서,
@@ -889,6 +919,6 @@ export function registerHitTriggerAssistant() {
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.once("ready", () => {
     game.socket.on(SOCKET_NAME, onSocketEvent);
-    migrateAddSurveyedDefaults();
+    migrateFixMansBestFriendApostrophe().then(() => migrateAddSurveyedDefaults());
   });
 }
