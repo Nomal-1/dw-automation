@@ -501,6 +501,16 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, huntTrackMoveNames, stats)
   );
 
+  // 사냥꾼-엘프/사냥꾼-인간은 이 모듈이 직접 만들어 넣는 종족 핵심 액션이라
+  // 던전월드 컴펜디엄에 원본이 없다 — 번역 대상에서 제외한다(settings.js
+  // 상단 주석 참고). 하프엘프 자체는 공식 무브라 그대로 번역한다.
+  const halfElvenMoveNames = game.settings.get(MODULE_ID, SETTINGS.HALF_ELVEN_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.HALF_ELVEN_MOVE_NAMES,
+    translateCommaList(moveMap, halfElvenMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

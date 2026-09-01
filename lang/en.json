@@ -862,6 +862,22 @@
       "HuntTrackMoveNames": {
         "Name": "Hunt & Track Move Names",
         "Hint": "Comma-separated (default: Hunt & Track)."
+      },
+      "EnableRaceCoreAssistant": {
+        "Name": "Enable Race Core Move Assistant (Half-elven)",
+        "Hint": "Activating Half-elven finds whichever of Ranger-Elf/Ranger-Human this character actually has, and creates the missing one. Currently only the Ranger is supported."
+      },
+      "HalfElvenMoveNames": {
+        "Name": "Half-elven Move Names",
+        "Hint": "Comma-separated (default: Half-elven)."
+      },
+      "RangerElfMoveName": {
+        "Name": "Ranger-Elf Race Core Move Name",
+        "Hint": "The name Half-elven creates/looks for. Have the GM add a move with this exact name to the actor directly at character creation."
+      },
+      "RangerHumanMoveName": {
+        "Name": "Ranger-Human Race Core Move Name",
+        "Hint": "The name Half-elven creates/looks for. Have the GM add a move with this exact name to the actor directly at character creation."
       }
     },
     "Npc": {
@@ -1689,6 +1705,11 @@
     },
     "Observant": {
       "ExtraChoice": "You can ask an extra question outside the Hunt & Track list"
+    },
+    "RaceCore": {
+      "Added": "Added the {name} move",
+      "AlreadyHasBoth": "Already has both Ranger-Elf and Ranger-Human, nothing to add",
+      "NoneFound": "Has neither Ranger-Elf nor Ranger-Human, so it's unclear which one to add. Have the GM add the race core move chosen at character creation first."
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",

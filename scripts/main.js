@@ -74,6 +74,7 @@ import { registerSpellLevelGuard } from "./features/spell-level-guard.js";
 import { registerFamiliarPreyAssistant } from "./features/familiar-prey.js";
 import { registerSafePlaceAssistant } from "./features/safe-place.js";
 import { registerObservantAssistant } from "./features/observant.js";
+import { registerRaceCoreAssistant } from "./features/race-core.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -159,3 +160,4 @@ registerSpellLevelGuard();
 registerFamiliarPreyAssistant();
 registerSafePlaceAssistant();
 registerObservantAssistant();
+registerRaceCoreAssistant();

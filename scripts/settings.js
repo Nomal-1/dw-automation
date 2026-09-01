@@ -758,6 +758,46 @@ export function registerSettings() {
     default: "Hunt & Track"
   });
 
+  // 레인저 무브 하프엘프: 자세한 설계는 features/race-core.js 참고. 사냥꾼-
+  // 엘프/사냥꾼-인간은 던전월드 공식 컴펜디엄에 없는(이 모듈이 직접 만들어
+  // 넣는) 종족 핵심 액션이라, 다른 무브 이름 설정과 달리 번역 컴펜디엄에서
+  // 자동으로 채워지지 않는다 — 기본값 자체가 이미 한국어다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_RACE_CORE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableRaceCoreAssistant.Name",
+    hint: "DWAUTO.Settings.EnableRaceCoreAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HALF_ELVEN_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HalfElvenMoveNames.Name",
+    hint: "DWAUTO.Settings.HalfElvenMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Half-elven"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.RANGER_ELF_MOVE_NAME, {
+    name: "DWAUTO.Settings.RangerElfMoveName.Name",
+    hint: "DWAUTO.Settings.RangerElfMoveName.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "사냥꾼-엘프"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.RANGER_HUMAN_MOVE_NAME, {
+    name: "DWAUTO.Settings.RangerHumanMoveName.Name",
+    hint: "DWAUTO.Settings.RangerHumanMoveName.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "사냥꾼-인간"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",
