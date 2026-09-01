@@ -36,6 +36,39 @@ const ANIMAL_STRENGTHS_FLAG = "animalCompanionStrengths";
 const ANIMAL_TRAININGS_FLAG = "animalCompanionTrainings";
 const ANIMAL_WEAKNESSES_FLAG = "animalCompanionWeaknesses";
 
+// 팔라딘 신의 은혜(Divine Favor) 원문: "이 무브를 고르면 주문 시전 목적으로
+// 자신을 1레벨 클레릭처럼 취급한다. 그 뒤로 레벨이 오를 때마다 이 클레릭
+// 레벨도 1씩 오른다." 발동 시 1로 시작하고, 이후 실제 캐릭터 레벨이
+// 바뀔 때마다(preUpdateActor에서 옛 레벨을 잠깐 기억해뒀다가 updateActor에서
+// 그 차이만큼) 같이 조정한다. GM은 탭에서 숫자를 직접 고쳐도 된다 — 그
+// 뒤로도 레벨이 오르면 그 고친 값 기준으로 계속 +1씩 된다. features/
+// spell-preparation.js의 getActorLevel이 이 값을 실제 캐릭터 레벨 대신
+// 읽어서, 예배(Commune)의 주문 준비 한도가 이 클레릭 레벨 기준으로 계산되게
+// 한다.
+const CLERIC_LEVEL_FLAG = "paladinClericLevel";
+const DIVINE_FAVOR_NAMES = ["Divine Favor", "신의 은혜"];
+const lastKnownActorLevel = new Map(); // actor.id -> preUpdateActor에서 기억해둔 옛 레벨
+
+function isDivineFavorMove(moveItem) {
+  return DIVINE_FAVOR_NAMES.includes(moveItem.name);
+}
+
+function getClericLevel(actor) {
+  return actor.getFlag(MODULE_ID, CLERIC_LEVEL_FLAG) ?? null;
+}
+
+async function setClericLevel(actor, value) {
+  const clamped = Math.max(1, Math.floor(Number(value)) || 1);
+  await actor.setFlag(MODULE_ID, CLERIC_LEVEL_FLAG, clamped);
+}
+
+// features/spell-preparation.js가 예배(Commune)의 주문 준비 한도를 계산할
+// 때 재사용한다. 신의 은혜를 발동한 적이 없으면(파딘이 아니거나 아직
+// 안 골랐으면) null — 호출부가 실제 캐릭터 레벨을 그대로 쓰면 된다.
+export function getPaladinClericLevel(actor) {
+  return getClericLevel(actor);
+}
+
 // features/well-trained.js(재주꾼)·features/unnatural-ally.js처럼 동물 친구
 // 상태에 얹혀사는 "무브당 한 번만 적용" 플래그를 가진 기능이 등록해두면,
 // 동물 친구 탭이 초기화될 때마다(resetNoteMove) 같이 호출해준다. 이게 없으면
@@ -163,11 +196,41 @@ const BLANK_PATTERN = /_{2,}/;
 // 수 있는 목록으로 보여준다(renderGmChoiceSection 참고).
 const GM_MARKER_PATTERN = /\bGM\b|마스터/i;
 
+// 팔라딘 신성한 임무(Quest)의 "그리고 다음 중에서 최대 두 가지 축복을
+// 고릅니다"처럼, 목록 바로 앞 문단에 "몇 개까지 고를 수 있는지"가 적혀
+// 있으면 그 숫자를 뽑아낸다(없으면 평소처럼 1개). "두 가지"/"세 가지"
+// 같은 한글 숫자말과 "choose two"/"choose up to three" 같은 영문 표현을
+// 모두 지원한다 — 다른 메모형 무브(신의 영역 등)의 평범한 "고르세요" 문구는
+// 숫자가 없으니 그대로 1개로 남는다.
+const KOREAN_COUNT_WORDS = { 하나: 1, 한: 1, 두: 2, 세: 3, 네: 4, 다섯: 5 };
+const ENGLISH_COUNT_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5 };
+
+function parseGroupMaxCount(precedingText) {
+  if (!precedingText) return 1;
+
+  const koMatch = precedingText.match(/(하나|한|두|세|네|다섯|\d+)\s*(?:가지|개)/);
+  if (koMatch) {
+    const raw = koMatch[1];
+    return KOREAN_COUNT_WORDS[raw] ?? parseInt(raw, 10) ?? 1;
+  }
+
+  if (/choose|pick/i.test(precedingText)) {
+    const enMatch = precedingText.match(/\b(one|two|three|four|five|\d+)\b/i);
+    if (enMatch) {
+      const raw = enMatch[1].toLowerCase();
+      return ENGLISH_COUNT_WORDS[raw] ?? parseInt(raw, 10) ?? 1;
+    }
+  }
+
+  return 1;
+}
+
 function classifyGroup(playerGroups, gmGroups, group, precedingText) {
+  const withCount = { ...group, maxCount: parseGroupMaxCount(precedingText) };
   if (GM_MARKER_PATTERN.test(precedingText)) {
-    gmGroups.push(group);
+    gmGroups.push(withCount);
   } else {
-    playerGroups.push(group);
+    playerGroups.push(withCount);
   }
 }
 
@@ -233,10 +296,28 @@ const KNOWN_MISSING_GM_GROUPS = [
 function applyKnownMissingGmGroups(moveItem, gmGroups) {
   if (gmGroups.length > 0) return;
   const entry = KNOWN_MISSING_GM_GROUPS.find((e) => e.matchNames.includes(moveItem.name));
-  if (entry) gmGroups.push({ label: entry.label, options: entry.options });
+  if (entry) gmGroups.push({ label: entry.label, options: entry.options, maxCount: 1 });
 }
 
-function extractListGroups(moveItem) {
+// 팔라딘 기사의 귀감(Perfect Knight) 원문: "신성한 임무를 발동하면 축복을
+// 2개 대신 3개 고른다." 신성한 임무의 "축복" 목록만 최대 개수가 2로
+// 파싱되므로(그 목록 앞 문단에 "최대 두 가지"라고 적혀 있어서), 그 목록만
+// 정확히 골라 3으로 올린다 — 사명/서약 등 신성한 임무의 다른 목록(둘 다
+// maxCount가 1이나 그 밖의 값)은 건드리지 않는다.
+const QUEST_NAMES = ["Quest", "신성한 임무"];
+const PERFECT_KNIGHT_NAMES = ["Perfect Knight", "기사의 귀감"];
+
+function applyPerfectKnightBoonBoost(actor, moveItem, playerGroups) {
+  if (!QUEST_NAMES.includes(moveItem.name)) return;
+  const hasPerfectKnight = actor.items.some((i) => i.type === "move" && PERFECT_KNIGHT_NAMES.includes(i.name));
+  if (!hasPerfectKnight) return;
+
+  for (const group of playerGroups) {
+    if (group.maxCount === 2) group.maxCount = 3;
+  }
+}
+
+function extractListGroups(moveItem, actor) {
   const rawDescription = moveItem.system?.description ?? "";
   const html = $(`<div>${rawDescription}</div>`);
   const playerGroups = [];
@@ -257,6 +338,7 @@ function extractListGroups(moveItem) {
 
   extractBulletPseudoGroups(html, playerGroups, gmGroups);
   applyKnownMissingGmGroups(moveItem, gmGroups);
+  applyPerfectKnightBoonBoost(actor, moveItem, playerGroups);
 
   console.log(
     `${MODULE_ID} | note-moves: extracted lists for "${moveItem.name}" — player: ${playerGroups.length}, gm: ${gmGroups.length}\n` +
@@ -268,28 +350,53 @@ function extractListGroups(moveItem) {
   return { playerGroups, gmGroups };
 }
 
-function promptListAnswers(moveItem, groups) {
-  const fieldsHtml = groups
-    .map((group, index) => {
-      const selectOptions = group.options
-        .map((opt) => `<option value="${opt}">${opt}</option>`)
-        .concat(`<option value="${CUSTOM_VALUE}">${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</option>`)
-        .join("");
+// maxCount가 1보다 큰 목록(신성한 임무의 축복 등)은 드롭다운 대신
+// 체크박스로 보여준다 — 정확히 N개가 아니라 "최대 N개"라 그보다 적게
+// 골라도 막지 않고, 초과했을 때만 다시 띄운다(이계의 음률/화음과 같은
+// "최대 개수" 원칙). 빈칸이 있는 선택지(예: "만인의 적 ______를 죽인다")는
+// 체크하면 그 옆에 채워 넣을 문구를 입력하는 칸이 나타난다.
+function buildGroupFieldHtml(group, index) {
+  if (group.maxCount > 1) {
+    const checkboxesHtml = group.options
+      .map((opt, optIndex) => {
+        const hasBlank = BLANK_PATTERN.test(opt);
+        return `
+          <label class="dwauto-counted-option"><input type="checkbox" class="dwauto-multi-answer" data-group="${index}" data-option="${optIndex}" value="${opt}"> ${opt}</label>
+          ${hasBlank ? `<input type="text" class="dwauto-multi-blank" data-group="${index}" data-option="${optIndex}" style="display:none;" placeholder="${game.i18n.localize("DWAUTO.NoteMoves.BlankPlaceholder")}">` : ""}
+        `;
+      })
+      .join("");
 
-      return `
-        <div class="form-group">
-          <label>${group.label ?? game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</label>
-          <select name="answer${index}">${selectOptions}</select>
-        </div>
-        <div class="form-group dwauto-note-blank" data-index="${index}" style="display:none;">
-          <input type="text" name="blankAnswer${index}" value="" placeholder="${game.i18n.localize("DWAUTO.NoteMoves.BlankPlaceholder")}">
-        </div>
-        <div class="form-group dwauto-note-custom" data-index="${index}" style="display:none;">
-          <input type="text" name="customAnswer${index}" value="">
-        </div>
-      `;
-    })
+    return `
+      <div class="form-group">
+        <label>${group.label ?? game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</label>
+        <p class="dwauto-counted-count" data-group="${index}"></p>
+        <div class="dwauto-counted-list">${checkboxesHtml}</div>
+      </div>
+    `;
+  }
+
+  const selectOptions = group.options
+    .map((opt) => `<option value="${opt}">${opt}</option>`)
+    .concat(`<option value="${CUSTOM_VALUE}">${game.i18n.localize("DWAUTO.NoteMoves.CustomOption")}</option>`)
     .join("");
+
+  return `
+    <div class="form-group">
+      <label>${group.label ?? game.i18n.localize("DWAUTO.NoteMoves.PromptLabel")}</label>
+      <select name="answer${index}">${selectOptions}</select>
+    </div>
+    <div class="form-group dwauto-note-blank" data-index="${index}" style="display:none;">
+      <input type="text" name="blankAnswer${index}" value="" placeholder="${game.i18n.localize("DWAUTO.NoteMoves.BlankPlaceholder")}">
+    </div>
+    <div class="form-group dwauto-note-custom" data-index="${index}" style="display:none;">
+      <input type="text" name="customAnswer${index}" value="">
+    </div>
+  `;
+}
+
+function promptListAnswers(moveItem, groups) {
+  const fieldsHtml = groups.map((group, index) => buildGroupFieldHtml(group, index)).join("");
 
   return new Promise((resolve) => {
     new Dialog({
@@ -299,20 +406,50 @@ function promptListAnswers(moveItem, groups) {
         ok: {
           label: game.i18n.localize("DWAUTO.Confirm"),
           callback: (html) => {
-            const answers = groups
-              .map((_, index) => {
-                const value = html.find(`[name="answer${index}"]`).val();
-                if (value === CUSTOM_VALUE) {
-                  return (html.find(`[name="customAnswer${index}"]`).val() ?? "").trim();
+            const answers = [];
+            let tooMany = false;
+
+            groups.forEach((group, index) => {
+              if (group.maxCount > 1) {
+                const checked = html.find(`.dwauto-multi-answer[data-group="${index}"]:checked`);
+                if (checked.length > group.maxCount) {
+                  tooMany = true;
+                  return;
                 }
-                if (BLANK_PATTERN.test(value)) {
-                  const fill = (html.find(`[name="blankAnswer${index}"]`).val() ?? "").trim();
-                  return fill ? value.replace(BLANK_PATTERN, fill) : value;
-                }
-                return value;
-              })
-              .filter(Boolean);
-            resolve(answers);
+                checked.each((_, el) => {
+                  let value = el.value;
+                  if (BLANK_PATTERN.test(value)) {
+                    const fill = (
+                      html.find(`.dwauto-multi-blank[data-group="${index}"][data-option="${el.dataset.option}"]`).val() ?? ""
+                    ).trim();
+                    if (fill) value = value.replace(BLANK_PATTERN, fill);
+                  }
+                  answers.push(value);
+                });
+                return;
+              }
+
+              const value = html.find(`[name="answer${index}"]`).val();
+              if (value === CUSTOM_VALUE) {
+                const custom = (html.find(`[name="customAnswer${index}"]`).val() ?? "").trim();
+                if (custom) answers.push(custom);
+                return;
+              }
+              if (BLANK_PATTERN.test(value)) {
+                const fill = (html.find(`[name="blankAnswer${index}"]`).val() ?? "").trim();
+                answers.push(fill ? value.replace(BLANK_PATTERN, fill) : value);
+                return;
+              }
+              answers.push(value);
+            });
+
+            if (tooMany) {
+              ui.notifications.warn(game.i18n.localize("DWAUTO.NoteMoves.TooManySelected"));
+              promptListAnswers(moveItem, groups).then(resolve);
+              return;
+            }
+
+            resolve(answers.filter(Boolean));
           }
         },
         cancel: {
@@ -323,15 +460,32 @@ function promptListAnswers(moveItem, groups) {
       default: "ok",
       width: 480,
       render: (html) => {
-        const updateFieldVisibility = (index) => {
-          const value = html.find(`[name="answer${index}"]`).val();
-          html.find(`.dwauto-note-custom[data-index="${index}"]`).toggle(value === CUSTOM_VALUE);
-          html.find(`.dwauto-note-blank[data-index="${index}"]`).toggle(value !== CUSTOM_VALUE && BLANK_PATTERN.test(value));
-        };
+        groups.forEach((group, index) => {
+          if (group.maxCount > 1) {
+            const updateCount = () => {
+              const count = html.find(`.dwauto-multi-answer[data-group="${index}"]:checked`).length;
+              html
+                .find(`.dwauto-counted-count[data-group="${index}"]`)
+                .text(game.i18n.format("DWAUTO.NoteMoves.CountedSelectedMax", { count, max: group.maxCount }));
+            };
+            html.find(`.dwauto-multi-answer[data-group="${index}"]`).on("change", (event) => {
+              const optIndex = event.currentTarget.dataset.option;
+              html
+                .find(`.dwauto-multi-blank[data-group="${index}"][data-option="${optIndex}"]`)
+                .toggle(event.currentTarget.checked);
+              updateCount();
+            });
+            updateCount();
+            return;
+          }
 
-        groups.forEach((_, index) => {
-          updateFieldVisibility(index);
-          html.find(`[name="answer${index}"]`).on("change", () => updateFieldVisibility(index));
+          const updateFieldVisibility = () => {
+            const value = html.find(`[name="answer${index}"]`).val();
+            html.find(`.dwauto-note-custom[data-index="${index}"]`).toggle(value === CUSTOM_VALUE);
+            html.find(`.dwauto-note-blank[data-index="${index}"]`).toggle(value !== CUSTOM_VALUE && BLANK_PATTERN.test(value));
+          };
+          updateFieldVisibility();
+          html.find(`[name="answer${index}"]`).on("change", updateFieldVisibility);
         });
       },
       close: () => resolve(null)
@@ -430,7 +584,7 @@ async function promptAnimalCompanionChoiceLists(actor, moveItem, stats) {
 }
 
 async function activate(actor, moveItem) {
-  const { playerGroups } = extractListGroups(moveItem);
+  const { playerGroups } = extractListGroups(moveItem, actor);
   let answers = null;
 
   if (playerGroups.length > 0) {
@@ -439,6 +593,10 @@ async function activate(actor, moveItem) {
   }
 
   await setActivated(actor, moveItem.id, true);
+
+  if (isDivineFavorMove(moveItem) && getClericLevel(actor) === null) {
+    await setClericLevel(actor, 1);
+  }
 
   if (answers && answers.length > 0) {
     await setAnswer(actor, moveItem.id, answers);
@@ -583,7 +741,8 @@ function renderTab(actor, moveItem, html) {
   const description = moveItem.system?.description ?? "";
   const answers = getAnswer(actor, moveItem.id);
   const text = getNoteText(actor, moveItem.id);
-  const { gmGroups } = extractListGroups(moveItem);
+  const { gmGroups } = extractListGroups(moveItem, actor);
+  const clericLevel = isDivineFavorMove(moveItem) ? (getClericLevel(actor) ?? 1) : null;
   const isAnimalCompanion = parseAnimalCompanionChoiceLists(description) !== null;
   const stats = isAnimalCompanion ? getAnimalCompanionStats(actor) : null;
   const strengths = isAnimalCompanion ? actor.getFlag(MODULE_ID, ANIMAL_STRENGTHS_FLAG) ?? [] : [];
@@ -614,11 +773,21 @@ function renderTab(actor, moveItem, html) {
       ${renderTagRow("DWAUTO.NoteMoves.AnimalStrengthsTitle", strengths)}
       ${renderTagRow("DWAUTO.NoteMoves.AnimalTrainingsTitle", trainings)}
       ${renderTagRow("DWAUTO.NoteMoves.AnimalWeaknessesTitle", weaknesses)}
+      ${
+        clericLevel !== null
+          ? `<label class="cell__title">${game.i18n.localize("DWAUTO.NoteMoves.ClericLevelLabel")}</label>
+             <input type="number" class="dwauto-cleric-level-input" min="1" value="${clericLevel}">`
+          : ""
+      }
       ${renderGmChoiceSection(actor, moveItem, gmGroups)}
       <label class="cell__title dwauto-note-move">${game.i18n.localize("DWAUTO.NoteMoves.NotesLabel")}</label>
       <textarea class="dwauto-note-textarea" rows="8">${text}</textarea>
     </div>
   `);
+
+  $section.find(".dwauto-cleric-level-input").on("change", (event) => {
+    setClericLevel(actor, event.currentTarget.value);
+  });
 
   $section.find(".dwauto-gm-choice-checkbox").on("change", () => {
     const checked = $section
@@ -763,9 +932,57 @@ async function migrateBackfillAnimalCompanionStats() {
   console.log(`${MODULE_ID} | note-moves: backfilled animal companion stats for already-activated actors`);
 }
 
+// 신의 은혜의 클레릭 레벨을 실제 캐릭터 레벨과 같이 움직이게 한다.
+// preUpdateActor 시점에는 아직 옛 레벨이 남아있으므로 여기서 잠깐 기억해뒀다가,
+// updateActor에서 그 차이(보통 +1이지만 GM이 레벨을 여러 단계 조정하는
+// 경우도 있어 델타로 계산한다)만큼 클레릭 레벨도 같이 조정한다.
+function onPreUpdateActorForClericLevel(actor, changes) {
+  if (!isEnabled()) return true;
+  if (actor.type !== "character") return true;
+
+  const flat = foundry.utils.flattenObject(changes);
+  if (!("system.attributes.level.value" in flat)) return true;
+
+  lastKnownActorLevel.set(actor.id, Number(actor.system.attributes?.level?.value) || 1);
+  return true;
+}
+
+function onUpdateActorForClericLevel(actor, changes, options, userId) {
+  if (!isEnabled()) return;
+  if (actor.type !== "character") return;
+  if (userId !== game.user.id) return;
+
+  const flat = foundry.utils.flattenObject(changes);
+  if (!("system.attributes.level.value" in flat)) return;
+
+  const oldLevel = lastKnownActorLevel.get(actor.id);
+  lastKnownActorLevel.delete(actor.id);
+  if (oldLevel === undefined) return;
+
+  const clericLevel = getClericLevel(actor);
+  if (clericLevel === null) return;
+
+  const newLevel = Number(flat["system.attributes.level.value"]) || oldLevel;
+  const delta = newLevel - oldLevel;
+  if (delta === 0) return;
+
+  setClericLevel(actor, clericLevel + delta).then(() => {
+    const moveItem = actor.items.find((i) => i.type === "move" && DIVINE_FAVOR_NAMES.includes(i.name));
+    if (moveItem) {
+      announceActionApplied(
+        actor,
+        moveItem.name,
+        game.i18n.format("DWAUTO.NoteMoves.ClericLevelChanged", { level: Math.max(1, clericLevel + delta) })
+      );
+    }
+  });
+}
+
 export function registerNoteMoves() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.on("preUpdateActor", onPreUpdateActorForClericLevel);
+  Hooks.on("updateActor", onUpdateActorForClericLevel);
   Hooks.once("ready", () => {
     migrateBornOfSoilIntoNoteMoves()
       .then(() => migrateLegacyOwnershipToActivation())

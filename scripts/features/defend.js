@@ -60,6 +60,24 @@ function findMoveByConfiguredNames(actor) {
   return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
 }
 
+// 팔라딘 견고한 방어(Staunch Defender)/무적의 방어(Impervious Defender,
+// 견고한 방어의 6레벨 상위 무브) 원문: "방어를 할 때 항상 +1 예비를
+// 받는다(6- 에서도)." 방어 자동화가 이미 계산한 예비(성공 3/부분성공 1/
+// 실패 0)에 그대로 더한다 — 실패에 더하면 0+1=1이 되어 "6-에서도"라는
+// 원문 조건이 자연히 만족된다. 무적의 방어는 추가로 "12+면 예비 대신
+// 근처의 공격자를 무력화한다"(onCreateChatMessage 참고)는 효과가 있어
+// 별도로 확인한다.
+function hasStaunchOrImperviousDefender(actor) {
+  const staunch = splitCommaList(SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES);
+  const impervious = splitCommaList(SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && (staunch.includes(i.name) || impervious.includes(i.name)));
+}
+
+function hasImperviousDefender(actor) {
+  const names = splitCommaList(SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES);
+  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+}
+
 async function matchesConfiguredName(title) {
   const configured = splitCommaList(SETTINGS.DEFEND_MOVE_NAMES);
   if (configured.includes(title)) return true;
@@ -209,7 +227,7 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, result } = info;
+    const { actor, title, result, isExtreme } = info;
     if (actor.type !== "character") return;
     if (!result) return;
 
@@ -220,7 +238,13 @@ async function onCreateChatMessage(message, options, userId) {
 
     await clearDefendState(actor);
 
-    const amount = result === "success" ? 3 : result === "partial" ? 1 : 0;
+    if (isExtreme && hasImperviousDefender(actor)) {
+      announceActionApplied(actor, moveItem.name, game.i18n.localize("DWAUTO.Defend.ImperviousStymie"));
+      return;
+    }
+
+    const staunchBonus = hasStaunchOrImperviousDefender(actor) ? 1 : 0;
+    const amount = (result === "success" ? 3 : result === "partial" ? 1 : 0) + staunchBonus;
     if (amount === 0) {
       announceActionApplied(actor, moveItem.name, game.i18n.localize("DWAUTO.Defend.FailedNoReserve"));
       return;

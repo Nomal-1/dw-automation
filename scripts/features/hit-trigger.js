@@ -18,6 +18,7 @@ import { findBurningBrandWeapon, addBurningBrandUses } from "./burning-brand.js"
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { setPendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
 import { deactivateDuelistParryOnHit } from "./duelist-parry.js";
+import { applyEverOnwardArmorRemovalOnHit } from "./ever-onward.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -665,6 +666,11 @@ function onPreUpdateActor(actor, changes, options, userId) {
   // 것뿐이다(features/duelist-parry.js 참고).
   deactivateDuelistParryOnHit(actor);
 
+  // 팔라딘 끝없는 전진(Ever Onward)의 "다음 피격까지 장갑 +2" 예약도 같은
+  // 이유로 여기서 바로 처리한다(features/ever-onward.js 참고) — 이번
+  // 피해는 이미 시스템이 계산을 끝낸 뒤라 영향이 없다.
+  applyEverOnwardArmorRemovalOnHit(actor);
+
   const candidates = getHitTriggerCandidates(actor);
   const outnumberedCandidates = getOutnumberedAskCandidate(actor);
   if (candidates.length === 0 && outnumberedCandidates.length === 0) return true;
@@ -755,7 +761,11 @@ function onSocketEvent(data) {
 // 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인 불문) Indomitable을
 // 가진 캐릭터는 +1 forward를 받는다. updateActor는 모든 클라이언트에서
 // 실행되므로, 실제로 그 갱신을 수행한 클라이언트에서만 반응하도록 userId를
-// 확인한다(그렇지 않으면 접속자 수만큼 중복 적용된다).
+// 확인한다(그렇지 않으면 접속자 수만큼 중복 적용된다). 시스템 native
+// forward 필드 대신 lib/roll-bonus-state.js의 대기 보정치에 얹는다 —
+// features/self-forward.js가 이 값을 그대로 읽어서 Indomitable 옆에
+// 적용중/적용안됨 배지를 보여주고 수동 토글도 제공한다(data/
+// self-forward-moves.js 참고).
 function onUpdateActor(actor, changes, options, userId) {
   if (options[SKIP_FLAG]) return;
   if (game.system.id !== "dungeonworld") return;
@@ -774,7 +784,7 @@ function onUpdateActor(actor, changes, options, userId) {
   if (!hasIndomitable) return;
 
   const moveName = actor.items.find((i) => i.type === "move" && indomitableNames.includes(i.name)).name;
-  grantForward(actor).then(() => {
+  setPendingRollBonus(actor, 1, moveName, null).then(() => {
     announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.HitTrigger.IndomitableApplied"));
   });
 }

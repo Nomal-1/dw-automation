@@ -486,6 +486,104 @@ export function registerSettings() {
     default: "Eye for Weakness"
   });
 
+  // 팔라딘 무브 돌격: 자세한 설계는 features/charge.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_CHARGE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableChargeAssistant.Name",
+    hint: "DWAUTO.Settings.EnableChargeAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CHARGE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ChargeMoveNames.Name",
+    hint: "DWAUTO.Settings.ChargeMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Charge!"
+  });
+
+  // 팔라딘 무브 연계 공격: 자세한 설계는 features/setup-strike.js 참고.
+  // 근접 무브 이름은 MELEE_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SETUP_STRIKE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSetupStrikeAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSetupStrikeAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SETUP_STRIKE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SetupStrikeMoveNames.Name",
+    hint: "DWAUTO.Settings.SetupStrikeMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Setup Strike"
+  });
+
+  // 팔라딘 무브 협공: 자세한 설계는 features/tandem-strike.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TANDEM_STRIKE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableTandemStrikeAssistant.Name",
+    hint: "DWAUTO.Settings.EnableTandemStrikeAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TANDEM_STRIKE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.TandemStrikeMoveNames.Name",
+    hint: "DWAUTO.Settings.TandemStrikeMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Tandem Strike"
+  });
+
+  // 팔라딘 무브 견고한 방어/무적의 방어: 방어(Defend) 자동화를 강화하는
+  // 보조 무브라 별도 사용 스위치 없이 ENABLE_DEFEND_ASSISTANT 하나로 같이
+  // 켜고 끈다. 자세한 설계는 features/defend.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.StaunchDefenderMoveNames.Name",
+    hint: "DWAUTO.Settings.StaunchDefenderMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Staunch Defender"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ImperviousDefenderMoveNames.Name",
+    hint: "DWAUTO.Settings.ImperviousDefenderMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Impervious Defender"
+  });
+
+  // 팔라딘 무브 끝없는 전진: 자세한 설계는 features/ever-onward.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_EVER_ONWARD_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableEverOnwardAssistant.Name",
+    hint: "DWAUTO.Settings.EnableEverOnwardAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.EVER_ONWARD_MOVE_NAMES, {
+    name: "DWAUTO.Settings.EverOnwardMoveNames.Name",
+    hint: "DWAUTO.Settings.EverOnwardMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Ever Onward"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

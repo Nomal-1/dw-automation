@@ -63,6 +63,10 @@ import { registerMetalHurlantAssistant } from "./features/metal-hurlant.js";
 import { registerDuelistParryAssistant } from "./features/duelist-parry.js";
 import { registerBamboozleAssistant } from "./features/bamboozle.js";
 import { registerDeviousAssistant } from "./features/devious.js";
+import { registerChargeAssistant } from "./features/charge.js";
+import { registerSetupStrikeAssistant } from "./features/setup-strike.js";
+import { registerTandemStrikeAssistant } from "./features/tandem-strike.js";
+import { registerEverOnwardAssistant } from "./features/ever-onward.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -137,3 +141,7 @@ registerMetalHurlantAssistant();
 registerDuelistParryAssistant();
 registerBamboozleAssistant();
 registerDeviousAssistant();
+registerChargeAssistant();
+registerSetupStrikeAssistant();
+registerTandemStrikeAssistant();
+registerEverOnwardAssistant();

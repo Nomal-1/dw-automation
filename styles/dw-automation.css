@@ -648,6 +648,12 @@
   color: #fff !important;
 }
 
+.dwauto-setup-strike-on,
+.dwauto-tandem-strike-on {
+  background: #2e5c7a !important;
+  color: #fff !important;
+}
+
 .dwauto-poison-list {
   margin: 0 0 10px;
   padding-left: 18px;

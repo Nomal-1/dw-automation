@@ -742,6 +742,46 @@
       "DeviousMoveNames": {
         "Name": "Devious Move Names",
         "Hint": "Comma-separated (default: Devious)."
+      },
+      "EnableChargeAssistant": {
+        "Name": "Enable Charge Automation",
+        "Hint": "When triggered, lets you pick several tokens on the scene and gives each a +1 to their next roll, announcing in chat who received it."
+      },
+      "ChargeMoveNames": {
+        "Name": "Charge Move Names",
+        "Hint": "Comma-separated (default: Charge!)."
+      },
+      "EnableSetupStrikeAssistant": {
+        "Name": "Enable Setup Strike Automation",
+        "Hint": "When you make a Hack & Slash roll (regardless of result), lets you pick an ally and automatically adds +1d4 to their next damage roll. The badge next to the move shows who currently has this effect."
+      },
+      "SetupStrikeMoveNames": {
+        "Name": "Setup Strike Move Names",
+        "Hint": "Comma-separated (default: Setup Strike)."
+      },
+      "EnableTandemStrikeAssistant": {
+        "Name": "Enable Tandem Strike Automation",
+        "Hint": "When you make a Hack & Slash roll (regardless of result), lets you pick an ally and gives them both +1 on their next roll and +1d4 on their next damage roll. The badge next to the move shows who currently has this effect."
+      },
+      "TandemStrikeMoveNames": {
+        "Name": "Tandem Strike Move Names",
+        "Hint": "Comma-separated (default: Tandem Strike)."
+      },
+      "StaunchDefenderMoveNames": {
+        "Name": "Staunch Defender Move Names",
+        "Hint": "Comma-separated (default: Staunch Defender). Uses the same enable switch as Defend Automation — adds +1 to the hold gained from Defend (minimum 1 even on a miss)."
+      },
+      "ImperviousDefenderMoveNames": {
+        "Name": "Impervious Defender Move Names",
+        "Hint": "Comma-separated (default: Impervious Defender). Same +1 hold as Staunch Defender, plus a narrative note on a 12+ that the attacker is stymied instead of gaining hold."
+      },
+      "EnableEverOnwardAssistant": {
+        "Name": "Enable Ever Onward Automation",
+        "Hint": "When triggered, lets you designate one ally and immediately grants +1 to their next roll and +2 armor; the +2 armor is automatically removed the moment that ally actually takes damage."
+      },
+      "EverOnwardMoveNames": {
+        "Name": "Ever Onward Move Names",
+        "Hint": "Comma-separated (default: Ever Onward)."
       }
     },
     "Npc": {
@@ -1325,7 +1365,11 @@
       "AnimalTrainingsTitle": "Trainings",
       "AnimalWeaknessesTitle": "Weaknesses",
       "AnimalStatsLabel": "Current Stats (includes bonuses like Unnatural Ally)",
-      "AnimalStatsSummary": "Ferocity +{ferocity}, Cunning +{cunning}, {armor} Armor, Instinct +{instinct}"
+      "AnimalStatsSummary": "Ferocity +{ferocity}, Cunning +{cunning}, {armor} Armor, Instinct +{instinct}",
+      "TooManySelected": "You went over the maximum. Please choose again.",
+      "CountedSelectedMax": "Selected: {count} / max {max}",
+      "ClericLevelLabel": "Cleric Level (used for Commune's preparation limit; GM can edit directly)",
+      "ClericLevelChanged": "Cleric level adjusted to {level} due to a level change"
     },
     "NoteMovesSettings": {
       "Title": "Note-Taking Move Names",
@@ -1486,6 +1530,31 @@
     "Devious": {
       "ExtraChoice": "Added to the question list: \"How are you vulnerable to me?\" (your subject may not ask this of you)"
     },
+    "Charge": {
+      "TargetLabel": "Pick the allies leading the charge (multiple allowed).",
+      "Applied": "{names} received the Charge! effect"
+    },
+    "SetupStrike": {
+      "TargetLabel": "Which ally do you want to set up with Setup Strike?",
+      "RollFlavor": "{name} additional damage",
+      "Applied": "+{amount} queued for {target}'s next damage roll",
+      "BadgeTitle": "Shows which ally currently has this effect (clears automatically once consumed).",
+      "BadgeOn": "Active on {name}",
+      "BadgeOff": "Inactive"
+    },
+    "TandemStrike": {
+      "TargetLabel": "Which ally do you want to set up with Tandem Strike?",
+      "RollFlavor": "{name} additional damage",
+      "Applied": "+1 on their next roll and +{amount} on their next damage roll queued for {target}",
+      "BadgeTitle": "Shows which ally currently has this effect (clears automatically once consumed).",
+      "BadgeOn": "Active on {name}",
+      "BadgeOff": "Inactive"
+    },
+    "EverOnward": {
+      "TargetLabel": "Pick one ally to lead the charge.",
+      "Applied": "{name} received the Ever Onward effect — +1 on their next roll, armor rises to {armor} (lasts until their next hit)",
+      "ArmorRemoved": "Ever Onward's temporary armor was spent — armor drops back to {armor}"
+    },
     "MetalHurlant": {
       "Flavor": "{name} damage",
       "PartialNotice": "It's out of control on a partial success — the GM decides whether a nearby extra target is also affected."
@@ -1530,6 +1599,7 @@
     },
     "Defend": {
       "FailedNoReserve": "The roll failed, so no reserve was gained",
+      "ImperviousStymie": "12+ success — Impervious Defender stymies the nearest attacker instead of gaining reserve (the GM narrates the details)",
       "ReserveGained": "Gained {amount} reserve. Protecting: {target}",
       "ProtectTargetLabel": "Choose who to protect",
       "SelfLabel": "self",

@@ -390,6 +390,44 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, deviousMoveNames, stats)
   );
 
+  const chargeMoveNames = game.settings.get(MODULE_ID, SETTINGS.CHARGE_MOVE_NAMES);
+  await game.settings.set(MODULE_ID, SETTINGS.CHARGE_MOVE_NAMES, translateCommaList(moveMap, chargeMoveNames, stats));
+
+  const setupStrikeMoveNames = game.settings.get(MODULE_ID, SETTINGS.SETUP_STRIKE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.SETUP_STRIKE_MOVE_NAMES,
+    translateCommaList(moveMap, setupStrikeMoveNames, stats)
+  );
+
+  const tandemStrikeMoveNames = game.settings.get(MODULE_ID, SETTINGS.TANDEM_STRIKE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.TANDEM_STRIKE_MOVE_NAMES,
+    translateCommaList(moveMap, tandemStrikeMoveNames, stats)
+  );
+
+  const staunchDefenderMoveNames = game.settings.get(MODULE_ID, SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES,
+    translateCommaList(moveMap, staunchDefenderMoveNames, stats)
+  );
+
+  const imperviousDefenderMoveNames = game.settings.get(MODULE_ID, SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES,
+    translateCommaList(moveMap, imperviousDefenderMoveNames, stats)
+  );
+
+  const everOnwardMoveNames = game.settings.get(MODULE_ID, SETTINGS.EVER_ONWARD_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.EVER_ONWARD_MOVE_NAMES,
+    translateCommaList(moveMap, everOnwardMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

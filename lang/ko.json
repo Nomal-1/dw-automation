@@ -742,6 +742,46 @@
       "DeviousMoveNames": {
         "Name": "교활 무브 이름",
         "Hint": "쉼표로 구분해서 입력하세요(기본값: Devious)."
+      },
+      "EnableChargeAssistant": {
+        "Name": "돌격 자동화 사용",
+        "Hint": "발동하면 필드 위 토큰 중 여러 명을 골라 각자에게 다음 판정 +1을 걸고, 누가 받았는지 채팅에 알립니다."
+      },
+      "ChargeMoveNames": {
+        "Name": "돌격 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Charge!)."
+      },
+      "EnableSetupStrikeAssistant": {
+        "Name": "연계 공격 자동화 사용",
+        "Hint": "접근전 판정을 하면(성공 여부 무관) 아군 한 명을 고르게 하고, 그 아군의 다음 피해 굴림에 +1d4를 자동으로 얹습니다. 무브 옆 배지가 지금 누가 이 효과를 받고 있는지 보여줍니다."
+      },
+      "SetupStrikeMoveNames": {
+        "Name": "연계 공격 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Setup Strike)."
+      },
+      "EnableTandemStrikeAssistant": {
+        "Name": "협공 자동화 사용",
+        "Hint": "접근전 판정을 하면(성공 여부 무관) 아군 한 명을 고르게 하고, 그 아군에게 다음 판정 +1과 다음 피해 굴림 +1d4를 함께 겁니다. 무브 옆 배지가 지금 누가 이 효과를 받고 있는지 보여줍니다."
+      },
+      "TandemStrikeMoveNames": {
+        "Name": "협공 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Tandem Strike)."
+      },
+      "StaunchDefenderMoveNames": {
+        "Name": "견고한 방어 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Staunch Defender). 방어 자동화(ENABLE_DEFEND_ASSISTANT) 사용 스위치를 그대로 씁니다 — 방어 판정의 예비에 +1을 더합니다(실패해도 최소 1)."
+      },
+      "ImperviousDefenderMoveNames": {
+        "Name": "무적의 방어 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Impervious Defender). 견고한 방어와 같은 +1 예비에 더해, 12+ 성공 시 예비 대신 공격자를 무력화하는 서사적 효과를 안내합니다."
+      },
+      "EnableEverOnwardAssistant": {
+        "Name": "끝없는 전진 자동화 사용",
+        "Hint": "발동하면 아군 한 명을 지정해 다음 판정 +1과 장갑 +2를 즉시 적용하고, 그 아군이 실제로 피해를 입는 순간 장갑 +2가 자동으로 다시 빠집니다."
+      },
+      "EverOnwardMoveNames": {
+        "Name": "끝없는 전진 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Ever Onward)."
       }
     },
     "Npc": {
@@ -1325,7 +1365,11 @@
       "AnimalTrainingsTitle": "훈련 특성",
       "AnimalWeaknessesTitle": "약점",
       "AnimalStatsLabel": "현재 능력치 (Unnatural Ally 등 보너스 포함)",
-      "AnimalStatsSummary": "사나움 +{ferocity}, 교활함 +{cunning}, 장갑 {armor}, 본능 +{instinct}"
+      "AnimalStatsSummary": "사나움 +{ferocity}, 교활함 +{cunning}, 장갑 {armor}, 본능 +{instinct}",
+      "TooManySelected": "최대 개수를 넘었습니다. 다시 골라주세요.",
+      "CountedSelectedMax": "선택됨: {count} / 최대 {max}",
+      "ClericLevelLabel": "클레릭 레벨 (예배 준비 한도 계산에 사용, 마스터가 직접 수정 가능)",
+      "ClericLevelChanged": "레벨 변동으로 클레릭 레벨이 {level}(으)로 조정되었습니다"
     },
     "NoteMovesSettings": {
       "Title": "메모형 무브 이름 설정",
@@ -1486,6 +1530,31 @@
     "Devious": {
       "ExtraChoice": "질문 목록에 다음 선택지가 추가됩니다: \"내가 이용할 수 있는 당신의 약점은 무엇인가?\"(상대는 이 질문을 할 수 없습니다)"
     },
+    "Charge": {
+      "TargetLabel": "돌격을 이끌 아군을 골라주세요(여러 명 가능).",
+      "Applied": "{names}이(가) 돌격 효과를 받았습니다"
+    },
+    "SetupStrike": {
+      "TargetLabel": "어느 아군에게 연계 공격을 걸어주시겠습니까?",
+      "RollFlavor": "{name} 추가 피해",
+      "Applied": "{target}의 다음 피해 굴림에 +{amount} 적용 예정",
+      "BadgeTitle": "지금 이 효과를 받고 있는 아군을 보여줍니다(소모되면 자동으로 사라집니다).",
+      "BadgeOn": "{name}에게 적용중",
+      "BadgeOff": "적용안됨"
+    },
+    "TandemStrike": {
+      "TargetLabel": "어느 아군에게 협공을 걸어주시겠습니까?",
+      "RollFlavor": "{name} 추가 피해",
+      "Applied": "{target}에게 다음 판정 +1과 다음 피해 굴림 +{amount} 적용 예정",
+      "BadgeTitle": "지금 이 효과를 받고 있는 아군을 보여줍니다(소모되면 자동으로 사라집니다).",
+      "BadgeOn": "{name}에게 적용중",
+      "BadgeOff": "적용안됨"
+    },
+    "EverOnward": {
+      "TargetLabel": "돌격을 이끌 아군 한 명을 골라주세요.",
+      "Applied": "{name}이(가) 끝없는 전진 효과를 받았습니다 — 다음 판정 +1, 장갑이 {armor}(으)로 증가(다음 피격까지 유지)",
+      "ArmorRemoved": "끝없는 전진의 임시 장갑이 소모되어 장갑이 {armor}(으)로 돌아왔습니다"
+    },
     "MetalHurlant": {
       "Flavor": "{name} 피해",
       "PartialNotice": "부분성공이라 통제가 되지 않습니다 — 근처의 다른 대상 하나가 추가로 영향을 받을지는 마스터가 정해주세요."
@@ -1530,6 +1599,7 @@
     },
     "Defend": {
       "FailedNoReserve": "판정에 실패해서 예비를 얻지 못했습니다",
+      "ImperviousStymie": "12+ 성공 — 무적의 방어 효과로 예비 대신 근처의 공격자가 무력화됩니다(세부 상황은 마스터가 서술합니다)",
       "ReserveGained": "예비 {amount}점을 얻었습니다. 보호대상: {target}",
       "ProtectTargetLabel": "지킬 대상을 선택하세요",
       "SelfLabel": "자신",
