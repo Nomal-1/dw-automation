@@ -511,6 +511,15 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, halfElvenMoveNames, stats)
   );
 
+  // 마법사-엘프 자체는 이 모듈이 만들어 넣는 이름이라 번역 대상이 아니지만
+  // (settings.js 상단 주석 참고), 마법 탐지는 공식 주문이라 번역한다.
+  const detectMagicMoveNames = game.settings.get(MODULE_ID, SETTINGS.DETECT_MAGIC_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DETECT_MAGIC_MOVE_NAMES,
+    translateCommaList(spellMap, detectMagicMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

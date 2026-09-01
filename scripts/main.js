@@ -75,6 +75,7 @@ import { registerFamiliarPreyAssistant } from "./features/familiar-prey.js";
 import { registerSafePlaceAssistant } from "./features/safe-place.js";
 import { registerObservantAssistant } from "./features/observant.js";
 import { registerRaceCoreAssistant } from "./features/race-core.js";
+import { registerWizardElfAssistant } from "./features/wizard-elf.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -161,3 +162,4 @@ registerFamiliarPreyAssistant();
 registerSafePlaceAssistant();
 registerObservantAssistant();
 registerRaceCoreAssistant();
+registerWizardElfAssistant();

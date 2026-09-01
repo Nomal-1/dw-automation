@@ -812,6 +812,37 @@ export function registerSettings() {
     default: "사냥꾼-인간"
   });
 
+  // 마법사-엘프 종족 핵심 액션: 자세한 설계는 features/wizard-elf.js 참고.
+  // 마법사-엘프 자체의 이름은 사냥꾼-엘프처럼 이 모듈이 직접 만들어 넣는
+  // 이름이라 기본값이 이미 한국어다. 마법 탐지는 공식 컴펜디엄 주문이라
+  // 번역 대상이다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_WIZARD_ELF_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableWizardElfAssistant.Name",
+    hint: "DWAUTO.Settings.EnableWizardElfAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.WIZARD_ELF_MOVE_NAMES, {
+    name: "DWAUTO.Settings.WizardElfMoveNames.Name",
+    hint: "DWAUTO.Settings.WizardElfMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "마법사-엘프"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.DETECT_MAGIC_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DetectMagicMoveNames.Name",
+    hint: "DWAUTO.Settings.DetectMagicMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Detect Magic"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

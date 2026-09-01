@@ -883,6 +883,18 @@
       "RangerHumanMoveName": {
         "Name": "Ranger-Human Race Core Move Name",
         "Hint": "The name Half-elven creates/looks for. Have the GM add a move with this exact name to the actor directly at character creation."
+      },
+      "EnableWizardElfAssistant": {
+        "Name": "Enable Wizard-Elf Assistant",
+        "Hint": "Activating Wizard-Elf adds Detect Magic to the spellbook as a level-0 spell (or just lowers its level to 0 if already owned)."
+      },
+      "WizardElfMoveNames": {
+        "Name": "Wizard-Elf Race Core Move Name",
+        "Hint": "Comma-separated (default: 마법사-엘프)."
+      },
+      "DetectMagicMoveNames": {
+        "Name": "Detect Magic Spell Name",
+        "Hint": "Comma-separated (default: Detect Magic)."
       }
     },
     "Npc": {
@@ -1723,6 +1735,11 @@
       "Added": "Added the {name} move",
       "AlreadyHasBoth": "Already has both Ranger-Elf and Ranger-Human, nothing to add",
       "NoneFound": "Has neither Ranger-Elf nor Ranger-Human, so it's unclear which one to add. Have the GM add the race core move chosen at character creation first."
+    },
+    "WizardElf": {
+      "Added": "Added {spell} to the spellbook as a level-0 spell",
+      "Lowered": "Lowered {spell}'s level to 0",
+      "AlreadyCantrip": "{spell} is already a level-0 spell"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",
