@@ -29,14 +29,19 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-function findLogicalMove(actor) {
-  const names = splitCommaList(SETTINGS.LOGICAL_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
-}
-
 function findHighlyLogicalMove(actor) {
   const names = splitCommaList(SETTINGS.HIGHLY_LOGICAL_MOVE_NAMES);
   return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+}
+
+// 매우 논리적은 논리적의 6레벨 상위 무브라(무브 업그레이드 자동화가
+// 배우는 순간 하위 무브인 논리적을 지운다) 매우 논리적만 가진 캐릭터에게는
+// "논리적" 이름의 무브 아이템 자체가 더 이상 존재하지 않는다 — 토글
+// 배지/자동화가 여기서 찾는 대상은 둘 중 실제로 갖고 있는 쪽이다.
+function findLogicalMove(actor) {
+  const names = splitCommaList(SETTINGS.LOGICAL_MOVE_NAMES);
+  const move = actor.items.find((i) => i.type === "move" && names.includes(i.name));
+  return move ?? findHighlyLogicalMove(actor);
 }
 
 function matchesDiscernRealities(title) {
