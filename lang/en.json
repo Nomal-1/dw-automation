@@ -943,6 +943,22 @@
       "WizardHumanMoveNames": {
         "Name": "Wizard-Human Race Core Move Name",
         "Hint": "Comma-separated (default: 마법사-인간)."
+      },
+      "EnableFighterDwarfAssistant": {
+        "Name": "Enable Fighter-Dwarf Assistant",
+        "Hint": "Before Parley, asks whether you're sharing a drink with them, and rolls with CON instead of CHA if so."
+      },
+      "FighterDwarfMoveNames": {
+        "Name": "Fighter-Dwarf Race Core Move Name",
+        "Hint": "Comma-separated (default: 전사-드워프)."
+      },
+      "EnableFighterHalflingAssistant": {
+        "Name": "Enable Fighter-Halfling Assistant",
+        "Hint": "Before Defy Danger, asks whether you're using your small size to your advantage, and applies +1 if so."
+      },
+      "FighterHalflingMoveNames": {
+        "Name": "Fighter-Halfling Race Core Move Name",
+        "Hint": "Comma-separated (default: 전사-하플링)."
       }
     },
     "Npc": {
@@ -1809,6 +1825,14 @@
       "ChooseLabel": "Which spell?",
       "Added": "Added {spell} to the spellbook",
       "AlreadyGranted": "Already got {spell} from {move}"
+    },
+    "FighterDwarf": {
+      "Prompt": "Are you sharing a drink with them? Roll with CON?",
+      "Applied": "Fighter-Dwarf applied — this Parley uses CON"
+    },
+    "FighterHalfling": {
+      "Prompt": "Are you using your small size to your advantage?",
+      "Applied": "Fighter-Halfling applied — +1 on this Defy Danger"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",

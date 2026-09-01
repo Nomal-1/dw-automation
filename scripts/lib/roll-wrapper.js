@@ -47,6 +47,8 @@ import { promptLogicalPreRoll } from "../features/logical.js";
 import { promptFamiliarPreyPreRoll } from "../features/familiar-prey.js";
 import { promptSaferPlaceForwardPreRoll } from "../features/safe-place.js";
 import { promptThiefHumanPreRoll } from "../features/thief-human.js";
+import { promptFighterDwarfPreRoll } from "../features/fighter-dwarf.js";
+import { promptFighterHalflingPreRoll } from "../features/fighter-halfling.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -187,6 +189,10 @@ async function wrappedRoll(wrapped, ...args) {
   // 같은 자리에서 처리한다(features/thief-human.js 참고).
   const thiefHuman = await promptThiefHumanPreRoll(this);
 
+  // 전사-하플링(종족 핵심 액션)의 "작은 몸집을 유리하게 이용한 위험 돌파
+  // +1"도 같은 자리에서 처리한다(features/fighter-halfling.js 참고).
+  const fighterHalfling = await promptFighterHalflingPreRoll(this);
+
   const preRollBonus =
     iAmTheLaw.bonus +
     knowItAll.bonus +
@@ -200,6 +206,7 @@ async function wrappedRoll(wrapped, ...args) {
     fountOfKnowledge.bonus +
     saferPlace.bonus +
     thiefHuman.bonus +
+    fighterHalfling.bonus +
     getSeeingRedBonus(this) +
     getLoveTruckBonus(this);
 
@@ -216,7 +223,9 @@ async function wrappedRoll(wrapped, ...args) {
   const precise = await promptPrecisePreRoll(this);
   const logical = await promptLogicalPreRoll(this);
   const familiarPrey = await promptFamiliarPreyPreRoll(this);
-  const statOverride = interrogator.statOverride ?? precise.statOverride ?? logical.statOverride ?? familiarPrey.statOverride;
+  const fighterDwarf = await promptFighterDwarfPreRoll(this);
+  const statOverride =
+    interrogator.statOverride ?? precise.statOverride ?? logical.statOverride ?? familiarPrey.statOverride ?? fighterDwarf.statOverride;
 
   let spellPenalty = 0;
   if (game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT) && isCastSpellMove(this)) {

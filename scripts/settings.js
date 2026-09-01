@@ -959,6 +959,46 @@ export function registerSettings() {
     default: "마법사-인간"
   });
 
+  // 전사-드워프 종족 핵심 액션: 자세한 설계는 features/fighter-dwarf.js 참고.
+  // 대상 무브(협상)는 PARLEY_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_FIGHTER_DWARF_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableFighterDwarfAssistant.Name",
+    hint: "DWAUTO.Settings.EnableFighterDwarfAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FIGHTER_DWARF_MOVE_NAMES, {
+    name: "DWAUTO.Settings.FighterDwarfMoveNames.Name",
+    hint: "DWAUTO.Settings.FighterDwarfMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "전사-드워프"
+  });
+
+  // 전사-하플링 종족 핵심 액션: 자세한 설계는 features/fighter-halfling.js
+  // 참고. 대상 무브(위험 돌파)는 DEFY_DANGER_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_FIGHTER_HALFLING_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableFighterHalflingAssistant.Name",
+    hint: "DWAUTO.Settings.EnableFighterHalflingAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FIGHTER_HALFLING_MOVE_NAMES, {
+    name: "DWAUTO.Settings.FighterHalflingMoveNames.Name",
+    hint: "DWAUTO.Settings.FighterHalflingMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "전사-하플링"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",
