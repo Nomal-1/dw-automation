@@ -36,6 +36,8 @@ import { maybeRollHerculeanAppetites } from "../features/herculean-appetites.js"
 import { promptOnTheMovePreRoll } from "../features/on-the-move.js";
 import { getLoveTruckBonus } from "../features/love-truck.js";
 import { promptBamboozlePreRoll } from "../features/bamboozle.js";
+import { promptFountOfKnowledgePreRoll } from "../features/fount-of-knowledge.js";
+import { promptLogicalPreRoll } from "../features/logical.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -153,6 +155,11 @@ async function wrappedRoll(wrapped, ...args) {
   // "적용중" 지속 +1은 다이얼로그 없이 조용히 붙는다(features/seeing-red.js,
   // features/love-truck.js 참고) — 물어보는 건 판정이 끝난 뒤(또는 발동
   // 시점)의 몫이다.
+  // 위저드 지식의 샘(Fount of Knowledge)의 "지식 더듬기 전용 +1"도 판정마다
+  // 확인이 필요한 사전 보정치라 같은 자리에서 처리한다(features/
+  // fount-of-knowledge.js 참고).
+  const fountOfKnowledge = await promptFountOfKnowledgePreRoll(this);
+
   const preRollBonus =
     iAmTheLaw.bonus +
     knowItAll.bonus +
@@ -163,6 +170,7 @@ async function wrappedRoll(wrapped, ...args) {
     heist.bonus +
     onTheMove.bonus +
     bamboozle.bonus +
+    fountOfKnowledge.bonus +
     getSeeingRedBonus(this) +
     getLoveTruckBonus(this);
 
@@ -177,7 +185,8 @@ async function wrappedRoll(wrapped, ...args) {
   // 대상으로 하므로 같은 판정에서 동시에 걸릴 일은 없다.
   const interrogator = await promptInterrogatorPreRoll(this);
   const precise = await promptPrecisePreRoll(this);
-  const statOverride = interrogator.statOverride ?? precise.statOverride;
+  const logical = await promptLogicalPreRoll(this);
+  const statOverride = interrogator.statOverride ?? precise.statOverride ?? logical.statOverride;
 
   let spellPenalty = 0;
   if (game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT) && isCastSpellMove(this)) {

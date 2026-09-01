@@ -786,6 +786,30 @@
       "EnableClericSpellGrantAssistant": {
         "Name": "예배 - 레벨별 사제 주문 모두 얻기 버튼 사용",
         "Hint": "예배(Commune)를 가진 액터의 주문 탭에 버튼을 추가합니다. 누르면 (실제 클레릭은 자기 레벨, 신의 은혜로 예배를 얻은 팔라딘은 그 클레릭 레벨 기준으로) 그 레벨 이하의 클레릭 기본 주문 컴펜디엄 전체 중 아직 없는 것만 스펠북에 추가합니다."
+      },
+      "EnableFountOfKnowledgeAssistant": {
+        "Name": "지식의 샘 자동화 사용",
+        "Hint": "지식 더듬기(Spout Lore) 판정 직전에 '항상 묻기' 모드면 매번 물어보고 답에 따라 +1을 반영합니다. '항상 미적용' 모드면 아예 묻지 않고 그대로 진행합니다."
+      },
+      "FountOfKnowledgeMoveNames": {
+        "Name": "지식의 샘 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Fount of Knowledge)."
+      },
+      "SpoutLoreMoveNames": {
+        "Name": "지식 더듬기 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Spout Lore)."
+      },
+      "EnableLogicalAssistant": {
+        "Name": "논리적 자동화 사용",
+        "Hint": "상황 파악 판정 직전 '매번 묻기/항상 적용/항상 미적용' 중 현재 모드에 따라 WIS 대신 INT로 판정할지 정합니다. 매우 논리적을 가지고 있으면 12+ 성공 시(항상 미적용이 아닐 때) 목록에 없는 질문도 3개까지 물을 수 있다는 안내를 채팅에 남깁니다."
+      },
+      "LogicalMoveNames": {
+        "Name": "논리적 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Logical)."
+      },
+      "HighlyLogicalMoveNames": {
+        "Name": "매우 논리적 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Highly Logical)."
       }
     },
     "Npc": {
@@ -1264,7 +1288,8 @@
     "SpellDiscount": {
       "ChooseLabel": "할인할 주문 선택",
       "Discounted": "\"{spell}\"을(를) 앞으로 한 레벨 낮은 것처럼 준비합니다.",
-      "NoCandidates": "{name}에게는 할인할 수 있는(레벨 1 이상) 주문이 없습니다."
+      "NoCandidates": "{name}에게는 할인할 수 있는(레벨 1 이상) 주문이 없습니다.",
+      "AlreadyDiscounted": "{move}(으)로 이미 \"{spell}\"을(를) 한 레벨 낮게 준비하고 있습니다."
     },
     "SpellbookExpansion": {
       "ChooseClassLabel": "직업 선택",
@@ -1558,6 +1583,22 @@
       "TargetLabel": "돌격을 이끌 아군 한 명을 골라주세요.",
       "Applied": "{name}이(가) 끝없는 전진 효과를 받았습니다 — 다음 판정 +1, 장갑이 {armor}(으)로 증가(다음 피격까지 유지)",
       "ArmorRemoved": "끝없는 전진의 임시 장갑이 소모되어 장갑이 {armor}(으)로 돌아왔습니다"
+    },
+    "FountOfKnowledge": {
+      "Prompt": "아무도 모를 법한 것에 대한 지식 더듬기입니까?",
+      "Applied": "지식의 샘 적용 — 이번 지식 더듬기 판정에 +1",
+      "ToggleTitle": "클릭하면 판정마다 물어볼지/아예 묻지 않을지를 켜고 끕니다.",
+      "AskOn": "항상 묻기",
+      "AskOff": "항상 미적용"
+    },
+    "Logical": {
+      "Prompt": "WIS 대신 INT로 상황 파악을 하시겠습니까?",
+      "Applied": "논리적 적용 — 이번 상황 파악을 INT로 판정합니다",
+      "HighlyLogicalBonus": "매우 논리적 효과로 목록에 없는 질문도 3개까지 물어볼 수 있습니다",
+      "ToggleTitle": "클릭하면 매번 묻기 → 항상 적용 → 항상 미적용 순으로 전환합니다.",
+      "ModeAsk": "매번 묻기",
+      "ModeOn": "항상 적용",
+      "ModeOff": "항상 미적용"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "현재 레벨 사제 주문 모두 얻기",

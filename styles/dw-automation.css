@@ -654,6 +654,32 @@
   color: #fff !important;
 }
 
+.dwauto-fount-of-knowledge-badge {
+  cursor: pointer;
+}
+
+.dwauto-fount-of-knowledge-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-fount-of-knowledge-on {
+  background: #5c2e7a !important;
+  color: #fff !important;
+}
+
+.dwauto-logical-badge {
+  cursor: pointer;
+}
+
+.dwauto-logical-badge:hover {
+  filter: brightness(1.2);
+}
+
+.dwauto-logical-on {
+  background: #2e7a5c !important;
+  color: #fff !important;
+}
+
 .dwauto-cleric-spell-grant-button {
   display: block;
   width: 100%;

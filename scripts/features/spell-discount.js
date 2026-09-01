@@ -1,6 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
-import { announceActionApplied } from "../lib/announce.js";
+import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 
 // 위저드 천재(Prodigy)/대가(Master) 원문: "주문 하나를 골라라. 그 주문을
@@ -94,7 +94,19 @@ async function onCreateChatMessage(message, options, userId) {
     if (!moveItem) return;
 
     const discountMap = getDiscountMap(actor);
-    if (discountMap[moveItem.id]) return; // 이미 이 무브로 골라둔 주문이 있다 — 다시 묻지 않는다.
+    if (discountMap[moveItem.id]) {
+      // 이미 이 무브로 골라둔 주문이 있다 — 다시 묻지 않고(증보와 같은
+      // 패턴), 무엇을 골랐었는지만 다시 알려준다.
+      const chosen = actor.items.get(discountMap[moveItem.id]);
+      announceInfo(
+        actor,
+        game.i18n.format("DWAUTO.SpellDiscount.AlreadyDiscounted", {
+          move: moveItem.name,
+          spell: chosen?.name ?? "?"
+        })
+      );
+      return;
+    }
 
     const alreadyDiscountedIds = new Set(Object.values(discountMap));
     const candidates = actor.items.filter(

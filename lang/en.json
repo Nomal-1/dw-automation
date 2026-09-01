@@ -786,6 +786,30 @@
       "EnableClericSpellGrantAssistant": {
         "Name": "Enable Commune's \"Get All Cleric Spells\" Button",
         "Hint": "Adds a button to the spell tab of any actor with Commune. Clicking it adds every default cleric spell (from the compendium) at or below the actor's effective level — the actor's own level for real Clerics, or their Divine Favor cleric level for Paladins — skipping spells they already have."
+      },
+      "EnableFountOfKnowledgeAssistant": {
+        "Name": "Enable Fount of Knowledge Automation",
+        "Hint": "Right before a Spout Lore roll, in 'Always Ask' mode it asks every time and applies +1 based on the answer. In 'Always Off' mode it never asks and just proceeds normally."
+      },
+      "FountOfKnowledgeMoveNames": {
+        "Name": "Fount of Knowledge Move Names",
+        "Hint": "Comma-separated (default: Fount of Knowledge)."
+      },
+      "SpoutLoreMoveNames": {
+        "Name": "Spout Lore Move Names",
+        "Hint": "Comma-separated (default: Spout Lore)."
+      },
+      "EnableLogicalAssistant": {
+        "Name": "Enable Logical Automation",
+        "Hint": "Right before a Discern Realities roll, the current mode ('Always Ask' / 'Always On' / 'Always Off') decides whether to use INT instead of WIS. If the character also has Highly Logical, a chat note is posted on a 12+ (while not in 'Always Off' mode) about being able to ask up to three questions outside the list."
+      },
+      "LogicalMoveNames": {
+        "Name": "Logical Move Names",
+        "Hint": "Comma-separated (default: Logical)."
+      },
+      "HighlyLogicalMoveNames": {
+        "Name": "Highly Logical Move Names",
+        "Hint": "Comma-separated (default: Highly Logical)."
       }
     },
     "Npc": {
@@ -1264,7 +1288,8 @@
     "SpellDiscount": {
       "ChooseLabel": "Choose spell to discount",
       "Discounted": "\"{spell}\" will be prepared as one level lower from now on.",
-      "NoCandidates": "{name} has no eligible (level 1+) spells to discount."
+      "NoCandidates": "{name} has no eligible (level 1+) spells to discount.",
+      "AlreadyDiscounted": "{move} is already discounting \"{spell}\" by one level."
     },
     "SpellbookExpansion": {
       "ChooseClassLabel": "Choose a Class",
@@ -1558,6 +1583,22 @@
       "TargetLabel": "Pick one ally to lead the charge.",
       "Applied": "{name} received the Ever Onward effect — +1 on their next roll, armor rises to {armor} (lasts until their next hit)",
       "ArmorRemoved": "Ever Onward's temporary armor was spent — armor drops back to {armor}"
+    },
+    "FountOfKnowledge": {
+      "Prompt": "Is this Spout Lore about something no one else has a clue about?",
+      "Applied": "Fount of Knowledge applied — +1 on this Spout Lore roll",
+      "ToggleTitle": "Click to toggle whether to ask every roll or never.",
+      "AskOn": "Always Ask",
+      "AskOff": "Always Off"
+    },
+    "Logical": {
+      "Prompt": "Do you want to Discern Realities with INT instead of WIS?",
+      "Applied": "Logical applied — this Discern Realities roll uses INT",
+      "HighlyLogicalBonus": "Highly Logical lets you ask up to three questions outside the list",
+      "ToggleTitle": "Click to cycle Always Ask → Always On → Always Off.",
+      "ModeAsk": "Always Ask",
+      "ModeOn": "Always On",
+      "ModeOff": "Always Off"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",

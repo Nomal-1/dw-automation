@@ -595,6 +595,63 @@ export function registerSettings() {
     default: true
   });
 
+  // 위저드 무브 지식의 샘: 자세한 설계는 features/fount-of-knowledge.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_FOUNT_OF_KNOWLEDGE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableFountOfKnowledgeAssistant.Name",
+    hint: "DWAUTO.Settings.EnableFountOfKnowledgeAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FOUNT_OF_KNOWLEDGE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.FountOfKnowledgeMoveNames.Name",
+    hint: "DWAUTO.Settings.FountOfKnowledgeMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Fount of Knowledge"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SPOUT_LORE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SpoutLoreMoveNames.Name",
+    hint: "DWAUTO.Settings.SpoutLoreMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Spout Lore"
+  });
+
+  // 위저드 무브 논리적/매우 논리적: 자세한 설계는 features/logical.js 참고.
+  // 상황 파악 무브 이름은 DISCERN_REALITIES_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_LOGICAL_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableLogicalAssistant.Name",
+    hint: "DWAUTO.Settings.EnableLogicalAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LOGICAL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.LogicalMoveNames.Name",
+    hint: "DWAUTO.Settings.LogicalMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Logical"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HIGHLY_LOGICAL_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HighlyLogicalMoveNames.Name",
+    hint: "DWAUTO.Settings.HighlyLogicalMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Highly Logical"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",
