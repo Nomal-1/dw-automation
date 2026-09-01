@@ -1269,7 +1269,8 @@
       "TierAdvanced2": "Advanced (Lower)",
       "TierAdvanced6": "Advanced (Upper)",
       "AlreadyGranted": "This character already gained the following via {move}: {moves}",
-      "AlreadyGrantedUnknown": "This character already gained something via {move}, but it was recorded by an older version so what it was is unknown."
+      "AlreadyGrantedUnknown": "This character already gained something via {move}, but it was recorded by an older version so what it was is unknown.",
+      "GrantedMovesRemoved": "{move} was deleted, so the move(s) it granted were removed too: {moves}"
     },
     "PrepareSpellsMoves": {
       "Title": "Prepare Spells Moves",

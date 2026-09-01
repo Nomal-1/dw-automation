@@ -1269,7 +1269,8 @@
       "TierAdvanced2": "고급 하급",
       "TierAdvanced6": "고급 상급",
       "AlreadyGranted": "이 캐릭터가 {move} 액션으로 얻은 무브: {moves}",
-      "AlreadyGrantedUnknown": "이 캐릭터는 이미 {move} 액션으로 무언가를 얻었지만, 이전 버전에서 기록된 것이라 무엇을 얻었는지는 알 수 없습니다."
+      "AlreadyGrantedUnknown": "이 캐릭터는 이미 {move} 액션으로 무언가를 얻었지만, 이전 버전에서 기록된 것이라 무엇을 얻었는지는 알 수 없습니다.",
+      "GrantedMovesRemoved": "{move}을(를) 지워서, 그 선택으로 얻었던 무브도 같이 지웠습니다: {moves}"
     },
     "PrepareSpellsMoves": {
       "Title": "주문 준비 무브 설정",

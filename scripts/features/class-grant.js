@@ -48,6 +48,42 @@ async function setGranted(actor, moveId, moveNames) {
   await actor.setFlag(MODULE_ID, GRANTED_FLAG, { ...current, [moveId]: moveNames });
 }
 
+// 사냥꾼의 형제처럼 "다른 직업 무브를 골라 부여하는" 무브를 지우면, 그때
+// 골랐던 무브는 별개의 독립된 아이템이라 원래는 시트에 그대로 남는다 —
+// GM 요청대로, 부여한 무브 자체를 지우면 그 선택으로 받았던 무브(들)도
+// 같이 지워서 다시 배웠을 때 완전히 깨끗한 상태에서 새로 고를 수 있게
+// 한다. 레거시 데이터(boolean true, 어떤 무브였는지 모름)는 지울 대상을
+// 알 수 없어 건드리지 않는다.
+async function onDeleteItem(item, options, userId) {
+  if (game.system.id !== "dungeonworld") return;
+  if (!isEnabled()) return;
+  if (userId !== game.user.id) return;
+  if (item.type !== "move") return;
+
+  const actor = item.parent;
+  if (!actor || actor.documentName !== "Actor") return;
+
+  const grantedNames = getGrantedNames(actor, item.id);
+  if (grantedNames.length === 0) return;
+
+  const toDelete = actor.items.filter((i) => i.type === "move" && grantedNames.includes(i.name));
+  if (toDelete.length > 0) {
+    await actor.deleteEmbeddedDocuments("Item", toDelete.map((i) => i.id));
+  }
+
+  await actor.update({ [`flags.${MODULE_ID}.${GRANTED_FLAG}.-=${item.id}`]: null });
+
+  if (toDelete.length > 0) {
+    announceInfo(
+      actor,
+      game.i18n.format("DWAUTO.ClassGrant.GrantedMovesRemoved", {
+        move: item.name,
+        moves: toDelete.map((i) => i.name).join(", ")
+      })
+    );
+  }
+}
+
 // features/level-up-info.js의 getAllMoveDocuments와 같은 방식(전체 목록을
 // 한 번 캐시)이다 — 8개 기본 직업 무브 컴펜디엄 전체에서 이름으로 찾는다.
 async function getAllMoveDocuments() {
@@ -445,6 +481,7 @@ async function migrateAddNoLevelCapFlag() {
 
 export function registerClassGrantAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  Hooks.on("deleteItem", onDeleteItem);
   Hooks.once("ready", () => {
     migrateAddSurveyedDefaults().then(() => migrateAddNoLevelCapFlag());
   });
