@@ -16,7 +16,8 @@ import {
   getFormcrafterRollModifier,
   shouldInterceptAskRoll,
   promptAskRollAbility,
-  getDopplegangersDanceOngoingMalus
+  getDopplegangersDanceOngoingMalus,
+  trySpendShapeshiftHold
 } from "../features/druid.js";
 import { getCommandCunningBonus } from "../features/command.js";
 import { getGoodDayToDieBonus } from "../features/barbarian.js";
@@ -109,6 +110,12 @@ async function consumePendingRollBonus(item, pendingBonus) {
 
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
+
+  // 드루이드 변신: 이미 변신 중이고 Hold가 남아있으면 이 클릭은 "다시
+  // 변신을 시도"가 아니라 "그 형태의 능력을 쓰려고 Hold를 쓰는" 것이라
+  // 판정 자체가 없어야 한다(features/druid.js 참고) — 다른 사전 처리보다
+  // 먼저 확인해서, 해당하면 원래 굴림을 아예 실행하지 않는다.
+  if (await trySpendShapeshiftHold(this, this.actor)) return undefined;
 
   // 사그라지는 인연(황천길 대체)은 유대(BOND) 판정이라 rollMod로 개입할 수
   // 없다 — 판정 자체가 열리기 전에 가장 먼저 물어봐야 한다(그래야 죽어가는

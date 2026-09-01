@@ -537,6 +537,40 @@ function promptAnimalName() {
   });
 }
 
+// 원문: "예비를 1점 쓰면 판정 없이 [마스터가 정해준] 그 액션을 할 수
+// 있다." 변신 중(Hold > 0)에 변신 무브를 다시 클릭하면 시스템이 원래
+// 2d6+WIS를 새로 굴려버리는데, 이건 "다시 변신을 시도"하는 게 아니라
+// "이미 변신한 상태에서 그 형태의 능력을 쓰는" 완전히 다른 행동이라
+// 판정 자체가 없어야 한다. lib/roll-wrapper.js가 원래 굴림을 실행하기
+// *전에* 이 함수를 불러서, 변신 중이고 Hold가 남아있으면 아예 굴림을
+// 가로채 Hold만 1 소모한다(counterspell.js/herculean-appetites.js와 같은
+// "판정 자체를 대체" 패턴). 어떤 액션을 썼는지는 자유 서술이라(변신
+// 무브 자체에 구조화된 선택지가 없다) 자동화하지 않고, 소모만 반영한다.
+// 이 소모로 Hold가 0이 되면 원문대로("Hold가 떨어지면 본래 모습으로
+// 돌아온다") 자동으로 변신을 해제한다.
+export async function trySpendShapeshiftHold(item, actor) {
+  if (!isEnabled()) return false;
+  if (!actor || actor.type !== "character") return false;
+
+  const names = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
+  if (!names.includes(item.name)) return false;
+  if (!isShapeshiftActive(actor)) return false;
+
+  const hold = Number(actor.system.attributes?.hold?.value) || 0;
+  if (hold <= 0) return false;
+
+  const moveName = getShapeshifterMove(actor)?.name ?? item.name;
+  const next = hold - 1;
+  await actor.update({ "system.attributes.hold.value": next });
+  announceActionApplied(actor, moveName, game.i18n.format("DWAUTO.Druid.ShapeshiftHoldSpent", { hold: next }));
+
+  if (next <= 0) {
+    await revertShapeshift(actor);
+  }
+
+  return true;
+}
+
 async function startShapeshift(actor) {
   const animalName = await promptAnimalName();
   if (animalName === null) return;

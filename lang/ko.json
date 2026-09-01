@@ -1388,6 +1388,7 @@
       "HoldAdjustLabel": "Hold",
       "HoldBadgeTitle": "지금 Hold가 몇 개인지 보여줍니다. 마스터는 클릭해서 직접 고칠 수 있습니다.",
       "HoldBadge": "Hold: {hold}",
+      "ShapeshiftHoldSpent": "Hold를 1점 써서 그 형태의 능력을 사용했습니다 (남은 Hold: {hold})",
       "ShedApplied": "변신을 해제하고 피해 {damage}를 무효화했습니다",
       "FormshaperPromptTitle": "Formshaper",
       "FormshaperPromptContent": "이번 변신에서 장갑 +1과 피해 +1d4 중 무엇을 선택하시겠습니까?",

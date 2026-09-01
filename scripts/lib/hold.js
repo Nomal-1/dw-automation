@@ -7,9 +7,16 @@
 import { getMoveChoiceData, promptChoiceSelection } from "./move-choices.js";
 import { announceActionApplied } from "./announce.js";
 
+// 던전월드 한글화 모듈은 "Hold"를 전부 "예비"로 옮겨서(예: "예비 2점을
+// 받습니다"), 영문 "hold"만 찾던 정규식이 번역된 세계에서는 단 한 번도
+// 맞아떨어진 적이 없었다 — 판정 결과 텍스트에서 새 Hold 값을 못 읽어서
+// 항상 조용히 0을 반환했고(실제로 변신 굴림 뒤 Hold가 전혀 안 올라가는
+// 것으로 확인됨), 그 위에 다른 보너스(형태의 자유의 1d4 등)가 얹히면
+// "원래 Hold는 사라지고 보너스만 남은 것"처럼 보였다. "hold"/"예비" 둘 다
+// 인식하도록 고쳤다.
 function parseHoldAmount(resultHtml) {
   const text = $("<div>").html(resultHtml ?? "").text();
-  const match = text.match(/hold\s+(\d+)/i);
+  const match = text.match(/(?:hold|예비)\s*(\d+)/i);
   return match ? parseInt(match[1], 10) : 0;
 }
 

@@ -1388,6 +1388,7 @@
       "HoldAdjustLabel": "Hold",
       "HoldBadgeTitle": "Shows the current Hold count. The GM can click to edit it directly.",
       "HoldBadge": "Hold: {hold}",
+      "ShapeshiftHoldSpent": "Spent 1 Hold to use that form's ability (Hold remaining: {hold})",
       "ShedApplied": "Reverted to natural form, negating {damage} damage",
       "FormshaperPromptTitle": "Formshaper",
       "FormshaperPromptContent": "Choose +1 armor or +1d4 damage for this shapeshift.",
