@@ -181,6 +181,7 @@ export const SETTINGS = {
   ENABLE_LOGICAL_ASSISTANT: "enableLogicalAssistant",
   LOGICAL_MOVE_NAMES: "logicalMoveNames",
   HIGHLY_LOGICAL_MOVE_NAMES: "highlyLogicalMoveNames",
+  ENABLE_SPELL_LEVEL_GUARD: "enableSpellLevelGuard",
   ENABLE_METAL_HURLANT_ASSISTANT: "enableMetalHurlantAssistant",
   METAL_HURLANT_MOVE_NAMES: "metalHurlantMoveNames",
   ELDRITCH_TONES_MOVE_NAMES: "eldritchTonesMoveNames",

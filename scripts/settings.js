@@ -652,6 +652,16 @@ export function registerSettings() {
     default: "Highly Logical"
   });
 
+  // 주문 레벨 안전장치: 자세한 설계는 features/spell-level-guard.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SPELL_LEVEL_GUARD, {
+    name: "DWAUTO.Settings.EnableSpellLevelGuard.Name",
+    hint: "DWAUTO.Settings.EnableSpellLevelGuard.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

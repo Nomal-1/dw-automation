@@ -15,6 +15,7 @@ import { getCheapShotBonus } from "./cheap-shot.js";
 import { promptStrongArmThrow, removeAmmoChoice } from "./strong-arm.js";
 import { getWhatAreYouWaitingForBonus } from "./what-are-you-waiting-for.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { getEffectiveSpellLevel } from "./spell-preparation.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -214,7 +215,9 @@ function promptAmmo(ammoItems) {
 
 // Wizard의 Spell Augmentation: 지속 중인 주문을 하나 소모해서 그 레벨만큼
 // 데미지를 추가한다. 이 무브가 없거나 지속 중인 주문이 없으면 그냥 0을 반환한다
-// (물어보지 않고 조용히 넘어감).
+// (물어보지 않고 조용히 넘어감). 원문 레벨이 아니라 getEffectiveSpellLevel
+// (spell-preparation.js)로 계산해서, 천재/대가 등으로 낮춰둔 레벨이 그대로
+// 반영되게 한다.
 async function promptSpellAugmentation(actor) {
   const moveNames = splitCommaList(SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES);
   const hasMove = actor.items.some((i) => i.type === "move" && moveNames.includes(i.name));
@@ -242,7 +245,7 @@ async function promptSpellAugmentation(actor) {
           callback: async (html) => {
             const itemId = html.find('[name="spell"]').val();
             const spellItem = actor.items.get(itemId);
-            const level = Number(spellItem?.system?.spellLevel) || 0;
+            const level = getEffectiveSpellLevel(actor, spellItem);
             await removeActiveOngoingSpell(actor, itemId);
             announceActionApplied(
               actor,

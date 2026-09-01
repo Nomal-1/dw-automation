@@ -76,6 +76,17 @@ function getAllDiscountedSpellIds(actor) {
   return discountMap;
 }
 
+// 주문 준비 예산 계산 말고도 그 주문의 레벨을 실제 규칙에 쓰는 다른
+// 자동화들(위저드 주문 방어/주문 접지의 "끝낸 주문의 레벨만큼", 마력의
+// 방패/방패의 "1레벨 이상 주문 보유" 조건 등)도 천재/대가/선택받은 자/
+// 응급처치로 낮춰둔 레벨을 그대로 반영해야 원문("0레벨이 된 주문은
+// 암송주문으로 간주")과 어긋나지 않는다 — features/underdog.js,
+// features/hit-trigger.js, features/attack-assistant.js가 재사용한다.
+export function getEffectiveSpellLevel(actor, spell) {
+  if (!spell) return 0;
+  return effectiveSpellLevel(spell, getAllDiscountedSpellIds(actor));
+}
+
 // 설정("주문 준비 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
 // 아직 번역 전(영문 기본값)이어도, 지금 이 시점의 번역 데이터로 다시 한번
 // 확인한다(features/class-grant.js와 같은 방식).

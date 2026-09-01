@@ -4,6 +4,7 @@ import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 import { getMoveNameMap, resolveDamageReductionMoveName } from "../lib/translation-import.js";
 import { isNoteMoveActive } from "./note-moves.js";
+import { getEffectiveSpellLevel } from "./spell-preparation.js";
 
 // "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
 // 이름/평소 보너스/조건 충족 시 보너스로 이루어진 일반 표라 GM이 서로 무관한
@@ -57,9 +58,11 @@ export function isConditionActive(actor, moveId) {
 
 // 위저드 Arcane Ward/Arcane Armor 전용: "1레벨 이상 주문을 하나라도 준비하고
 // 있는가"를 액터의 주문 아이템에서 직접 읽어 판정한다(features/spell-preparation.js가
-// system.prepared를 정확히 유지해준다).
+// system.prepared를 정확히 유지해준다). 원문 레벨이 아니라 getEffectiveSpellLevel로
+// 확인해서, 천재/대가 등으로 0레벨(암송주문)까지 낮춰둔 주문은 더 이상
+// 조건을 만족시키지 않게 한다.
 function hasPreparedSpellOfLevel1Plus(actor) {
-  return actor.items.some((i) => i.type === "spell" && i.system?.prepared && Number(i.system?.spellLevel) >= 1);
+  return actor.items.some((i) => i.type === "spell" && i.system?.prepared && getEffectiveSpellLevel(actor, i) >= 1);
 }
 
 // 팔라딘 Holy Protection처럼 linkedMoveName이 있는 행은 수동 토글이 아니라

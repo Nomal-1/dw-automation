@@ -70,6 +70,7 @@ import { registerEverOnwardAssistant } from "./features/ever-onward.js";
 import { registerClericSpellGrantAssistant } from "./features/cleric-spell-grant.js";
 import { registerFountOfKnowledgeAssistant } from "./features/fount-of-knowledge.js";
 import { registerLogicalAssistant } from "./features/logical.js";
+import { registerSpellLevelGuard } from "./features/spell-level-guard.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -151,3 +152,4 @@ registerEverOnwardAssistant();
 registerClericSpellGrantAssistant();
 registerFountOfKnowledgeAssistant();
 registerLogicalAssistant();
+registerSpellLevelGuard();

@@ -8,7 +8,7 @@ import { findDecidingUser } from "../lib/deciding-user.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
 import { getHold, setHold } from "../lib/divine-hold-state.js";
 import { getProtectedAllies } from "../lib/divine-protection-state.js";
-import { getHoldGrantRow } from "./spell-preparation.js";
+import { getHoldGrantRow, getEffectiveSpellLevel } from "./spell-preparation.js";
 import { isFerocitySpent, setFerocitySpent } from "../lib/animal-companion-state.js";
 import { isHungerPenaltyActive, setHungerPenaltyActive } from "../lib/hunger-penalty-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -206,11 +206,13 @@ function promptDebilityChoice(actor, row) {
 
 // 위저드 Spell Defense 전용: 완전 무효화가 아니라 "유지 중인 지속 주문 하나를
 // 끝내고, 그 주문 레벨만큼만 피해를 경감"하는 대가다. 유지 중인 지속 주문
-// 중 하나를 고르는 대화상자. 취소하면 null.
+// 중 하나를 고르는 대화상자. 취소하면 null. 원문 레벨이 아니라
+// getEffectiveSpellLevel(spell-preparation.js)로 계산해서, 천재/대가 등으로
+// 낮춰둔 레벨이 그대로 반영되게 한다.
 function promptSpellDefenseChoice(actor, row, active) {
   const options = active
     .map((s) => {
-      const level = Number(actor.items.get(s.itemId)?.system?.spellLevel) || 0;
+      const level = getEffectiveSpellLevel(actor, actor.items.get(s.itemId));
       return `<option value="${s.itemId}">${s.name} (Lv.${level})</option>`;
     })
     .join("");
@@ -252,7 +254,7 @@ async function applySpellDefense(actor, row, damage, originalChanges, originalOp
   if (spellId === undefined) return null;
 
   const spellItem = actor.items.get(spellId);
-  const spellLevel = Number(spellItem?.system?.spellLevel) || 0;
+  const spellLevel = getEffectiveSpellLevel(actor, spellItem);
   const reducedDamage = Math.max(0, damage - spellLevel);
 
   await removeActiveOngoingSpell(actor, spellId);
