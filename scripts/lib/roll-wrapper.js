@@ -44,6 +44,8 @@ import { getLoveTruckBonus } from "../features/love-truck.js";
 import { promptBamboozlePreRoll } from "../features/bamboozle.js";
 import { promptFountOfKnowledgePreRoll } from "../features/fount-of-knowledge.js";
 import { promptLogicalPreRoll } from "../features/logical.js";
+import { promptFamiliarPreyPreRoll } from "../features/familiar-prey.js";
+import { promptSaferPlaceForwardPreRoll } from "../features/safe-place.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -174,6 +176,12 @@ async function wrappedRoll(wrapped, ...args) {
   // fount-of-knowledge.js 참고).
   const fountOfKnowledge = await promptFountOfKnowledgePreRoll(this);
 
+  // 레인저 이러면 더 안전하오(A Safer Place)의 "파수 이외 아무 판정에나
+  // +1 forward" 대기도 같은 자리에서 소모한다(features/safe-place.js
+  // 참고) — 파수 전용 +1은 pendingRollBonus 슬롯을 그대로 쓰므로 여기
+  // preRollBonus 합산에는 관여하지 않는다.
+  const saferPlace = await promptSaferPlaceForwardPreRoll(this);
+
   const preRollBonus =
     iAmTheLaw.bonus +
     knowItAll.bonus +
@@ -185,6 +193,7 @@ async function wrappedRoll(wrapped, ...args) {
     onTheMove.bonus +
     bamboozle.bonus +
     fountOfKnowledge.bonus +
+    saferPlace.bonus +
     getSeeingRedBonus(this) +
     getLoveTruckBonus(this);
 
@@ -200,7 +209,8 @@ async function wrappedRoll(wrapped, ...args) {
   const interrogator = await promptInterrogatorPreRoll(this);
   const precise = await promptPrecisePreRoll(this);
   const logical = await promptLogicalPreRoll(this);
-  const statOverride = interrogator.statOverride ?? precise.statOverride ?? logical.statOverride;
+  const familiarPrey = await promptFamiliarPreyPreRoll(this);
+  const statOverride = interrogator.statOverride ?? precise.statOverride ?? logical.statOverride ?? familiarPrey.statOverride;
 
   let spellPenalty = 0;
   if (game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT) && isCastSpellMove(this)) {

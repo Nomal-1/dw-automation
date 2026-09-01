@@ -822,6 +822,46 @@
       "EnableSpellLevelGuard": {
         "Name": "Enable Spell Level Guard",
         "Hint": "The dungeonworld system has a defect where a spell level other than 0/1/3/5/7/9 makes the character sheet fail to open entirely (confirmed by an actual incident). Blocks and warns if you try to save a spell item's level outside those 6 values."
+      },
+      "EnableFamiliarPreyAssistant": {
+        "Name": "Enable Familiar Prey Assistant",
+        "Hint": "Before Spout Lore about a monster, asks whether to roll with WIS instead. If upgraded to Hunter's Prey, posts a note on a 12+ that an extra question can be asked."
+      },
+      "FamiliarPreyMoveNames": {
+        "Name": "Familiar Prey Move Names",
+        "Hint": "Comma-separated (default: Familiar Prey)."
+      },
+      "HuntersPreyMoveNames": {
+        "Name": "Hunter's Prey Move Names",
+        "Hint": "Comma-separated (default: Hunter's Prey)."
+      },
+      "EnableSafePlaceAssistant": {
+        "Name": "Enable A Safe Place Assistant",
+        "Hint": "Using A Safe Place / A Safer Place prompts you to pick an ally, then reserves +1 to both your and that ally's next Take Watch roll. With A Safer Place, also reserves +1 forward to the next roll other than Take Watch."
+      },
+      "SafePlaceMoveNames": {
+        "Name": "A Safe Place Move Names",
+        "Hint": "Comma-separated (default: A Safe Place)."
+      },
+      "SaferPlaceMoveNames": {
+        "Name": "A Safer Place Move Names",
+        "Hint": "Comma-separated (default: A Safer Place)."
+      },
+      "TakeWatchMoveNames": {
+        "Name": "Take Watch Move Names",
+        "Hint": "Comma-separated (default: Take Watch)."
+      },
+      "EnableObservantAssistant": {
+        "Name": "Enable Observant Assistant",
+        "Hint": "Posts a note in chat when Hunt & Track rolls a 10+, that an extra question not on the list can be asked."
+      },
+      "ObservantMoveNames": {
+        "Name": "Observant Move Names",
+        "Hint": "Comma-separated (default: Observant)."
+      },
+      "HuntTrackMoveNames": {
+        "Name": "Hunt & Track Move Names",
+        "Hint": "Comma-separated (default: Hunt & Track)."
       }
     },
     "Npc": {
@@ -1634,6 +1674,21 @@
       "ModeAsk": "Always Ask",
       "ModeOn": "Always On",
       "ModeOff": "Always Off"
+    },
+    "FamiliarPrey": {
+      "Prompt": "Is this Spout Lore about a monster? Roll with WIS.",
+      "Applied": "Familiar Prey applied — this Spout Lore uses WIS",
+      "HuntersPreyBonus": "Hunter's Prey lets you ask one extra question about that target"
+    },
+    "SafePlace": {
+      "TargetLabel": "Pick the ally who receives the effect.",
+      "SaferPlaceLabel": "A Safer Place",
+      "SaferForwardApplied": "A Safer Place applied — +1 on this roll",
+      "Applied": "Reserved +1 to {name}'s and your own next Take Watch roll",
+      "AppliedSafer": "Reserved +1 to {name}'s and your own next Take Watch roll, plus +1 forward on your next roll other than Take Watch"
+    },
+    "Observant": {
+      "ExtraChoice": "You can ask an extra question outside the Hunt & Track list"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "Get All Cleric Spells (Current Level)",

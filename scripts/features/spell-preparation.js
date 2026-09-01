@@ -10,7 +10,7 @@ import { getHold, setHold } from "../lib/divine-hold-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { promptActorMultiTarget } from "../lib/actor-target-picker.js";
 import { setProtectedAllies } from "../lib/divine-protection-state.js";
-import { getPaladinClericLevel } from "./note-moves.js";
+import { getClericLevelOverride } from "./note-moves.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -31,13 +31,13 @@ function getRows() {
   return game.settings.get(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES);
 }
 
-// 팔라딘 신의 은혜(Divine Favor)를 발동한 액터는 실제 캐릭터 레벨 대신
-// 클레릭 레벨(features/note-moves.js가 관리)을 기준으로 예배(Commune)의
-// 주문 준비 한도를 계산한다 — 위저드 Prepare Spells/클레릭 본인의 예배는
-// 이 값이 항상 null이라(신의 은혜를 발동한 적이 없으므로) 원래대로 실제
-// 레벨을 그대로 쓴다.
+// 팔라딘 신의 은혜(Divine Favor)/레인저 황무지의 신(God Amidst The Wastes)을
+// 발동한 액터는 실제 캐릭터 레벨 대신 클레릭 레벨(features/note-moves.js가
+// 관리)을 기준으로 예배(Commune)의 주문 준비 한도를 계산한다 — 위저드
+// Prepare Spells/클레릭 본인의 예배는 이 값이 항상 null이라(둘 다 발동한
+// 적이 없으므로) 원래대로 실제 레벨을 그대로 쓴다.
 function getActorLevel(actor) {
-  const clericLevel = getPaladinClericLevel(actor);
+  const clericLevel = getClericLevelOverride(actor);
   if (clericLevel !== null) return clericLevel;
   return Number(actor.system?.attributes?.level?.value) || 1;
 }

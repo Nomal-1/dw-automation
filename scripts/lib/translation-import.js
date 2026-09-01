@@ -452,6 +452,55 @@ export async function runTranslationImport() {
     translateCommaList(moveMap, highlyLogicalMoveNames, stats)
   );
 
+  const familiarPreyMoveNames = game.settings.get(MODULE_ID, SETTINGS.FAMILIAR_PREY_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.FAMILIAR_PREY_MOVE_NAMES,
+    translateCommaList(moveMap, familiarPreyMoveNames, stats)
+  );
+
+  const huntersPreyMoveNames = game.settings.get(MODULE_ID, SETTINGS.HUNTERS_PREY_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.HUNTERS_PREY_MOVE_NAMES,
+    translateCommaList(moveMap, huntersPreyMoveNames, stats)
+  );
+
+  const safePlaceMoveNames = game.settings.get(MODULE_ID, SETTINGS.SAFE_PLACE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.SAFE_PLACE_MOVE_NAMES,
+    translateCommaList(moveMap, safePlaceMoveNames, stats)
+  );
+
+  const saferPlaceMoveNames = game.settings.get(MODULE_ID, SETTINGS.SAFER_PLACE_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.SAFER_PLACE_MOVE_NAMES,
+    translateCommaList(moveMap, saferPlaceMoveNames, stats)
+  );
+
+  const takeWatchMoveNames = game.settings.get(MODULE_ID, SETTINGS.TAKE_WATCH_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.TAKE_WATCH_MOVE_NAMES,
+    translateCommaList(moveMap, takeWatchMoveNames, stats)
+  );
+
+  const observantMoveNames = game.settings.get(MODULE_ID, SETTINGS.OBSERVANT_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.OBSERVANT_MOVE_NAMES,
+    translateCommaList(moveMap, observantMoveNames, stats)
+  );
+
+  const huntTrackMoveNames = game.settings.get(MODULE_ID, SETTINGS.HUNT_TRACK_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.HUNT_TRACK_MOVE_NAMES,
+    translateCommaList(moveMap, huntTrackMoveNames, stats)
+  );
+
   // 무브 업그레이드 표는 upgradeName/replacesName 둘 다 무브 이름이다.
   // deletesPrevious(대체/필요 구분)는 이름과 무관한 GM 설정이라 그대로
   // 옮겨야 한다 — 여기서 새 객체를 이름 두 필드만으로 다시 만들면 매번

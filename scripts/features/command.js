@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { announceActionApplied } from "../lib/announce.js";
-import { getAnimalCompanionStats } from "./note-moves.js";
+import { getEffectiveAnimalCompanionStats } from "./note-moves.js";
 
 // 레인저 명령(Command) 원문: "동물 친구가 받은 훈련을 활용하고 있으면 —
 // 같은 대상을 공격할 때 동물의 사나움을 피해에, 추적할 때 동물의 교활함을
@@ -56,7 +56,7 @@ function getActiveStats(actor) {
   if (!isEnabled()) return null;
   if (!isCooperating(actor)) return null;
   if (!findCommandMove(actor)) return null;
-  return getAnimalCompanionStats(actor);
+  return getEffectiveAnimalCompanionStats(actor);
 }
 
 // features/attack-assistant.js가 데미지 굴림 공식에 이어붙인다(같은 대상을

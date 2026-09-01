@@ -5,6 +5,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 import { parseAnimalCompanionStats, parseAnimalCompanionChoiceLists } from "../lib/animal-companion-stats.js";
+import { isFerocitySpent } from "../lib/animal-companion-state.js";
 
 // Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
 // Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
@@ -46,7 +47,11 @@ const ANIMAL_WEAKNESSES_FLAG = "animalCompanionWeaknesses";
 // 읽어서, 예배(Commune)의 주문 준비 한도가 이 클레릭 레벨 기준으로 계산되게
 // 한다.
 const CLERIC_LEVEL_FLAG = "paladinClericLevel";
-const DIVINE_FAVOR_NAMES = ["Divine Favor", "신의 은혜"];
+// 레인저 황무지의 신(God Amidst The Wastes) 원문이 팔라딘 신의 은혜와
+// 완전히 같은 문구("예배와 주문 시전을 얻고, 자신을 1레벨 클레릭처럼
+// 취급하며 레벨이 오를 때마다 클레릭 레벨도 오른다")라 같은 클레릭 레벨
+// 추적 로직을 그대로 공유한다.
+const DIVINE_FAVOR_NAMES = ["Divine Favor", "신의 은혜", "God Amidst The Wastes", "황무지의 신"];
 const lastKnownActorLevel = new Map(); // actor.id -> preUpdateActor에서 기억해둔 옛 레벨
 
 function isDivineFavorMove(moveItem) {
@@ -62,10 +67,12 @@ async function setClericLevel(actor, value) {
   await actor.setFlag(MODULE_ID, CLERIC_LEVEL_FLAG, clamped);
 }
 
-// features/spell-preparation.js가 예배(Commune)의 주문 준비 한도를 계산할
-// 때 재사용한다. 신의 은혜를 발동한 적이 없으면(파딘이 아니거나 아직
-// 안 골랐으면) null — 호출부가 실제 캐릭터 레벨을 그대로 쓰면 된다.
-export function getPaladinClericLevel(actor) {
+// features/spell-preparation.js가 예배(Commune)의 주문 준비 한도를,
+// features/cleric-spell-grant.js가 "레벨별 사제 주문 모두 얻기" 버튼의
+// 기준 레벨을 계산할 때 재사용한다. 신의 은혜/황무지의 신을 발동한 적이
+// 없으면(실제 클레릭이거나 아직 안 골랐으면) null — 호출부가 실제 캐릭터
+// 레벨을 그대로 쓰면 된다.
+export function getClericLevelOverride(actor) {
   return getClericLevel(actor);
 }
 
@@ -84,6 +91,19 @@ export function registerAnimalCompanionResetListener(fn) {
 // features/command.js가 재사용한다. 아직 파싱된 값이 없으면 null.
 export function getAnimalCompanionStats(actor) {
   return actor.getFlag(MODULE_ID, ANIMAL_STATS_FLAG) ?? null;
+}
+
+// 레인저 헌신적인 친구(Man's Best Friend)로 사나움을 다 써버린 동안은
+// (features/hit-trigger.js가 관리하는 isFerocitySpent) 다른 자동화(예:
+// features/command.js의 명령 피해 보너스)도 동물의 사나움을 실제로 0으로
+// 봐야 한다 — 원문 "사나움이 이미 0이면 이 능력을 못 쓴다"가 성립하려면
+// 다른 계산에서도 0으로 취급돼야 하기 때문이다. 몇 시간 휴식하면(배지를
+// 다시 눌러 되돌리면) 원래 값으로 돌아온다.
+export function getEffectiveAnimalCompanionStats(actor) {
+  const stats = getAnimalCompanionStats(actor);
+  if (!stats) return stats;
+  if (!isFerocitySpent(actor)) return stats;
+  return { ...stats, ferocity: 0 };
 }
 
 // features/well-trained.js가 재사용한다. 아직 고른 적 없으면 빈 배열.
@@ -978,6 +998,25 @@ function onUpdateActorForClericLevel(actor, changes, options, userId) {
   });
 }
 
+// 레인저 황무지의 신(God Amidst The Wastes)이 이번 업데이트 전에는
+// DIVINE_FAVOR_NAMES에 없어서, 그 전에 이미 발동해둔 액터는 클레릭 레벨이
+// 한 번도 초기화되지 않았다 — 이미 발동(isActivated)했는데 아직 클레릭
+// 레벨이 없는 액터를 찾아 1로 채워 넣는다(그 뒤로는 레벨업 훅이 정상적으로
+// 이어서 관리한다).
+async function migrateBackfillClericLevel() {
+  if (!game.user.isGM) return;
+
+  for (const actor of game.actors) {
+    if (actor.type !== "character") continue;
+    const moveItem = actor.items.find((i) => i.type === "move" && isDivineFavorMove(i));
+    if (!moveItem) continue;
+    if (!isActivated(actor, moveItem.id)) continue;
+    if (getClericLevel(actor) !== null) continue;
+
+    await setClericLevel(actor, 1);
+  }
+}
+
 export function registerNoteMoves() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
@@ -986,6 +1025,7 @@ export function registerNoteMoves() {
   Hooks.once("ready", () => {
     migrateBornOfSoilIntoNoteMoves()
       .then(() => migrateLegacyOwnershipToActivation())
-      .then(() => migrateBackfillAnimalCompanionStats());
+      .then(() => migrateBackfillAnimalCompanionStats())
+      .then(() => migrateBackfillClericLevel());
   });
 }

@@ -71,6 +71,9 @@ import { registerClericSpellGrantAssistant } from "./features/cleric-spell-grant
 import { registerFountOfKnowledgeAssistant } from "./features/fount-of-knowledge.js";
 import { registerLogicalAssistant } from "./features/logical.js";
 import { registerSpellLevelGuard } from "./features/spell-level-guard.js";
+import { registerFamiliarPreyAssistant } from "./features/familiar-prey.js";
+import { registerSafePlaceAssistant } from "./features/safe-place.js";
+import { registerObservantAssistant } from "./features/observant.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -153,3 +156,6 @@ registerClericSpellGrantAssistant();
 registerFountOfKnowledgeAssistant();
 registerLogicalAssistant();
 registerSpellLevelGuard();
+registerFamiliarPreyAssistant();
+registerSafePlaceAssistant();
+registerObservantAssistant();

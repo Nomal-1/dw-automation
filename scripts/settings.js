@@ -662,6 +662,102 @@ export function registerSettings() {
     default: true
   });
 
+  // 레인저 무브 익숙한 사냥감/사냥의 지식: 자세한 설계는
+  // features/familiar-prey.js 참고. 지식 더듬기 무브 이름은
+  // SPOUT_LORE_MOVE_NAMES를 그대로 재사용한다.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_FAMILIAR_PREY_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableFamiliarPreyAssistant.Name",
+    hint: "DWAUTO.Settings.EnableFamiliarPreyAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.FAMILIAR_PREY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.FamiliarPreyMoveNames.Name",
+    hint: "DWAUTO.Settings.FamiliarPreyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Familiar Prey"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HUNTERS_PREY_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HuntersPreyMoveNames.Name",
+    hint: "DWAUTO.Settings.HuntersPreyMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Hunter’s Prey"
+  });
+
+  // 레인저 무브 이러면 안전하오/이러면 더 안전하오: 자세한 설계는
+  // features/safe-place.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_SAFE_PLACE_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableSafePlaceAssistant.Name",
+    hint: "DWAUTO.Settings.EnableSafePlaceAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SAFE_PLACE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SafePlaceMoveNames.Name",
+    hint: "DWAUTO.Settings.SafePlaceMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "A Safe Place"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.SAFER_PLACE_MOVE_NAMES, {
+    name: "DWAUTO.Settings.SaferPlaceMoveNames.Name",
+    hint: "DWAUTO.Settings.SaferPlaceMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "A Safer Place"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TAKE_WATCH_MOVE_NAMES, {
+    name: "DWAUTO.Settings.TakeWatchMoveNames.Name",
+    hint: "DWAUTO.Settings.TakeWatchMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Take Watch"
+  });
+
+  // 레인저 무브 관찰력: 자세한 설계는 features/observant.js 참고.
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_OBSERVANT_ASSISTANT, {
+    name: "DWAUTO.Settings.EnableObservantAssistant.Name",
+    hint: "DWAUTO.Settings.EnableObservantAssistant.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.OBSERVANT_MOVE_NAMES, {
+    name: "DWAUTO.Settings.ObservantMoveNames.Name",
+    hint: "DWAUTO.Settings.ObservantMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Observant"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HUNT_TRACK_MOVE_NAMES, {
+    name: "DWAUTO.Settings.HuntTrackMoveNames.Name",
+    hint: "DWAUTO.Settings.HuntTrackMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Hunt & Track"
+  });
+
   // 바드 무브 쇳소리: 자세한 설계는 features/metal-hurlant.js 참고.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_METAL_HURLANT_ASSISTANT, {
     name: "DWAUTO.Settings.EnableMetalHurlantAssistant.Name",

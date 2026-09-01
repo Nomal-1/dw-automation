@@ -822,6 +822,46 @@
       "EnableSpellLevelGuard": {
         "Name": "주문 레벨 안전장치 사용",
         "Hint": "던전월드 시스템은 주문 레벨이 0/1/3/5/7/9가 아니면 캐릭터 시트 자체가 오류로 열리지 않게 되는 결함이 있습니다(실제 사고 사례로 확인됨). 주문 아이템의 레벨을 이 6개 값 밖으로 저장하려고 하면 막고 경고합니다."
+      },
+      "EnableFamiliarPreyAssistant": {
+        "Name": "익숙한 사냥감 자동화 사용",
+        "Hint": "괴물에 대한 지식 더듬기 직전 WIS로 판정할지 물어봅니다. 사냥의 지식으로 업그레이드된 경우 12+ 성공 시 추가 질문 안내를 채팅에 남깁니다."
+      },
+      "FamiliarPreyMoveNames": {
+        "Name": "익숙한 사냥감 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Familiar Prey)."
+      },
+      "HuntersPreyMoveNames": {
+        "Name": "사냥의 지식 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Hunter's Prey)."
+      },
+      "EnableSafePlaceAssistant": {
+        "Name": "이러면 안전하오 자동화 사용",
+        "Hint": "이러면 안전하오/이러면 더 안전하오를 사용하면 효과를 받을 아군을 고르게 하고, 그 아군과 본인에게 다음 파수 판정 +1을 예약합니다. 이러면 더 안전하오면 추가로 파수 이외의 다음 판정에도 +1을 예약합니다."
+      },
+      "SafePlaceMoveNames": {
+        "Name": "이러면 안전하오 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: A Safe Place)."
+      },
+      "SaferPlaceMoveNames": {
+        "Name": "이러면 더 안전하오 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: A Safer Place)."
+      },
+      "TakeWatchMoveNames": {
+        "Name": "파수 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Take Watch)."
+      },
+      "EnableObservantAssistant": {
+        "Name": "관찰력 자동화 사용",
+        "Hint": "사냥과 추적 판정에서 10+가 나오면 목록에 없는 추가 선택지를 물을 수 있다는 안내를 채팅에 남깁니다."
+      },
+      "ObservantMoveNames": {
+        "Name": "관찰력 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Observant)."
+      },
+      "HuntTrackMoveNames": {
+        "Name": "사냥과 추적 무브 이름",
+        "Hint": "쉼표로 구분해서 입력하세요(기본값: Hunt & Track)."
       }
     },
     "Npc": {
@@ -1634,6 +1674,21 @@
       "ModeAsk": "매번 묻기",
       "ModeOn": "항상 적용",
       "ModeOff": "항상 미적용"
+    },
+    "FamiliarPrey": {
+      "Prompt": "괴물에 대한 지식 더듬기입니까? WIS로 판정합니다.",
+      "Applied": "익숙한 사냥감 적용 — 이번 지식 더듬기를 WIS로 판정합니다",
+      "HuntersPreyBonus": "사냥의 지식 효과로 그 대상에 대해 질문을 하나 더 물어볼 수 있습니다"
+    },
+    "SafePlace": {
+      "TargetLabel": "효과를 받을 아군을 골라주세요.",
+      "SaferPlaceLabel": "이러면 더 안전하오",
+      "SaferForwardApplied": "이러면 더 안전하오 효과로 이번 판정에 +1",
+      "Applied": "{name}과(와) 본인에게 다음 파수 판정 +1이 예약되었습니다",
+      "AppliedSafer": "{name}과(와) 본인에게 다음 파수 판정 +1과, 파수 이외의 다음 판정 +1이 예약되었습니다"
+    },
+    "Observant": {
+      "ExtraChoice": "사냥과 추적 질문 목록에 없는 선택지도 하나 더 물어볼 수 있습니다"
     },
     "ClericSpellGrant": {
       "ButtonLabel": "현재 레벨 사제 주문 모두 얻기",
