@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "../data/self-forward-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 function blankRow() {
   return { name: "", restrictToMoveNames: "" };
@@ -28,7 +29,17 @@ export class SelfForwardMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 사제 Reaper, 마법사 Quick Study, 음유시인 An Ear For Magic, 야만전사
+  // Usurper처럼 여러 직업 무브가 한 표에 섞여 있어, 어느 직업 것인지
+  // 배지로 보여주고 그 기준으로 묶어서 정렬한다(lib/move-class-lookup.js
+  // 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | self-forward-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.SelfForwardMoves.Hint"),
       rows: this.rows

@@ -2,6 +2,24 @@
   "DWAUTO": {
     "Cancel": "취소",
     "Confirm": "확인",
+    "ClassLabel": {
+      "Column": "직업"
+    },
+    "SettingsTabs": {
+      "General": "일반",
+      "Barbarian": "야만전사",
+      "Bard": "음유시인",
+      "Cleric": "사제",
+      "Druid": "드루이드",
+      "Fighter": "전사",
+      "Immolator": "소각술사",
+      "Paladin": "팔라딘",
+      "Ranger": "사냥꾼",
+      "Thief": "도적",
+      "Wizard": "마법사",
+      "Shared": "공용 표",
+      "Other": "기타"
+    },
     "VersionInfo": {
       "Content": "지금 로드된 던전월드 자동화 툴킷 버전입니다."
     },

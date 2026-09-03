@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 const VALID_EFFECTS = ["armor", "debility", "spellDefense", "hold", "animalCompanion", "ongoingPenalty", "fireAid"];
 
@@ -32,7 +33,17 @@ export class HitTriggerMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 전사 Armor Mastery, 팔라딘 Bloody Aegis, 사제 Divine Intervention,
+  // 사냥꾼 Man's Best Friend 등 여러 직업 무브가 한 표에 섞여 있어, 어느
+  // 직업 것인지 배지로 보여주고 그 기준으로 묶어서 정렬한다(lib/
+  // move-class-lookup.js 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | hit-trigger-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.HitTriggerMoves.Hint"),
       rows: this.rows.map((r) => ({

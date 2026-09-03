@@ -4,6 +4,7 @@
   <table class="dwauto-attack-moves-table">
     <thead>
       <tr>
+        <th>{{localize "DWAUTO.ClassLabel.Column"}}</th>
         <th>{{localize "DWAUTO.NoteMovesSettings.Name"}}</th>
         <th></th>
       </tr>
@@ -11,6 +12,7 @@
     <tbody>
       {{#each rows}}
       <tr>
+        <td>{{#if this.classLabel}}<span class="dwauto-class-badge">{{this.classLabel}}</span>{{/if}}</td>
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
         <td><button type="button" class="dwauto-remove-row" data-action="remove-row" data-index="{{@index}}"><i class="fas fa-trash"></i></button></td>
       </tr>

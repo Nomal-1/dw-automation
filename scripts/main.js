@@ -79,9 +79,11 @@ import { registerWizardElfAssistant } from "./features/wizard-elf.js";
 import { registerRangerElfJourneyAssistant } from "./features/ranger-elf-journey.js";
 import { registerClericDwarfAssistant } from "./features/cleric-dwarf.js";
 import { registerCrossClassSpellAssistant } from "./features/cross-class-spell.js";
+import { registerSettingsTabs } from "./lib/settings-tabs.js";
 
 Hooks.once("init", () => {
   registerSettings();
+  registerSettingsTabs();
 });
 
 // game.dungeonworld.ItemDw(및 다른 시스템/모듈이 등록해두는 전역들)가 전부

@@ -114,6 +114,53 @@
   color: #b03a2e;
 }
 
+/* 여러 직업 무브가 한 표에 섞인 설정 메뉴(메모형 무브 등)에서 각 행이 어느
+   직업 것인지 보여주는 배지. lib/move-class-lookup.js가 표시/정렬 전용으로
+   붙여준다 — 저장되는 값에는 영향이 없다. */
+.dwauto-class-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(120, 46, 34, 0.15);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* 설정 화면 상단 직업별/기능별 탭(lib/settings-tabs.js) — 화면단 재배치일
+   뿐이라 안 좋아 보이면 이 블록과 그 파일만 지우면 원래 한 줄 목록으로
+   완전히 되돌아간다. */
+.dwauto-settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(120, 46, 34, 0.4);
+}
+
+.dwauto-settings-tab {
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(120, 46, 34, 0.12);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dwauto-settings-tab:hover {
+  background: rgba(120, 46, 34, 0.22);
+}
+
+.dwauto-settings-tab.active {
+  background: #7a2e2e;
+  color: #fff;
+}
+
+.dwauto-settings-tab-body .form-group {
+  margin-bottom: 6px;
+}
+
 .dwauto-ongoing-badge {
   background: #4a2e7a !important;
   color: #fff !important;

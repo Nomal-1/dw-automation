@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 function blankRow() {
   return { upgradeName: "", replacesName: "", deletesPrevious: true };
@@ -29,7 +30,16 @@ export class MoveUpgradesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 이 표는 8개 기본 직업 전체(+바바리안/이몰레이터)를 다루므로, 어느
+  // 직업 것인지 배지로 보여주고 그 기준으로 묶어서 정렬한다(upgradeName
+  // 기준 — lib/move-class-lookup.js 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows, { nameField: "upgradeName" }));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | move-upgrades-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.MoveUpgrades.Hint"),
       rows: this.rows

@@ -4,6 +4,7 @@
   <table class="dwauto-attack-moves-table">
     <thead>
       <tr>
+        <th>{{localize "DWAUTO.ClassLabel.Column"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.Name"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.Mode"}}</th>
         <th>{{localize "DWAUTO.ClassGrantMoves.GrantedMoveNames"}}</th>
@@ -15,6 +16,7 @@
     <tbody>
       {{#each rows}}
       <tr>
+        <td>{{#if this.classLabel}}<span class="dwauto-class-badge">{{this.classLabel}}</span>{{/if}}</td>
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
         <td>
           <select name="rows.{{@index}}.mode">

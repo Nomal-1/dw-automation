@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 const VALID_MODES = ["fixed", "choice"];
 
@@ -34,7 +35,17 @@ export class ClassGrantMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 팔라딘 Divine Favor, 레인저 God Amidst The Wastes, 야만전사 Appetite For
+  // Destruction 등 여러 직업 무브가 한 표에 섞여 있어, 어느 직업 것인지
+  // 배지로 보여주고 그 기준으로 묶어서 정렬한다(lib/move-class-lookup.js
+  // 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | class-grant-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.ClassGrantMoves.Hint"),
       rows: this.rows.map((r) => ({

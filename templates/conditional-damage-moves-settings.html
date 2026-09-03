@@ -4,6 +4,7 @@
   <table class="dwauto-attack-moves-table">
     <thead>
       <tr>
+        <th>{{localize "DWAUTO.ClassLabel.Column"}}</th>
         <th>{{localize "DWAUTO.ConditionalDamageMoves.Name"}}</th>
         <th>{{localize "DWAUTO.ConditionalDamageMoves.YesFormula"}}</th>
         <th>{{localize "DWAUTO.ConditionalDamageMoves.NoFormula"}}</th>
@@ -14,6 +15,7 @@
     <tbody>
       {{#each rows}}
       <tr>
+        <td>{{#if this.classLabel}}<span class="dwauto-class-badge">{{this.classLabel}}</span>{{/if}}</td>
         <td><input type="text" name="rows.{{@index}}.name" value="{{this.name}}"></td>
         <td><input type="text" name="rows.{{@index}}.yesFormula" value="{{this.yesFormula}}" placeholder="1d4"></td>
         <td><input type="text" name="rows.{{@index}}.noFormula" value="{{this.noFormula}}" placeholder="0"></td>

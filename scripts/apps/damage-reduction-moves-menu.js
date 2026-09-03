@@ -1,5 +1,15 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
+
+// "Divine Protection"/"Divine Armor"는 클레릭과 팔라딘이 이름을 공유해서
+// 이름만으로는 어느 직업인지 알 수 없다 — linkedMoveName이 "Quest"로
+// 채워진 쪽이 팔라딘(호리 프로텍션 계열), 아니면 클레릭이다(data/
+// hit-trigger-moves.js 상단 주석 참고).
+function disambiguateDivineProtection(row, englishName) {
+  if (englishName !== "Divine Protection" && englishName !== "Divine Armor") return null;
+  return row.linkedMoveName ? "팔라딘" : "사제";
+}
 
 function blankRow() {
   return { name: "", baseBonus: 0, outnumberedBonus: 1, linkedMoveName: "", autoCheckPreparedSpell: false };
@@ -31,7 +41,19 @@ export class DamageReductionMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 도적 Underdog, 야만전사 Unencumbered Unharmed, 드루이드 Barkskin, 사제/
+  // 팔라딘 Divine Protection, 마법사 Arcane Ward 등 여러 직업 무브가 한 표에
+  // 섞여 있어, 어느 직업 것인지 배지로 보여주고 그 기준으로 묶어서
+  // 정렬한다(lib/move-class-lookup.js 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(
+        await annotateRowsWithClass(this.rows, { disambiguate: disambiguateDivineProtection })
+      );
+    } catch (err) {
+      console.warn(`${MODULE_ID} | damage-reduction-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.DamageReductionMoves.Hint"),
       rows: this.rows

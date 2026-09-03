@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "../data/conditional-damage-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 function blankRow() {
   return { name: "", yesFormula: "", noFormula: "0", requiresDesignation: false };
@@ -30,7 +31,17 @@ export class ConditionalDamageMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 팔라딘 Smite/Holy Smite/Exterminatus, 레인저 Viper's Strike/Fangs, 야만전사
+  // Scent/Taste Of Blood처럼 여러 직업 무브가 한 표에 섞여 있어, 어느 직업
+  // 것인지 배지로 보여주고 그 기준으로 묶어서 정렬한다(lib/
+  // move-class-lookup.js 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | conditional-damage-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.ConditionalDamageMoves.Hint"),
       rows: this.rows

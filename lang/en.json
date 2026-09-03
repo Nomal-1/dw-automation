@@ -2,6 +2,24 @@
   "DWAUTO": {
     "Cancel": "Cancel",
     "Confirm": "Confirm",
+    "ClassLabel": {
+      "Column": "Class"
+    },
+    "SettingsTabs": {
+      "General": "General",
+      "Barbarian": "Barbarian",
+      "Bard": "Bard",
+      "Cleric": "Cleric",
+      "Druid": "Druid",
+      "Fighter": "Fighter",
+      "Immolator": "Immolator",
+      "Paladin": "Paladin",
+      "Ranger": "Ranger",
+      "Thief": "Thief",
+      "Wizard": "Wizard",
+      "Shared": "Shared Tables",
+      "Other": "Other"
+    },
     "VersionInfo": {
       "Content": "Currently loaded Dungeon World Automation Toolkit version."
     },

@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { DEFAULT_EMPOWER_MOVES } from "../data/empower-moves.js";
+import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup.js";
 
 function blankRow() {
   return { name: "", isGreater: false };
@@ -28,7 +29,16 @@ export class EmpowerMovesMenu extends FormApplication {
     });
   }
 
-  getData() {
+  // 사제 강화/상급 강화, 마법사 주문 강화/상급 주문 강화가 한 표에 섞여
+  // 있어, 어느 직업 것인지 배지로 보여주고 그 기준으로 묶어서 정렬한다
+  // (lib/move-class-lookup.js 참고).
+  async getData() {
+    try {
+      this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | empower-moves-menu: class annotation failed`, err);
+    }
+
     return {
       hint: game.i18n.localize("DWAUTO.EmpowerMoves.Hint"),
       rows: this.rows
