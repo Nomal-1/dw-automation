@@ -1,4 +1,6 @@
+import { MODULE_ID } from "./constants.js";
 import { registerSettings } from "./settings.js";
+import { buildPublicApi } from "./lib/public-api.js";
 import { registerNpcGenerator } from "./features/npc-generator.js";
 import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
@@ -90,6 +92,12 @@ Hooks.once("init", () => {
 // 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.
 Hooks.once("ready", () => {
   registerRollWrapper();
+
+  // 이 모듈에 의존하는 다른 모듈(예: Nomal's DW 홈브루 자동화)이
+  // game.modules.get("dw-automation").api로 공용 유틸에 접근할 수 있게
+  // 노출한다(ARCHITECTURE.md 9번 항목, lib/public-api.js 참고).
+  const self = game.modules.get(MODULE_ID);
+  if (self) self.api = buildPublicApi();
 });
 
 registerNpcGenerator();

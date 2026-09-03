@@ -189,10 +189,24 @@ lang/ko.json, en.json 전체 UI 문자열. 한국어가 사실상 1순위 언어
 - 새 모듈의 `module.json`에 `relationships.requires`로 이 모듈(`dw-automation`)을
   명시한다.
 - 이 모듈의 `scripts/lib/*.js` 내부 파일을 새 모듈이 직접 `import`하지 말고,
-  이 모듈이 `ready` 훅에서 `game.modules.get("dw-automation").api = { ... }`
-  형태로 공개 API를 노출하면 새 모듈은 그 API 객체를 통해서만 접근한다(아직
-  구현 전 — 새 모듈 착수 시점에 어떤 함수를 노출할지부터 정한다). 내부 파일
-  경로가 바뀌어도 새 모듈이 조용히 깨지지 않게 하기 위함이다.
+  `game.modules.get("dw-automation").api`를 통해서만 접근한다. 이 API는
+  `scripts/lib/public-api.js`의 `buildPublicApi()`가 만들고, `main.js`의
+  `ready` 훅(`registerRollWrapper()` 다음)에서 `game.modules.get(MODULE_ID).api`에
+  얹는다. 현재 노출된 함수(전부 `scripts/lib/public-api.js`에서 재확인 가능):
+  - `getMoveCardInfo`, `findMoveItem` (무브 카드 파싱)
+  - `getMoveChoiceData`, `promptChoiceSelection`, `extractInlineRoll`,
+    `extractSignedInlineRoll` (선택지 다이얼로그)
+  - `announceActionApplied`, `announceInfo` (채팅 알림)
+  - `promptActorTarget`, `promptActorMultiTarget`, `getCandidateActors`
+    (대상 선택 다이얼로그)
+  - `getMoveNameMap`, `getClassNameMap` (번역 인식 이름 매칭)
+  - `setPendingRollBonus`, `getPendingRollBonus`, `clearPendingRollBonus`,
+    `rollBonusAppliesTo` ("다음 판정 한 번" 대기 보정치)
+  - `getOrCreateTagsContainer` (캐릭터 시트 무브 항목에 배지 붙이기)
+
+  새 함수가 필요하면 `public-api.js`에 추가하고 이 목록도 같이 갱신할 것.
+  내부 파일 경로가 바뀌어도 여기 이름·시그니처만 유지하면 의존 모듈이 조용히
+  깨지지 않는다.
 - 새 모듈도 이 문서에 적힌 파일 구조/패턴/원칙(2번 항목이 특히 중요)을 그대로
   따라간다 — 별도로 다시 발명하지 않는다.
 - 새 모듈의 설정 화면은 이 모듈과 분리된 자기 자신의 설정 목록을 가진다(커스텀
