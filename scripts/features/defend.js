@@ -5,6 +5,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { findDecidingUser } from "../lib/deciding-user.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { listOpenApps } from "../lib/open-apps.js";
 import {
   getDefendReserve,
   setDefendReserve,
@@ -660,7 +661,7 @@ function onUpdateActor(actor, changes) {
   if (!relevant) return;
 
   setTimeout(() => {
-    for (const app of Object.values(ui.windows)) {
+    for (const app of listOpenApps()) {
       if (app.actor?.type === "character" && findMoveByConfiguredNames(app.actor) && typeof app.render === "function") {
         app.render(true);
       }

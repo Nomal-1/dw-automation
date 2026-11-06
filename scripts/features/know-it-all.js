@@ -5,6 +5,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { getKnowItAllPending, setKnowItAllPending, clearKnowItAllPending } from "../lib/know-it-all-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { listOpenApps } from "../lib/open-apps.js";
 
 // 위저드 Know-It-All 원문: "다른 플레이어의 캐릭터가 조언을 구하러 오고
 // 당신이 최선이라 생각하는 걸 말해주면, 그들이 그 조언을 따를 때 +1
@@ -374,7 +375,7 @@ function onUpdateActor(actor, changes) {
   // 무시될 수 있으므로, 살짝 늦춰서 그 사이 다른 갱신도 다 반영된 뒤에
   // 한 번 확실하게 다시 그린다(force로 강제).
   setTimeout(() => {
-    for (const app of Object.values(ui.windows)) {
+    for (const app of listOpenApps()) {
       if (app.actor?.type === "character" && findMoveByConfiguredNames(app.actor) && typeof app.render === "function") {
         app.render(true);
       }

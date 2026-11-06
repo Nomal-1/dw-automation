@@ -16,7 +16,17 @@ function findSettingKey(el, prefix) {
   return raw.startsWith(prefix) ? raw.slice(prefix.length) : null;
 }
 
+// V13+의 설정 화면(AppV2)은 DOM 구조가 바뀔 수 있어서, 탭 재배치가 어디서든
+// 예외를 내더라도 설정 화면 자체는 원래의 한 줄 목록으로 그대로 열리게 한다.
 function onRenderSettingsConfig(app, html) {
+  try {
+    buildSettingsTabs(html);
+  } catch (error) {
+    console.warn(`${MODULE_ID} | 설정 화면 탭을 만들지 못해 기본 목록으로 둡니다.`, error);
+  }
+}
+
+function buildSettingsTabs(html) {
   const $html = html instanceof jQuery ? html : $(html);
   const prefix = `${MODULE_ID}.`;
 

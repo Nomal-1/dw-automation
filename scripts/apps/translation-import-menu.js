@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../constants.js";
 import { isTranslationModuleActive, runTranslationImport, TRANSLATION_MODULE_ID } from "../lib/translation-import.js";
+import { listOpenApps, getSettingsConfigClass } from "../lib/open-apps.js";
 
 export class TranslationImportMenu extends FormApplication {
   static get defaultOptions() {
@@ -44,7 +45,10 @@ export class TranslationImportMenu extends FormApplication {
         // (실제 저장된 값은 바뀌어 있어서 게임 동작은 정상이지만, 화면에는 예전
         // 값이 남아 있는 것처럼 보인다). 열려 있다면 강제로 다시 그려서 방금
         // 바뀐 값을 바로 보여준다.
-        const openSettingsConfig = Object.values(ui.windows).find((app) => app instanceof SettingsConfig);
+        const SettingsConfigClass = getSettingsConfigClass();
+        const openSettingsConfig = SettingsConfigClass
+          ? listOpenApps().find((app) => app instanceof SettingsConfigClass)
+          : null;
         openSettingsConfig?.render();
       } finally {
         $button.prop("disabled", false);
