@@ -155,16 +155,22 @@ lang/ko.json, en.json 전체 UI 문자열. 한국어가 사실상 1순위 언어
 
 ## 7. 릴리스 절차
 
-1. `module.json`의 `version` 올리기
-2. 관련 파일만 `git add`(절대 `-A`/`.` 쓰지 않음) → 영문 커밋 메시지로 커밋 →
-   `git push origin main`
-3. PowerShell: `Compress-Archive -Path @('module.json','scripts','styles','lang','templates','README.md') -DestinationPath "$env:TEMP\module.zip" -Force`
-4. `git tag vX.Y.Z && git push origin vX.Y.Z`
-5. `gh release create vX.Y.Z module.json "$TEMP/module.zip" --title vX.Y.Z --notes "..."`
-   (릴리스 노트는 한국어로 작성 — 실제 사용자인 GM이 읽는 글)
-6. lang 파일을 건드렸다면 커밋 전에 항상
-   `python3 -c "import json; json.load(open('lang/ko.json', encoding='utf-8'))"`로
-   유효성 검증(이 환경엔 `node`가 없어서 JS 문법 검사는 수동 재확인으로 대체).
+릴리스는 로컬 PC 없이 GitHub만으로 한다. `.github/workflows/release.yml`이 릴리스가 **게시(publish)**되면
+태그(`vX.Y.Z`)에서 버전을 읽어 `module.json`의 `version`을 맞추고, `module.zip`(`module.json`,
+`README.md`, `lang`, `scripts`, `styles`, `templates`)을 만들어 릴리스에 `module.json`과 함께 올린다.
+
+1. 변경을 `main`에 푸시한다(관련 파일만 `git add`, 절대 `-A`/`.` 쓰지 않음, 영문 커밋 메시지).
+2. lang 파일을 건드렸다면 푸시 전에 항상
+   `python3 -c "import json; json.load(open('lang/ko.json', encoding='utf-8'))"`로 유효성을 검증한다.
+3. GitHub(웹/앱)에서 태그 `vX.Y.Z`로 릴리스를 게시한다. 또는
+   `gh release create vX.Y.Z --target main --title vX.Y.Z --notes "..."`.
+   릴리스 노트는 한국어로 작성한다(실제 사용자인 GM이 읽는 글).
+4. Actions 탭에서 "Build module release files"가 성공했는지, 릴리스 자산에 `module.json`과
+   `module.zip`이 있는지 확인한다. 빌드만 시험하려면 같은 워크플로를 수동 실행(`version` 입력)하면
+   릴리스 없이 zip만 아티팩트로 남는다.
+5. `compatibility.verified`는 그 Foundry 버전에서 실제로 확인한 뒤에만 올린다.
+
+모듈 전체 목록과 공통 규칙, 현황은 `Nomal-1/dw-workspace`(비공개)를 참고한다.
 
 ## 8. 작업 방식 관례 (사용자와 합의된 것)
 
