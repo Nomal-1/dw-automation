@@ -215,6 +215,55 @@ export async function resolveDamageReductionMoveName(englishName, linkedMoveName
   return mergeNameMaps(packMaps).get(englishName) ?? null;
 }
 
+// 클레릭과 위저드가 같은 영문 이름("Light", "True Seeing")의 주문을 서로 다른
+// 한글 이름("빛 (지속)"/"빛")으로 번역해 둔 경우, 합친 번역표에서는 모호해서 빠지므로
+// 지속 주문 표에 영문 행이 그대로 남아 그 주문들이 지속 상태로 인식되지 않았다.
+// 영문 이름 행 하나를 번역명마다 행 하나씩으로 펼쳐서(같은 설정값 복사) 어느 직업의
+// 주문이든 인식되게 한다. 이미 같은 이름의 행이 있으면 중복으로 넣지 않는다.
+export function expandAmbiguousSpellRows(spellPackMaps, rows) {
+  const variants = new Map();
+  for (const packMap of spellPackMaps.values()) {
+    for (const [englishName, translated] of packMap) {
+      if (!variants.has(englishName)) variants.set(englishName, new Set());
+      variants.get(englishName).add(translated);
+    }
+  }
+
+  const seen = new Set();
+  const result = [];
+  const push = (row) => {
+    if (seen.has(row.name)) return;
+    seen.add(row.name);
+    result.push(row);
+  };
+
+  for (const row of rows) {
+    const names = variants.get(row.name);
+    if (names && names.size > 1) {
+      for (const name of names) push({ ...row, name });
+    } else {
+      push(row);
+    }
+  }
+  return result;
+}
+
+// 월드를 열 때 자동으로: 지속 주문 표에 남아 있는 모호한 영문 행을 위와 같이 펼친다.
+export async function expandAmbiguousOngoingSpellRows() {
+  if (!game.user.isGM) return;
+  if (!isTranslationModuleActive()) return;
+
+  const packMaps = await buildPackNameMaps(SPELL_PACK_FILES);
+  if (shouldDeferForMissingTranslations(mergeNameMaps(packMaps), "ongoing spells")) return;
+
+  const rows = game.settings.get(MODULE_ID, SETTINGS.ONGOING_SPELLS);
+  const expanded = expandAmbiguousSpellRows(packMaps, rows);
+  if (expanded.length === rows.length && expanded.every((r, i) => r.name === rows[i].name)) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.ONGOING_SPELLS, expanded);
+  console.log(`${MODULE_ID} | ongoing spells: expanded ambiguous spell rows (${rows.length} -> ${expanded.length})`);
+}
+
 function translateOne(map, rawName, stats) {
   const name = (rawName ?? "").trim();
   if (!name) return name;
@@ -259,7 +308,8 @@ function translateRows(map, rows, stats) {
 export async function runTranslationImport() {
   const movePackMaps = await buildPackNameMaps(MOVE_PACK_FILES);
   const moveMap = mergeNameMaps(movePackMaps);
-  const spellMap = await buildNameMap(SPELL_PACK_FILES);
+  const spellPackMaps = await buildPackNameMaps(SPELL_PACK_FILES);
+  const spellMap = mergeNameMaps(spellPackMaps);
   const stats = { matched: 0, unmatched: 0 };
 
   const melee = game.settings.get(MODULE_ID, SETTINGS.MELEE_MOVE_NAMES);
@@ -282,7 +332,11 @@ export async function runTranslationImport() {
   await game.settings.set(MODULE_ID, SETTINGS.SPECIAL_ATTACK_MOVES, translateRows(moveMap, specialMoves, stats));
 
   const ongoingSpells = game.settings.get(MODULE_ID, SETTINGS.ONGOING_SPELLS);
-  await game.settings.set(MODULE_ID, SETTINGS.ONGOING_SPELLS, translateRows(spellMap, ongoingSpells, stats));
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.ONGOING_SPELLS,
+    expandAmbiguousSpellRows(spellPackMaps, translateRows(spellMap, ongoingSpells, stats))
+  );
 
   const hitTriggerMoves = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
   await game.settings.set(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES, translateRows(moveMap, hitTriggerMoves, stats));
@@ -390,6 +444,13 @@ export async function runTranslationImport() {
     MODULE_ID,
     SETTINGS.DUELIST_PARRY_MOVE_NAMES,
     translateCommaList(moveMap, duelistParryMoveNames, stats)
+  );
+
+  const duelistBlockMoveNames = game.settings.get(MODULE_ID, SETTINGS.DUELIST_BLOCK_MOVE_NAMES);
+  await game.settings.set(
+    MODULE_ID,
+    SETTINGS.DUELIST_BLOCK_MOVE_NAMES,
+    translateCommaList(moveMap, duelistBlockMoveNames, stats)
   );
 
   const bamboozleMoveNames = game.settings.get(MODULE_ID, SETTINGS.BAMBOOZLE_MOVE_NAMES);

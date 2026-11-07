@@ -227,6 +227,7 @@ export const SETTINGS = {
   VICIOUS_CACOPHONY_MOVE_NAMES: "viciousCacophonyMoveNames",
   ENABLE_DUELIST_PARRY_ASSISTANT: "enableDuelistParryAssistant",
   DUELIST_PARRY_MOVE_NAMES: "duelistParryMoveNames",
+  DUELIST_BLOCK_MOVE_NAMES: "duelistBlockMoveNames",
   ENABLE_BAMBOOZLE_ASSISTANT: "enableBamboozleAssistant",
   BAMBOOZLE_MOVE_NAMES: "bamboozleMoveNames",
   ELDRITCH_CHORD_MOVE_NAMES: "eldritchChordMoveNames",

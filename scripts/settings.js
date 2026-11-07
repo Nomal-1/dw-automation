@@ -1101,6 +1101,15 @@ export function registerSettings() {
     default: "Duelist’s Parry"
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.DUELIST_BLOCK_MOVE_NAMES, {
+    name: "DWAUTO.Settings.DuelistBlockMoveNames.Name",
+    hint: "DWAUTO.Settings.DuelistBlockMoveNames.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "Duelist’s Block"
+  });
+
   // 바드 무브 현란한 말솜씨: 자세한 설계는 features/bamboozle.js 참고.
   // 협상 무브 이름은 PARLEY_MOVE_NAMES를 그대로 재사용한다.
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_BAMBOOZLE_ASSISTANT, {

@@ -84,6 +84,7 @@ import { registerClericDwarfAssistant } from "./features/cleric-dwarf.js";
 import { registerCrossClassSpellAssistant } from "./features/cross-class-spell.js";
 import { registerSettingsTabs } from "./lib/settings-tabs.js";
 import { registerMigrationBackup } from "./lib/migration-backup.js";
+import { registerLegacyNameFixes } from "./lib/legacy-name-fixes.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -106,6 +107,7 @@ Hooks.once("ready", () => {
   if (self) self.api = buildPublicApi();
 });
 
+registerLegacyNameFixes();
 registerNpcGenerator();
 registerDiceSoundFallback();
 registerMonsterGenerator();

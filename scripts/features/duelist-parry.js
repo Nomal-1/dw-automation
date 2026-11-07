@@ -2,7 +2,13 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
-import { isDuelistParryActive, setDuelistParryActive } from "../lib/duelist-parry-state.js";
+import {
+  isDuelistParryActive,
+  setDuelistParryActive,
+  getDuelistParryAmount,
+  setDuelistParryAmount
+} from "../lib/duelist-parry-state.js";
+import { getMoveNameMap } from "../lib/translation-import.js";
 
 // 바드 무브 결투사의 호신술(Duelist’s Parry) 원문: "접근전을 할 때, 장갑
 // +1 forward를 받는다." "forward"라 원래는 다음에 실제로 맞을 때 한 번만
@@ -34,9 +40,17 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-function findDuelistParryMove(actor) {
-  const names = splitCommaList(SETTINGS.DUELIST_PARRY_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+// 결투사의 호신비결(Duelist’s Block)은 호신술을 대체하는 상위판으로 원문이
+// "접근전을 하면 장갑 +2 forward"(호신술은 +1)다. 둘 다 가지고 있어도 호신비결이
+// 우선한다. 반환값은 { moveItem, amount }.
+function findDuelistMove(actor) {
+  const blockNames = splitCommaList(SETTINGS.DUELIST_BLOCK_MOVE_NAMES);
+  const block = actor.items.find((i) => i.type === "move" && blockNames.includes(i.name));
+  if (block) return { moveItem: block, amount: 2 };
+
+  const parryNames = splitCommaList(SETTINGS.DUELIST_PARRY_MOVE_NAMES);
+  const parry = actor.items.find((i) => i.type === "move" && parryNames.includes(i.name));
+  return parry ? { moveItem: parry, amount: 1 } : null;
 }
 
 function matchesMelee(title) {
@@ -56,24 +70,26 @@ export function getDuelistParryArmorContribution(actor) {
   if (!isEnabled()) return null;
   if (actor.type !== "character") return null;
 
-  const moveItem = findDuelistParryMove(actor);
-  if (!moveItem) return null;
+  const found = findDuelistMove(actor);
+  if (!found) return null;
   if (!isDuelistParryActive(actor)) return null;
 
-  return { source: moveItem.name, amount: 1 };
+  return { source: found.moveItem.name, amount: getDuelistParryAmount(actor) };
 }
 
-async function activate(actor, moveItem) {
+async function activate(actor, moveItem, amount) {
   if (isDuelistParryActive(actor)) return;
+  await setDuelistParryAmount(actor, amount);
   await setDuelistParryActive(actor, true);
-  const armor = await adjustArmor(actor, 1);
+  const armor = await adjustArmor(actor, amount);
   announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.DuelistParry.Activated", { armor }));
 }
 
 async function deactivate(actor, moveItem) {
   if (!isDuelistParryActive(actor)) return;
+  const amount = getDuelistParryAmount(actor);
   await setDuelistParryActive(actor, false);
-  const armor = await adjustArmor(actor, -1);
+  const armor = await adjustArmor(actor, -amount);
   announceActionApplied(actor, moveItem.name, game.i18n.format("DWAUTO.DuelistParry.Deactivated", { armor }));
 }
 
@@ -84,11 +100,11 @@ export async function deactivateDuelistParryOnHit(actor) {
   if (!isEnabled()) return;
   if (actor.type !== "character") return;
 
-  const moveItem = findDuelistParryMove(actor);
-  if (!moveItem) return;
+  const found = findDuelistMove(actor);
+  if (!found) return;
   if (!isDuelistParryActive(actor)) return;
 
-  await deactivate(actor, moveItem);
+  await deactivate(actor, found.moveItem);
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -104,10 +120,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     if (!matchesMelee(title)) return;
 
-    const moveItem = findDuelistParryMove(actor);
-    if (!moveItem) return;
+    const found = findDuelistMove(actor);
+    if (!found) return;
 
-    await activate(actor, moveItem);
+    await activate(actor, found.moveItem, found.amount);
   } catch (err) {
     console.error(`${MODULE_ID} | duelist-parry: onCreateChatMessage failed`, err);
   }
@@ -122,8 +138,9 @@ function onRenderActorSheet(app, html) {
   const actor = app.actor;
   if (actor.type !== "character") return;
 
-  const moveItem = findDuelistParryMove(actor);
-  if (!moveItem) return;
+  const found = findDuelistMove(actor);
+  if (!found) return;
+  const { moveItem, amount } = found;
 
   const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
   if (!$item.length) return;
@@ -141,11 +158,32 @@ function onRenderActorSheet(app, html) {
     event.preventDefault();
     event.stopPropagation();
     if (active) await deactivate(actor, moveItem);
-    else await activate(actor, moveItem);
+    else await activate(actor, moveItem, amount);
   });
+}
+
+// 이 설정은 이후에 추가됐으므로 이미 번역을 적용해 둔 월드에는 영문 기본값이 남아 있다.
+// 번역 이름표를 읽을 수 있고 값이 아직 영문 기본값 그대로일 때만 번역명으로 바꾼다.
+async function migrateTranslateBlockName() {
+  if (!game.user.isGM) return;
+  const english = "Duelist’s Block";
+  if (game.settings.get(MODULE_ID, SETTINGS.DUELIST_BLOCK_MOVE_NAMES) !== english) return;
+
+  let translated = null;
+  try {
+    translated = (await getMoveNameMap()).get(english) ?? null;
+  } catch (err) {
+    // 번역 이름표를 못 읽으면 다음 로드에 다시 시도한다.
+  }
+  if (!translated) return;
+
+  await game.settings.set(MODULE_ID, SETTINGS.DUELIST_BLOCK_MOVE_NAMES, translated);
 }
 
 export function registerDuelistParryAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    migrateTranslateBlockName().catch((err) => console.warn(`${MODULE_ID} | duelist block name migration failed`, err));
+  });
 }

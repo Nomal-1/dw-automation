@@ -751,6 +751,10 @@
         "Name": "Duelist's Parry Move Names",
         "Hint": "Comma-separated (default: Duelist’s Parry)."
       },
+      "DuelistBlockMoveNames": {
+        "Name": "Duelist’s Block move names",
+        "Hint": "Comma-separated (default: Duelist’s Block). The upgrade of Duelist’s Parry: after a melee move your armor goes up by 2 instead of 1. If a character has both, Block takes priority."
+      },
       "EnableBamboozleAssistant": {
         "Name": "Enable Bamboozle Automation",
         "Hint": "When a Parley roll succeeds at 7+, the badge next to the move automatically turns 'Active'. While active, every roll this character makes asks 'Is this roll against the target of Bamboozle?' — answering yes grants +1 and immediately turns it back to 'Inactive'."

@@ -10,6 +10,7 @@ import {
 } from "../lib/ongoing-spells-state.js";
 import { handleSpellHeal } from "./healing.js";
 import { handleSpellDamage } from "./spell-damage.js";
+import { expandAmbiguousOngoingSpellRows } from "../lib/translation-import.js";
 
 function splitCommaList(settingKey) {
   return game.settings
@@ -287,4 +288,9 @@ function onRenderActorSheet(app, html) {
 export function registerSpellcastingAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  Hooks.once("ready", () => {
+    expandAmbiguousOngoingSpellRows().catch((err) => {
+      console.warn(`${MODULE_ID} | could not expand ambiguous ongoing spell rows`, err);
+    });
+  });
 }
