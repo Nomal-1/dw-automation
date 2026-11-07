@@ -264,6 +264,33 @@ export async function expandAmbiguousOngoingSpellRows() {
   console.log(`${MODULE_ID} | ongoing spells: expanded ambiguous spell rows (${rows.length} -> ${expanded.length})`);
 }
 
+// features/move-upgrades.js의 "새 기본값 행 추가" 마이그레이션이 업그레이드 쌍을
+// 번역명으로 저장할 때, "Divine Protection"처럼 클레릭/팔라딘이 같이 쓰는 모호한
+// 이름은 번역표(getMoveNameMap)에서 빠져 있어 영문 그대로 저장되고, 이미 번역돼
+// 저장된 행과 키가 달라 월드를 열 때마다 영문 행이 새로 끼어들었다. 번역 import와
+// 같은 규칙(같은 행의 짝 이름이 어느 직업 팩에 있는지)으로 알아낸 번역명을 돌려준다.
+//
+// 이미 번역돼 저장된 짝 이름(예: "정의의 갑옷")도 알아봐야 해서, 짝 이름이 영문 키이든
+// 번역명이든 그 이름이 들어 있는 직업 팩을 찾아 그 팩의 번역을 쓴다.
+export async function resolveMoveUpgradeNames(upgradeName, replacesName) {
+  const packMaps = await buildPackNameMaps(MOVE_PACK_FILES);
+  const merged = mergeNameMaps(packMaps);
+
+  const packContaining = (name) => {
+    for (const map of packMaps.values()) {
+      if (map.has(name)) return map;
+      for (const translated of map.values()) if (translated === name) return map;
+    }
+    return null;
+  };
+  const resolveOne = (name, sibling) => {
+    if (!AMBIGUOUS_NAME_BY_LINK[name]) return merged.get(name) ?? null;
+    return packContaining(sibling)?.get(name) ?? null;
+  };
+
+  return { upgradeName: resolveOne(upgradeName, replacesName), replacesName: resolveOne(replacesName, upgradeName) };
+}
+
 function translateOne(map, rawName, stats) {
   const name = (rawName ?? "").trim();
   if (!name) return name;

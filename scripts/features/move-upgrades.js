@@ -1,7 +1,11 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
-import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
+import {
+  getMoveNameMap,
+  shouldDeferForMissingTranslations,
+  resolveMoveUpgradeNames
+} from "../lib/translation-import.js";
 
 function getUpgradeRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
@@ -48,8 +52,44 @@ function onCreateItem(item, options, userId) {
 async function migrateAddSurveyedDefaults() {
   if (!game.user.isGM) return;
 
-  const rows = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
+  let rows = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
   const rowKey = (r) => `${r.upgradeName}|${r.replacesName}`;
+
+  // 예전 버전이 영문 "Divine Protection"으로 끼워 넣은 행을 번역명으로 바로잡고, 같은
+  // 번역명 행이 이미 있으면 중복으로 지운다(번역을 읽을 수 있을 때만).
+  if (game.modules.get("dungeonworld-ko")?.active) {
+    let normalized = rows;
+    try {
+      const fixed = [];
+      for (const row of rows) {
+        if (row.upgradeName !== "Divine Protection" && row.replacesName !== "Divine Protection") {
+          fixed.push(row);
+          continue;
+        }
+        const resolved = await resolveMoveUpgradeNames(row.upgradeName, row.replacesName);
+        fixed.push({
+          ...row,
+          upgradeName: resolved.upgradeName ?? row.upgradeName,
+          replacesName: resolved.replacesName ?? row.replacesName
+        });
+      }
+      const seen = new Set();
+      normalized = fixed.filter((row) => {
+        const key = rowKey(row);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    } catch (err) {
+      normalized = rows;
+    }
+    const changed = normalized.length !== rows.length || normalized.some((r, i) => rowKey(r) !== rowKey(rows[i]));
+    if (changed) {
+      await game.settings.set(MODULE_ID, SETTINGS.MOVE_UPGRADES, normalized);
+      console.log(`${MODULE_ID} | move-upgrades: normalized ambiguous Divine Protection rows (${rows.length} -> ${normalized.length})`);
+      rows = normalized;
+    }
+  }
   const existingKeys = new Set(rows.map(rowKey));
 
   let nameMap = null;
@@ -64,8 +104,18 @@ async function migrateAddSurveyedDefaults() {
   for (const row of DEFAULT_MOVE_UPGRADES) {
     if (existingKeys.has(rowKey(row))) continue;
 
-    const translatedUpgrade = nameMap?.get(row.upgradeName);
-    const translatedReplaces = nameMap?.get(row.replacesName);
+    let translatedUpgrade = nameMap?.get(row.upgradeName);
+    let translatedReplaces = nameMap?.get(row.replacesName);
+    if (!translatedUpgrade || !translatedReplaces) {
+      // 클레릭/팔라딘 공용 이름(Divine Protection)은 짝 이름으로 어느 쪽인지 구분한다.
+      try {
+        const resolved = await resolveMoveUpgradeNames(row.upgradeName, row.replacesName);
+        translatedUpgrade ??= resolved.upgradeName ?? undefined;
+        translatedReplaces ??= resolved.replacesName ?? undefined;
+      } catch (err) {
+        // 못 알아내면 영문 이름으로 계속한다.
+      }
+    }
     const translatedKey = `${translatedUpgrade ?? row.upgradeName}|${translatedReplaces ?? row.replacesName}`;
     if (existingKeys.has(translatedKey)) continue;
 
