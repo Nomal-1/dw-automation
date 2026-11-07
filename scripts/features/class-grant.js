@@ -19,10 +19,10 @@ const MOVE_PACK_IDS = MOVE_PACK_FILES.map((file) => file.replace(/\.json$/, ""))
 let cachedMoveDocs = null;
 
 // 바바리안 Appetite For Destruction/Kill 'Em All 원문("You may not take
-// multiclass moves from those classes")이 가리키는 대상 — 던전월드 컴펜디엄
-// 전체에서 "멀티클래스 무브"에 해당하는 건 이 둘뿐이다(각 기본 직업의
-// 고급 무브로 하나씩 존재).
-const MULTICLASS_MOVE_NAMES = ["Multiclass Dabbler", "Multiclass Initiate"];
+// multiclass moves from those classes")이 가리키는 대상 — 던전월드 컴펜디엄의
+// "멀티클래스 무브"는 Multiclass Dabbler(초급)/Initiate(중급)와, 음유시인에만
+// 있는 Master(고급)까지 세 가지다(영어 원본 이름으로 비교한다 — canonicalMoveName 참고).
+const MULTICLASS_MOVE_NAMES = ["Multiclass Dabbler", "Multiclass Initiate", "Multiclass Master"];
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_CLASS_GRANT_ASSISTANT);
