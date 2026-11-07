@@ -72,6 +72,15 @@ export function registerSettings() {
     default: true
   });
 
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_DICE_SOUND_FALLBACK, {
+    name: "DWAUTO.Settings.EnableDiceSoundFallback.Name",
+    hint: "DWAUTO.Settings.EnableDiceSoundFallback.Hint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_ATTACK_ASSISTANT, {
     name: "DWAUTO.Settings.EnableAttackAssistant.Name",
     hint: "DWAUTO.Settings.EnableAttackAssistant.Hint",

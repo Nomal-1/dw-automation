@@ -4,6 +4,7 @@ export const SETTINGS = {
   ENABLE_NPC_GENERATOR: "enableNpcGenerator",
   ENABLE_MONSTER_GENERATOR: "enableMonsterGenerator",
   ENABLE_ATTACK_ASSISTANT: "enableAttackAssistant",
+  ENABLE_DICE_SOUND_FALLBACK: "enableDiceSoundFallback",
   MELEE_MOVE_NAMES: "meleeMoveNames",
   RANGED_MOVE_NAMES: "rangedMoveNames",
   MELEE_WEAPON_TAGS: "meleeWeaponTags",

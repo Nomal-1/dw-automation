@@ -37,6 +37,10 @@
         "Name": "Enable Monster Stat Generator",
         "Hint": "Adds a tab to NPC sheets that randomly rolls a damage die, armor, HP, and coin."
       },
+      "EnableDiceSoundFallback": {
+        "Name": "Enable dice roll sound fallback",
+        "Hint": "Plays the dice roll sound when a Dungeon World roll card is posted, replacing the sound that Foundry 14 and Dungeon World system 1.10.0 no longer play. Skipped automatically when Dice So Nice is active. Stored per user (client)."
+      },
       "EnableAttackAssistant": {
         "Name": "Enable Attack Damage Automation",
         "Hint": "On a success or partial success, asks whether to roll damage and automatically deducts consumables like ammo. Which moves trigger this is managed in the name lists below and the Special Attack Moves setting."

@@ -48,6 +48,7 @@ export const SETTING_CATEGORIES = {
   [SETTINGS.ENABLE_NPC_GENERATOR]: "general",
   [SETTINGS.ENABLE_MONSTER_GENERATOR]: "general",
   [SETTINGS.ENABLE_ATTACK_ASSISTANT]: "general",
+  [SETTINGS.ENABLE_DICE_SOUND_FALLBACK]: "general",
   translationImportMenu: "general",
   raceCoreCompendiumMenu: "general",
   [SETTINGS.MELEE_MOVE_NAMES]: "general",

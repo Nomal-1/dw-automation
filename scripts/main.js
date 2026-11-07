@@ -2,6 +2,7 @@ import { MODULE_ID } from "./constants.js";
 import { registerSettings } from "./settings.js";
 import { buildPublicApi } from "./lib/public-api.js";
 import { registerNpcGenerator } from "./features/npc-generator.js";
+import { registerDiceSoundFallback } from "./features/dice-sound.js";
 import { registerMonsterGenerator } from "./features/monster-generator.js";
 import { registerAttackAssistant } from "./features/attack-assistant.js";
 import { registerSpellcastingAssistant } from "./features/spellcasting.js";
@@ -101,6 +102,7 @@ Hooks.once("ready", () => {
 });
 
 registerNpcGenerator();
+registerDiceSoundFallback();
 registerMonsterGenerator();
 registerAttackAssistant();
 registerSpellcastingAssistant();
