@@ -1,8 +1,10 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 
 // Nomal-1/dungeonworld-ko (Babele 기반 한글화 모듈)를 대상으로 한 자동 채우기.
-// Babele 팩 JSON은 표준적으로 entries: [{id: "영문 원본 이름", name: "번역명", ...}]
-// 구조를 쓰며, entries[].id가 곧 컴펜디엄 아이템의 원래 영문 이름이다. Babele API
+// Babele 팩 JSON의 entries는 [{id: "영문 원본 이름", name: "번역명", ...}] 배열이거나
+// {"영문 원본 이름": {name: "번역명", ...}} 객체 형태다(둘 다 Babele가 인정하는
+// 형식이고, 이 모듈은 둘 다 읽어 같은 배열 모양으로 맞춘다). 그 id/키가 곧
+// 컴펜디엄 아이템의 원래 영문 이름이다. Babele API
 // (game.babele)를 거치지 않고 이 모듈이 배포하는 정적 JSON 파일을 직접 fetch해서
 // "영문 이름 -> 한글 이름" 맵을 만든다 — 무브/주문 이름 설정을 채우는 1회성 조회일
 // 뿐이라 Babele이 실제로 초기화됐는지에 의존할 필요가 없다.
@@ -48,7 +50,12 @@ async function fetchPackEntries(file) {
     const response = await fetch(`modules/${TRANSLATION_MODULE_ID}/compendium/${file}`);
     if (!response.ok) return [];
     const data = await response.json();
-    return Array.isArray(data?.entries) ? data.entries : [];
+    const entries = data?.entries;
+    if (Array.isArray(entries)) return entries;
+    if (entries && typeof entries === "object") {
+      return Object.entries(entries).map(([id, value]) => ({ id, ...value }));
+    }
+    return [];
   } catch (err) {
     console.warn(`${MODULE_ID} | failed to read translation pack: ${file}`, err);
     return [];
