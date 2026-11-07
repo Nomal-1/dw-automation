@@ -2,7 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
 import { getShedCandidate, applyShed } from "./druid.js";
-import { getEquippedArmorItems, damageArmorItem } from "./armor-assistant.js";
+import { getEquippedArmorItems, getSacrificableArmorItems, damageArmorItem } from "./armor-assistant.js";
 import { getOutnumberedAskCandidate, applyOutnumberedAnswer, isConditionActive } from "./underdog.js";
 import { findDecidingUser } from "../lib/deciding-user.js";
 import { getActiveOngoingSpells, removeActiveOngoingSpell } from "../lib/ongoing-spells-state.js";
@@ -132,7 +132,7 @@ function promptArmorItemChoice(items) {
 // 취소한 것으로 보고 null을 반환한다 — 호출부가 원래 피해를 그대로
 // 적용한다.
 async function applyArmorNegation(actor, row, damage) {
-  const equippedArmor = getEquippedArmorItems(actor);
+  const equippedArmor = getSacrificableArmorItems(actor);
   let itemDetail = "";
 
   if (equippedArmor.length > 0) {
@@ -481,6 +481,16 @@ async function applyEmbracePain(actor, row, damage, originalChanges, originalOpt
   }
 }
 
+// Armor Mastery류는 "방어구의 장갑을 1 깎아서" 무효화하는 무브라, 깎을
+// 장갑이 없으면 쓸 수 없다. 장착한 방어구가 있으면 그중 장갑 태그가 남은 것이
+// 하나라도 있어야 하고(전부 파괴됐으면 불가), 장착한 방어구 아이템이 아예
+// 없는 캐릭터는 장갑 수치 자체가 1 이상일 때만 쓸 수 있다.
+function canSacrificeArmor(actor) {
+  if (getSacrificableArmorItems(actor).length > 0) return true;
+  if (getEquippedArmorItems(actor).length > 0) return false;
+  return (Number(actor.system.attributes?.ac?.value) || 0) > 0;
+}
+
 // preUpdateActor가 이미 원래 HP 갱신을 막아둔 뒤 호출된다. 플레이어가 결국
 // 무효화를 포기하면(선택 취소, 대화상자 닫기 포함) 원래 변경사항을 그대로
 // 다시 적용해서 피해를 정상적으로 받게 한다.
@@ -493,6 +503,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
     if (row.effect === "animalCompanion") return !isFerocitySpent(actor);
     if (row.effect === "ongoingPenalty") return !isHungerPenaltyActive(actor);
     if (row.effect === "fireAid") return damage % 2 !== 0;
+    if (row.effect === "armor") return canSacrificeArmor(actor);
     return true;
   });
   if (usable.length === 0) {

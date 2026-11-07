@@ -51,6 +51,13 @@ export function getEquippedArmorItems(actor) {
   return actor.items.filter((i) => i.type === "equipment" && i.system?.itemType === "armor" && i.system?.equipped);
 }
 
+// Armor Mastery류가 실제로 희생시킬 수 있는 방어구: 장착 중이고 장갑 태그
+// 합이 1 이상인 것만. 이미 파괴돼서 장갑 태그가 없어진 방어구는 더 줄일 값이
+// 없으므로 제외한다.
+export function getSacrificableArmorItems(actor) {
+  return getEquippedArmorItems(actor).filter((item) => getArmorTagValue(parseTagsArray(item)) > 0);
+}
+
 // 선택된 방어구 아이템의 장갑 태그를 1 줄인다. "+" 표기가 있었으면 그대로
 // 유지한 채(예: "+2 armor" -> "+1 armor") 새 값으로 바꾸고, 0 이하가 되면
 // 장갑 태그 자체를 없앤 뒤 아이템 이름 뒤에 "(파괴됨)"을 붙인다. 장갑 태그가
