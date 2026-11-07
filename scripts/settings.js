@@ -5,6 +5,7 @@ import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
 import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 import { TranslationImportMenu } from "./apps/translation-import-menu.js";
+import { MigrationBackupMenu } from "./apps/migration-backup-menu.js";
 import { RaceCoreCompendiumMenu } from "./apps/race-core-compendium-menu.js";
 import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
 import { HealingMovesMenu } from "./apps/healing-moves-menu.js";
@@ -79,6 +80,28 @@ export function registerSettings() {
     config: true,
     type: Boolean,
     default: true
+  });
+
+  // 마이그레이션 직전 백업(lib/migration-backup.js). 화면에 보이지 않는 내부 값이다.
+  game.settings.register(MODULE_ID, SETTINGS.MIGRATION_BACKUPS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
+  });
+  game.settings.register(MODULE_ID, SETTINGS.LAST_SEEN_VERSION, {
+    scope: "world",
+    config: false,
+    type: String,
+    default: ""
+  });
+  game.settings.registerMenu(MODULE_ID, "migrationBackupMenu", {
+    name: "DWAUTO.Settings.MigrationBackupMenu.Name",
+    label: "DWAUTO.Settings.MigrationBackupMenu.Label",
+    hint: "DWAUTO.Settings.MigrationBackupMenu.Hint",
+    icon: "fas fa-history",
+    type: MigrationBackupMenu,
+    restricted: true
   });
 
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_ATTACK_ASSISTANT, {

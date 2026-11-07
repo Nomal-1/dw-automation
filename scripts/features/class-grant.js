@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
-import { getMoveNameMap, MOVE_PACK_FILES } from "../lib/translation-import.js";
+import { getMoveNameMap, MOVE_PACK_FILES, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 
 // 팔라딘 Divine Favor/레인저 God Amidst The Wastes처럼 "발동하면 다른 직업의
@@ -429,6 +429,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "class-grant defaults")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_CLASS_GRANT_MOVES) {

@@ -45,6 +45,22 @@ export function isTranslationModuleActive() {
   return game.modules.get(TRANSLATION_MODULE_ID)?.active ?? false;
 }
 
+// 월드를 열 때 자동으로 도는 "새 기본값 행 추가" 마이그레이션이 쓴다.
+// 한글화 모듈이 켜져 있는데 번역 이름표를 못 읽었다면(네트워크 지연, 파일 형식
+// 불일치 등) 그 상태로 영문 이름 행을 저장해버리면, 나중에 번역이 읽힐 때 이미
+// 영문 행이 있어서 한글 행이 자동으로 채워지지 않는다. 이럴 때는 이번 로드의
+// 행 추가를 건너뛰고 다음 로드에 다시 시도하게 한다(마이그레이션은 이미 있는
+// 행을 건너뛰므로 다시 돌아도 안전하다). 한글화 모듈이 아예 꺼져 있으면 영문
+// 이름으로 추가하는 것이 정상 동작이라 건너뛰지 않는다.
+export function shouldDeferForMissingTranslations(nameMap, label) {
+  if (!isTranslationModuleActive()) return false;
+  if (nameMap && nameMap.size > 0) return false;
+  console.warn(
+    `${MODULE_ID} | ${label}: translation names are not available yet — skipping this migration for now, it will be retried on the next load.`
+  );
+  return true;
+}
+
 async function fetchPackEntries(file) {
   try {
     const response = await fetch(`modules/${TRANSLATION_MODULE_ID}/compendium/${file}`);
@@ -87,6 +103,8 @@ async function buildPackNameMaps(files) {
 // 맵에서 빼버린다 — 틀린 번역을 조용히 적용하는 것보다, 그 이름만 자동
 // 번역하지 않고 그대로 두는 편이 안전하다(아래 AMBIGUOUS_NAME_BY_LINK에
 // 등록해둔 이름은 예외 — resolveAmbiguousName이 별도로 정확히 구분한다).
+const warnedAmbiguousNames = new Set();
+
 function mergeNameMaps(packMaps) {
   const map = new Map();
   const ambiguous = new Set();
@@ -98,9 +116,13 @@ function mergeNameMaps(packMaps) {
       if (existing !== undefined && existing !== name) {
         ambiguous.add(id);
         map.delete(id);
-        console.warn(
-          `${MODULE_ID} | translation-import: "${id}" has different translations across classes ("${existing}" vs "${name}") — skipping auto-translate for this name, enter it manually.`
-        );
+        // 같은 이름의 경고를 월드 로드 한 번에 수십 번 찍지 않도록 세션당 한 번만.
+        if (!warnedAmbiguousNames.has(id)) {
+          warnedAmbiguousNames.add(id);
+          console.warn(
+            `${MODULE_ID} | translation-import: "${id}" has different translations across classes ("${existing}" vs "${name}") — skipping auto-translate for this name, enter it manually.`
+          );
+        }
         continue;
       }
       map.set(id, name);

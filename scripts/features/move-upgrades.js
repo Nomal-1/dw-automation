@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 
 function getUpgradeRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
@@ -58,6 +58,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "move-upgrades")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_MOVE_UPGRADES) {

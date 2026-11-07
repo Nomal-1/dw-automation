@@ -12,7 +12,7 @@ import { getHoldGrantRow, getEffectiveSpellLevel } from "./spell-preparation.js"
 import { isFerocitySpent, setFerocitySpent } from "../lib/animal-companion-state.js";
 import { isHungerPenaltyActive, setHungerPenaltyActive } from "../lib/hunger-penalty-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "../data/hit-trigger-moves.js";
 import { findBurningBrandWeapon, addBurningBrandUses } from "./burning-brand.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
@@ -818,6 +818,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "hit-trigger")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_HIT_TRIGGER_MOVES) {

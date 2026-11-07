@@ -14,7 +14,7 @@ import { getMercilessBonus } from "./merciless.js";
 import { getCheapShotBonus } from "./cheap-shot.js";
 import { promptStrongArmThrow, removeAmmoChoice } from "./strong-arm.js";
 import { getWhatAreYouWaitingForBonus } from "./what-are-you-waiting-for.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { getEffectiveSpellLevel } from "./spell-preparation.js";
 import { getThiefHalflingRangedBonus } from "./thief-halfling.js";
 
@@ -840,6 +840,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "attack-assistant conditional damage")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_CONDITIONAL_DAMAGE_MOVES) {

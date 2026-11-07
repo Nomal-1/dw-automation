@@ -5,6 +5,8 @@ export const SETTINGS = {
   ENABLE_MONSTER_GENERATOR: "enableMonsterGenerator",
   ENABLE_ATTACK_ASSISTANT: "enableAttackAssistant",
   ENABLE_DICE_SOUND_FALLBACK: "enableDiceSoundFallback",
+  MIGRATION_BACKUPS: "migrationBackups",
+  LAST_SEEN_VERSION: "lastSeenVersion",
   MELEE_MOVE_NAMES: "meleeMoveNames",
   RANGED_MOVE_NAMES: "rangedMoveNames",
   MELEE_WEAPON_TAGS: "meleeWeaponTags",

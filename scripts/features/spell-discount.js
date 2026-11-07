@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 
 // 위저드 천재(Prodigy)/대가(Master) 원문: "주문 하나를 골라라. 그 주문을
 // 준비할 때 한 레벨 낮은 것처럼 취급한다." 대가는 "천재에서 고른 것에 더해
@@ -151,6 +151,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "spell-discount")) return;
 
   const toAdd = [];
   for (const name of ["Chosen One", "Anointed"]) {

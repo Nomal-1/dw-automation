@@ -101,6 +101,11 @@
         "Label": "Open Auto-fill Tool",
         "Hint": "If the Nomal-1/dungeonworld-ko Korean translation module is installed, fill in the move/spell name settings above using its translation data instead of typing them by hand."
       },
+      "MigrationBackupMenu": {
+        "Name": "Restore migration backup",
+        "Label": "Open backup restore tool",
+        "Hint": "The first time a world is opened after this module's version changes, the module's settings and character flags are backed up right before the automatic migrations run. If a migration changed something wrongly, you can roll back to that point here."
+      },
       "RaceCoreCompendiumMenu": {
         "Name": "Build Race Core Move Compendium",
         "Label": "Open Compendium Builder",
@@ -1158,6 +1163,24 @@
       "RunButton": "Run Auto-fill Now",
       "Close": "Close",
       "Done": "Auto-fill complete: {matched} matched, {unmatched} not found (left unchanged)."
+    },
+    "MigrationBackup": {
+      "Title": "Restore migration backup",
+      "Alias": "DW Automation",
+      "Hint": "Each entry is a copy of this module's settings and per-character module flags from that moment. Restoring overwrites the current values (the state right before restoring is saved as a new backup). Only the latest 3 are kept.",
+      "Empty": "No backup yet. One is created automatically the first time a world is opened after the module version changes.",
+      "Counts": "settings / characters",
+      "RestoreButton": "Restore this point",
+      "Close": "Close",
+      "ConfirmTitle": "Restore backup",
+      "ConfirmContent": "This overwrites the module's current settings and character flags with the selected backup. The current state is saved as a new backup first. After restoring, the automatic migrations may be applied again on the next load. Continue?",
+      "Restored": "Restored: {settings} settings, {actors} characters. Everyone should refresh (F5).",
+      "RestoreFailed": "Restore failed. See the console (F12) for details.",
+      "PreRestoreLabel": "before restore",
+      "ValuesChanged": "values changed",
+      "ActorsChanged": "module flags changed on {count} character(s)",
+      "ReportIntro": "Changes made by the automatic migrations after updating DW Automation {from} → {to}.",
+      "ReportFooter": "If anything looks wrong, roll back from Module Settings > General > \"Restore migration backup\"."
     },
     "RaceCoreCompendium": {
       "Title": "Build Race Core Move Compendium",

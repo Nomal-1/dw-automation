@@ -50,6 +50,7 @@ export const SETTING_CATEGORIES = {
   [SETTINGS.ENABLE_ATTACK_ASSISTANT]: "general",
   [SETTINGS.ENABLE_DICE_SOUND_FALLBACK]: "general",
   translationImportMenu: "general",
+  migrationBackupMenu: "general",
   raceCoreCompendiumMenu: "general",
   [SETTINGS.MELEE_MOVE_NAMES]: "general",
   [SETTINGS.RANGED_MOVE_NAMES]: "general",

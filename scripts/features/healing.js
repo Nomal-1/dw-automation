@@ -3,7 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_HOSPITALLER_MOVES } from "../data/healing-moves.js";
-import { getMoveNameMap } from "../lib/translation-import.js";
+import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingDamageForward } from "../lib/damage-forward-state.js";
 import { consumePendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
@@ -360,6 +360,7 @@ async function migrateAddSurveyedHospitallerDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "healing hospitaller")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_HOSPITALLER_MOVES) {

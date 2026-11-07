@@ -2,7 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
-import { getMoveNameMap, resolveDamageReductionMoveName } from "../lib/translation-import.js";
+import { getMoveNameMap, resolveDamageReductionMoveName, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { isNoteMoveActive } from "./note-moves.js";
 import { getEffectiveSpellLevel } from "./spell-preparation.js";
 
@@ -262,6 +262,7 @@ async function migrateAddSurveyedDefaults() {
   } catch (err) {
     // 번역 데이터를 못 읽어도 최소한 영문 이름으로는 추가한다.
   }
+  if (shouldDeferForMissingTranslations(nameMap, "underdog")) return;
 
   const toAdd = [];
   for (const row of DEFAULT_DAMAGE_REDUCTION_MOVES) {

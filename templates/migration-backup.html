@@ -1,0 +1,27 @@
+<form class="dwauto-migration-backup">
+  <p class="notes">{{hint}}</p>
+
+  {{#if empty}}
+  <p class="notes">{{emptyText}}</p>
+  {{else}}
+  <ul class="dwauto-backup-list" style="list-style:none; padding:0; margin:0 0 8px;">
+    {{#each backups}}
+    <li class="flexrow" style="align-items:center; gap:8px; margin-bottom:6px;">
+      <span style="flex:1;">
+        <b>{{date}}</b>{{#if label}} — {{label}}{{/if}}<br>
+        <small>{{fromVersion}} → {{toVersion}} · {{localize "DWAUTO.MigrationBackup.Counts"}}: {{settingCount}} / {{actorCount}}</small>
+      </span>
+      <button type="button" data-action="restore" data-taken-at="{{takenAt}}" style="flex:0 0 auto; width:auto;">
+        <i class="fas fa-undo"></i> {{localize "DWAUTO.MigrationBackup.RestoreButton"}}
+      </button>
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  <footer class="sheet-footer flexrow">
+    <button type="button" data-action="close-menu">
+      <i class="fas fa-times"></i> {{localize "DWAUTO.MigrationBackup.Close"}}
+    </button>
+  </footer>
+</form>
