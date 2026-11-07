@@ -29,8 +29,14 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
+// 이러면 더 안전하오(Safer Place)를 얻으면 무브 업그레이드 자동화가 하위 무브인
+// 이러면 안전하오를 지워 버리므로(data/move-upgrades.js), 상위 무브만 가진 캐릭터도
+// 클릭하면 같은 자동화가 돌아야 한다. 그래서 두 무브 이름 모두 이 자동화의 대상이다.
 function matchesConfiguredName(title) {
-  return splitCommaList(SETTINGS.SAFE_PLACE_MOVE_NAMES).includes(title);
+  return (
+    splitCommaList(SETTINGS.SAFE_PLACE_MOVE_NAMES).includes(title) ||
+    splitCommaList(SETTINGS.SAFER_PLACE_MOVE_NAMES).includes(title)
+  );
 }
 
 function hasSaferPlace(actor) {
