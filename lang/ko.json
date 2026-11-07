@@ -1198,7 +1198,7 @@
       "ArmorDestroyed": "{name}의 장갑이 0이 되었습니다 — 시트에서 파괴된 갑옷/방패를 정리해주세요.",
       "ArmorItemPromptTitle": "내구도를 깎을 장비 선택",
       "ArmorItemPromptContent": "어느 방어구의 내구도를 깎으시겠습니까?",
-      "ArmorItemDamaged": "{item}의 장갑 태그가 {value}로 줄었습니다",
+      "ArmorItemDamaged": "{item}의 장갑 태그가 {value}(으)로 줄었습니다",
       "ArmorItemDestroyed": "{item}이(가) 파괴되었습니다",
       "IndomitableApplied": "forward +1",
       "SpellDefenseChooseInstruction": "끝낼 지속 주문을 선택해주세요.",
@@ -1215,12 +1215,12 @@
       "HungerPenaltyToggleTitle": "클릭하면 욕구 페널티 상태를 켜고 끕니다. 페널티가 있는 동안에는 이 액션을 쓸 수 없고, 욕구를 채우면(예: 식사) 다시 클릭해서 정상으로 되돌리세요.",
       "HungerPenaltyActive": "페널티 적용중",
       "HungerPenaltyReady": "정상",
-      "FireAidInstruction": "1d4를 굴려 {amount}가 나왔습니다. 무엇에 쓰시겠습니까?",
+      "FireAidInstruction": "1d4를 굴려 {amount}이(가) 나왔습니다. 무엇에 쓰시겠습니까?",
       "FireAidAddUses": "불타는 낙인 사용 횟수에 {amount} 추가",
       "FireAidForward": "다음 불타는 낙인 판정에 forward로 {amount} 가져가기",
       "FireAidReduceDamage": "받는 피해를 {amount}만큼 경감",
-      "FireAidAddUsesApplied": "1d4({amount})를 굴려 \"{weapon}\"의 사용 횟수에 {amount}를 더했습니다",
-      "FireAidForwardApplied": "1d4({amount})를 굴려 다음 불타는 낙인 판정에 forward로 {amount}를 가져갑니다",
+      "FireAidAddUsesApplied": "1d4({amount})를 굴려 \"{weapon}\"의 사용 횟수에 {amount}을(를) 더했습니다",
+      "FireAidForwardApplied": "1d4({amount})를 굴려 다음 불타는 낙인 판정에 forward로 {amount}을(를) 가져갑니다",
       "FireAidReduceDamageApplied": "1d4({amount})를 굴려 원래 피해 {original}에서 {amount}만큼 경감되어, 실제로는 {damage}의 피해를 입습니다",
       "EmbracePainApplied": "고통을 받아들여 1d4({extra})의 피해를 추가로 입습니다(장갑 무시) — 총 {total}의 피해. 다음 번 주문 시전 판정에 +1을 받습니다",
       "EmbracePainSpellLevelBonus": "다음 번 주문 시전으로 주는 피해나 치유에 자기 레벨({level})만큼이 자동으로 더해집니다"
@@ -1401,7 +1401,7 @@
       "ResetConfirmContent": "지금 표의 내용을 지우고, 이 모듈이 8개 기본 직업의 실제 액션 원문을 확인해서 정리해둔 영문 기본값(대체/필요 구분 포함)으로 되돌립니다. 그 뒤에 이 창을 닫고 '번역 모듈에서 자동 채우기'를 실행하면 이름이 번역되고 대체/필요 구분은 그대로 유지됩니다. 계속하시겠습니까?"
     },
     "MoveUpgrade": {
-      "Replaced": "이전 단계 액션 \"{old}\"가 자동으로 제거되었습니다"
+      "Replaced": "이전 단계 액션 \"{old}\"이(가) 자동으로 제거되었습니다"
     },
     "DruidDamageDieMoves": {
       "Title": "드루이드 변신 데미지 주사위 설정",
@@ -1449,7 +1449,7 @@
       "ResetConfirmContent": "지금 표의 내용을 지우고, 이 모듈이 실제 액션 원문을 확인해서 정리해둔 영문 기본값으로 되돌립니다. 그 뒤에 이 창을 닫고 '번역 모듈에서 자동 채우기'를 실행하면 이름이 번역됩니다. 계속하시겠습니까?"
     },
     "PrepareSpells": {
-      "Instruction": "레벨 합이 {budget}을 넘지 않도록 준비할 주문을 고르세요.",
+      "Instruction": "레벨 합이 {budget}을(를) 넘지 않도록 준비할 주문을 고르세요.",
       "TotalLabel": "선택한 레벨 합:",
       "NoEligible": "고를 수 있는 주문이 없습니다.",
       "CantripNote": "0레벨 주문은 한도와 무관하게 자동으로 준비됩니다: {names}",
@@ -1490,7 +1490,7 @@
       "PartialInfo": "부분성공(7-9): 그들이 하나를 고릅니다(추가 forward 없음).",
       "FailureApplied": "실패: 그들은 하고 싶은 대로 합니다. 그들을 상대로 한 다음 판정에 -1 forward가 대기 중입니다.",
       "PendingBlocked": "{name}에게 아직 확인되지 않은 내가 법이다 보정치가 대기 중입니다. 다음 판정에서 그 NPC 상대인지 먼저 확인해주세요.",
-      "TargetPrompt": "이 판정이 \"{name}\"으로 명령을 내렸던 그 NPC를 상대로 한 것입니까?",
+      "TargetPrompt": "이 판정이 \"{name}\"(으)로 명령을 내렸던 그 NPC를 상대로 한 것입니까?",
       "TargetApplied": "이번 판정에 {amount} forward를 적용했습니다.",
       "PendingOn": "보정치 대기 중 ({amount})",
       "PendingOff": "대기 없음",
@@ -1538,7 +1538,7 @@
       "ShapeshiftRevertButton": "변신 해제",
       "ShapeshiftRequiredNotApplied": "변신 상태가 아니므로 적용되지 않았습니다",
       "DamageDiePrompt": "변신했을 때 {name} 액션을 적용할까요?",
-      "DamageDieApplied": "변신 중이라 데미지 주사위가 {die}로 적용되었습니다",
+      "DamageDieApplied": "변신 중이라 데미지 주사위가 {die}(으)로 적용되었습니다",
       "DamageDieToggleTitle": "클릭하면 적용 상태를 켜고 끕니다.",
       "DamageDieActive": "적용중",
       "DamageDieInactive": "적용안됨",
@@ -1556,7 +1556,7 @@
       "HoldBadgeTitle": "지금 Hold가 몇 개인지 보여줍니다. 마스터는 클릭해서 직접 고칠 수 있습니다.",
       "HoldBadge": "Hold: {hold}",
       "ShapeshiftHoldSpent": "Hold를 1점 써서 그 형태의 능력을 사용했습니다 (남은 Hold: {hold})",
-      "ShedApplied": "변신을 해제하고 피해 {damage}를 무효화했습니다",
+      "ShedApplied": "변신을 해제하고 피해 {damage}을(를) 무효화했습니다",
       "FormshaperPromptTitle": "변신의 달인(Formshaper)",
       "FormshaperPromptContent": "이번 변신에서 장갑 +1과 피해 +1d4 중 무엇을 선택하시겠습니까?",
       "FormshaperArmorOption": "장갑 +1",
@@ -2092,7 +2092,7 @@
       "AskPrompt": "지금 \"{name}\"의 발동 조건을 충족하고 있습니까?",
       "BecameOutnumbered": "조건을 충족했습니다 (장갑 {armor})",
       "NoLongerOutnumbered": "더 이상 조건을 충족하지 않습니다 (장갑 {armor})",
-      "DamageRecalculated": "바뀐 장갑 기준으로 이번 피해가 {damage}로 재계산되었습니다",
+      "DamageRecalculated": "바뀐 장갑 기준으로 이번 피해가 {damage}(으)로 재계산되었습니다",
       "OutnumberedToggleTitle": "클릭하면 지금 이 액션의 발동 조건을 충족하는지 아닌지를 켜고 끕니다. 실제로 상태가 바뀌면 장갑도 함께 조정됩니다.",
       "LinkedToggleTitle": "\"{linked}\" 액션이 지금 발동(활성) 상태인지에 따라 자동으로 켜지고 꺼집니다. 수동으로 바꿀 수 없습니다.",
       "AutoPreparedSpellToggleTitle": "1레벨 이상 주문을 하나라도 준비하고 있는지에 따라 자동으로 켜지고 꺼집니다. 수동으로 바꿀 수 없습니다.",

@@ -162,6 +162,15 @@ function tierSuffix(reqLevel) {
   return game.i18n.localize("DWAUTO.ClassGrant.TierCore");
 }
 
+// 컴펜디엄 문서의 name은 번역 모듈(Babele)이 한글로 바꿔 놓은 값이라 아래
+// 영문 상수(MULTICLASS_MOVE_NAMES, MULTICLASS_BUNDLES)와 직접 비교하면 번역
+// 환경에서는 절대 맞지 않는다. Babele가 번역하면서 남기는 원본 영문 이름
+// (flags.babele.originalName)을 우선 쓰고, 번역되지 않은 환경에서는 name을
+// 그대로 쓴다.
+function canonicalMoveName(doc) {
+  return doc.flags?.babele?.originalName ?? doc.name;
+}
+
 function buildEligiblePicks(classGroups, actorLevel, excludeNames = null, noLevelCap = false) {
   const maxLevel = noLevelCap ? Infinity : actorLevel - 1;
   const result = new Map(); // packId -> { label, picks: [{ key, label, docs }] }
@@ -174,11 +183,11 @@ function buildEligiblePicks(classGroups, actorLevel, excludeNames = null, noLeve
 
     for (const doc of docs) {
       if (doc.type !== "move") continue;
-      if (excludeNames?.has(doc.name)) continue;
+      if (excludeNames?.has(canonicalMoveName(doc))) continue;
       const reqLevel = Number(doc.system?.requiresLevel) || 0;
       if (reqLevel > maxLevel) continue;
 
-      if (bundleNames?.includes(doc.name)) {
+      if (bundleNames?.includes(canonicalMoveName(doc))) {
         bundleDocs.push(doc);
         bundleLevel = Math.max(bundleLevel, reqLevel);
         continue;
