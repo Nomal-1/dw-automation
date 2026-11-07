@@ -116,15 +116,30 @@ async function buildNameMap(files) {
 // features/level-up-info.js가 레벨업 창의 무브 선행조건(requiresMove, 항상
 // 영문 원본)을 화면에 표시할 번역명으로 바꿀 때 재사용한다. dungeonworld-ko가
 // 없거나 응답이 실패하면 빈 맵을 반환하고, 호출부가 영문 원본으로 대체 표시한다.
+//
+// 채팅 카드 하나를 여러 자동화가 각자 처리하면서 이 함수를 수십 번 부르는데, 그때마다
+// 번역 파일 11개를 서버에서 다시 받아 맵을 새로 만들었다(느린 연결에서는 자동화 창이
+// 몇 초씩 늦게 뜨고, 콘솔에는 같은 "모호한 이름" 경고가 수십 번 반복됐다). 번역 파일은
+// 페이지를 새로 열기 전에는 바뀌지 않으므로, 성공한(비어 있지 않은) 결과만 이 세션에서
+// 한 번 만들어 두고 재사용한다. 호출부는 맵을 읽기만 한다. 실패해서 빈 맵이 나온
+// 경우는 저장하지 않아 다음 호출에서 다시 시도한다.
+let moveNameMapCache = null;
 export async function getMoveNameMap() {
-  return buildNameMap(MOVE_PACK_FILES);
+  if (moveNameMapCache) return moveNameMapCache;
+  const map = await buildNameMap(MOVE_PACK_FILES);
+  if (map.size > 0) moveNameMapCache = map;
+  return map;
 }
 
 // features/vitals-assistant.js가 재사용한다. "The Fighter" -> "전사"처럼
 // 직업 아이템 이름 그대로 매핑한다(무브 이름과 겹칠 일이 없는 별도 컴펜디엄
 // 이라 mergeNameMaps의 모호함 처리는 필요 없다).
+let classNameMapCache = null;
 export async function getClassNameMap() {
-  return buildNameMap([CLASS_PACK_FILE]);
+  if (classNameMapCache) return classNameMapCache;
+  const map = await buildNameMap([CLASS_PACK_FILE]);
+  if (map.size > 0) classNameMapCache = map;
+  return map;
 }
 
 // DAMAGE_REDUCTION_MOVES(조건부 장갑 보너스 무브)에서만 쓰는 모호한 이름
