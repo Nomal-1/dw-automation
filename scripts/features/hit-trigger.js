@@ -166,6 +166,11 @@ async function applyArmorNegation(actor, row, damage) {
 
 function promptDebilityChoice(actor, row) {
   return new Promise((resolve) => {
+    // 확인 버튼의 콜백은 async라서 약화를 저장하는 await 도중에 Dialog가 닫히며
+    // close 핸들러가 먼저 불린다. 그때 resolve(false)가 먼저 나가면 "취소"로 오해해
+    // 무효화했던 피해를 그대로 다시 적용해버린다(약화도 입고 피해도 입음). 확인을
+    // 눌렀다면 close에서는 아무것도 하지 않는다.
+    let submitted = false;
     const open = getOpenDebilities(actor);
     const options = open.map((key) => `<option value="${key}">${getDebilityLabel(key)}</option>`).join("");
 
@@ -183,6 +188,7 @@ function promptDebilityChoice(actor, row) {
         ok: {
           label: game.i18n.localize("DWAUTO.Confirm"),
           callback: async (html) => {
+            submitted = true;
             const key = html.find('[name="debility"]').val();
             await actor.update({ [`system.abilities.${key}.debility`]: true });
             announceActionApplied(
@@ -199,7 +205,9 @@ function promptDebilityChoice(actor, row) {
         }
       },
       default: "ok",
-      close: () => resolve(false)
+      close: () => {
+        if (!submitted) resolve(false);
+      }
     }).render(true);
   });
 }
@@ -537,6 +545,9 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
       ok: {
         label: game.i18n.localize("DWAUTO.Confirm"),
         callback: async (html) => {
+          // 확인 버튼을 빠르게 두 번 누르면 같은 무효화가 두 번 처리되어 대화상자가
+          // 겹쳐 뜨고 피해가 이중으로 계산될 수 있다 — 이미 처리 중이면 무시한다.
+          if (resolved) return;
           resolved = true;
           const idx = Number(html.find('[name="choice"]').val());
           if (idx < 0) {
