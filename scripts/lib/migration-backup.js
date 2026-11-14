@@ -112,7 +112,7 @@ export function diffAgainstSnapshot(snapshot) {
     } catch (err) {
       continue;
     }
-    if (foundry.utils.objectsEqual(before, after)) continue;
+    if ((foundry.utils.equals ?? foundry.utils.objectsEqual)(before, after)) continue;
     changes.push({ key, title: settingTitle(key), detail: describeChange(before, after) });
   }
 
@@ -120,7 +120,7 @@ export function diffAgainstSnapshot(snapshot) {
   for (const actor of game.actors) {
     const before = snapshot.actorFlags[actor.id] ?? {};
     const after = actor.flags?.[MODULE_ID] ?? {};
-    if (!foundry.utils.objectsEqual(before, after)) actorCount++;
+    if (!(foundry.utils.equals ?? foundry.utils.objectsEqual)(before, after)) actorCount++;
   }
 
   return { changes, actorCount };
