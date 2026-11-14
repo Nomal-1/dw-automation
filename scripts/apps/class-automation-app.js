@@ -148,6 +148,20 @@ export class ClassAutomationApp extends ApplicationV2 {
     return game.settings.menus.has(`${MODULE_ID}.${key}`) ? key : null;
   }
 
+  // 이 액션 자체의 자동화가 없을 때: 굴리면 채팅에 무엇이 올라가는지(시스템 기본 동작)를 설명한다.
+  #chatOnlyText(m) {
+    const type = m.roll?.type;
+    if (type == null) return L("NoAutomation");
+    const abilities = { STR: "Str", DEX: "Dex", CON: "Con", INT: "Int", WIS: "Wis", CHA: "Cha" };
+    let text;
+    if (abilities[type]) text = L("ChatRollStat", { stat: game.i18n.localize(`DW.Ability${abilities[type]}`) });
+    else if (type === "BOND") text = L("ChatRollStat", { stat: game.i18n.localize("DW.Bond") });
+    else if (type === "ASK") text = L("ChatRollAsk");
+    else if (type === "FORMULA") text = L("ChatRollFormula", { formula: m.roll.formula || "?" });
+    else text = L("ChatNoRoll");
+    return `${text} ${L("ChatNoAutomation")}`;
+  }
+
   #renderMove(m, index) {
     const entry = { cls: m.classKey, original: m.original, name: m.name, ambiguous: m.ambiguous };
     const moveOff = isEntryDisabled(entry);
@@ -166,7 +180,7 @@ export class ClassAutomationApp extends ApplicationV2 {
 
     let features;
     if (!m.own.length) {
-      features = `<div class="dwauto-ca-none">${esc(L("NoAutomation"))}</div>`;
+      features = `<div class="dwauto-ca-none">${esc(this.#chatOnlyText(m))}</div>`;
     } else {
       features = m.own
         .map((f) => {
@@ -192,7 +206,7 @@ export class ClassAutomationApp extends ApplicationV2 {
     const reacting = m.reacting.length
       ? `<div class="dwauto-ca-reacting"><i class="fas fa-reply"></i> ${esc(L("Reacting"))} ${m.reacting
           .map((f) => `<span class="${game.settings.get(MODULE_ID, f.enableKey) ? "" : "off"}" title="${esc(f.hint)}">${esc(f.label)}</span>`)
-          .join(", ")}</div>`
+          .join(", ")}<div class="note">${esc(L(m.own.length ? "ReactingNote" : "ReactingNoteOnly"))}</div></div>`
       : "";
 
     // 액션 업그레이드(상급 액션을 배우면 이전 단계를 시트에서 정리)는 액션 자체의

@@ -2149,7 +2149,7 @@
       "Empty": "No moves to show.",
       "NoAutomation": "No automation (narrative move or not supported yet)",
       "SharedWith": "Switches together with: {moves}",
-      "Reacting": "Rolling this move triggers:",
+      "Reacting": "Rolling this move triggers automations of other moves:",
       "RaceGroup": "Race moves",
       "OtherGroup": "Other (homebrew and hand-made moves)",
       "BasicGroup": "Basic moves",
@@ -2171,7 +2171,14 @@
       "NameListDefault": "Default (original, always included): {names}",
       "LegacyName": "Show the old settings layout",
       "LegacyHint": "When on, the settings moved into the automation-by-class window (feature switches, move name lists, table editors, translation auto-fill) appear here again. Normally leave it off and use the automation-by-class window. Takes effect when the settings window is reopened.",
-      "Numbers": "Choice positions and numbers"
+      "Numbers": "Choice positions and numbers",
+      "ChatRollStat": "Rolling posts a 2d6+{stat} result to chat, with the move text for that result (10+ / 7-9 / 6-).",
+      "ChatRollAsk": "Rolling first asks which ability to use, then posts the 2d6 result and the matching move text to chat.",
+      "ChatRollFormula": "Rolling posts a {formula} roll and the move text to chat.",
+      "ChatNoRoll": "Posts only the move text card to chat, with no roll.",
+      "ChatNoAutomation": "Anything after that (picking options, applying numbers) is done by hand — this move has no automation of its own.",
+      "ReactingNote": "Those automations are switched on and off in their own move rows.",
+      "ReactingNoteOnly": "Those automations are switched on and off in their own move rows. Turning off \"Automate this move\" on the left stops them from reacting to this move."
     }
   }
 }

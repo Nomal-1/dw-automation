@@ -209,6 +209,12 @@ function classKeyFromPack(pack) {
   return name.replace(/-moves$/, "");
 }
 
+/** 무브 아이템의 굴림 방식(던전월드 시스템 system.rollType: STR…CHA, ASK, BOND, FORMULA, 빈 값=굴림 없음) */
+function moveRoll(doc) {
+  const sys = doc?.system ?? {};
+  return { type: String(sys.rollType ?? "").toUpperCase(), formula: sys.rollFormula ?? "" };
+}
+
 const GROUP_ORDER = ["basic", "barbarian", "bard", "cleric", "druid", "fighter", "immolator", "paladin", "ranger", "thief", "wizard"];
 
 /** 무브 컴펜디엄 팩들 (던전월드 시스템 + 다른 모듈이 더한 무브 팩) */
@@ -226,7 +232,9 @@ export async function buildAutomationCatalog() {
   const featureGroups = getFeatureGroups();
   const characters = game.actors.filter((a) => a.type === "character");
 
-  const makeMove = ({ name, original, classKey, img }) => {
+  // roll: 시스템 무브 데이터의 굴림 방식 { type, formula } (모르면 null) — 자동화가 없는 액션이
+  // 채팅에 무엇을 올리는지 설명할 때 쓴다.
+  const makeMove = ({ name, original, classKey, img, roll = null }) => {
     const keys = new Set([normalizeName(name), normalizeName(original)].filter(Boolean));
     const own = [];
     const reacting = [];
@@ -248,7 +256,7 @@ export async function buildAutomationCatalog() {
         )
       )
       .map((a) => a.name);
-    return { name, original: original ?? null, classKey, img: img ?? null, own, reacting, owners };
+    return { name, original: original ?? null, classKey, img: img ?? null, own, reacting, owners, roll };
   };
 
   const groups = new Map();
@@ -273,7 +281,7 @@ export async function buildAutomationCatalog() {
     for (const doc of docs) {
       if (doc.type !== "move") continue;
       const original = doc.flags?.babele?.originalName ?? null;
-      group.moves.push(makeMove({ name: doc.name, original, classKey, img: doc.img }));
+      group.moves.push(makeMove({ name: doc.name, original, classKey, img: doc.img, roll: moveRoll(doc) }));
       seen.add(normalizeName(doc.name));
       if (original) seen.add(normalizeName(original));
     }
@@ -298,7 +306,9 @@ export async function buildAutomationCatalog() {
       const o = normalizeName(item.flags?.babele?.originalName);
       if (seen.has(n) || (o && seen.has(o)) || otherSeen.has(n)) continue;
       otherSeen.add(n);
-      otherGroup.moves.push(makeMove({ name: item.name, original: item.flags?.babele?.originalName ?? null, classKey: "other", img: item.img }));
+      otherGroup.moves.push(
+        makeMove({ name: item.name, original: item.flags?.babele?.originalName ?? null, classKey: "other", img: item.img, roll: moveRoll(item) })
+      );
     }
   }
 

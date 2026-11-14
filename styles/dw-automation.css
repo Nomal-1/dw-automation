@@ -843,3 +843,4 @@
 .dwauto-ca-field { display: grid; grid-template-columns: minmax(140px, 1fr) 2fr; gap: 6px; align-items: center; margin: 2px 0; }
 .dwauto-ca-field input[type="checkbox"] { justify-self: start; }
 .dwauto-ca-field.wide { grid-template-columns: minmax(140px, 1fr) 3fr; }
+.dwauto-ca-reacting .note { opacity: 0.75; margin-top: 1px; }
