@@ -137,6 +137,14 @@ function externalNames(namespace, names = [], keys = []) {
 }
 
 function externalGroups() {
+  // 모듈들의 ready 순서는 보장되지 않으므로, 표를 만들 때마다 훅으로 다시 물어본다
+  // (등록은 id로 덮어쓰므로 여러 번 불려도 같다). 의존 모듈은
+  // Hooks.on("dwAutomationCollectFeatures", (register) => register({...}))로 등록하면 된다.
+  try {
+    Hooks.callAll("dwAutomationCollectFeatures", registerAutomationFeature);
+  } catch (err) {
+    console.warn(`${MODULE_ID} | dwAutomationCollectFeatures hook failed`, err);
+  }
   const groups = [];
   for (const def of EXTERNAL_FEATURES) {
     if (!game.modules.get(def.namespace)?.active) continue;
