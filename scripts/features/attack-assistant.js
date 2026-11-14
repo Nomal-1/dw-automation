@@ -17,6 +17,7 @@ import { getWhatAreYouWaitingForBonus } from "./what-are-you-waiting-for.js";
 import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { getEffectiveSpellLevel } from "./spell-preparation.js";
 import { getThiefHalflingRangedBonus } from "./thief-halfling.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -30,7 +31,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // 근접/사격 판정: 무기 태그(tagsString)에 설정된 키워드가 하나라도 포함되어
@@ -60,7 +62,7 @@ function isAmmoItem(item) {
 // 무기 문자열 매칭 대신 무브 소지 여부로 판정한다.
 function hasMusclebound(actor) {
   const names = splitCommaList(SETTINGS.MUSCLEBOUND_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 // 모듈 설정(태그 자동 반영 목록)에서 켜둔 태그만 검사한다.
@@ -228,7 +230,7 @@ function promptAmmo(ammoItems) {
 // 반영되게 한다.
 async function promptSpellAugmentation(actor) {
   const moveNames = splitCommaList(SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES);
-  const hasMove = actor.items.some((i) => i.type === "move" && (moveNames.includes(i.name) || moveNames.includes(i.flags?.babele?.originalName)));
+  const hasMove = actor.items.some((i) => i.type === "move" && ((moveNames.includes(i.name) || moveNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (!hasMove) return 0;
 
   const active = getActiveOngoingSpells(actor);
@@ -315,7 +317,7 @@ async function setDesignation(actor, moveName, designated) {
 // "자동 아니오" 토글이 켜진 무브는 물어보지 않고 바로 noFormula를 적용한다.
 async function promptConditionalDamageBonuses(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
-  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i))));
   if (owned.length === 0) return "";
 
   const locks = getAutoNoLocks(actor);
@@ -354,7 +356,7 @@ async function promptConditionalDamageBonuses(actor) {
 // (액터+무브 이름으로 구분되므로 표가 달라도 충돌하지 않는다).
 async function promptConditionalTagMoves(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
-  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i))));
   if (owned.length === 0) return [];
 
   const locks = getAutoNoLocks(actor);
@@ -697,14 +699,14 @@ function onCreateChatMessage(message, options, userId) {
   if (result === "success" && info.isExtreme && !behavior.ranged) {
     const superiorWarriorNames = splitCommaList(SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
     const superiorWarriorMove = actor.items.find(
-      (i) => i.type === "move" && (superiorWarriorNames.includes(i.name) || superiorWarriorNames.includes(i.flags?.babele?.originalName))
+      (i) => i.type === "move" && ((superiorWarriorNames.includes(i.name) || superiorWarriorNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))
     );
     if (superiorWarriorMove) {
       announceActionApplied(actor, superiorWarriorMove.name, game.i18n.localize("DWAUTO.SuperiorWarrior.Applied"));
     }
 
     const smashNames = splitCommaList(SETTINGS.SMASH_MOVE_NAMES);
-    const smashMove = actor.items.find((i) => i.type === "move" && (smashNames.includes(i.name) || smashNames.includes(i.flags?.babele?.originalName)));
+    const smashMove = actor.items.find((i) => i.type === "move" && ((smashNames.includes(i.name) || smashNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
     if (smashMove) {
       announceActionApplied(actor, smashMove.name, game.i18n.localize("DWAUTO.Smash.Applied"));
     }
@@ -753,7 +755,7 @@ function onRenderActorSheet(app, html) {
   const designations = getDesignations(actor);
 
   for (const row of table) {
-    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+    const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
@@ -803,7 +805,7 @@ function onRenderActorSheet(app, html) {
 
   const tagTable = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
   for (const row of tagTable) {
-    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+    const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

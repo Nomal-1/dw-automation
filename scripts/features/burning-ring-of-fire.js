@@ -6,6 +6,7 @@ import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEBILITY_ABILITIES, getDebilityLabel } from "../lib/debilities.js";
 import { getBurningRingBond, setBurningRingBond, clearBurningRingBond } from "../lib/burning-ring-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 소각술사 고급액션(6레벨 이후) 불로 맺은 언약(Burning Ring Of Fire) 원문:
 // "의지가 있는 사람의 영혼을 자신의 것과 융합하면 roll+CHA. 성공(hit,
@@ -37,7 +38,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -230,7 +232,7 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
 
   const names = splitCommaList(SETTINGS.BURNING_RING_OF_FIRE_MOVE_NAMES);
-  const moveItem = actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  const moveItem = actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (!moveItem) return;
 
   const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

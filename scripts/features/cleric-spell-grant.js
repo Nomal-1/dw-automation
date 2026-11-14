@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getClericLevelOverride } from "./note-moves.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 예배(Commune)를 가진 액터의 주문 탭에 "현재 레벨 사제 주문 모두 얻기"
 // 버튼을 붙인다. 실제 클레릭은 자기 레벨을, 팔라딘 신의 은혜(Divine
@@ -25,7 +26,7 @@ function findCommuneMove(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES);
   const communeRow = rows.find((r) => r.enforceIndividualLevelCap);
   if (!communeRow) return null;
-  return actor.items.find((i) => i.type === "move" && (i.name === communeRow.name || i.flags?.babele?.originalName === communeRow.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((i.name === communeRow.name || i.flags?.babele?.originalName === communeRow.name) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function getEffectiveClericLevel(actor) {

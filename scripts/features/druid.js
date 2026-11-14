@@ -6,6 +6,7 @@ import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { promptHealTarget, applyHealAmount } from "./healing.js";
 import { isDamageDieActive, setDamageDieActive } from "../lib/druid-damage-die-state.js";
 import { isHidingTell, setHidingTell } from "../lib/dopplegangers-dance-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 const BALANCE_FLAG = "druidBalance";
 const SHAPESHIFT_FLAG = "druidShapeshift";
@@ -30,11 +31,12 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMoveByNames(actor, names) {
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function getBalanceMove(actor) {
@@ -110,7 +112,7 @@ export async function incrementBalanceOnDamage(actor) {
 function getOwnedDamageDieRows(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   return table
-    .map((row) => ({ ...row, move: actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)) }))
+    .map((row) => ({ ...row, move: actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i))) }))
     .filter((row) => row.move);
 }
 
@@ -560,7 +562,7 @@ export async function trySpendShapeshiftHold(item, actor) {
   if (!actor || actor.type !== "character") return false;
 
   const names = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
-  if (!(names.includes(item.name) || names.includes(item.flags?.babele?.originalName))) return false;
+  if (!((names.includes(item.name) || names.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return false;
   if (!isShapeshiftActive(actor)) return false;
 
   const hold = Number(actor.system.attributes?.hold?.value) || 0;

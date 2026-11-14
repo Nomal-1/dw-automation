@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { getPendingDamageForward, setPendingDamageForward } from "../lib/damage-forward-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 팔라딘 무브 연계 공격(Setup Strike) 원문: "접근전을 할 때, 아군 한 명을
 // 고른다. 그 아군의 다음 공격이 당신의 대상에게 +1d4 피해를 준다." 접근전
@@ -31,12 +32,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findSetupStrikeMove(actor) {
   const names = splitCommaList(SETTINGS.SETUP_STRIKE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesMeleeByTitle(title) {

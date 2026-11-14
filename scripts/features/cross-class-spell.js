@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { SPELL_PACK_FILES } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 사제-인간/마법사-인간(종족 핵심 액션, data/race-core-moves.js 참고) 원문:
 // "다른 직업(마법사/사제) 주문을 하나 선택하십시오. 그 주문은 마치 자기
@@ -33,7 +34,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // title이 사제-인간/마법사-인간 중 어느 쪽이든, "다른 직업의 주문 팩 id"를
@@ -84,7 +86,7 @@ async function setGranted(actor, moveId, spellName) {
 // 이미 갖고 있는 주문은 목록에서 뺀다(중복 추가 방지). 후보가 하나도 없으면
 // 다이얼로그 없이 바로 null.
 function promptSpellChoice(moveItem, docs, actor) {
-  const options = docs.filter((d) => !actor.items.some((i) => i.type === "spell" && (i.name === d.name || i.flags?.babele?.originalName === d.name)));
+  const options = docs.filter((d) => !actor.items.some((i) => i.type === "spell" && ((i.name === d.name || i.flags?.babele?.originalName === d.name) && !isMoveItemDisabled(i))));
   if (options.length === 0) return Promise.resolve(null);
 
   const optionsHtml = options

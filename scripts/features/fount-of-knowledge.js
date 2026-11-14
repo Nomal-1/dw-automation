@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isFountOfKnowledgeAskMode, setFountOfKnowledgeAskMode } from "../lib/fount-of-knowledge-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 위저드 무브 지식의 샘(Fount of Knowledge) 원문: "아무도 모를 법한 것에
 // 대해 지식 더듬기(Spout Lore)를 할 때 +1." "아무도 모를 법한 것"인지는
@@ -28,12 +29,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findFountOfKnowledgeMove(actor) {
   const names = splitCommaList(SETTINGS.FOUNT_OF_KNOWLEDGE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesSpoutLoreByTitle(title) {

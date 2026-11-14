@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap, MOVE_PACK_FILES } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isTwiceAsBrightUsed, setTwiceAsBrightUsed } from "../lib/twice-as-bright-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 소각술사 고급액션 두 개를 한 쌍으로 묶어서 처리한다.
 //
@@ -34,12 +35,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMoveByConfiguredNames(actor, settingKey) {
   const names = splitCommaList(settingKey);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function matchesMove(title, settingKey, englishName, originalTitle = null) {

@@ -1,6 +1,7 @@
 export const MODULE_ID = "dw-automation";
 
 export const SETTINGS = {
+  DISABLED_MOVES: "disabledMoves",
   ENABLE_NPC_GENERATOR: "enableNpcGenerator",
   ENABLE_MONSTER_GENERATOR: "enableMonsterGenerator",
   ENABLE_ATTACK_ASSISTANT: "enableAttackAssistant",

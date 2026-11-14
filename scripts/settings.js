@@ -106,6 +106,14 @@ export function registerSettings() {
     restricted: true
   });
 
+  // 직업별 자동화 창에서 "이 액션 자동화"를 끈 액션 목록(lib/move-toggles.js 참고)
+  game.settings.register(MODULE_ID, SETTINGS.DISABLED_MOVES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
+  });
+
   game.settings.registerMenu(MODULE_ID, "migrationBackupMenu", {
     name: "DWAUTO.Settings.MigrationBackupMenu.Name",
     label: "DWAUTO.Settings.MigrationBackupMenu.Label",

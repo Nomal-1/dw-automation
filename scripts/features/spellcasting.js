@@ -11,6 +11,7 @@ import {
 import { handleSpellHeal } from "./healing.js";
 import { handleSpellDamage } from "./spell-damage.js";
 import { expandAmbiguousOngoingSpellRows } from "../lib/translation-import.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -24,7 +25,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // features/counterspell.js도 재사용한다(주문 차단 부분성공 시 건 주문을 잊는

@@ -5,6 +5,7 @@ import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { getPendingDamageForward, setPendingDamageForward } from "../lib/damage-forward-state.js";
 import { getPendingRollBonus, setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 팔라딘 무브 협공(Tandem Strike, 연계 공격의 6레벨 상위 무브) 원문에
 // 더해, GM 요청대로 접근전을 할 때 아군 한 명을 고르면 그 아군이 (1) 다음
@@ -32,12 +33,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findTandemStrikeMove(actor) {
   const names = splitCommaList(SETTINGS.TANDEM_STRIKE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesMeleeByTitle(title) {

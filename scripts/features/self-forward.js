@@ -5,6 +5,7 @@ import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/transl
 import { getPendingRollBonus, setPendingRollBonus, clearPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "../data/self-forward-moves.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // Reaper(클레릭)/Quick Study(위저드)/An Ear For Magic(바드)/
 // Unforgettable Face(바드)/Usurper(바바리안)처럼 "따로 판정 없이, 특정
@@ -134,7 +135,7 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
 
   for (const row of getRows()) {
-    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+    const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

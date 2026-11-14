@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 야만전사 고급액션 주도권(The Upper Hand) 원문: "황천길 판정에 +1 상시
 // 보너스를 받습니다." 황천길(Last Breath)의 rollType은 BOND(유대)라 원조/
@@ -25,12 +26,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function hasUpperHand(actor) {
   const names = splitCommaList(SETTINGS.UPPER_HAND_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 async function matchesLastBreathByTitle(title) {

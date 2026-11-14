@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
 import { announceInfo } from "../lib/announce.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 소각술사 고급액션(6레벨 이후) 쌍각의 들불 지침: "생각의 발신 액션을
 // 사용해서 실패하지 않았으면 채팅창에 [쌍각의 들불 적용 가능]이라고
@@ -28,7 +29,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function onCreateChatMessage(message, options, userId) {
@@ -47,7 +49,7 @@ function onCreateChatMessage(message, options, userId) {
     if (!(sendThoughtsNames.includes(title) || (originalTitle != null && sendThoughtsNames.includes(originalTitle)))) return;
 
     const wildfireNames = splitCommaList(SETTINGS.TWIN_HORN_WILDFIRE_MOVE_NAMES);
-    const wildfireItem = actor.items.find((i) => i.type === "move" && (wildfireNames.includes(i.name) || wildfireNames.includes(i.flags?.babele?.originalName)));
+    const wildfireItem = actor.items.find((i) => i.type === "move" && ((wildfireNames.includes(i.name) || wildfireNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
     if (!wildfireItem) return;
 
     // 실제 효과 문구는 이 무브 자체가 컴펜디엄에 없어서 우리가 알 방법이

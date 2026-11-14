@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { isSaferPlaceForwardPending, setSaferPlaceForwardPending } from "../lib/safer-place-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 레인저 무브 이러면 안전하오(A Safe Place) 원문: "밤에 파수를 정하면,
 // 모두가 파수(Take Watch)에 +1을 받는다." rollType이 없는 서술형 무브라
@@ -33,7 +34,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // 이러면 더 안전하오(Safer Place)를 얻으면 무브 업그레이드 자동화가 하위 무브인
@@ -57,7 +59,7 @@ function matchesConfiguredName(title, originalTitle = null) {
 
 function hasSaferPlace(actor) {
   const names = splitCommaList(SETTINGS.SAFER_PLACE_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 // lib/roll-wrapper.js가 판정 직전 다른 대기 보정치들과 같은 자리에서

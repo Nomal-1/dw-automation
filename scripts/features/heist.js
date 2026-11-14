@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorMultiTarget } from "../lib/actor-target-picker.js";
 import { getPendingHeistBonus, setPendingHeistBonus, clearPendingHeistBonus } from "../lib/heist-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 도적 고급액션 대도적(Heist) 원문: "무엇을 훔치고 싶은지 말하고 마스터에게
 // 질문 4개를 하십시오. 그 대답에 의거하여 행동하면 자신과 일행이 모두 다음
@@ -38,7 +39,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -201,7 +203,7 @@ export async function promptHeistPreRoll(item) {
   // "다음 판정"이 아니라 새 기회를 발급하는 행위다 — 대기 중인 기회를
   // 여기서 잘못 소모하지 않도록 제외한다(수련의 자기 제외와 같은 이유).
   const heistNames = splitCommaList(SETTINGS.HEIST_MOVE_NAMES);
-  if (heistNames.includes(item.name) || heistNames.includes(item.flags?.babele?.originalName)) return { bonus: 0 };
+  if ((heistNames.includes(item.name) || heistNames.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item)) return { bonus: 0 };
 
   const pending = getPendingHeistBonus(actor);
   if (!pending) return { bonus: 0 };

@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getEffectiveAnimalCompanionStats } from "./note-moves.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 레인저 명령(Command) 원문: "동물 친구가 받은 훈련을 활용하고 있으면 —
 // 같은 대상을 공격할 때 동물의 사나움을 피해에, 추적할 때 동물의 교활함을
@@ -36,7 +37,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function isCooperating(actor) {
@@ -53,7 +55,7 @@ async function setCooperating(actor, value) {
 
 function findCommandMove(actor) {
   const names = splitCommaList(SETTINGS.COMMAND_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // 토글이 켜져 있고, 명령을 실제로 갖고 있고, 동물의 능력치가 파싱되어
@@ -88,7 +90,7 @@ export function getCommandCunningBonus(item) {
   if (!actor) return 0;
 
   const cunningMoveNames = splitCommaList(SETTINGS.COMMAND_CUNNING_MOVE_NAMES);
-  if (!(cunningMoveNames.includes(item.name) || cunningMoveNames.includes(item.flags?.babele?.originalName))) return 0;
+  if (!((cunningMoveNames.includes(item.name) || cunningMoveNames.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return 0;
 
   const stats = getActiveStats(actor);
   if (!stats || !stats.cunning) return 0;

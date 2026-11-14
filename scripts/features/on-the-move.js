@@ -7,6 +7,7 @@ import {
   isOnTheMoveActive,
   setOnTheMoveActive
 } from "../lib/on-the-move-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바바리안 무브 재빠른 몸놀림(On The Move) 원문: "이동으로 인한 위험(좁은
 // 다리에서 떨어지거나 무장한 경비병을 지나쳐 달리는 등)에 위험돌파로
@@ -32,12 +33,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findOnTheMove(actor) {
   const names = splitCommaList(SETTINGS.ON_THE_MOVE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesDefyDangerByTitle(title) {

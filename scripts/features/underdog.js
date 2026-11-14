@@ -5,6 +5,7 @@ import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "../data/hit-trigger-moves.js";
 import { getMoveNameMap, resolveDamageReductionMoveName, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { isNoteMoveActive } from "./note-moves.js";
 import { getEffectiveSpellLevel } from "./spell-preparation.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // "조건부 장갑 보너스 무브" 설정 표(Conditional Armor Bonus Moves)는
 // 이름/평소 보너스/조건 충족 시 보너스로 이루어진 일반 표라 GM이 서로 무관한
@@ -40,7 +41,7 @@ function getRows() {
 function getOwnedRows(actor) {
   const owned = [];
   for (const row of getRows()) {
-    const move = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+    const move = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
     if (move) owned.push({ row, move });
   }
   return owned;

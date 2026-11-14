@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 도적-인간(종족 핵심 액션, data/race-core-moves.js 참고) 원문: "범죄계에
 // 익숙합니다. 범죄 활동에 관해 지식 더듬기나 상황 파악을 할 때 +1을
@@ -21,12 +22,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findThiefHumanMove(actor) {
   const names = splitCommaList(SETTINGS.THIEF_HUMAN_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesSpoutLoreOrDiscernRealitiesByTitle(title) {

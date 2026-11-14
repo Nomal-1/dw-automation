@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isLoveTruckActive, setLoveTruckActive } from "../lib/love-truck-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바바리안 무브 너에 대한 내 사랑은 트럭 같아(My Love For You Is Like A
 // Truck) 원문: "힘을 과시하는 행동을 할 때, 그 자리에 있는 감명받은 사람
@@ -30,12 +31,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findLoveTruckMove(actor) {
   const names = splitCommaList(SETTINGS.LOVE_TRUCK_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesParleyByTitle(title) {

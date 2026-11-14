@@ -1,6 +1,7 @@
 // 액터가 현재 유지하고 있는 지속형 주문 목록을 flag로 추적한다.
 // flags.dw-automation.activeOngoingSpells = [{ itemId, name, castPenalty }, ...]
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { isMoveItemDisabled } from "./move-toggles.js";
 
 const FLAG_KEY = "activeOngoingSpells";
 export const COMMUNE_PENALTY_FLAG = "communePenaltyCount";
@@ -41,7 +42,7 @@ function getOngoingPenaltyReduction(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES);
   let reduction = 0;
   for (const row of rows) {
-    if (actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name))) {
+    if (actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)))) {
       reduction += Number(row.reduction) || 0;
     }
   }

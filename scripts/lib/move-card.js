@@ -1,3 +1,4 @@
+import { isNameDisabled } from "./move-toggles.js";
 // 던전월드 무브 굴림 채팅 카드(dungeonworld/templates/chat/chat-move.html) 공용 파서.
 //   <section><div class="... chat-card move-card" data-actor-id="..." data-roll-total="...">
 //     <h2 class="cell__title">{{move name}}</h2>
@@ -36,6 +37,10 @@ export function getMoveCardInfo(message) {
   // 있으면 함께 넘긴다. 이름 목록 설정의 기본값이 원문이라, 한글화 문구가 바뀌어도
   // 각 기능이 원문으로 다시 알아볼 수 있다. 플래그가 없으면(손으로 만든 아이템 등) null.
   const originalTitle = findMoveItem(actor, title)?.flags?.babele?.originalName ?? null;
+
+  // 직업별 자동화 창에서 이 액션의 자동화를 껐으면 카드가 없는 것처럼 돌려준다
+  // (굴린 뒤 처리하는 모든 기능이 이 함수로 카드를 읽는다 — lib/move-toggles.js)
+  if (isNameDisabled(title, actor) || isNameDisabled(originalTitle, actor)) return null;
 
   return { card, actor, title, originalTitle, result, rollTotal, isExtreme };
 }

@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { SPELL_PACK_FILES } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 위저드 증보(Expanded Spellbook) 원문: "Add a new spell from the spell list
 // of any class to your spellbook." — "When you..." 조건절 없이 그냥 지시문
@@ -34,7 +35,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // v0.35.0에서는 이 플래그가 그냥 boolean true였다(어떤 주문인지 기록 안 함).
@@ -79,14 +81,14 @@ async function getSpellsGroupedByClassPack() {
 function promptSpellChoice(moveItem, spellGroups, actor) {
   const packIds = Array.from(spellGroups.keys()).filter((packId) => {
     const { docs } = spellGroups.get(packId);
-    return docs.some((d) => !actor.items.some((i) => i.type === "spell" && (i.name === d.name || i.flags?.babele?.originalName === d.name)));
+    return docs.some((d) => !actor.items.some((i) => i.type === "spell" && ((i.name === d.name || i.flags?.babele?.originalName === d.name) && !isMoveItemDisabled(i))));
   });
   if (packIds.length === 0) return Promise.resolve(null);
 
   const buildSpellOptions = (packId) =>
     spellGroups
       .get(packId)
-      .docs.filter((d) => !actor.items.some((i) => i.type === "spell" && (i.name === d.name || i.flags?.babele?.originalName === d.name)))
+      .docs.filter((d) => !actor.items.some((i) => i.type === "spell" && ((i.name === d.name || i.flags?.babele?.originalName === d.name) && !isMoveItemDisabled(i))))
       .sort((a, b) => Number(a.system?.spellLevel) - Number(b.system?.spellLevel) || a.name.localeCompare(b.name))
       .map((d) => `<option value="${d.id}">${d.name} (Lv.${d.system?.spellLevel ?? "?"})</option>`)
       .join("");

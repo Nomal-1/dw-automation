@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceInfo } from "../lib/announce.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 사냥꾼-엘프(종족 핵심 액션, data/race-core-moves.js 참고) 원문: "험난한
 // 여정을 떠날 때, 어떤 역할을 맡건 10+인 것처럼 성공합니다." 실제 주사위
@@ -26,12 +27,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findRangerElfMove(actor) {
   const name = game.settings.get(MODULE_ID, SETTINGS.RANGER_ELF_MOVE_NAME);
-  return actor.items.find((i) => i.type === "move" && (i.name === name || i.flags?.babele?.originalName === name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((i.name === name || i.flags?.babele?.originalName === name) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesPerilousJourneyByTitle(title) {

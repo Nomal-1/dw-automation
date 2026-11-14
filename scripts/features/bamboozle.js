@@ -4,6 +4,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isBamboozleActive, setBamboozleActive } from "../lib/bamboozle-state.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바드 무브 현란한 말솜씨(Bamboozle) 원문: "누군가와 협상할 때, 7+면 그
 // 사람을 상대로 한 판정에 +1 forward도 함께 받는다." +1이 "그 특정 상대를
@@ -30,12 +31,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findBamboozleMove(actor) {
   const names = splitCommaList(SETTINGS.BAMBOOZLE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function matchesParleyByTitle(title) {

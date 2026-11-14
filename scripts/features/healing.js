@@ -7,6 +7,7 @@ import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/transl
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingDamageForward } from "../lib/damage-forward-state.js";
 import { consumePendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 관찰(Observer) 권한만 있는 대상(적인지 아군인지 애매한 NPC 등)도 치유
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
@@ -27,7 +28,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function getHealingRow(name) {
@@ -44,7 +46,7 @@ function getInvigorateGrant(healer) {
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_INVIGORATE_ASSISTANT)) return null;
 
   const names = splitCommaList(SETTINGS.INVIGORATE_MOVE_NAMES);
-  const move = healer.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  const move = healer.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (!move) return null;
 
   return { amount: 2, source: move.name };
@@ -65,7 +67,7 @@ function resolveFormula(item, row) {
 
 function getHospitallerBonusRows(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HOSPITALLER_MOVES);
-  return table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
+  return table.filter((row) => actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i))));
 }
 
 // 치유 대상을 고른다. 토큰을 하나만 타겟팅해뒀다면 그걸 기본 선택값으로

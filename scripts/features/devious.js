@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바드 무브 교활(Devious) 원문: "진솔한 대화를 할 때, '내가 이용할 수
 // 있는 당신의 약점은 무엇인가?' 하는 질문도 할 수 있다(상대는 이 질문을
@@ -25,12 +26,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findDeviousMove(actor) {
   const names = splitCommaList(SETTINGS.DEVIOUS_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function matchesCharmingOpenByTitle(title) {

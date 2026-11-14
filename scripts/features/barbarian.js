@@ -3,6 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바바리안 "죽기 좋은 날(A Good Day To Die)" 원문: "현재 HP가 자신의 CON
 // 미만(또는 1, 둘 중 더 큰 쪽)인 동안 모든 판정에 +1 ongoing을 받는다."
@@ -28,12 +29,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function hasGoodDayToDie(actor) {
   const names = splitCommaList(SETTINGS.GOOD_DAY_TO_DIE_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 // lib/roll-wrapper.js가 매 판정마다 호출한다.

@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 레인저 무브 익숙한 사냥감(Familiar Prey) 원문: "괴물에 대해 지식
 // 더듬기(Spout Lore)를 할 때, INT 대신 WIS로 판정할 수 있다." "괴물에
@@ -28,19 +29,20 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findHuntersPreyMove(actor) {
   const names = splitCommaList(SETTINGS.HUNTERS_PREY_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // 사냥의 지식이 익숙한 사냥감을 대체하므로(둘 다 갖고 있는 경우는 없음),
 // 둘 중 실제로 갖고 있는 쪽을 찾는다.
 function findFamiliarPreyMove(actor) {
   const names = splitCommaList(SETTINGS.FAMILIAR_PREY_MOVE_NAMES);
-  const move = actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  const move = actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   return move ?? findHuntersPreyMove(actor);
 }
 

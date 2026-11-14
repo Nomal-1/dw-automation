@@ -6,6 +6,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { applyHealAmount } from "./healing.js";
 import { setPendingDamageForward } from "../lib/damage-forward-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바드 마법의 곡조(Arcane Art) 원문: "음악을 엮어서 마법 효과를 만들 때,
 // 아군 한 명과 효과 하나를 고른다: (1) 1d8 피해 치유 (2) 다음번에 가하는
@@ -68,7 +69,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -95,7 +97,7 @@ async function matchesConfiguredName(title, originalTitle = null) {
 
 function hasAnyMove(actor, settingKey) {
   const names = splitCommaList(settingKey);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function hasEldritchTones(actor) {

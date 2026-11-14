@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { SPELL_PACK_FILES } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 마법사-엘프(종족 핵심 액션, data/race-core-moves.js 참고) 원문: "마법을
 // 마치 숨 쉬는 것처럼 자연스럽게 느낍니다. 마법 탐지가 간편주문이 됩니다."
@@ -30,7 +31,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function matchesWizardElfByTitle(title) {
@@ -48,7 +50,7 @@ function matchesWizardElf(title, originalTitle = null) {
 
 function findDetectMagicItem(actor) {
   const names = splitCommaList(SETTINGS.DETECT_MAGIC_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "spell" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "spell" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function getWizardSpellDocuments() {

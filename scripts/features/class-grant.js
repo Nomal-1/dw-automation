@@ -3,6 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, MOVE_PACK_FILES, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 팔라딘 Divine Favor/레인저 God Amidst The Wastes처럼 "발동하면 다른 직업의
 // 특정 무브(들)를 그대로 얻는다" 무브. features/note-moves.js와 별개의 독립된
@@ -66,7 +67,7 @@ async function onDeleteItem(item, options, userId) {
   const grantedNames = getGrantedNames(actor, item.id);
   if (grantedNames.length === 0) return;
 
-  const toDelete = actor.items.filter((i) => i.type === "move" && (grantedNames.includes(i.name) || grantedNames.includes(i.flags?.babele?.originalName)));
+  const toDelete = actor.items.filter((i) => i.type === "move" && ((grantedNames.includes(i.name) || grantedNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (toDelete.length > 0) {
     await actor.deleteEmbeddedDocuments("Item", toDelete.map((i) => i.id));
   }
@@ -325,7 +326,7 @@ async function grantMoves(actor, row) {
   const grantedNames = [];
 
   for (const name of names) {
-    if (actor.items.some((i) => i.type === "move" && (i.name === name || i.flags?.babele?.originalName === name))) continue;
+    if (actor.items.some((i) => i.type === "move" && ((i.name === name || i.flags?.babele?.originalName === name) && !isMoveItemDisabled(i)))) continue;
 
     const doc = await findMoveDocumentByName(name);
     if (!doc) {
@@ -390,7 +391,7 @@ async function onCreateChatMessage(message, options, userId) {
       if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
       await setGranted(actor, moveItem.id, chosenPick.docs.map((d) => d.name));
-      const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && (i.name === d.name || i.flags?.babele?.originalName === d.name)));
+      const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && ((i.name === d.name || i.flags?.babele?.originalName === d.name) && !isMoveItemDisabled(i))));
       if (toCreate.length > 0) {
         await actor.createEmbeddedDocuments(
           "Item",

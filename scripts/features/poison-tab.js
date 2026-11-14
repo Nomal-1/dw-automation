@@ -4,6 +4,7 @@ import { getUsedPoisons, addUsedPoison } from "../lib/poison-state.js";
 import { createOrIncrementPoisonItem } from "../lib/poison-item.js";
 import { DEFAULT_POISONS } from "../data/poison-tables.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 도적 고급액션 독의 달인(Poison Master, "한 번이라도 사용한 독은 위험 없이
 // 다룰 수 있다")/독제사(Brewer, "한 번이라도 사용한 독을 3회분씩 무료로
@@ -36,22 +37,23 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function hasPoisonMaster(actor) {
   const names = splitCommaList(SETTINGS.POISON_MASTER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function hasBrewer(actor) {
   const names = splitCommaList(SETTINGS.BREWER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function hasAlchemist(actor) {
   const names = splitCommaList(SETTINGS.ALCHEMIST_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function promptAddPoison() {

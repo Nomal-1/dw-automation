@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 위저드 천재(Prodigy)/대가(Master) 원문: "주문 하나를 골라라. 그 주문을
 // 준비할 때 한 레벨 낮은 것처럼 취급한다." 대가는 "천재에서 고른 것에 더해
@@ -37,7 +38,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function getDiscountMap(actor) {

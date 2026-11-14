@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { getTrapExpertHold, setTrapExpertHold } from "../lib/trap-expert-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 도적 핵심액션 덫 전문가(Trap Expert) 원문: 부분성공(7-9) 예비 1점,
 // 성공(10+) 예비 3점. 신중함(Cautious, 2레벨) 원문: "덫 전문가를 사용하면
@@ -35,22 +36,23 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMove(actor) {
   const names = splitCommaList(SETTINGS.TRAP_EXPERT_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function hasCautious(actor) {
   const names = splitCommaList(SETTINGS.CAUTIOUS_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function findExtremelyCautiousMove(actor) {
   const names = splitCommaList(SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function matchesConfiguredNameByTitle(title) {

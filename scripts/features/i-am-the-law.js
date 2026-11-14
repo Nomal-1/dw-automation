@@ -3,6 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getIAmTheLawPending, setIAmTheLawPending, clearIAmTheLawPending } from "../lib/i-am-the-law-state.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 팔라딘 I Am The Law 원문: "신의 권위를 내세워 NPC에게 명령을 내리면,
 // roll+CHA. 성공(10+)이면 그들이 하나를 고르고, 당신은 "그들을 상대로" +1
@@ -38,12 +39,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMoveByConfiguredNames(actor) {
   const names = splitCommaList(SETTINGS.I_AM_THE_LAW_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -91,7 +93,7 @@ export async function promptIAmTheLawPreRoll(item) {
   if (!pending) return { cancel: false, bonus: 0 };
 
   const names = splitCommaList(SETTINGS.I_AM_THE_LAW_MOVE_NAMES);
-  if ((names.includes(item.name) || names.includes(item.flags?.babele?.originalName))) {
+  if (((names.includes(item.name) || names.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) {
     ui.notifications.warn(game.i18n.format("DWAUTO.IAmTheLaw.PendingBlocked", { name: actor.name }));
     return { cancel: true, bonus: 0 };
   }

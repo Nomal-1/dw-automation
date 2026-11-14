@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceInfo } from "../lib/announce.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 바드 무브 쇳소리(Metal Hurlant) 원문: "크게 소리를 지르거나 부서질 듯한
 // 소리를 연주할 때, 대상을 하나 고르고 CON 판정. 10+면 대상이 1d10 피해를
@@ -29,7 +30,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function matchesConfiguredNameByTitle(title) {

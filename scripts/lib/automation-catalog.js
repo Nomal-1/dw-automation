@@ -57,6 +57,7 @@ function namesInSetting(setting) {
 // 파일이 확인하는 켜기 설정 ↔ 등록 순서상 묶인 켜기 설정) 어긋난 24개를 모두 적었다.
 // 새 설정을 다른 기능 사이에 끼워 등록했다면 여기에 한 줄 더한다.
 const SETTING_OWNER_OVERRIDES = {
+  [SETTINGS.DISABLED_MOVES]: null,
   [SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
   [SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES]: SETTINGS.ENABLE_DEFEND_ASSISTANT,
   [SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES]: SETTINGS.ENABLE_DEFEND_ASSISTANT,
@@ -111,7 +112,9 @@ export function getFeatureGroups() {
         names: new Set(),
         // 켜기 설정 바로 뒤에 처음 등록된 이름 목록 = 그 기능 자신의 액션(대개).
         // 뒤에 오는 목록은 그 기능이 반응하는 다른 액션(예: 위험 돌파)인 경우가 많다.
-        primary: null
+        primary: null,
+        // 이 기능이 쓰는 표 설정(세부 값). 창에서 "세부 값 편집" 버튼으로 기존 편집 창을 연다.
+        tables: []
       };
       groups.push(current);
       byKey.set(setting.key, current);
@@ -120,6 +123,7 @@ export function getFeatureGroups() {
     if (!current) continue;
     const names = namesInSetting(setting).map(normalizeName);
     for (const name of names) current.names.add(name);
+    if (Array.isArray(setting.default)) current.tables.push(setting.key);
     if (!current.primary && typeof setting.default === "string" && setting.key.endsWith("Names") && names.length) {
       current.primary = new Set(names);
     }
@@ -127,7 +131,9 @@ export function getFeatureGroups() {
   // 주인 기능이 뒤에 등록돼 있을 수도 있어서 다 모은 뒤에 넣는다
   for (const [owner, setting] of pendingOverrides) {
     const group = byKey.get(owner);
-    if (group) for (const name of namesInSetting(setting).map(normalizeName)) group.names.add(name);
+    if (!group) continue;
+    for (const name of namesInSetting(setting).map(normalizeName)) group.names.add(name);
+    if (Array.isArray(setting.default)) group.tables.push(setting.key);
   }
   return groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE);
 }
@@ -281,6 +287,20 @@ export async function buildAutomationCatalog() {
   for (const g of ordered) for (const m of g.moves) {
     const found = upgradeNotes.get(normalizeName(m.original)) ?? upgradeNotes.get(normalizeName(m.name)) ?? [];
     m.upgrades = found.map((n) => ({ ...n, otherName: translatedByOriginal.get(normalizeName(n.other)) ?? n.other, featureOn: upgradeOn }));
+  }
+
+  // 같은 원문 이름이 여러 직업 팩에 있는 액션(다중직업 액션, 신의 가호 등)은 직업별로 따로 끈다
+  const packsByOriginal = new Map();
+  for (const g of ordered) {
+    if (g.key === "race" || g.key === "other") continue;
+    for (const m of g.moves) {
+      const k = normalizeName(m.original ?? m.name);
+      if (!packsByOriginal.has(k)) packsByOriginal.set(k, new Set());
+      packsByOriginal.get(k).add(g.key);
+    }
+  }
+  for (const g of ordered) for (const m of g.moves) {
+    m.ambiguous = (packsByOriginal.get(normalizeName(m.original ?? m.name))?.size ?? 0) > 1;
   }
 
   // 같은 기능이 걸린 다른 "자기 자동화" 액션(함께 켜지고 꺼지는 액션)

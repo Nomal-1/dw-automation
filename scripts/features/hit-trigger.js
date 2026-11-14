@@ -19,6 +19,7 @@ import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { setPendingSpellEffectBonus } from "../lib/spell-effect-bonus-state.js";
 import { deactivateDuelistParryOnHit } from "./duelist-parry.js";
 import { applyEverOnwardArmorRemovalOnHit } from "./ever-onward.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // preUpdateActor에서 원래 HP 갱신을 취소해뒀다가(대화상자 결과를 기다리는 동안),
 // 플레이어가 결국 무효화를 포기하면 이 플래그를 달아 "그대로 다시 적용"한다.
@@ -42,7 +43,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // 클레릭 신의 보우(Divine Intervention)/신의 가호(Divine Invincibility) 원문
@@ -79,7 +81,7 @@ function getAllyHoldCandidates(actor) {
 // 들어가지 않는다(features/druid.js의 getShedCandidate 참고).
 function getHitTriggerCandidates(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
-  const candidates = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
+  const candidates = table.filter((row) => actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i))));
 
   const shed = getShedCandidate(actor);
   if (shed) candidates.push(shed);
@@ -811,10 +813,10 @@ function onUpdateActor(actor, changes, options, userId) {
   if (!gainedDebility) return;
 
   const indomitableNames = splitCommaList(SETTINGS.INDOMITABLE_MOVE_NAMES);
-  const hasIndomitable = actor.items.some((i) => i.type === "move" && (indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName)));
+  const hasIndomitable = actor.items.some((i) => i.type === "move" && ((indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (!hasIndomitable) return;
 
-  const moveName = actor.items.find((i) => i.type === "move" && (indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName))).name;
+  const moveName = actor.items.find((i) => i.type === "move" && ((indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))).name;
   setPendingRollBonus(actor, 1, moveName, null).then(() => {
     announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.HitTrigger.IndomitableApplied"));
   });
@@ -903,7 +905,7 @@ function onRenderActorSheet(app, html) {
   for (const row of table) {
     if (row.effect !== "animalCompanion" && row.effect !== "ongoingPenalty") continue;
 
-    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+    const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

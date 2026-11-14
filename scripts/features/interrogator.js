@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 전사 고급액션 협박(Interrogator) 원문: "When you parley using threats of
 // violence as leverage, you may use STR instead of CHA." 협상(Parley)
@@ -22,12 +23,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findInterrogatorMove(actor) {
   const names = splitCommaList(SETTINGS.INTERROGATOR_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다. 지금 굴리려는 무브가
@@ -40,7 +42,7 @@ export async function promptInterrogatorPreRoll(item) {
   if (!actor || actor.type !== "character") return { statOverride: null };
 
   const parleyNames = splitCommaList(SETTINGS.PARLEY_MOVE_NAMES);
-  if (!(parleyNames.includes(item.name) || parleyNames.includes(item.flags?.babele?.originalName))) return { statOverride: null };
+  if (!((parleyNames.includes(item.name) || parleyNames.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return { statOverride: null };
 
   const moveItem = findInterrogatorMove(actor);
   if (!moveItem) return { statOverride: null };

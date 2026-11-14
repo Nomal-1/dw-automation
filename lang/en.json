@@ -2159,7 +2159,12 @@
       "ReplacedDeleted": "Learning the next step \"{move}\" removes this move from the sheet.",
       "ReplacedKept": "Learning the next step \"{move}\" keeps this move.",
       "UpgradeOff": "(move upgrade cleanup is off, so nothing is removed right now)",
-      "UpgradeToggle": "Move upgrade cleanup — remove the previous step when an advanced move is learned (all classes)"
+      "UpgradeToggle": "Move upgrade cleanup — remove the previous step when an advanced move is learned (all classes)",
+      "MoveToggle": "Automate this move",
+      "MoveToggleHint": "When off, every automation attached to this move ignores it; other moves sharing the same automation are not affected. Automations of other classes that react to this move also ignore it.",
+      "MoveToggleClassOnly": "only for {cls} characters",
+      "FeatureAll": "switch for all moves",
+      "Details": "Edit details"
     }
   }
 }

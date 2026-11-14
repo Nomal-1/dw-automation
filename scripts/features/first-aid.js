@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 클레릭 고급액션 응급처치(First Aid) 원문: "소치유(Cure Light Wounds)는
 // 당신에게 암송주문이라, 부여받은 주문 한도에 포함되지 않습니다." 상급
@@ -27,18 +28,19 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function hasMove(actor, settingKey) {
   const names = splitCommaList(settingKey);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 function findSpellByName(actor, settingKey) {
   const spellName = game.settings.get(MODULE_ID, settingKey).trim();
   if (!spellName) return null;
-  return actor.items.find((i) => i.type === "spell" && (i.name === spellName || i.flags?.babele?.originalName === spellName)) ?? null;
+  return actor.items.find((i) => i.type === "spell" && ((i.name === spellName || i.flags?.babele?.originalName === spellName) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // features/spell-preparation.js가 spell-discount.js의 getDiscountedSpellIds와

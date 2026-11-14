@@ -6,6 +6,7 @@ import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { getCommandInstinctAmount } from "./command.js";
 import { hasEnhancedAid, consumeEnhancedAid } from "./arcane-art.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 던전월드 기본 무브 "원조/방해(Aid or Interfere)" 원문: "유대가 있는 사람을
 // 돕거나 방해할 때 +유대로 판정한다. 맞히면(7+) 그 사람의 판정에 +1 또는
@@ -58,7 +59,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -90,7 +92,7 @@ async function matchesConfiguredName(title, originalTitle = null) {
 function findLittleHelpMove(actor) {
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_LITTLE_HELP_ASSISTANT)) return null;
   const names = splitCommaList(SETTINGS.LITTLE_HELP_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function findApprovingGM() {

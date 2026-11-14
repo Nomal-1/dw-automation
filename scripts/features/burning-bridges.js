@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 소각술사 고급액션 사그라지는 인연(Burning Bridges) 원문: "황천길을 맞아야
 // 할 때, 대신 인연을 하나 지울 수 있다. 영구적이고, 그만큼 이후로 가질 수
@@ -30,17 +31,18 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function hasBurningBridges(actor) {
   const configured = splitCommaList(SETTINGS.BURNING_BRIDGES_MOVE_NAMES);
-  if (actor.items.some((i) => i.type === "move" && (configured.includes(i.name) || configured.includes(i.flags?.babele?.originalName)))) return true;
+  if (actor.items.some((i) => i.type === "move" && ((configured.includes(i.name) || configured.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)))) return true;
 
   try {
     const nameMap = await getMoveNameMap();
     const translated = nameMap.get("Burning Bridges");
-    if (translated) return actor.items.some((i) => i.type === "move" && (i.name === translated || i.flags?.babele?.originalName === translated));
+    if (translated) return actor.items.some((i) => i.type === "move" && ((i.name === translated || i.flags?.babele?.originalName === translated) && !isMoveItemDisabled(i)));
   } catch (err) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
@@ -96,7 +98,7 @@ export async function promptBurningBridgesPreRoll(item) {
   if (!actor || actor.type !== "character") return { cancel: false };
 
   const lastBreathNames = splitCommaList(SETTINGS.LAST_BREATH_MOVE_NAMES);
-  if (!(lastBreathNames.includes(item.name) || lastBreathNames.includes(item.flags?.babele?.originalName))) return { cancel: false };
+  if (!((lastBreathNames.includes(item.name) || lastBreathNames.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return { cancel: false };
 
   if (!(await hasBurningBridges(actor))) return { cancel: false };
 

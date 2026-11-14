@@ -11,6 +11,7 @@ import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { promptActorMultiTarget } from "../lib/actor-target-picker.js";
 import { setProtectedAllies } from "../lib/divine-protection-state.js";
 import { getClericLevelOverride } from "./note-moves.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 위저드 Prepare Spells / 클레릭 Commune 자동화. 원문: "시간을 들여 명상/기원하면
 // 지금까지 준비/부여받은 주문을 전부 잃고, 스펠북에서 새로 고른다 — 고른 주문의
@@ -51,7 +52,7 @@ function getActorLevel(actor) {
 // 신의 보우/가호 중 무엇을 가졌는지"(표시용 이름)를 그대로 재사용한다.
 export function getHoldGrantRow(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.HOLD_GRANT_MOVES);
-  return rows.find((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name))) ?? null;
+  return rows.find((row) => actor.items.some((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)))) ?? null;
 }
 
 // 위저드 천재(Prodigy)/대가(Master)로 골라둔 주문은 준비 시 레벨을 1 낮춰서
@@ -338,7 +339,7 @@ function onRenderActorSheet(app, html) {
   const row = getHoldGrantRow(actor);
   if (!row) return;
 
-  const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
+  const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === row.name || i.flags?.babele?.originalName === row.name) && !isMoveItemDisabled(i)));
   if (!moveItem) return;
 
   const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

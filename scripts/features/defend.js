@@ -18,6 +18,7 @@ import {
   setDefendVengeancePending,
   clearDefendVengeancePending
 } from "../lib/defend-vengeance-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 기본액션 방어(Defend) 원문(공식 컴펜디엄 기준, 이 세계관에서 재구성한
 // 버전): "누군가/무언가를 지키고 서 있다가 공격받으면 roll+CON. 10+면
@@ -60,12 +61,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMoveByConfiguredNames(actor) {
   const names = splitCommaList(SETTINGS.DEFEND_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // 팔라딘 견고한 방어(Staunch Defender)/무적의 방어(Impervious Defender,
@@ -78,12 +80,12 @@ function findMoveByConfiguredNames(actor) {
 function hasStaunchOrImperviousDefender(actor) {
   const staunch = splitCommaList(SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES);
   const impervious = splitCommaList(SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && ((staunch.includes(i.name) || staunch.includes(i.flags?.babele?.originalName)) || (impervious.includes(i.name) || impervious.includes(i.flags?.babele?.originalName))));
+  return actor.items.some((i) => i.type === "move" && (((staunch.includes(i.name) || staunch.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)) || ((impervious.includes(i.name) || impervious.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))));
 }
 
 function hasImperviousDefender(actor) {
   const names = splitCommaList(SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 async function matchesConfiguredNameByTitle(title) {

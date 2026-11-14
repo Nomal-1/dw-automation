@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { promptRevokeSpell } from "./spellcasting.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 위저드 주문 차단(Counterspell)/마법 차폐(Protective Counter) 원문: "막으려는
 // 순간, 준비된 주문 하나를 걸고 +INT 굴림. 부분성공(7-9)이면 건 주문을
@@ -30,7 +31,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function getAbilityMod(actor, ability) {

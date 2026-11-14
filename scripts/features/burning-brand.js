@@ -3,6 +3,7 @@ import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 소각술사 핵심 액션 불타는 낙인(Burning Brand) 원문: "roll+CON으로 순수한
 // 불꽃의 무기를 소환한다. 이 무기의 공격에는 근력/민첩 대신 지혜를 써도
@@ -104,7 +105,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -132,7 +134,7 @@ async function matchesConfiguredName(title, originalTitle = null) {
 function hasThisKillingFire(actor) {
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_THIS_KILLING_FIRE_ASSISTANT)) return false;
   const names = splitCommaList(SETTINGS.THIS_KILLING_FIRE_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
+  return actor.items.some((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
 }
 
 async function createBrandWeapon(actor, moveItem, chosenIndexes, effectsList = CHOICE_EFFECTS) {

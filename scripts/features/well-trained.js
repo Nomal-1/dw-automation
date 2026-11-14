@@ -8,6 +8,7 @@ import {
   addAnimalCompanionTraining,
   registerAnimalCompanionResetListener
 } from "./note-moves.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 레인저 재주꾼(Well-trained, 고급 무브) 원문: "동물 친구에게 훈련 특성을
 // 하나 추가하십시오." 새로 목록을 관리하지 않고, 동물 친구(Animal Companion)
@@ -34,7 +35,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // 이름만으로 찾지 않는다 — 서드파티 확장이 우연히 같은 이름을 쓸 수도 있으니,

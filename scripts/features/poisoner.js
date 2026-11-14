@@ -6,6 +6,7 @@ import { DEFAULT_POISONS } from "../data/poison-tables.js";
 import { getPoisonerChoice, setPoisonerChoice } from "../lib/poisoner-state.js";
 import { addUsedPoison } from "../lib/poison-state.js";
 import { createOrIncrementPoisonItem } from "../lib/poison-item.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 도적 핵심액션 독의 기술(Poisoner) 원문: "다음 중에서 독을 하나 고르십시오.
 // 처음에 그 독을 3회분 가지고 시작하며... 시간을 들여 재료를 모으고 안전한
@@ -30,7 +31,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {

@@ -828,3 +828,9 @@
 .dwauto-ca-feature .desc { flex-basis: 100%; margin-left: 24px; font-size: 0.8em; opacity: 0.7; line-height: 1.3; }
 .dwauto-ca-upgrade { font-size: 0.85em; opacity: 0.9; }
 .dwauto-ca-common { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 0.85em; }
+.dwauto-ca-feature label { display: inline-flex; align-items: center; gap: 4px; }
+.dwauto-ca-feature .scope, .dwauto-ca-movetoggle .scope { font-size: 0.75em; padding: 0 4px; border-radius: 3px; background: rgba(128, 128, 128, 0.25); }
+.dwauto-ca-details { width: auto; flex: 0 0 auto; line-height: 1.2; padding: 1px 6px; font-size: 0.8em; }
+.dwauto-ca-movetoggle { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.85em; }
+.dwauto-ca-row.move-off .dwauto-ca-features { opacity: 0.4; }
+.dwauto-ca-row.move-off .dwauto-ca-move .title { text-decoration: line-through; }

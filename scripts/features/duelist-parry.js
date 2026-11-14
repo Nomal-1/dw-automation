@@ -9,6 +9,7 @@ import {
   setDuelistParryAmount
 } from "../lib/duelist-parry-state.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 바드 무브 결투사의 호신술(Duelist’s Parry) 원문: "접근전을 할 때, 장갑
 // +1 forward를 받는다." "forward"라 원래는 다음에 실제로 맞을 때 한 번만
@@ -44,7 +45,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 // 결투사의 호신비결(Duelist’s Block)은 호신술을 대체하는 상위판으로 원문이
@@ -52,11 +54,11 @@ function splitCommaList(settingKey) {
 // 우선한다. 반환값은 { moveItem, amount }.
 function findDuelistMove(actor) {
   const blockNames = splitCommaList(SETTINGS.DUELIST_BLOCK_MOVE_NAMES);
-  const block = actor.items.find((i) => i.type === "move" && (blockNames.includes(i.name) || blockNames.includes(i.flags?.babele?.originalName)));
+  const block = actor.items.find((i) => i.type === "move" && ((blockNames.includes(i.name) || blockNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (block) return { moveItem: block, amount: 2 };
 
   const parryNames = splitCommaList(SETTINGS.DUELIST_PARRY_MOVE_NAMES);
-  const parry = actor.items.find((i) => i.type === "move" && (parryNames.includes(i.name) || parryNames.includes(i.flags?.babele?.originalName)));
+  const parry = actor.items.find((i) => i.type === "move" && ((parryNames.includes(i.name) || parryNames.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   return parry ? { moveItem: parry, amount: 1 } : null;
 }
 

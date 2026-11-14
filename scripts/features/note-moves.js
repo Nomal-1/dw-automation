@@ -6,6 +6,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 import { parseAnimalCompanionStats, parseAnimalCompanionChoiceLists } from "../lib/animal-companion-stats.js";
 import { isFerocitySpent } from "../lib/animal-companion-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
 // Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
@@ -149,7 +150,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function isActivated(actor, moveId) {
@@ -162,7 +164,7 @@ function isActivated(actor, moveId) {
 // 지금 액터가 실제로 들고 있는 이름 그대로(번역됐다면 번역된 이름) 넘겨야
 // 한다 — 초기화되면(탭이 사라지면) 다시 false가 된다.
 export function isNoteMoveActive(actor, moveName) {
-  const moveItem = actor.items.find((i) => i.type === "move" && (i.name === moveName || i.flags?.babele?.originalName === moveName));
+  const moveItem = actor.items.find((i) => i.type === "move" && ((i.name === moveName || i.flags?.babele?.originalName === moveName) && !isMoveItemDisabled(i)));
   if (!moveItem) return false;
   return isActivated(actor, moveItem.id);
 }
@@ -336,7 +338,7 @@ const PERFECT_KNIGHT_NAMES = ["Perfect Knight", "기사의 귀감"];
 
 function applyPerfectKnightBoonBoost(actor, moveItem, playerGroups) {
   if (!QUEST_NAMES.includes(moveItem.name)) return;
-  const hasPerfectKnight = actor.items.some((i) => i.type === "move" && (PERFECT_KNIGHT_NAMES.includes(i.name) || PERFECT_KNIGHT_NAMES.includes(i.flags?.babele?.originalName)));
+  const hasPerfectKnight = actor.items.some((i) => i.type === "move" && ((PERFECT_KNIGHT_NAMES.includes(i.name) || PERFECT_KNIGHT_NAMES.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
   if (!hasPerfectKnight) return;
 
   for (const group of playerGroups) {
@@ -1003,7 +1005,7 @@ function onUpdateActorForClericLevel(actor, changes, options, userId) {
   if (delta === 0) return;
 
   setClericLevel(actor, clericLevel + delta).then(() => {
-    const moveItem = actor.items.find((i) => i.type === "move" && (DIVINE_FAVOR_NAMES.includes(i.name) || DIVINE_FAVOR_NAMES.includes(i.flags?.babele?.originalName)));
+    const moveItem = actor.items.find((i) => i.type === "move" && ((DIVINE_FAVOR_NAMES.includes(i.name) || DIVINE_FAVOR_NAMES.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i)));
     if (moveItem) {
       announceActionApplied(
         actor,

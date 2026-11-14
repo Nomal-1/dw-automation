@@ -6,6 +6,7 @@ import {
   shouldDeferForMissingTranslations,
   resolveMoveUpgradeNames
 } from "../lib/translation-import.js";
+import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 function getUpgradeRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
@@ -31,7 +32,7 @@ function onCreateItem(item, options, userId) {
   if (!row) return;
   if (row.deletesPrevious === false) return; // "필요" 관계 — 이전 무브는 그대로 둔다.
 
-  const oldItem = actor.items.find((i) => i.type === "move" && (i.name === row.replacesName || i.flags?.babele?.originalName === row.replacesName));
+  const oldItem = actor.items.find((i) => i.type === "move" && ((i.name === row.replacesName || i.flags?.babele?.originalName === row.replacesName) && !isMoveItemDisabled(i)));
   if (!oldItem) return;
 
   oldItem.delete();

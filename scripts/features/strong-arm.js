@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 도적 고급액션 철완의 투척(Strong Arm, True Aim) 원문: "아무 근거리 무기나
 // 던져서 사격을 할 수 있습니다. 한 번 던진 근거리 무기는 손을 떠나기
@@ -58,7 +59,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesStrongArmNameByTitle(title) {
@@ -96,7 +98,7 @@ async function findStrongArmMove(actor) {
 // (정밀 태그 등)도 렌더 시점에는 같은 방식을 쓴다.
 function findMoveSync(actor) {
   const configured = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES).trim();
-  return actor.items.find((i) => i.type === "move" && (i.name === configured || i.flags?.babele?.originalName === configured)) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((i.name === configured || i.flags?.babele?.originalName === configured) && !isMoveItemDisabled(i))) ?? null;
 }
 
 function isRangedTitleByTitle(title) {

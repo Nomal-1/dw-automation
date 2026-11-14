@@ -4,6 +4,7 @@ import { announceActionApplied } from "../lib/announce.js";
 import { promptActorTarget } from "../lib/actor-target-picker.js";
 import { setPendingRollBonus } from "../lib/roll-bonus-state.js";
 import { getPendingArmorRemoval, setPendingArmorRemoval, clearPendingArmorRemoval } from "../lib/ever-onward-state.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 팔라딘 무브 끝없는 전진(Ever Onward, 돌격의 6레벨 상위 무브) 원문: "전투에
 // 앞장서서 돌격을 이끌 때, 이끄는 아군은 +1 forward와 +2 장갑 forward를
@@ -29,7 +30,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function matchesConfiguredNameByTitle(title) {

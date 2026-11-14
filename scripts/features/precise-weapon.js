@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 던전월드 공식 무기 태그 정밀(Precise) 원문: "It rewards careful strikes.
 // You use DEX to hack and slash with this weapon, not STR." 전사 전용
@@ -29,7 +30,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function getPreciseMode(actor) {
@@ -53,7 +55,7 @@ function modeLabel(mode) {
 
 function findMeleeMoveItem(actor) {
   const names = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다. 지금 굴리려는 무브가
@@ -67,7 +69,7 @@ export async function promptPrecisePreRoll(item) {
   if (!actor || actor.type !== "character") return { statOverride: null };
 
   const meleeNames = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
-  if (!(meleeNames.includes(item.name) || meleeNames.includes(item.flags?.babele?.originalName))) return { statOverride: null };
+  if (!((meleeNames.includes(item.name) || meleeNames.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return { statOverride: null };
 
   const mode = getPreciseMode(actor);
   if (mode === "never") return { statOverride: null };

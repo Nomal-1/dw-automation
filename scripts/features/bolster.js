@@ -9,6 +9,7 @@ import {
   isBolsterAskEnabled,
   setBolsterAskEnabled
 } from "../lib/bolster-state.js";
+import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 던전월드 기본 무브 수련(Bolster) 원문: "여가 시간을 수행/명상/맹훈련에
 // 쓰면 예비를 얻는다. 1~2주면 예비 1점, 한 달 이상이면 예비 3점. 나중에
@@ -38,12 +39,13 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 function findMoveByConfiguredNames(actor) {
   const names = splitCommaList(SETTINGS.BOLSTER_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
+  return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
 async function matchesConfiguredNameByTitle(title) {
@@ -159,7 +161,7 @@ export async function promptBolsterPreRoll(item) {
   if (!actor || actor.type !== "character") return { bonus: 0 };
 
   const names = splitCommaList(SETTINGS.BOLSTER_MOVE_NAMES);
-  if ((names.includes(item.name) || names.includes(item.flags?.babele?.originalName))) return { bonus: 0 };
+  if (((names.includes(item.name) || names.includes(item.flags?.babele?.originalName)) && !isMoveItemDisabled(item))) return { bonus: 0 };
 
   const reserve = getBolsterReserve(actor);
   if (reserve <= 0) return { bonus: 0 };

@@ -5,6 +5,7 @@ import { getMoveNameMap } from "../lib/translation-import.js";
 import { ENHANCEMENT_OPTIONS, RANGE_OPTIONS } from "../data/signature-weapon-tables.js";
 import { getExistingSignatureWeapon } from "./signature-weapon.js";
 import { ENHANCEMENTS_FLAG } from "../apps/signature-weapon-builder-app.js";
+import { filterDisabledNames } from "../lib/move-toggles.js";
 
 // 전사 고급액션 무기 강화(Improved Weapon) 원문: "Choose one extra
 // enhancement for your signature weapon." 고유병기가 없으면 아예 적용할
@@ -31,7 +32,8 @@ function splitCommaList(settingKey) {
   // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
   if (!settingKey.endsWith("Names")) return names;
   const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
-  return [...new Set([...names, ...defaults])];
+  // 직업별 자동화 창에서 끈 액션은 목록에서 뺀다(lib/move-toggles.js)
+  return filterDisabledNames([...new Set([...names, ...defaults])]);
 }
 
 async function matchesConfiguredNameByTitle(title) {
