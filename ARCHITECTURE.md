@@ -39,7 +39,16 @@ GM의 반복 작업을 자동화하는 모듈이다. 예: 무브 성공 시 데�
 **그래서 이 프로젝트는 항상 다음 중 하나로만 로직을 분기한다:**
 
 1. GM이 직접 관리하는 이름 목록 설정(콤마 구분 문자열, 영문 기본값 + 번역
-   자동 채우기 도구로 채움) — `actor.items.find(i => names.includes(i.name))`
+   자동 채우기 도구로 채움) — 아이템의 번역 이름 **또는 원문 영어 이름**으로 비교한다:
+   `actor.items.find(i => names.includes(i.name) || names.includes(i.flags?.babele?.originalName))`.
+   Babele는 번역한 컴펜디엄 문서에 `flags.babele.originalName`(원문 영어 이름)을 남기고,
+   시스템이 레벨업 때 문서를 통째로 복사하므로 캐릭터 아이템에도 남는다(2026-11-14 DW02 실측:
+   무브 178개 중 162개, 주문 9개 전부. 없는 것은 홈브루·손으로 만든 아이템뿐). 설정 기본값이
+   원문이라 한글화 문구가 바뀌거나 번역 자동 채우기가 실패해도 자동화가 끊기지 않는다.
+   굴림 후 처리(카드 제목만 있는 곳)는 `getMoveCardInfo`가 넘기는 `originalTitle`(카드 제목과
+   같은 이름의 무브 아이템의 원문 이름)을 같이 본다. 판별 함수는 `matchesX(title, originalTitle)`이
+   `matchesXByTitle`을 번역 제목으로 한 번, 원문으로 한 번 부르는 모양으로 통일했다.
+   새 기능도 이 모양을 따른다. 조사 기록: `docs/move-identification-study.md`(별도 브랜치).
 2. 선택지 목록의 **위치**(1번째/2번째 등, GM이 숫자로 직접 지정하는 설정) —
    "Choose N" 문구 파싱은 절대 쓰지 않는다
 3. 주사위 표기(`\d+d\d+`) — 언어와 무관하게 항상 같은 형태

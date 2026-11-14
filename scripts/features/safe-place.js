@@ -32,16 +32,25 @@ function splitCommaList(settingKey) {
 // 이러면 더 안전하오(Safer Place)를 얻으면 무브 업그레이드 자동화가 하위 무브인
 // 이러면 안전하오를 지워 버리므로(data/move-upgrades.js), 상위 무브만 가진 캐릭터도
 // 클릭하면 같은 자동화가 돌아야 한다. 그래서 두 무브 이름 모두 이 자동화의 대상이다.
-function matchesConfiguredName(title) {
+function matchesConfiguredNameByTitle(title) {
   return (
     splitCommaList(SETTINGS.SAFE_PLACE_MOVE_NAMES).includes(title) ||
     splitCommaList(SETTINGS.SAFER_PLACE_MOVE_NAMES).includes(title)
   );
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesConfiguredName(title, originalTitle = null) {
+  const byTitle = matchesConfiguredNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesConfiguredNameByTitle(originalTitle);
+}
+
 function hasSaferPlace(actor) {
   const names = splitCommaList(SETTINGS.SAFER_PLACE_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 // lib/roll-wrapper.js가 판정 직전 다른 대기 보정치들과 같은 자리에서
@@ -67,10 +76,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!matchesConfiguredName(title)) return;
+    if (!matchesConfiguredName(title, originalTitle)) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

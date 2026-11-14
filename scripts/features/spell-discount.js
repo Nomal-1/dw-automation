@@ -84,11 +84,11 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
     const names = splitCommaList(SETTINGS.DISCOUNT_SPELL_MOVE_NAMES);
-    if (!names.includes(title)) return;
+    if (!(names.includes(title) || (originalTitle != null && names.includes(originalTitle)))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

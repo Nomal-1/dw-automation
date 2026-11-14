@@ -105,7 +105,7 @@ async function performSpellDamage(caster, spell, row) {
 export async function handleSpellDamage(actor, spellItem) {
   if (!isEnabled()) return;
 
-  const row = getSpellDamageRow(spellItem.name);
+  const row = getSpellDamageRow(spellItem.name) ?? getSpellDamageRow(spellItem.flags?.babele?.originalName);
   if (!row) return;
 
   await performSpellDamage(actor, spellItem, row);

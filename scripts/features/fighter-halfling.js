@@ -19,11 +19,20 @@ function splitCommaList(settingKey) {
 
 function findFighterHalflingMove(actor) {
   const names = splitCommaList(SETTINGS.FIGHTER_HALFLING_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
-function matchesDefyDanger(title) {
+function matchesDefyDangerByTitle(title) {
   return splitCommaList(SETTINGS.DEFY_DANGER_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesDefyDanger(title, originalTitle = null) {
+  const byTitle = matchesDefyDangerByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesDefyDangerByTitle(originalTitle);
 }
 
 // lib/roll-wrapper.js가 지식의 샘/도적-인간과 같은 자리에서 호출한다.
@@ -32,7 +41,7 @@ export async function promptFighterHalflingPreRoll(item) {
 
   const actor = item.actor;
   if (!actor || actor.type !== "character") return { bonus: 0 };
-  if (!matchesDefyDanger(item.name)) return { bonus: 0 };
+  if (!matchesDefyDanger(item.name, item.flags?.babele?.originalName)) return { bonus: 0 };
 
   const moveItem = findFighterHalflingMove(actor);
   if (!moveItem) return { bonus: 0 };

@@ -25,7 +25,7 @@ function findCommuneMove(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.PREPARE_SPELLS_MOVES);
   const communeRow = rows.find((r) => r.enforceIndividualLevelCap);
   if (!communeRow) return null;
-  return actor.items.find((i) => i.type === "move" && i.name === communeRow.name) ?? null;
+  return actor.items.find((i) => i.type === "move" && (i.name === communeRow.name || i.flags?.babele?.originalName === communeRow.name)) ?? null;
 }
 
 function getEffectiveClericLevel(actor) {

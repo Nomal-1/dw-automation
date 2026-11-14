@@ -72,7 +72,7 @@ function getAllyHoldCandidates(actor) {
 // 들어가지 않는다(features/druid.js의 getShedCandidate 참고).
 function getHitTriggerCandidates(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HIT_TRIGGER_MOVES);
-  const candidates = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  const candidates = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
 
   const shed = getShedCandidate(actor);
   if (shed) candidates.push(shed);
@@ -804,10 +804,10 @@ function onUpdateActor(actor, changes, options, userId) {
   if (!gainedDebility) return;
 
   const indomitableNames = splitCommaList(SETTINGS.INDOMITABLE_MOVE_NAMES);
-  const hasIndomitable = actor.items.some((i) => i.type === "move" && indomitableNames.includes(i.name));
+  const hasIndomitable = actor.items.some((i) => i.type === "move" && (indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName)));
   if (!hasIndomitable) return;
 
-  const moveName = actor.items.find((i) => i.type === "move" && indomitableNames.includes(i.name)).name;
+  const moveName = actor.items.find((i) => i.type === "move" && (indomitableNames.includes(i.name) || indomitableNames.includes(i.flags?.babele?.originalName))).name;
   setPendingRollBonus(actor, 1, moveName, null).then(() => {
     announceActionApplied(actor, moveName, game.i18n.localize("DWAUTO.HitTrigger.IndomitableApplied"));
   });
@@ -896,7 +896,7 @@ function onRenderActorSheet(app, html) {
   for (const row of table) {
     if (row.effect !== "animalCompanion" && row.effect !== "ongoingPenalty") continue;
 
-    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

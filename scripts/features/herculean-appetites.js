@@ -46,7 +46,7 @@ function splitCommaList(settingKey) {
 
 function findMove(actor) {
   const names = splitCommaList(SETTINGS.HERCULEAN_APPETITES_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function formatModifier(n) {

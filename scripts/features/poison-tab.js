@@ -34,17 +34,17 @@ function splitCommaList(settingKey) {
 
 function hasPoisonMaster(actor) {
   const names = splitCommaList(SETTINGS.POISON_MASTER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 function hasBrewer(actor) {
   const names = splitCommaList(SETTINGS.BREWER_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 function hasAlchemist(actor) {
   const names = splitCommaList(SETTINGS.ALCHEMIST_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 function promptAddPoison() {

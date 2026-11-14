@@ -22,12 +22,12 @@ function splitCommaList(settingKey) {
 
 function findIronHideMove(actor) {
   const names = splitCommaList(SETTINGS.IRON_HIDE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function findSteelHideMove(actor) {
   const names = splitCommaList(SETTINGS.STEEL_HIDE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 // features/armor-assistant.js의 장갑 재계산 기여 목록에 더한다.

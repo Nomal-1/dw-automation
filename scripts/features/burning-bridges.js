@@ -28,12 +28,12 @@ function splitCommaList(settingKey) {
 
 async function hasBurningBridges(actor) {
   const configured = splitCommaList(SETTINGS.BURNING_BRIDGES_MOVE_NAMES);
-  if (actor.items.some((i) => i.type === "move" && configured.includes(i.name))) return true;
+  if (actor.items.some((i) => i.type === "move" && (configured.includes(i.name) || configured.includes(i.flags?.babele?.originalName)))) return true;
 
   try {
     const nameMap = await getMoveNameMap();
     const translated = nameMap.get("Burning Bridges");
-    if (translated) return actor.items.some((i) => i.type === "move" && i.name === translated);
+    if (translated) return actor.items.some((i) => i.type === "move" && (i.name === translated || i.flags?.babele?.originalName === translated));
   } catch (err) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
@@ -89,7 +89,7 @@ export async function promptBurningBridgesPreRoll(item) {
   if (!actor || actor.type !== "character") return { cancel: false };
 
   const lastBreathNames = splitCommaList(SETTINGS.LAST_BREATH_MOVE_NAMES);
-  if (!lastBreathNames.includes(item.name)) return { cancel: false };
+  if (!(lastBreathNames.includes(item.name) || lastBreathNames.includes(item.flags?.babele?.originalName))) return { cancel: false };
 
   if (!(await hasBurningBridges(actor))) return { cancel: false };
 

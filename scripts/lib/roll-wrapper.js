@@ -60,7 +60,9 @@ function splitCommaList(settingKey) {
 
 function isCastSpellMove(item) {
   if (item.type !== "move") return false;
-  return splitCommaList(SETTINGS.CAST_SPELL_MOVE_NAMES).includes(item.name);
+  const castNames = splitCommaList(SETTINGS.CAST_SPELL_MOVE_NAMES);
+  // 원문 영어 이름(Babele)도 본다
+  return castNames.includes(item.name) || castNames.includes(item.flags?.babele?.originalName);
 }
 
 // Formcrafter: "무엇으로 판정할지 그 자리에서 고르는"(ask, 예: 위험 돌파) 무브는

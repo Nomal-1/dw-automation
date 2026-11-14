@@ -28,11 +28,20 @@ function splitCommaList(settingKey) {
 
 function findLoveTruckMove(actor) {
   const names = splitCommaList(SETTINGS.LOVE_TRUCK_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
-function matchesParley(title) {
+function matchesParleyByTitle(title) {
   return splitCommaList(SETTINGS.PARLEY_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesParley(title, originalTitle = null) {
+  const byTitle = matchesParleyByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesParleyByTitle(originalTitle);
 }
 
 // lib/roll-wrapper.js가 판정 직전 전사의 눈과 같은 자리에서 호출한다.
@@ -50,7 +59,7 @@ export function getLoveTruckBonus(item) {
   return 1;
 }
 
-async function matchesConfiguredName(title) {
+async function matchesConfiguredNameByTitle(title) {
   const configured = splitCommaList(SETTINGS.LOVE_TRUCK_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -63,6 +72,15 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredName(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredNameByTitle(originalTitle);
+}
+
 async function onCreateChatMessage(message, options, userId) {
   try {
     if (game.system.id !== "dungeonworld") return;
@@ -71,10 +89,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!(await matchesConfiguredName(title))) return;
+    if (!(await matchesConfiguredName(title, originalTitle))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

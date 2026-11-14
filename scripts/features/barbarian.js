@@ -26,7 +26,7 @@ function splitCommaList(settingKey) {
 
 function hasGoodDayToDie(actor) {
   const names = splitCommaList(SETTINGS.GOOD_DAY_TO_DIE_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 // lib/roll-wrapper.js가 매 판정마다 호출한다.
@@ -45,7 +45,7 @@ export function getGoodDayToDieBonus(actor) {
 // 실제로 클릭했을 때(features/well-trained.js 등과 같은 방식) 약화 선택
 // 대화상자를 띄운다. 이미 6개 약화를 전부 가지고 있으면(lib/debilities.js의
 // hasAllDebilities) 고를 게 없으므로 안내만 하고 끝낸다.
-async function matchesSamson(title) {
+async function matchesSamsonByTitle(title) {
   const configured = splitCommaList(SETTINGS.SAMSON_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -56,6 +56,15 @@ async function matchesSamson(title) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
   return false;
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesSamson(title, originalTitle = null) {
+  const byTitle = await matchesSamsonByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesSamsonByTitle(originalTitle);
 }
 
 function promptSamsonDebilityChoice(moveItem, open) {
@@ -96,10 +105,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!(await matchesSamson(title))) return;
+    if (!(await matchesSamson(title, originalTitle))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

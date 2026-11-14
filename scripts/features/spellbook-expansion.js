@@ -72,14 +72,14 @@ async function getSpellsGroupedByClassPack() {
 function promptSpellChoice(moveItem, spellGroups, actor) {
   const packIds = Array.from(spellGroups.keys()).filter((packId) => {
     const { docs } = spellGroups.get(packId);
-    return docs.some((d) => !actor.items.some((i) => i.type === "spell" && i.name === d.name));
+    return docs.some((d) => !actor.items.some((i) => i.type === "spell" && (i.name === d.name || i.flags?.babele?.originalName === d.name)));
   });
   if (packIds.length === 0) return Promise.resolve(null);
 
   const buildSpellOptions = (packId) =>
     spellGroups
       .get(packId)
-      .docs.filter((d) => !actor.items.some((i) => i.type === "spell" && i.name === d.name))
+      .docs.filter((d) => !actor.items.some((i) => i.type === "spell" && (i.name === d.name || i.flags?.babele?.originalName === d.name)))
       .sort((a, b) => Number(a.system?.spellLevel) - Number(b.system?.spellLevel) || a.name.localeCompare(b.name))
       .map((d) => `<option value="${d.id}">${d.name} (Lv.${d.system?.spellLevel ?? "?"})</option>`)
       .join("");
@@ -133,11 +133,11 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
     const names = splitCommaList(SETTINGS.EXPANDED_SPELLBOOK_MOVE_NAMES);
-    if (!names.includes(title)) return;
+    if (!(names.includes(title) || (originalTitle != null && names.includes(originalTitle)))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

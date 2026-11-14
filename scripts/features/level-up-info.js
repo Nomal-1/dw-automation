@@ -128,7 +128,7 @@ async function findMissingEligibleUpgrades(actor, shownNames, docs) {
     if (!actorMoveNames.has(row.replacesName)) continue;
     if (shownNames.has(row.upgradeName)) continue;
 
-    const moveDoc = docs.find((d) => d.name === row.upgradeName);
+    const moveDoc = docs.find((d) => d.name === row.upgradeName || d.flags?.babele?.originalName === row.upgradeName);
     if (moveDoc) missing.push({ moveDoc, replacesName: row.replacesName, deletesPrevious: row.deletesPrevious !== false });
   }
   return missing;

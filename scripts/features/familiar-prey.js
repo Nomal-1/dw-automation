@@ -26,19 +26,28 @@ function splitCommaList(settingKey) {
 
 function findHuntersPreyMove(actor) {
   const names = splitCommaList(SETTINGS.HUNTERS_PREY_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 // 사냥의 지식이 익숙한 사냥감을 대체하므로(둘 다 갖고 있는 경우는 없음),
 // 둘 중 실제로 갖고 있는 쪽을 찾는다.
 function findFamiliarPreyMove(actor) {
   const names = splitCommaList(SETTINGS.FAMILIAR_PREY_MOVE_NAMES);
-  const move = actor.items.find((i) => i.type === "move" && names.includes(i.name));
+  const move = actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
   return move ?? findHuntersPreyMove(actor);
 }
 
-function matchesSpoutLore(title) {
+function matchesSpoutLoreByTitle(title) {
   return splitCommaList(SETTINGS.SPOUT_LORE_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesSpoutLore(title, originalTitle = null) {
+  const byTitle = matchesSpoutLoreByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesSpoutLoreByTitle(originalTitle);
 }
 
 // lib/roll-wrapper.js가 협박/정밀/논리적과 같은 자리에서 호출한다.
@@ -71,10 +80,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, isExtreme } = info;
+    const { actor, title, isExtreme, originalTitle } = info;
     if (actor.type !== "character") return;
     if (!isExtreme) return;
-    if (!matchesSpoutLore(title)) return;
+    if (!matchesSpoutLore(title, originalTitle)) return;
 
     const huntersPreyMove = findHuntersPreyMove(actor);
     if (!huntersPreyMove) return;

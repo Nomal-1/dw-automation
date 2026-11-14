@@ -24,12 +24,12 @@ function splitCommaList(settingKey) {
 
 function findMercilessMove(actor) {
   const names = splitCommaList(SETTINGS.MERCILESS_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function findBloodthirstyMove(actor) {
   const names = splitCommaList(SETTINGS.BLOODTHIRSTY_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 // features/attack-assistant.js가 데미지 굴림 수식에 이어붙일 추가 다이스

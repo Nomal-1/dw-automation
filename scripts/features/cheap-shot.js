@@ -30,21 +30,30 @@ function splitCommaList(settingKey) {
 
 function findCheapShotMove(actor) {
   const names = splitCommaList(SETTINGS.CHEAP_SHOT_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function findDirtyFighterMove(actor) {
   const names = splitCommaList(SETTINGS.DIRTY_FIGHTER_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
-function isMeleeOrRangedTitle(title) {
+function isMeleeOrRangedTitleByTitle(title) {
   const meleeNames = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
   const rangedNames = splitCommaList(SETTINGS.RANGED_MOVE_NAMES);
   return meleeNames.includes(title) || rangedNames.includes(title);
 }
 
-async function isBackstabTitle(title) {
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function isMeleeOrRangedTitle(title, originalTitle = null) {
+  const byTitle = isMeleeOrRangedTitleByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return isMeleeOrRangedTitleByTitle(originalTitle);
+}
+
+async function isBackstabTitleByTitle(title) {
   const configured = splitCommaList(SETTINGS.BACKSTAB_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -55,6 +64,15 @@ async function isBackstabTitle(title) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
   return false;
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function isBackstabTitle(title, originalTitle = null) {
+  const byTitle = await isBackstabTitleByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await isBackstabTitleByTitle(originalTitle);
 }
 
 // 무기 태그 원문(precise/hand)은 번역 여부와 무관하게 항상 영문으로
@@ -73,7 +91,10 @@ export async function getCheapShotBonus(actor, moveTitle, weapon) {
   if (!isPreciseOrHandWeapon(weapon)) return "";
 
   const dirtyFighter = findDirtyFighterMove(actor);
-  const isBackstab = await isBackstabTitle(moveTitle);
+  // 카드 제목(번역문)과 같은 이름의 무브 아이템이 가진 원문 영어 이름(Babele)
+  const originalTitle =
+    actor.items.find((i) => i.type === "move" && i.name === moveTitle)?.flags?.babele?.originalName ?? null;
+  const isBackstab = await isBackstabTitle(moveTitle, originalTitle);
 
   if (isBackstab) {
     if (dirtyFighter) {
@@ -87,7 +108,7 @@ export async function getCheapShotBonus(actor, moveTitle, weapon) {
   }
 
   if (!dirtyFighter) return "";
-  if (!isMeleeOrRangedTitle(moveTitle)) return "";
+  if (!isMeleeOrRangedTitle(moveTitle, originalTitle)) return "";
 
   announceActionApplied(actor, dirtyFighter.name, game.i18n.localize("DWAUTO.CheapShot.DirtyFighterOtherApplied"));
   return "1d4";

@@ -20,7 +20,7 @@ function splitCommaList(settingKey) {
 
 function findInterrogatorMove(actor) {
   const names = splitCommaList(SETTINGS.INTERROGATOR_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다. 지금 굴리려는 무브가
@@ -33,7 +33,7 @@ export async function promptInterrogatorPreRoll(item) {
   if (!actor || actor.type !== "character") return { statOverride: null };
 
   const parleyNames = splitCommaList(SETTINGS.PARLEY_MOVE_NAMES);
-  if (!parleyNames.includes(item.name)) return { statOverride: null };
+  if (!(parleyNames.includes(item.name) || parleyNames.includes(item.flags?.babele?.originalName))) return { statOverride: null };
 
   const moveItem = findInterrogatorMove(actor);
   if (!moveItem) return { statOverride: null };

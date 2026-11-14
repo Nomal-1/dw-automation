@@ -32,15 +32,15 @@ function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, result } = info;
+    const { actor, title, result, originalTitle } = info;
     if (actor.type !== "character") return;
     if (!result || result === "failure") return;
 
     const sendThoughtsNames = splitCommaList(SETTINGS.SEND_THOUGHTS_MOVE_NAMES);
-    if (!sendThoughtsNames.includes(title)) return;
+    if (!(sendThoughtsNames.includes(title) || (originalTitle != null && sendThoughtsNames.includes(originalTitle)))) return;
 
     const wildfireNames = splitCommaList(SETTINGS.TWIN_HORN_WILDFIRE_MOVE_NAMES);
-    const wildfireItem = actor.items.find((i) => i.type === "move" && wildfireNames.includes(i.name));
+    const wildfireItem = actor.items.find((i) => i.type === "move" && (wildfireNames.includes(i.name) || wildfireNames.includes(i.flags?.babele?.originalName)));
     if (!wildfireItem) return;
 
     // 실제 효과 문구는 이 무브 자체가 컴펜디엄에 없어서 우리가 알 방법이

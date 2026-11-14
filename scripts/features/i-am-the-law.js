@@ -36,7 +36,7 @@ function splitCommaList(settingKey) {
 
 function findMoveByConfiguredNames(actor) {
   const names = splitCommaList(SETTINGS.I_AM_THE_LAW_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -47,12 +47,12 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, result } = info;
+    const { actor, title, result, originalTitle } = info;
     if (actor.type !== "character") return;
     if (!result) return;
 
     const names = splitCommaList(SETTINGS.I_AM_THE_LAW_MOVE_NAMES);
-    if (!names.includes(title)) return;
+    if (!(names.includes(title) || (originalTitle != null && names.includes(originalTitle)))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
@@ -84,7 +84,7 @@ export async function promptIAmTheLawPreRoll(item) {
   if (!pending) return { cancel: false, bonus: 0 };
 
   const names = splitCommaList(SETTINGS.I_AM_THE_LAW_MOVE_NAMES);
-  if (names.includes(item.name)) {
+  if ((names.includes(item.name) || names.includes(item.flags?.babele?.originalName))) {
     ui.notifications.warn(game.i18n.format("DWAUTO.IAmTheLaw.PendingBlocked", { name: actor.name }));
     return { cancel: true, bonus: 0 };
   }

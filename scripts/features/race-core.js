@@ -23,8 +23,17 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-function matchesHalfElven(title) {
+function matchesHalfElvenByTitle(title) {
   return splitCommaList(SETTINGS.HALF_ELVEN_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesHalfElven(title, originalTitle = null) {
+  const byTitle = matchesHalfElvenByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesHalfElvenByTitle(originalTitle);
 }
 
 function getRaceCoreMoveName(row) {
@@ -34,7 +43,7 @@ function getRaceCoreMoveName(row) {
 
 function hasRaceCoreMove(actor, row) {
   const name = getRaceCoreMoveName(row);
-  return actor.items.some((i) => i.type === "move" && i.name === name);
+  return actor.items.some((i) => i.type === "move" && (i.name === name || i.flags?.babele?.originalName === name));
 }
 
 // 던전월드 무브 아이템 스키마(공식 컴펜디엄 Half_elven.yml 구조를 그대로
@@ -70,9 +79,9 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
-    if (!matchesHalfElven(title)) return;
+    if (!matchesHalfElven(title, originalTitle)) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;

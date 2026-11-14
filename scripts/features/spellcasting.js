@@ -216,11 +216,11 @@ function onCreateChatMessage(message, options, userId) {
 
   const info = getMoveCardInfo(message);
   if (!info) return;
-  const { actor, title, result, isExtreme } = info;
+  const { actor, title, result, isExtreme, originalTitle } = info;
   if (result !== "success" && result !== "partial") return;
 
   const castNames = splitCommaList(SETTINGS.CAST_SPELL_MOVE_NAMES);
-  if (!castNames.includes(title)) return;
+  if (!(castNames.includes(title) || (originalTitle != null && castNames.includes(originalTitle)))) return;
 
   const moveItem = findMoveItem(actor, title);
   promptSpellChoice(actor, result, moveItem, isExtreme);

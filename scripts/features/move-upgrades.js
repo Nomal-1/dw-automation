@@ -31,7 +31,7 @@ function onCreateItem(item, options, userId) {
   if (!row) return;
   if (row.deletesPrevious === false) return; // "필요" 관계 — 이전 무브는 그대로 둔다.
 
-  const oldItem = actor.items.find((i) => i.type === "move" && i.name === row.replacesName);
+  const oldItem = actor.items.find((i) => i.type === "move" && (i.name === row.replacesName || i.flags?.babele?.originalName === row.replacesName));
   if (!oldItem) return;
 
   oldItem.delete();

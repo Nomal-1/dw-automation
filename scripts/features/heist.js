@@ -34,7 +34,7 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-async function matchesConfiguredName(title) {
+async function matchesConfiguredNameByTitle(title) {
   const configured = splitCommaList(SETTINGS.HEIST_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -45,6 +45,15 @@ async function matchesConfiguredName(title) {
     // 번역 데이터를 못 읽으면 설정값 직접 비교만으로 판단한다.
   }
   return false;
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredName(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredNameByTitle(originalTitle);
 }
 
 function findApprovingGM() {
@@ -140,9 +149,9 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
-    if (!(await matchesConfiguredName(title))) return;
+    if (!(await matchesConfiguredName(title, originalTitle))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
@@ -184,7 +193,8 @@ export async function promptHeistPreRoll(item) {
   // 대도적 자신을 다시 발동하는 클릭도 이 판정 훅을 거치므로, 그건 실제
   // "다음 판정"이 아니라 새 기회를 발급하는 행위다 — 대기 중인 기회를
   // 여기서 잘못 소모하지 않도록 제외한다(수련의 자기 제외와 같은 이유).
-  if (splitCommaList(SETTINGS.HEIST_MOVE_NAMES).includes(item.name)) return { bonus: 0 };
+  const heistNames = splitCommaList(SETTINGS.HEIST_MOVE_NAMES);
+  if (heistNames.includes(item.name) || heistNames.includes(item.flags?.babele?.originalName)) return { bonus: 0 };
 
   const pending = getPendingHeistBonus(actor);
   if (!pending) return { bonus: 0 };

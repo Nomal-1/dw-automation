@@ -45,16 +45,25 @@ function splitCommaList(settingKey) {
 // 우선한다. 반환값은 { moveItem, amount }.
 function findDuelistMove(actor) {
   const blockNames = splitCommaList(SETTINGS.DUELIST_BLOCK_MOVE_NAMES);
-  const block = actor.items.find((i) => i.type === "move" && blockNames.includes(i.name));
+  const block = actor.items.find((i) => i.type === "move" && (blockNames.includes(i.name) || blockNames.includes(i.flags?.babele?.originalName)));
   if (block) return { moveItem: block, amount: 2 };
 
   const parryNames = splitCommaList(SETTINGS.DUELIST_PARRY_MOVE_NAMES);
-  const parry = actor.items.find((i) => i.type === "move" && parryNames.includes(i.name));
+  const parry = actor.items.find((i) => i.type === "move" && (parryNames.includes(i.name) || parryNames.includes(i.flags?.babele?.originalName)));
   return parry ? { moveItem: parry, amount: 1 } : null;
 }
 
-function matchesMelee(title) {
+function matchesMeleeByTitle(title) {
   return splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesMelee(title, originalTitle = null) {
+  const byTitle = matchesMeleeByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesMeleeByTitle(originalTitle);
 }
 
 async function adjustArmor(actor, delta) {
@@ -115,10 +124,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!matchesMelee(title)) return;
+    if (!matchesMelee(title, originalTitle)) return;
 
     const found = findDuelistMove(actor);
     if (!found) return;

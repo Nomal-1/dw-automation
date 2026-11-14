@@ -26,11 +26,20 @@ function splitCommaList(settingKey) {
 
 function findFountOfKnowledgeMove(actor) {
   const names = splitCommaList(SETTINGS.FOUNT_OF_KNOWLEDGE_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
-function matchesSpoutLore(title) {
+function matchesSpoutLoreByTitle(title) {
   return splitCommaList(SETTINGS.SPOUT_LORE_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function matchesSpoutLore(title, originalTitle = null) {
+  const byTitle = matchesSpoutLoreByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return matchesSpoutLoreByTitle(originalTitle);
 }
 
 // lib/roll-wrapper.js가 판정 "직전"에 다른 사전 보정치들과 같은 자리에서
@@ -41,7 +50,7 @@ export async function promptFountOfKnowledgePreRoll(item) {
 
   const actor = item.actor;
   if (!actor || actor.type !== "character") return { bonus: 0 };
-  if (!matchesSpoutLore(item.name)) return { bonus: 0 };
+  if (!matchesSpoutLore(item.name, item.flags?.babele?.originalName)) return { bonus: 0 };
 
   const moveItem = findFountOfKnowledgeMove(actor);
   if (!moveItem) return { bonus: 0 };

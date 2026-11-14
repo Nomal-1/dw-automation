@@ -32,7 +32,12 @@ export function getMoveCardInfo(message) {
   const rollTotal = Number(card.attr("data-roll-total"));
   const isExtreme = result === "success" && Number.isFinite(rollTotal) && rollTotal >= 12;
 
-  return { card, actor, title, result, rollTotal, isExtreme };
+  // 카드 제목은 아이템 이름(번역문)이다. 그 아이템에 Babele가 남긴 원문 영어 이름이
+  // 있으면 함께 넘긴다. 이름 목록 설정의 기본값이 원문이라, 한글화 문구가 바뀌어도
+  // 각 기능이 원문으로 다시 알아볼 수 있다. 플래그가 없으면(손으로 만든 아이템 등) null.
+  const originalTitle = findMoveItem(actor, title)?.flags?.babele?.originalName ?? null;
+
+  return { card, actor, title, originalTitle, result, rollTotal, isExtreme };
 }
 
 /** 채팅 카드의 (번역된) 무브 이름으로 그 액터가 실제로 가진 move 아이템을 찾는다.

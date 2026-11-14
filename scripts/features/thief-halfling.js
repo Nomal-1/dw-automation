@@ -20,7 +20,7 @@ function splitCommaList(settingKey) {
 
 function findThiefHalflingMove(actor) {
   const names = splitCommaList(SETTINGS.THIEF_HALFLING_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 export function getThiefHalflingRangedBonus(actor, isRanged) {

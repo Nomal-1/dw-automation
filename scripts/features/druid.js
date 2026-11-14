@@ -27,7 +27,7 @@ function splitCommaList(settingKey) {
 }
 
 function findMoveByNames(actor, names) {
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function getBalanceMove(actor) {
@@ -103,7 +103,7 @@ export async function incrementBalanceOnDamage(actor) {
 function getOwnedDamageDieRows(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.DRUID_DAMAGE_DIE_MOVES);
   return table
-    .map((row) => ({ ...row, move: actor.items.find((i) => i.type === "move" && i.name === row.name) }))
+    .map((row) => ({ ...row, move: actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)) }))
     .filter((row) => row.move);
 }
 
@@ -553,7 +553,7 @@ export async function trySpendShapeshiftHold(item, actor) {
   if (!actor || actor.type !== "character") return false;
 
   const names = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
-  if (!names.includes(item.name)) return false;
+  if (!(names.includes(item.name) || names.includes(item.flags?.babele?.originalName))) return false;
   if (!isShapeshiftActive(actor)) return false;
 
   const hold = Number(actor.system.attributes?.hold?.value) || 0;
@@ -889,11 +889,11 @@ async function onCreateChatMessage(message, options, userId) {
 
   const info = getMoveCardInfo(message);
   if (!info) return;
-  const { actor, title, result } = info;
+  const { actor, title, result, originalTitle } = info;
   if (result !== "success" && result !== "partial" && result !== "failure") return;
 
   const shapeshifterNames = splitCommaList(SETTINGS.DRUID_SHAPESHIFTER_MOVE_NAMES);
-  if (!shapeshifterNames.includes(title)) return;
+  if (!(shapeshifterNames.includes(title) || (originalTitle != null && shapeshifterNames.includes(originalTitle)))) return;
 
   if (!isShapeshiftActivated(actor)) {
     await actor.setFlag(MODULE_ID, SHAPESHIFT_ACTIVATED_FLAG, true);

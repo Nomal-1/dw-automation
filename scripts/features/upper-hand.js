@@ -23,10 +23,10 @@ function splitCommaList(settingKey) {
 
 function hasUpperHand(actor) {
   const names = splitCommaList(SETTINGS.UPPER_HAND_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
-async function matchesLastBreath(title) {
+async function matchesLastBreathByTitle(title) {
   const configured = splitCommaList(SETTINGS.LAST_BREATH_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -39,6 +39,15 @@ async function matchesLastBreath(title) {
   return false;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesLastBreath(title, originalTitle = null) {
+  const byTitle = await matchesLastBreathByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesLastBreathByTitle(originalTitle);
+}
+
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다. 지금 굴리려는 게 황천길이
 // 아니거나 주도권이 없으면 조용히 통과한다.
 export async function promptUpperHandPreRoll(item) {
@@ -47,7 +56,7 @@ export async function promptUpperHandPreRoll(item) {
   const actor = item.actor;
   if (!actor || actor.type !== "character") return;
   if (!hasUpperHand(actor)) return;
-  if (!(await matchesLastBreath(item.name))) return;
+  if (!(await matchesLastBreath(item.name, item.flags?.babele?.originalName))) return;
 
   await Dialog.prompt({
     title: item.name,

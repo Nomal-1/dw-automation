@@ -54,7 +54,7 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-async function matchesStrongArmName(title) {
+async function matchesStrongArmNameByTitle(title) {
   const configured = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES).trim();
   if (configured && configured === title) return true;
 
@@ -67,10 +67,19 @@ async function matchesStrongArmName(title) {
   return false;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesStrongArmName(title, originalTitle = null) {
+  const byTitle = await matchesStrongArmNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesStrongArmNameByTitle(originalTitle);
+}
+
 async function findStrongArmMove(actor) {
   for (const item of actor.items) {
     if (item.type !== "move") continue;
-    if (await matchesStrongArmName(item.name)) return item;
+    if (await matchesStrongArmName(item.name, item.flags?.babele?.originalName)) return item;
   }
   return null;
 }
@@ -80,11 +89,20 @@ async function findStrongArmMove(actor) {
 // (정밀 태그 등)도 렌더 시점에는 같은 방식을 쓴다.
 function findMoveSync(actor) {
   const configured = game.settings.get(MODULE_ID, SETTINGS.STRONG_ARM_MOVE_NAMES).trim();
-  return actor.items.find((i) => i.type === "move" && i.name === configured) ?? null;
+  return actor.items.find((i) => i.type === "move" && (i.name === configured || i.flags?.babele?.originalName === configured)) ?? null;
 }
 
-function isRangedTitle(title) {
+function isRangedTitleByTitle(title) {
   return splitCommaList(SETTINGS.RANGED_MOVE_NAMES).includes(title);
+}
+
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+function isRangedTitle(title, originalTitle = null) {
+  const byTitle = isRangedTitleByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return isRangedTitleByTitle(originalTitle);
 }
 
 // features/attack-assistant.js가 사격의 선택지를 보여주기 직전에 호출한다.
@@ -92,7 +110,10 @@ function isRangedTitle(title) {
 // "미적용"이면 묻지도 않고 바로 통과한다.
 export async function promptStrongArmThrow(actor, moveTitle) {
   if (!isEnabled()) return { throwing: false };
-  if (!isRangedTitle(moveTitle)) return { throwing: false };
+  // 카드 제목(번역문)과 같은 이름의 무브 아이템이 가진 원문 영어 이름(Babele)
+  const originalTitle =
+    actor.items.find((i) => i.type === "move" && i.name === moveTitle)?.flags?.babele?.originalName ?? null;
+  if (!isRangedTitle(moveTitle, originalTitle)) return { throwing: false };
 
   const moveItem = await findStrongArmMove(actor);
   if (!moveItem) return { throwing: false };

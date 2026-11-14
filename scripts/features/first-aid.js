@@ -25,13 +25,13 @@ function splitCommaList(settingKey) {
 
 function hasMove(actor, settingKey) {
   const names = splitCommaList(settingKey);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 function findSpellByName(actor, settingKey) {
   const spellName = game.settings.get(MODULE_ID, settingKey).trim();
   if (!spellName) return null;
-  return actor.items.find((i) => i.type === "spell" && i.name === spellName) ?? null;
+  return actor.items.find((i) => i.type === "spell" && (i.name === spellName || i.flags?.babele?.originalName === spellName)) ?? null;
 }
 
 // features/spell-preparation.js가 spell-discount.js의 getDiscountedSpellIds와

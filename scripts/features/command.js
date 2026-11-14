@@ -46,7 +46,7 @@ async function setCooperating(actor, value) {
 
 function findCommandMove(actor) {
   const names = splitCommaList(SETTINGS.COMMAND_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 // 토글이 켜져 있고, 명령을 실제로 갖고 있고, 동물의 능력치가 파싱되어
@@ -81,7 +81,7 @@ export function getCommandCunningBonus(item) {
   if (!actor) return 0;
 
   const cunningMoveNames = splitCommaList(SETTINGS.COMMAND_CUNNING_MOVE_NAMES);
-  if (!cunningMoveNames.includes(item.name)) return 0;
+  if (!(cunningMoveNames.includes(item.name) || cunningMoveNames.includes(item.flags?.babele?.originalName))) return 0;
 
   const stats = getActiveStats(actor);
   if (!stats || !stats.cunning) return 0;

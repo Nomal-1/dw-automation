@@ -44,7 +44,7 @@ function parseRestrictToMoveNames(row) {
 // 설정("자기 자신 forward 무브")에 등록된 이름과 채팅 카드 제목을 비교한다.
 // features/class-grant.js와 같은 방식으로, 설정값이 아직 번역 전이어도
 // 지금 시점의 번역 데이터로 다시 한번 확인한다.
-async function matchesConfiguredRow(title) {
+async function matchesConfiguredRowByTitle(title) {
   const rows = getRows();
   const direct = rows.find((r) => r.name === title);
   if (direct) return direct;
@@ -62,6 +62,15 @@ async function matchesConfiguredRow(title) {
   return null;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredRow(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredRowByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredRowByTitle(originalTitle);
+}
+
 async function onCreateChatMessage(message, options, userId) {
   try {
     if (game.system.id !== "dungeonworld") return;
@@ -70,10 +79,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    const row = await matchesConfiguredRow(title);
+    const row = await matchesConfiguredRow(title, originalTitle);
     if (!row) return;
 
     const moveItem = findMoveItem(actor, title);
@@ -125,7 +134,7 @@ function onRenderActorSheet(app, html) {
   if (actor.type !== "character") return;
 
   for (const row of getRows()) {
-    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

@@ -53,7 +53,7 @@ function isAmmoItem(item) {
 // 무기 문자열 매칭 대신 무브 소지 여부로 판정한다.
 function hasMusclebound(actor) {
   const names = splitCommaList(SETTINGS.MUSCLEBOUND_MOVE_NAMES);
-  return actor.items.some((i) => i.type === "move" && names.includes(i.name));
+  return actor.items.some((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
 }
 
 // 모듈 설정(태그 자동 반영 목록)에서 켜둔 태그만 검사한다.
@@ -221,7 +221,7 @@ function promptAmmo(ammoItems) {
 // 반영되게 한다.
 async function promptSpellAugmentation(actor) {
   const moveNames = splitCommaList(SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES);
-  const hasMove = actor.items.some((i) => i.type === "move" && moveNames.includes(i.name));
+  const hasMove = actor.items.some((i) => i.type === "move" && (moveNames.includes(i.name) || moveNames.includes(i.flags?.babele?.originalName)));
   if (!hasMove) return 0;
 
   const active = getActiveOngoingSpells(actor);
@@ -308,7 +308,7 @@ async function setDesignation(actor, moveName, designated) {
 // "자동 아니오" 토글이 켜진 무브는 물어보지 않고 바로 noFormula를 적용한다.
 async function promptConditionalDamageBonuses(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_DAMAGE_MOVES);
-  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
   if (owned.length === 0) return "";
 
   const locks = getAutoNoLocks(actor);
@@ -347,7 +347,7 @@ async function promptConditionalDamageBonuses(actor) {
 // (액터+무브 이름으로 구분되므로 표가 달라도 충돌하지 않는다).
 async function promptConditionalTagMoves(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
-  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  const owned = table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
   if (owned.length === 0) return [];
 
   const locks = getAutoNoLocks(actor);
@@ -652,7 +652,7 @@ function onCreateChatMessage(message, options, userId) {
 
   const info = getMoveCardInfo(message);
   if (!info) return;
-  const { actor, title, result } = info;
+  const { actor, title, result, originalTitle } = info;
   if (result !== "success" && result !== "partial") return;
 
   const moveItem = findMoveItem(actor, title);
@@ -660,7 +660,8 @@ function onCreateChatMessage(message, options, userId) {
   // 1) "특수 공격 무브" 설정 표(Backstab/Called Shot처럼 선택지에 따라 거동이
   //    달라지는 무브)에 이름이 등록되어 있는지 먼저 확인한다.
   const specialMoves = game.settings.get(MODULE_ID, SETTINGS.SPECIAL_ATTACK_MOVES);
-  const special = specialMoves.find((m) => m.name === title);
+  const special = specialMoves.find((m) => m.name === title) ??
+    (originalTitle != null ? specialMoves.find((m) => m.name === originalTitle) : undefined);
   let behavior = special
     ? {
         ranged: special.ranged,
@@ -676,8 +677,8 @@ function onCreateChatMessage(message, options, userId) {
   if (!behavior) {
     const meleeNames = splitCommaList(SETTINGS.MELEE_MOVE_NAMES);
     const rangedNames = splitCommaList(SETTINGS.RANGED_MOVE_NAMES);
-    const isRangedName = rangedNames.includes(title);
-    if (!meleeNames.includes(title) && !isRangedName) return;
+    const isRangedName = (rangedNames.includes(title) || (originalTitle != null && rangedNames.includes(originalTitle)));
+    if (!(meleeNames.includes(title) || (originalTitle != null && meleeNames.includes(originalTitle))) && !isRangedName) return;
     behavior = { ...DEFAULT_ATTACK_BEHAVIOR, ranged: isRangedName };
   }
 
@@ -689,14 +690,14 @@ function onCreateChatMessage(message, options, userId) {
   if (result === "success" && info.isExtreme && !behavior.ranged) {
     const superiorWarriorNames = splitCommaList(SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES);
     const superiorWarriorMove = actor.items.find(
-      (i) => i.type === "move" && superiorWarriorNames.includes(i.name)
+      (i) => i.type === "move" && (superiorWarriorNames.includes(i.name) || superiorWarriorNames.includes(i.flags?.babele?.originalName))
     );
     if (superiorWarriorMove) {
       announceActionApplied(actor, superiorWarriorMove.name, game.i18n.localize("DWAUTO.SuperiorWarrior.Applied"));
     }
 
     const smashNames = splitCommaList(SETTINGS.SMASH_MOVE_NAMES);
-    const smashMove = actor.items.find((i) => i.type === "move" && smashNames.includes(i.name));
+    const smashMove = actor.items.find((i) => i.type === "move" && (smashNames.includes(i.name) || smashNames.includes(i.flags?.babele?.originalName)));
     if (smashMove) {
       announceActionApplied(actor, smashMove.name, game.i18n.localize("DWAUTO.Smash.Applied"));
     }
@@ -714,7 +715,7 @@ function onCreateChatMessage(message, options, userId) {
       result === "success" &&
       !behavior.ranged &&
       moveItem &&
-      splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(title);
+      (splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(title) || (originalTitle != null && splitCommaList(SETTINGS.MELEE_MOVE_NAMES).includes(originalTitle)));
 
     (async () => {
       // 사격 10+(선택지 없이 곧바로 데미지)도 철완의 투척 여부를 물어야
@@ -745,7 +746,7 @@ function onRenderActorSheet(app, html) {
   const designations = getDesignations(actor);
 
   for (const row of table) {
-    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);
@@ -795,7 +796,7 @@ function onRenderActorSheet(app, html) {
 
   const tagTable = game.settings.get(MODULE_ID, SETTINGS.CONDITIONAL_TAG_MOVES);
   for (const row of tagTable) {
-    const moveItem = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    const moveItem = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
     if (!moveItem) continue;
 
     const $item = html.find(`.item[data-item-id="${moveItem.id}"]`);

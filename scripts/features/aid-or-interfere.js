@@ -54,7 +54,7 @@ function splitCommaList(settingKey) {
     .filter(Boolean);
 }
 
-async function matchesConfiguredName(title) {
+async function matchesConfiguredNameByTitle(title) {
   const configured = splitCommaList(SETTINGS.AID_OR_INTERFERE_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -67,6 +67,15 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredName(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredNameByTitle(originalTitle);
+}
+
 // 바드 친구여 고맙소(A Little Help From My Friends) 원문: "원조에 성공하면
 // 자기 자신도 +1 forward를 받는다." — 방해(-2)에는 해당 없이 원조(+1)를
 // 실제로 성공시켰을 때만(방해하는 사람에게 걸리는 게 아니라 원조하는 이
@@ -74,7 +83,7 @@ async function matchesConfiguredName(title) {
 function findLittleHelpMove(actor) {
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_LITTLE_HELP_ASSISTANT)) return null;
   const names = splitCommaList(SETTINGS.LITTLE_HELP_MOVE_NAMES);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
 function findApprovingGM() {
@@ -338,10 +347,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title, result } = info;
+    const { actor, title, result, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!(await matchesConfiguredName(title))) return;
+    if (!(await matchesConfiguredName(title, originalTitle))) return;
 
     const decision = pendingDecisions.get(actor.id);
     if (!decision) return; // 굴리기 전에 취소했거나, 애초에 이 무브가 아니었다.

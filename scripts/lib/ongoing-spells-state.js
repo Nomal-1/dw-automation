@@ -17,7 +17,7 @@ export function getOngoingSpellConfig(spellName) {
 /** 지속형 주문 데이터베이스에 있는 주문이면 활성 목록에 추가하고 설정을 반환한다.
  *  지속형이 아니면 아무것도 안 하고 null을 반환한다. */
 export async function addActiveOngoingSpell(actor, item) {
-  const config = getOngoingSpellConfig(item.name);
+  const config = getOngoingSpellConfig(item.name) ?? getOngoingSpellConfig(item.flags?.babele?.originalName);
   if (!config) return null;
 
   const current = getActiveOngoingSpells(actor);
@@ -41,7 +41,7 @@ function getOngoingPenaltyReduction(actor) {
   const rows = game.settings.get(MODULE_ID, SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES);
   let reduction = 0;
   for (const row of rows) {
-    if (actor.items.some((i) => i.type === "move" && i.name === row.name)) {
+    if (actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name))) {
       reduction += Number(row.reduction) || 0;
     }
   }

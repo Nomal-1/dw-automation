@@ -37,7 +37,7 @@ function getInvigorateGrant(healer) {
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_INVIGORATE_ASSISTANT)) return null;
 
   const names = splitCommaList(SETTINGS.INVIGORATE_MOVE_NAMES);
-  const move = healer.items.find((i) => i.type === "move" && names.includes(i.name));
+  const move = healer.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName)));
   if (!move) return null;
 
   return { amount: 2, source: move.name };
@@ -58,7 +58,7 @@ function resolveFormula(item, row) {
 
 function getHospitallerBonusRows(actor) {
   const table = game.settings.get(MODULE_ID, SETTINGS.HOSPITALLER_MOVES);
-  return table.filter((row) => actor.items.some((i) => i.type === "move" && i.name === row.name));
+  return table.filter((row) => actor.items.some((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name)));
 }
 
 // 치유 대상을 고른다. 토큰을 하나만 타겟팅해뒀다면 그걸 기본 선택값으로
@@ -330,10 +330,10 @@ function onCreateChatMessage(message, options, userId) {
 
   const info = getMoveCardInfo(message);
   if (!info) return;
-  const { actor, title, result } = info;
+  const { actor, title, result, originalTitle } = info;
   if (result !== "success" && result !== "partial") return;
 
-  const row = getHealingRow(title);
+  const row = getHealingRow(title) ?? (originalTitle != null ? getHealingRow(originalTitle) : null);
   if (!row) return;
 
   const moveItem = findMoveItem(actor, title);

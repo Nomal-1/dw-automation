@@ -40,7 +40,7 @@ function getRows() {
 function getOwnedRows(actor) {
   const owned = [];
   for (const row of getRows()) {
-    const move = actor.items.find((i) => i.type === "move" && i.name === row.name);
+    const move = actor.items.find((i) => i.type === "move" && (i.name === row.name || i.flags?.babele?.originalName === row.name));
     if (move) owned.push({ row, move });
   }
   return owned;
@@ -126,7 +126,8 @@ export async function applyOutnumberedAnswer(actor, moveId, moveName, nowActive)
   const wasActive = isConditionActive(actor, moveId);
   if (wasActive === nowActive) return { changed: false, newArmor: currentArmor };
 
-  const row = getRows().find((r) => r.name === moveName);
+  const originalName = actor.items.get(moveId)?.flags?.babele?.originalName;
+  const row = getRows().find((r) => r.name === moveName || (originalName != null && r.name === originalName));
   const delta = row
     ? (nowActive ? row.outnumberedBonus : row.baseBonus) - (wasActive ? row.outnumberedBonus : row.baseBonus)
     : nowActive

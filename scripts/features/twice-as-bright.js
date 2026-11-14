@@ -32,12 +32,14 @@ function splitCommaList(settingKey) {
 
 function findMoveByConfiguredNames(actor, settingKey) {
   const names = splitCommaList(settingKey);
-  return actor.items.find((i) => i.type === "move" && names.includes(i.name)) ?? null;
+  return actor.items.find((i) => i.type === "move" && (names.includes(i.name) || names.includes(i.flags?.babele?.originalName))) ?? null;
 }
 
-async function matchesMove(title, settingKey, englishName) {
+async function matchesMove(title, settingKey, englishName, originalTitle = null) {
   const configured = splitCommaList(settingKey);
   if (configured.includes(title)) return true;
+  // 그 무브 아이템의 원문 영어 이름(Babele)으로도 본다
+  if (originalTitle != null && (configured.includes(originalTitle) || originalTitle === englishName)) return true;
 
   try {
     const nameMap = await getMoveNameMap();
@@ -74,7 +76,7 @@ async function getAllMoveDocuments() {
 
 async function findMoveDocumentByName(name) {
   const docs = await getAllMoveDocuments();
-  return docs.find((d) => d.name === name) ?? null;
+  return docs.find((d) => d.name === name || d.flags?.babele?.originalName === name) ?? null;
 }
 
 // 컴펜디엄 문서를 pack.getDocuments()로 직접 읽으면, 번역 모듈(예:
@@ -113,12 +115,12 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
     const moveItem = findMoveItem(actor, title);
 
-    if (await matchesMove(title, SETTINGS.TWICE_AS_BRIGHT_MOVE_NAMES, "Burns Twice As Bright")) {
+    if (await matchesMove(title, SETTINGS.TWICE_AS_BRIGHT_MOVE_NAMES, "Burns Twice As Bright", originalTitle)) {
       await setTwiceAsBrightUsed(actor, true);
       const granted = await grantHalfAsLongIfMissing(actor);
       announceActionApplied(
@@ -131,7 +133,7 @@ async function onCreateChatMessage(message, options, userId) {
       return;
     }
 
-    if (await matchesMove(title, SETTINGS.HALF_AS_LONG_MOVE_NAMES, "Burns Half As Long")) {
+    if (await matchesMove(title, SETTINGS.HALF_AS_LONG_MOVE_NAMES, "Burns Half As Long", originalTitle)) {
       await setTwiceAsBrightUsed(actor, false);
       announceActionApplied(actor, moveItem?.name ?? title, game.i18n.localize("DWAUTO.TwiceAsBright.Ready"));
     }

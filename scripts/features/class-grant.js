@@ -66,7 +66,7 @@ async function onDeleteItem(item, options, userId) {
   const grantedNames = getGrantedNames(actor, item.id);
   if (grantedNames.length === 0) return;
 
-  const toDelete = actor.items.filter((i) => i.type === "move" && grantedNames.includes(i.name));
+  const toDelete = actor.items.filter((i) => i.type === "move" && (grantedNames.includes(i.name) || grantedNames.includes(i.flags?.babele?.originalName)));
   if (toDelete.length > 0) {
     await actor.deleteEmbeddedDocuments("Item", toDelete.map((i) => i.id));
   }
@@ -106,7 +106,7 @@ async function getAllMoveDocuments() {
 
 async function findMoveDocumentByName(name) {
   const docs = await getAllMoveDocuments();
-  return docs.find((d) => d.name === name) ?? null;
+  return docs.find((d) => d.name === name || d.flags?.babele?.originalName === name) ?? null;
 }
 
 // 룰북 원문: "다중직업을 따질 때에 한하여, 직업의 핵심 액션들 중 서로
@@ -288,7 +288,7 @@ function promptChoiceGrant(moveItem, eligibleGroups) {
 // 설정("클래스 부여 무브")에 등록된 이름과 채팅 카드 제목을 비교한다. 설정값이
 // 아직 번역 전(영문 기본값)이어도, 지금 이 시점의 번역 데이터로 다시 한번
 // 확인한다(features/note-moves.js와 같은 방식).
-async function matchesConfiguredRow(title) {
+async function matchesConfiguredRowByTitle(title) {
   const rows = getRows();
   const direct = rows.find((r) => r.name === title);
   if (direct) return direct;
@@ -306,6 +306,15 @@ async function matchesConfiguredRow(title) {
   return null;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredRow(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredRowByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredRowByTitle(originalTitle);
+}
+
 async function grantMoves(actor, row) {
   const names = row.grantedMoveNames
     .split(",")
@@ -316,7 +325,7 @@ async function grantMoves(actor, row) {
   const grantedNames = [];
 
   for (const name of names) {
-    if (actor.items.some((i) => i.type === "move" && i.name === name)) continue;
+    if (actor.items.some((i) => i.type === "move" && (i.name === name || i.flags?.babele?.originalName === name))) continue;
 
     const doc = await findMoveDocumentByName(name);
     if (!doc) {
@@ -343,10 +352,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    const row = await matchesConfiguredRow(title);
+    const row = await matchesConfiguredRow(title, originalTitle);
     if (!row) return;
 
     const moveItem = findMoveItem(actor, title);
@@ -381,7 +390,7 @@ async function onCreateChatMessage(message, options, userId) {
       if (!chosenPick) return; // 취소 — 다음에 다시 발동하면 다시 물어본다.
 
       await setGranted(actor, moveItem.id, chosenPick.docs.map((d) => d.name));
-      const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && i.name === d.name));
+      const toCreate = chosenPick.docs.filter((d) => !actor.items.some((i) => i.type === "move" && (i.name === d.name || i.flags?.babele?.originalName === d.name)));
       if (toCreate.length > 0) {
         await actor.createEmbeddedDocuments(
           "Item",

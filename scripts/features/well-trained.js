@@ -85,7 +85,7 @@ function promptTrainingChoice(moveItem, options) {
 
 // features/note-moves.js와 같은 방식: 설정값이 아직 번역 전(영문 기본값)이어도
 // 지금 이 시점의 번역 데이터로 다시 한번 확인해서 매칭을 놓치지 않는다.
-async function matchesConfiguredName(title) {
+async function matchesConfiguredNameByTitle(title) {
   const configured = splitCommaList(SETTINGS.WELL_TRAINED_MOVE_NAMES);
   if (configured.includes(title)) return true;
 
@@ -98,6 +98,15 @@ async function matchesConfiguredName(title) {
   return false;
 }
 
+// 카드 제목(번역문)으로 못 찾으면 그 무브 아이템의 원문 영어 이름(Babele가 남기는
+// flags.babele.originalName, getMoveCardInfo의 originalTitle)으로 한 번 더 본다.
+// 설정 기본값이 원문이라 한글화 문구가 바뀌어도 자동화가 끊기지 않는다.
+async function matchesConfiguredName(title, originalTitle = null) {
+  const byTitle = await matchesConfiguredNameByTitle(title);
+  if (byTitle || !originalTitle || originalTitle === title) return byTitle;
+  return await matchesConfiguredNameByTitle(originalTitle);
+}
+
 async function onCreateChatMessage(message, options, userId) {
   try {
     if (game.system.id !== "dungeonworld") return;
@@ -106,10 +115,10 @@ async function onCreateChatMessage(message, options, userId) {
 
     const info = getMoveCardInfo(message);
     if (!info) return;
-    const { actor, title } = info;
+    const { actor, title, originalTitle } = info;
     if (actor.type !== "character") return;
 
-    if (!(await matchesConfiguredName(title))) return;
+    if (!(await matchesConfiguredName(title, originalTitle))) return;
 
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
