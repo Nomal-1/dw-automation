@@ -795,3 +795,33 @@
   width: 100%;
   resize: vertical;
 }
+
+/* 직업별 자동화 창 (apps/class-automation-app.js) */
+.dwauto-class-automation .window-content { padding: 0; overflow: hidden; }
+.dwauto-ca-layout { display: flex; height: 100%; min-height: 0; }
+.dwauto-ca-nav { flex: 0 0 170px; display: flex; flex-direction: column; gap: 2px; padding: 8px; overflow-y: auto; border-right: 1px solid var(--color-border, #7a7971); }
+.dwauto-ca-group { display: flex; justify-content: space-between; align-items: center; text-align: left; padding: 6px 8px; }
+.dwauto-ca-group.active { background: var(--color-warm-2, #c9593f); color: #fff; }
+.dwauto-ca-group .count { font-size: 0.8em; opacity: 0.75; }
+.dwauto-ca-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 8px 10px; }
+.dwauto-ca-toolbar { display: flex; gap: 8px; align-items: center; }
+.dwauto-ca-toolbar input[type="search"] { flex: 1; }
+.dwauto-ca-toolbar button { flex: 0 0 auto; width: auto; }
+.dwauto-ca-missing { display: flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 0.9em; }
+.dwauto-ca-hint { margin: 6px 0; font-size: 0.85em; opacity: 0.8; }
+.dwauto-ca-rows { flex: 1; overflow-y: auto; }
+.dwauto-ca-row { display: grid; grid-template-columns: minmax(180px, 2fr) 3fr; gap: 10px; padding: 6px 4px; border-bottom: 1px solid var(--color-border-light-2, rgba(128, 128, 128, 0.3)); }
+.dwauto-ca-row.no-auto { opacity: 0.6; }
+.dwauto-ca-move { display: flex; gap: 8px; align-items: flex-start; }
+.dwauto-ca-move img { width: 32px; height: 32px; flex: 0 0 32px; border: none; }
+.dwauto-ca-move .title { font-weight: bold; }
+.dwauto-ca-move .original { font-weight: normal; font-size: 0.85em; opacity: 0.7; margin-left: 4px; }
+.dwauto-ca-move .owners { display: block; font-size: 0.8em; opacity: 0.8; }
+.dwauto-ca-features { display: flex; flex-direction: column; gap: 3px; }
+.dwauto-ca-feature { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.dwauto-ca-feature.off .name { text-decoration: line-through; opacity: 0.6; }
+.dwauto-ca-feature .shared { flex-basis: 100%; margin-left: 24px; font-size: 0.8em; opacity: 0.75; }
+.dwauto-ca-none { font-size: 0.85em; font-style: italic; }
+.dwauto-ca-reacting { font-size: 0.8em; opacity: 0.85; }
+.dwauto-ca-reacting .off { text-decoration: line-through; opacity: 0.6; }
+.dwauto-ca-empty { padding: 20px; text-align: center; opacity: 0.7; }

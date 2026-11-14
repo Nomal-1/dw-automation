@@ -49,6 +49,7 @@ export const SETTING_CATEGORIES = {
   [SETTINGS.ENABLE_MONSTER_GENERATOR]: "general",
   [SETTINGS.ENABLE_ATTACK_ASSISTANT]: "general",
   [SETTINGS.ENABLE_DICE_SOUND_FALLBACK]: "general",
+  classAutomationMenu: "general",
   translationImportMenu: "general",
   migrationBackupMenu: "general",
   raceCoreCompendiumMenu: "general",

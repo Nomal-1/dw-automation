@@ -39,6 +39,7 @@ import { DEFAULT_HOLD_GRANT_MOVES } from "./data/hold-grant-moves.js";
 import { SelfForwardMovesMenu } from "./apps/self-forward-moves-menu.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "./data/self-forward-moves.js";
 import { VersionInfoMenu } from "./apps/version-info-menu.js";
+import { ClassAutomationApp } from "./apps/class-automation-app.js";
 
 export function registerSettings() {
   // Foundry 설정 창은 메뉴(버튼으로 여는 것들)를 일반 설정보다 항상 먼저
@@ -95,6 +96,16 @@ export function registerSettings() {
     type: String,
     default: ""
   });
+  // 직업별 자동화 창(1차): 직업을 고르면 그 직업 액션과 걸린 자동화를 한눈에 보고 켜고 끈다.
+  game.settings.registerMenu(MODULE_ID, "classAutomationMenu", {
+    name: "DWAUTO.ClassAutomation.MenuName",
+    label: "DWAUTO.ClassAutomation.MenuLabel",
+    hint: "DWAUTO.ClassAutomation.MenuHint",
+    icon: "fas fa-list-check",
+    type: ClassAutomationApp,
+    restricted: true
+  });
+
   game.settings.registerMenu(MODULE_ID, "migrationBackupMenu", {
     name: "DWAUTO.Settings.MigrationBackupMenu.Name",
     label: "DWAUTO.Settings.MigrationBackupMenu.Label",
