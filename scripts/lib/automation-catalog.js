@@ -51,14 +51,36 @@ function namesInSetting(setting) {
   return out;
 }
 
-// 등록 순서 규칙의 예외: 다른 기능의 켜기 설정 뒤에 등록돼 있지만 실제로는 이 기능이
-// 쓰는 이름 목록. 근접 무브 12+ 알림(맹렬한 전사·박살·근육질)은 공격 보조
-// (features/attack-assistant.js)가 쓰는데 액션 업그레이드 켜기 설정 뒤에 등록돼 있다.
+// 등록 순서 규칙의 예외: 다른 기능의 켜기 설정 뒤에 등록돼 있지만 실제로는 다른 기능이
+// 쓰는 이름 목록·표 → 실제 주인 기능의 켜기 설정. 값이 null이면 켜기 설정이 따로 없는
+// 공통 규칙이라 어느 기능에도 넣지 않는다. 2026-11-14에 코드 전체를 분석해(이름 목록을 쓰는
+// 파일이 확인하는 켜기 설정 ↔ 등록 순서상 묶인 켜기 설정) 어긋난 24개를 모두 적었다.
 // 새 설정을 다른 기능 사이에 끼워 등록했다면 여기에 한 줄 더한다.
 const SETTING_OWNER_OVERRIDES = {
+  [SETTINGS.SPELL_AUGMENTATION_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
+  [SETTINGS.STAUNCH_DEFENDER_MOVE_NAMES]: SETTINGS.ENABLE_DEFEND_ASSISTANT,
+  [SETTINGS.IMPERVIOUS_DEFENDER_MOVE_NAMES]: SETTINGS.ENABLE_DEFEND_ASSISTANT,
+  [SETTINGS.ELDRITCH_TONES_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.HEALING_SONG_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.VICIOUS_CACOPHONY_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.ELDRITCH_CHORD_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.HEALING_CHORUS_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.VICIOUS_BLAST_MOVE_NAMES]: SETTINGS.ENABLE_ARCANE_ART_ASSISTANT,
+  [SETTINGS.CHARMING_OPEN_MOVE_NAMES]: SETTINGS.ENABLE_DEVIOUS_ASSISTANT,
+  [SETTINGS.DAMAGE_REDUCTION_MOVES]: SETTINGS.ENABLE_HIT_TRIGGER_ASSISTANT,
+  [SETTINGS.CONDITIONAL_DAMAGE_MOVES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
+  [SETTINGS.CONDITIONAL_TAG_MOVES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
   [SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
   [SETTINGS.SMASH_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
-  [SETTINGS.MUSCLEBOUND_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT
+  [SETTINGS.MUSCLEBOUND_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
+  [SETTINGS.ONGOING_PENALTY_REDUCTION_MOVES]: null,
+  [SETTINGS.EMPOWER_MOVES]: SETTINGS.ENABLE_SPELLCASTING_ASSISTANT,
+  [SETTINGS.HOLD_GRANT_MOVES]: SETTINGS.ENABLE_SPELL_PREPARATION_ASSISTANT,
+  [SETTINGS.STEEL_HIDE_MOVE_NAMES]: SETTINGS.ENABLE_IRON_HIDE_ASSISTANT,
+  [SETTINGS.BLOODTHIRSTY_MOVE_NAMES]: SETTINGS.ENABLE_MERCILESS_ASSISTANT,
+  [SETTINGS.DIRTY_FIGHTER_MOVE_NAMES]: SETTINGS.ENABLE_CHEAP_SHOT_ASSISTANT,
+  [SETTINGS.ALCHEMIST_MOVE_NAMES]: SETTINGS.ENABLE_POISON_TRACKER_ASSISTANT,
+  [SETTINGS.EXTREMELY_CAUTIOUS_MOVE_NAMES]: SETTINGS.ENABLE_TRAP_EXPERT_ASSISTANT,
 };
 
 // 액션 업그레이드는 액션 자체의 자동화가 아니라 "상급 액션을 배우면 이전 단계 액션을
@@ -71,12 +93,13 @@ export const MOVE_UPGRADE_FEATURE = SETTINGS.ENABLE_MOVE_UPGRADE_ASSISTANT;
 export function getFeatureGroups() {
   const groups = [];
   const byKey = new Map();
+  const pendingOverrides = [];
   let current = null;
   for (const setting of game.settings.settings.values()) {
     if (setting.namespace !== MODULE_ID) continue;
-    const overrideOwner = SETTING_OWNER_OVERRIDES[setting.key];
-    if (overrideOwner && byKey.has(overrideOwner)) {
-      for (const name of namesInSetting(setting).map(normalizeName)) byKey.get(overrideOwner).names.add(name);
+    if (setting.key in SETTING_OWNER_OVERRIDES) {
+      const owner = SETTING_OWNER_OVERRIDES[setting.key];
+      if (owner) pendingOverrides.push([owner, setting]);
       continue;
     }
     if (setting.type === Boolean && /^enable[A-Z]/.test(setting.key)) {
@@ -100,6 +123,11 @@ export function getFeatureGroups() {
     if (!current.primary && typeof setting.default === "string" && setting.key.endsWith("Names") && names.length) {
       current.primary = new Set(names);
     }
+  }
+  // 주인 기능이 뒤에 등록돼 있을 수도 있어서 다 모은 뒤에 넣는다
+  for (const [owner, setting] of pendingOverrides) {
+    const group = byKey.get(owner);
+    if (group) for (const name of namesInSetting(setting).map(normalizeName)) group.names.add(name);
   }
   return groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE);
 }
