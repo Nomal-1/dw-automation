@@ -2145,14 +2145,21 @@
       "Search": "Search move name",
       "MissingOnly": "Only moves characters have but no automation covers",
       "RefreshHint": "Reload (after characters or settings changed)",
-      "Hint": "Automations follow the moves a character has, not the character's class. Moves gained by multiclassing follow the settings of the class they belong to. When one automation covers several moves, they switch on and off together.",
+      "Hint": "Each row shows a move (and who has it) on the left and the automations attached to it on the right. Untick to switch an automation off. The grey text says what the automation actually does. Automations follow the moves a character has, not the character's class, so moves gained by multiclassing follow the settings of the class they belong to.",
       "Empty": "No moves to show.",
       "NoAutomation": "No automation (narrative move or not supported yet)",
       "SharedWith": "Switches together with: {moves}",
       "Reacting": "Rolling this move triggers:",
       "RaceGroup": "Race moves",
       "OtherGroup": "Other (homebrew and hand-made moves)",
-      "BasicGroup": "Basic moves"
+      "BasicGroup": "Basic moves",
+      "SharedCommon": "This automation covers {count} moves (switching it off affects all of them).",
+      "UpgradeDeletes": "Advanced step: learning this removes the previous step \"{move}\" from the sheet.",
+      "UpgradeKeeps": "Advanced step: learning this keeps the previous step \"{move}\" (it is only a prerequisite).",
+      "ReplacedDeleted": "Learning the next step \"{move}\" removes this move from the sheet.",
+      "ReplacedKept": "Learning the next step \"{move}\" keeps this move.",
+      "UpgradeOff": "(move upgrade cleanup is off, so nothing is removed right now)",
+      "UpgradeToggle": "Move upgrade cleanup — remove the previous step when an advanced move is learned (all classes)"
     }
   }
 }

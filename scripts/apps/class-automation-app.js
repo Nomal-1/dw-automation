@@ -1,5 +1,5 @@
 import { MODULE_ID } from "../constants.js";
-import { buildAutomationCatalog } from "../lib/automation-catalog.js";
+import { buildAutomationCatalog, MOVE_UPGRADE_FEATURE } from "../lib/automation-catalog.js";
 
 // 직업별 자동화 창(1차). 왼쪽에서 분류(기본 액션·직업·종족·기타)를 고르면 오른쪽에
 // 그 분류의 액션이 한 줄씩 나오고, 줄마다 그 액션에 걸린 자동화를 켜고 끌 수 있다.
@@ -73,6 +73,10 @@ export class ClassAutomationApp extends ApplicationV2 {
             <label class="dwauto-ca-missing"><input type="checkbox" name="missingOnly" ${this.#missingOnly ? "checked" : ""}> ${esc(L("MissingOnly"))}</label>
             <button type="button" data-action="refresh" title="${esc(L("RefreshHint"))}"><i class="fas fa-rotate"></i></button>
           </header>
+          <label class="dwauto-ca-common" title="${esc(game.i18n.localize("DWAUTO.Settings.EnableMoveUpgradeAssistant.Hint"))}">
+            <input type="checkbox" data-feature="${esc(MOVE_UPGRADE_FEATURE)}" ${game.settings.get(MODULE_ID, MOVE_UPGRADE_FEATURE) ? "checked" : ""}>
+            ${esc(L("UpgradeToggle"))}
+          </label>
           <p class="dwauto-ca-hint">${esc(L("Hint"))}</p>
           <div class="dwauto-ca-rows">${rows}</div>
         </section>
@@ -123,12 +127,13 @@ export class ClassAutomationApp extends ApplicationV2 {
         .map((f) => {
           const on = !!game.settings.get(MODULE_ID, f.enableKey);
           const others = (this.#catalog.ownersOfFeature.get(f.enableKey) ?? []).filter((n) => n !== m.name);
-          const shared = others.length
-            ? `<div class="shared">${esc(L("SharedWith", { moves: others.slice(0, 6).join(", ") + (others.length > 6 ? ` +${others.length - 6}` : "") }))}</div>`
-            : "";
-          return `<label class="dwauto-ca-feature${on ? "" : " off"}" title="${esc(f.hint)}">
+          let shared = "";
+          if (others.length > 8) shared = `<div class="shared">${esc(L("SharedCommon", { count: others.length + 1 }))}</div>`;
+          else if (others.length) shared = `<div class="shared">${esc(L("SharedWith", { moves: others.join(", ") }))}</div>`;
+          const desc = f.hint ? `<div class="desc">${esc(f.hint)}</div>` : "";
+          return `<label class="dwauto-ca-feature${on ? "" : " off"}">
               <input type="checkbox" data-feature="${esc(f.enableKey)}" ${on ? "checked" : ""}>
-              <span class="name">${esc(f.label)}</span>${shared}
+              <span class="name">${esc(f.label)}</span>${desc}${shared}
             </label>`;
         })
         .join("");
@@ -140,12 +145,22 @@ export class ClassAutomationApp extends ApplicationV2 {
           .join(", ")}</div>`
       : "";
 
-    return `<div class="dwauto-ca-row${m.own.length ? "" : " no-auto"}">
+    // 액션 업그레이드(상급 액션을 배우면 이전 단계를 시트에서 정리)는 액션 자체의
+    // 자동화가 아니라 시트 정리 규칙이라 안내 문장으로 보여준다.
+    const upgrades = (m.upgrades ?? [])
+      .map((u) => {
+        const key = u.kind === "upgrade" ? (u.deletes ? "UpgradeDeletes" : "UpgradeKeeps") : u.deletes ? "ReplacedDeleted" : "ReplacedKept";
+        const off = u.featureOn ? "" : ` ${L("UpgradeOff")}`;
+        return `<div class="dwauto-ca-upgrade"><i class="fas fa-arrow-up-right-dots"></i> ${esc(L(key, { move: u.otherName }))}${esc(off)}</div>`;
+      })
+      .join("");
+
+    return `<div class="dwauto-ca-row${m.own.length || upgrades ? "" : " no-auto"}">
         <div class="dwauto-ca-move">
           ${m.img ? `<img src="${esc(m.img)}" alt="">` : ""}
           <div><div class="title">${esc(m.name)} ${original}</div>${owners}</div>
         </div>
-        <div class="dwauto-ca-features">${features}${reacting}</div>
+        <div class="dwauto-ca-features">${features}${upgrades}${reacting}</div>
       </div>`;
   }
 

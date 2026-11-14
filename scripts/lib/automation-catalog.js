@@ -1,6 +1,7 @@
-import { MODULE_ID } from "../constants.js";
+import { MODULE_ID, SETTINGS } from "../constants.js";
 import { SETTING_CATEGORIES } from "../data/settings-categories.js";
 import { RACE_CORE_MOVES } from "../data/race-core-moves.js";
+import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
 
 // 직업별 자동화 창(apps/class-automation-app.js)이 보여줄 "액션 ↔ 자동화" 연결표를
 // 그때그때 계산한다. 손으로 쓴 목록을 따로 두지 않는 이유: 기능을 추가할 때마다
@@ -50,12 +51,34 @@ function namesInSetting(setting) {
   return out;
 }
 
+// 등록 순서 규칙의 예외: 다른 기능의 켜기 설정 뒤에 등록돼 있지만 실제로는 이 기능이
+// 쓰는 이름 목록. 근접 무브 12+ 알림(맹렬한 전사·박살·근육질)은 공격 보조
+// (features/attack-assistant.js)가 쓰는데 액션 업그레이드 켜기 설정 뒤에 등록돼 있다.
+// 새 설정을 다른 기능 사이에 끼워 등록했다면 여기에 한 줄 더한다.
+const SETTING_OWNER_OVERRIDES = {
+  [SETTINGS.SUPERIOR_WARRIOR_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
+  [SETTINGS.SMASH_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT,
+  [SETTINGS.MUSCLEBOUND_MOVE_NAMES]: SETTINGS.ENABLE_ATTACK_ASSISTANT
+};
+
+// 액션 업그레이드는 액션 자체의 자동화가 아니라 "상급 액션을 배우면 이전 단계 액션을
+// 시트에서 정리"하는 규칙이다. 43쌍이 모든 직업에 걸쳐 있어 일반 자동화처럼 보여주면
+// 거의 모든 줄에 같은 스위치가 붙는다. 그래서 이 기능은 연결표에서 빼고, 해당 액션
+// 줄에 "배우면 무엇이 지워지는지/남는지" 안내로 따로 보여준다(buildUpgradeNotes).
+export const MOVE_UPGRADE_FEATURE = SETTINGS.ENABLE_MOVE_UPGRADE_ASSISTANT;
+
 /** 등록 순서로 기능 묶음을 만든다. */
 export function getFeatureGroups() {
   const groups = [];
+  const byKey = new Map();
   let current = null;
   for (const setting of game.settings.settings.values()) {
     if (setting.namespace !== MODULE_ID) continue;
+    const overrideOwner = SETTING_OWNER_OVERRIDES[setting.key];
+    if (overrideOwner && byKey.has(overrideOwner)) {
+      for (const name of namesInSetting(setting).map(normalizeName)) byKey.get(overrideOwner).names.add(name);
+      continue;
+    }
     if (setting.type === Boolean && /^enable[A-Z]/.test(setting.key)) {
       current = {
         enableKey: setting.key,
@@ -68,6 +91,7 @@ export function getFeatureGroups() {
         primary: null
       };
       groups.push(current);
+      byKey.set(setting.key, current);
       continue;
     }
     if (!current) continue;
@@ -77,7 +101,36 @@ export function getFeatureGroups() {
       current.primary = new Set(names);
     }
   }
-  return groups.filter((g) => g.names.size > 0);
+  return groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE);
+}
+
+/**
+ * 액션 업그레이드 안내: 원문 이름(정규화) → [{kind, other, deletes}]
+ * kind "upgrade": 이 액션이 상급 단계 — 배우면 other(이전 단계)를 지우거나(deletes) 남긴다.
+ * kind "replaced": 이 액션이 이전 단계 — other(상급 단계)를 배우면 지워지거나 남는다.
+ */
+function buildUpgradeNotes() {
+  const notes = new Map();
+  let rows = DEFAULT_MOVE_UPGRADES;
+  try {
+    const saved = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
+    if (Array.isArray(saved) && saved.length) rows = [...DEFAULT_MOVE_UPGRADES, ...saved];
+  } catch (err) {
+    // 기본 표만 쓴다
+  }
+  const add = (key, note) => {
+    const k = normalizeName(key);
+    if (!k) return;
+    if (!notes.has(k)) notes.set(k, []);
+    if (!notes.get(k).some((n) => n.kind === note.kind && normalizeName(n.other) === normalizeName(note.other))) notes.get(k).push(note);
+  };
+  for (const row of rows) {
+    if (!row?.upgradeName || !row?.replacesName) continue;
+    const deletes = row.deletesPrevious !== false;
+    add(row.upgradeName, { kind: "upgrade", other: row.replacesName, deletes });
+    add(row.replacesName, { kind: "replaced", other: row.upgradeName, deletes });
+  }
+  return notes;
 }
 
 function classKeyFromPack(pack) {
@@ -189,6 +242,18 @@ export async function buildAutomationCatalog() {
     return ra - rb;
   });
   for (const g of ordered) g.moves.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+
+  // 액션 업그레이드 안내(상대 액션 이름은 번역된 이름으로 보여준다)
+  const translatedByOriginal = new Map();
+  for (const g of ordered) for (const m of g.moves) {
+    if (m.original) translatedByOriginal.set(normalizeName(m.original), m.name);
+  }
+  const upgradeNotes = buildUpgradeNotes();
+  const upgradeOn = !!game.settings.get(MODULE_ID, MOVE_UPGRADE_FEATURE);
+  for (const g of ordered) for (const m of g.moves) {
+    const found = upgradeNotes.get(normalizeName(m.original)) ?? upgradeNotes.get(normalizeName(m.name)) ?? [];
+    m.upgrades = found.map((n) => ({ ...n, otherName: translatedByOriginal.get(normalizeName(n.other)) ?? n.other, featureOn: upgradeOn }));
+  }
 
   // 같은 기능이 걸린 다른 "자기 자동화" 액션(함께 켜지고 꺼지는 액션)
   const ownersOfFeature = new Map();
