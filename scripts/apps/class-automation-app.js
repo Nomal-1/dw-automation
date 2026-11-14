@@ -123,6 +123,13 @@ export class ClassAutomationApp extends ApplicationV2 {
     for (const el of root.querySelectorAll("[data-table-field]")) {
       el.addEventListener("change", (ev) => this.#onTableField(ev));
     }
+    for (const el of root.querySelectorAll("input[data-number-setting]")) {
+      el.addEventListener("change", async (ev) => {
+        if (!game.user.isGM) return;
+        await game.settings.set(MODULE_ID, ev.target.dataset.numberSetting, Number(ev.target.value) || 0);
+        this.render({ keepScroll: true });
+      });
+    }
     for (const el of root.querySelectorAll("input[data-name-list]")) {
       el.addEventListener("change", (ev) => this.#onNameList(ev));
     }
@@ -250,6 +257,26 @@ export class ClassAutomationApp extends ApplicationV2 {
         })
         .join("");
       parts.push(`<div class="dwauto-ca-table"><div class="dwauto-ca-subtitle">${esc(title)}</div>${inputs}</div>`);
+    }
+
+    // 기능의 숫자 설정(예: 선택지 위치 — 몇 번째 선택지가 어떤 효과인지)
+    const numbers = [];
+    for (const f of m.own) {
+      for (const key of f.numbers ?? []) {
+        if (numbers.some((n) => n.key === key)) continue;
+        const setting = game.settings.settings.get(`${MODULE_ID}.${key}`);
+        if (!setting) continue;
+        numbers.push({ key, label: game.i18n.localize(setting.name ?? key), hint: game.i18n.localize(setting.hint ?? ""), value: game.settings.get(MODULE_ID, key) });
+      }
+    }
+    if (numbers.length) {
+      const items = numbers
+        .map(
+          (n) => `<label class="dwauto-ca-field" title="${esc(n.hint)}"><span>${esc(n.label)}</span>
+            <input type="number" data-number-setting="${esc(n.key)}" value="${esc(n.value ?? 0)}"></label>`
+        )
+        .join("");
+      parts.push(`<div class="dwauto-ca-table"><div class="dwauto-ca-subtitle">${esc(L("Numbers"))}</div>${items}</div>`);
     }
 
     const lists = [];

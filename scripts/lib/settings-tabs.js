@@ -61,6 +61,10 @@ function buildSettingsTabs(html) {
 
   if (rowCategories.size === 0) return;
 
+  // 옛 설정 화면을 쓰지 않으면 직업별 탭 없이 남은 일반 설정만 원래 순서대로 둔다
+  // (직업별 설정은 직업별 자동화 창으로 옮겼다).
+  if (managed.size > 0) return;
+
   const firstRow = rowCategories.keys().next().value;
   const $marker = $('<div class="dwauto-settings-tabs-anchor"></div>');
   $(firstRow).before($marker);

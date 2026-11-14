@@ -117,7 +117,9 @@ export function getFeatureGroups() {
         // 이 기능이 쓰는 표 설정(세부 값). 창에서 "세부 값 편집" 버튼으로 기존 편집 창을 연다.
         tables: [],
         // 이 기능의 이름 목록 설정 키(창의 "인식 이름" 칸 — 홈브루 액션을 연결할 때 쓴다)
-        lists: []
+        lists: [],
+        // 이 기능의 숫자 설정(선택지 위치 등) — 창의 세부 값 칸에서 고친다
+        numbers: []
       };
       groups.push(current);
       byKey.set(setting.key, current);
@@ -128,6 +130,7 @@ export function getFeatureGroups() {
     for (const name of names) current.names.add(name);
     if (Array.isArray(setting.default)) current.tables.push(setting.key);
     else if (typeof setting.default === "string" && setting.key.endsWith("Names")) current.lists.push(setting.key);
+    else if (setting.type === Number && setting.config !== false) current.numbers.push(setting.key);
     if (!current.primary && typeof setting.default === "string" && setting.key.endsWith("Names") && names.length) {
       current.primary = new Set(names);
     }
@@ -177,7 +180,8 @@ function buildUpgradeNotes() {
  * 기능 켜기 설정, 그 기능의 이름 목록·표, 표 편집 창, 액션 업그레이드, 번역 자동 채우기 창.
  */
 export function getWindowManagedKeys() {
-  const keys = new Set(["translationImportMenu", "moveUpgradesMenu", SETTINGS.MOVE_UPGRADES, MOVE_UPGRADE_FEATURE]);
+  const keys = new Set(["translationImportMenu", "moveUpgradesMenu", "noteMovesMenu", SETTINGS.MOVE_UPGRADES, MOVE_UPGRADE_FEATURE]);
+  for (const g of getFeatureGroups()) for (const k of g.numbers ?? []) keys.add(k);
   let current = null;
   for (const setting of game.settings.settings.values()) {
     if (setting.namespace !== MODULE_ID) continue;

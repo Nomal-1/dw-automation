@@ -2170,7 +2170,8 @@
       "NameListsHint": "Name lists that decide which moves this automation recognizes (comma separated). Original English names are always recognized without listing them. To make a homebrew or hand-made move use this automation, add its name here.",
       "NameListDefault": "Default (original, always included): {names}",
       "LegacyName": "Show the old settings layout",
-      "LegacyHint": "When on, the settings moved into the automation-by-class window (feature switches, move name lists, table editors, translation auto-fill) appear here again. Normally leave it off and use the automation-by-class window. Takes effect when the settings window is reopened."
+      "LegacyHint": "When on, the settings moved into the automation-by-class window (feature switches, move name lists, table editors, translation auto-fill) appear here again. Normally leave it off and use the automation-by-class window. Takes effect when the settings window is reopened.",
+      "Numbers": "Choice positions and numbers"
     }
   }
 }
