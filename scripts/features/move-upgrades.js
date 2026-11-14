@@ -6,7 +6,6 @@ import {
   shouldDeferForMissingTranslations,
   resolveMoveUpgradeNames
 } from "../lib/translation-import.js";
-import { isMoveItemDisabled } from "../lib/move-toggles.js";
 
 function getUpgradeRow(name) {
   const table = game.settings.get(MODULE_ID, SETTINGS.MOVE_UPGRADES);
@@ -28,11 +27,18 @@ function onCreateItem(item, options, userId) {
   if (!actor || actor.documentName !== "Actor" || actor.type !== "character") return;
   if (userId !== game.user.id) return;
 
-  const row = getUpgradeRow(item.name);
+  // 표가 번역된 이름으로 채워져 있을 수도, 영문 원문 그대로일 수도 있다 — 둘 다 본다
+  const row = getUpgradeRow(item.name) ?? getUpgradeRow(item.flags?.babele?.originalName);
   if (!row) return;
   if (row.deletesPrevious === false) return; // "필요" 관계 — 이전 무브는 그대로 둔다.
 
-  const oldItem = actor.items.find((i) => i.type === "move" && ((i.name === row.replacesName || i.flags?.babele?.originalName === row.replacesName) && !isMoveItemDisabled(i)));
+  // 업그레이드 정리는 액션의 자동화가 아니라 시트 규칙이라, 직업별 자동화 창에서 이전 단계
+  // 액션의 자동화를 꺼 두었어도 그대로 정리한다(isMoveItemDisabled를 보지 않는다).
+  // 표의 이전 단계 이름도 번역/원문 어느 쪽이든 맞춰 본다.
+  const oldNames = new Set([row.replacesName]);
+  const oldItem = actor.items.find(
+    (i) => i.type === "move" && i.id !== item.id && (oldNames.has(i.name) || oldNames.has(i.flags?.babele?.originalName))
+  );
   if (!oldItem) return;
 
   oldItem.delete();
