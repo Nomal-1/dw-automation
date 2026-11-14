@@ -1,6 +1,7 @@
 import { MODULE_ID } from "../constants.js";
 import { buildAutomationCatalog, MOVE_UPGRADE_FEATURE } from "../lib/automation-catalog.js";
 import { isEntryDisabled, setMoveDisabled } from "../lib/move-toggles.js";
+import { TABLE_FIELDS } from "../data/table-fields.js";
 
 // 직업별 자동화 창(1차). 왼쪽에서 분류(기본 액션·직업·종족·기타)를 고르면 오른쪽에
 // 그 분류의 액션이 한 줄씩 나오고, 줄마다 그 액션에 걸린 자동화를 켜고 끌 수 있다.
@@ -41,6 +42,7 @@ export class ClassAutomationApp extends ApplicationV2 {
   #filter = "";
   #missingOnly = false;
   #visibleMoves = [];
+  #openPanels = new Set();
 
   async _prepareContext(options) {
     this.#catalog ??= await buildAutomationCatalog();
@@ -118,6 +120,18 @@ export class ClassAutomationApp extends ApplicationV2 {
     for (const box of root.querySelectorAll('input[data-move-index]')) {
       box.addEventListener("change", (ev) => this.#onToggleMove(ev));
     }
+    for (const el of root.querySelectorAll("[data-table-field]")) {
+      el.addEventListener("change", (ev) => this.#onTableField(ev));
+    }
+    for (const el of root.querySelectorAll("input[data-name-list]")) {
+      el.addEventListener("change", (ev) => this.#onNameList(ev));
+    }
+    for (const el of root.querySelectorAll("details[data-panel]")) {
+      el.addEventListener("toggle", () => {
+        if (el.open) this.#openPanels.add(el.dataset.panel);
+        else this.#openPanels.delete(el.dataset.panel);
+      });
+    }
   }
 
   // 표 설정 키 → 그 표를 편집하는 기존 설정 창(registerMenu) 키. 이름 규칙은 "<표>Menu"이고
@@ -184,13 +198,14 @@ export class ClassAutomationApp extends ApplicationV2 {
       })
       .join("");
 
+    const panel = this.#renderPanel(m);
     const rowClass = `${m.own.length || upgrades ? "" : " no-auto"}${moveOff ? " move-off" : ""}`;
     return `<div class="dwauto-ca-row${rowClass}">
         <div class="dwauto-ca-move">
           ${m.img ? `<img src="${esc(m.img)}" alt="">` : ""}
           <div><div class="title">${esc(m.name)} ${original}</div>${owners}${moveToggle}</div>
         </div>
-        <div class="dwauto-ca-features">${features}${upgrades}${reacting}</div>
+        <div class="dwauto-ca-features">${features}${upgrades}${reacting}${panel}</div>
       </div>`;
   }
 
@@ -199,6 +214,89 @@ export class ClassAutomationApp extends ApplicationV2 {
     const value = event.target.checked;
     if (!game.user.isGM) return;
     await game.settings.set(MODULE_ID, key, value);
+    this.render({ keepScroll: true });
+  }
+
+  // 세부 값(이 액션의 표 행)과 인식 이름(기능의 이름 목록)을 접었다 펴는 칸으로 보여준다.
+  #renderPanel(m) {
+    if (!m.own.length) return "";
+    const panelKey = `${m.classKey}|${m.original ?? m.name}`;
+    const parts = [];
+
+    for (const ref of m.tableRows ?? []) {
+      const fields = TABLE_FIELDS[ref.tableKey];
+      let row;
+      try {
+        row = (game.settings.get(MODULE_ID, ref.tableKey) ?? [])[ref.index];
+      } catch (err) {
+        row = null;
+      }
+      if (!fields || !row) continue;
+      const menuKey = this.#menuForTable(ref.tableKey);
+      const title = menuKey ? game.i18n.localize(game.settings.menus.get(`${MODULE_ID}.${menuKey}`)?.name ?? "") : ref.tableKey;
+      const inputs = fields
+        .map((f) => {
+          const attrs = `data-table-field data-table="${esc(ref.tableKey)}" data-index="${ref.index}" data-field="${esc(f.key)}" data-type="${esc(f.type)}"`;
+          const value = row[f.key];
+          let control;
+          if (f.type === "checkbox") control = `<input type="checkbox" ${attrs} ${value ? "checked" : ""}>`;
+          else if (f.type === "number") control = `<input type="number" ${attrs} value="${esc(value ?? 0)}">`;
+          else if (f.type === "select")
+            control = `<select ${attrs}>${(f.options ?? [])
+              .map((o) => `<option value="${esc(o.value)}" ${o.value === value ? "selected" : ""}>${esc(game.i18n.localize(o.label))}</option>`)
+              .join("")}</select>`;
+          else control = `<input type="text" ${attrs} value="${esc(value ?? "")}">`;
+          return `<label class="dwauto-ca-field"><span>${esc(game.i18n.localize(f.label))}</span>${control}</label>`;
+        })
+        .join("");
+      parts.push(`<div class="dwauto-ca-table"><div class="dwauto-ca-subtitle">${esc(title)}</div>${inputs}</div>`);
+    }
+
+    const lists = [];
+    for (const f of m.own) {
+      for (const key of f.lists ?? []) {
+        if (lists.some((l) => l.key === key)) continue;
+        const setting = game.settings.settings.get(`${MODULE_ID}.${key}`);
+        if (!setting) continue;
+        lists.push({ key, label: game.i18n.localize(setting.name ?? key), value: game.settings.get(MODULE_ID, key) ?? "", fallback: setting.default ?? "" });
+      }
+    }
+    if (lists.length) {
+      const items = lists
+        .map(
+          (l) => `<label class="dwauto-ca-field wide"><span>${esc(l.label)}</span>
+            <input type="text" data-name-list="${esc(l.key)}" value="${esc(l.value)}" title="${esc(L("NameListDefault", { names: l.fallback }))}"></label>`
+        )
+        .join("");
+      parts.push(`<div class="dwauto-ca-table"><div class="dwauto-ca-subtitle">${esc(L("NameLists"))}</div>
+        <p class="dwauto-ca-subhint">${esc(L("NameListsHint"))}</p>${items}</div>`);
+    }
+    if (!parts.length) return "";
+    const open = this.#openPanels.has(panelKey) ? " open" : "";
+    return `<details class="dwauto-ca-panel" data-panel="${esc(panelKey)}"${open}><summary>${esc(L("PanelSummary"))}</summary>${parts.join("")}</details>`;
+  }
+
+  async #onTableField(event) {
+    if (!game.user.isGM) return;
+    const el = event.target;
+    const { table, field, type } = el.dataset;
+    const index = Number(el.dataset.index);
+    const rows = foundry.utils.deepClone(game.settings.get(MODULE_ID, table) ?? []);
+    if (!rows[index]) return;
+    let value = el.value;
+    if (type === "checkbox") value = el.checked;
+    else if (type === "number") value = Number(el.value) || 0;
+    rows[index][field] = value;
+    await game.settings.set(MODULE_ID, table, rows);
+    this.render({ keepScroll: true });
+  }
+
+  async #onNameList(event) {
+    if (!game.user.isGM) return;
+    const el = event.target;
+    await game.settings.set(MODULE_ID, el.dataset.nameList, el.value.trim());
+    // 이름 목록이 바뀌면 액션 ↔ 자동화 연결이 바뀔 수 있어 표를 다시 계산한다
+    this.#catalog = null;
     this.render({ keepScroll: true });
   }
 

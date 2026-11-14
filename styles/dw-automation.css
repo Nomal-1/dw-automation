@@ -834,3 +834,12 @@
 .dwauto-ca-movetoggle { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.85em; }
 .dwauto-ca-row.move-off .dwauto-ca-features { opacity: 0.4; }
 .dwauto-ca-row.move-off .dwauto-ca-move .title { text-decoration: line-through; }
+
+.dwauto-ca-panel { margin-top: 4px; font-size: 0.85em; }
+.dwauto-ca-panel > summary { cursor: pointer; opacity: 0.85; }
+.dwauto-ca-table { margin: 4px 0 6px 12px; padding: 4px 6px; border-left: 2px solid rgba(128, 128, 128, 0.4); }
+.dwauto-ca-subtitle { font-weight: bold; margin-bottom: 2px; }
+.dwauto-ca-subhint { margin: 0 0 4px; opacity: 0.7; }
+.dwauto-ca-field { display: grid; grid-template-columns: minmax(140px, 1fr) 2fr; gap: 6px; align-items: center; margin: 2px 0; }
+.dwauto-ca-field input[type="checkbox"] { justify-self: start; }
+.dwauto-ca-field.wide { grid-template-columns: minmax(140px, 1fr) 3fr; }

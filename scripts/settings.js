@@ -106,6 +106,18 @@ export function registerSettings() {
     restricted: true
   });
 
+  // 직업별 자동화 창이 생기면서 설정 화면에서 숨긴 옛 칸(기능 켜기·이름 목록·표 편집 창)을
+  // 다시 보이게 하는 비상용 스위치(lib/settings-tabs.js 참고)
+  game.settings.register(MODULE_ID, "legacySettingsScreen", {
+    name: "DWAUTO.ClassAutomation.LegacyName",
+    hint: "DWAUTO.ClassAutomation.LegacyHint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
+    requiresReload: false
+  });
+
   // 직업별 자동화 창에서 "이 액션 자동화"를 끈 액션 목록(lib/move-toggles.js 참고)
   game.settings.register(MODULE_ID, SETTINGS.DISABLED_MOVES, {
     scope: "world",

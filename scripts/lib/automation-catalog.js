@@ -2,6 +2,7 @@ import { MODULE_ID, SETTINGS } from "../constants.js";
 import { SETTING_CATEGORIES } from "../data/settings-categories.js";
 import { RACE_CORE_MOVES } from "../data/race-core-moves.js";
 import { DEFAULT_MOVE_UPGRADES } from "../data/move-upgrades.js";
+import { TABLE_FIELDS } from "../data/table-fields.js";
 
 // 직업별 자동화 창(apps/class-automation-app.js)이 보여줄 "액션 ↔ 자동화" 연결표를
 // 그때그때 계산한다. 손으로 쓴 목록을 따로 두지 않는 이유: 기능을 추가할 때마다
@@ -114,7 +115,9 @@ export function getFeatureGroups() {
         // 뒤에 오는 목록은 그 기능이 반응하는 다른 액션(예: 위험 돌파)인 경우가 많다.
         primary: null,
         // 이 기능이 쓰는 표 설정(세부 값). 창에서 "세부 값 편집" 버튼으로 기존 편집 창을 연다.
-        tables: []
+        tables: [],
+        // 이 기능의 이름 목록 설정 키(창의 "인식 이름" 칸 — 홈브루 액션을 연결할 때 쓴다)
+        lists: []
       };
       groups.push(current);
       byKey.set(setting.key, current);
@@ -124,6 +127,7 @@ export function getFeatureGroups() {
     const names = namesInSetting(setting).map(normalizeName);
     for (const name of names) current.names.add(name);
     if (Array.isArray(setting.default)) current.tables.push(setting.key);
+    else if (typeof setting.default === "string" && setting.key.endsWith("Names")) current.lists.push(setting.key);
     if (!current.primary && typeof setting.default === "string" && setting.key.endsWith("Names") && names.length) {
       current.primary = new Set(names);
     }
@@ -134,6 +138,7 @@ export function getFeatureGroups() {
     if (!group) continue;
     for (const name of namesInSetting(setting).map(normalizeName)) group.names.add(name);
     if (Array.isArray(setting.default)) group.tables.push(setting.key);
+    else if (typeof setting.default === "string" && setting.key.endsWith("Names")) group.lists.push(setting.key);
   }
   return groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE);
 }
@@ -165,6 +170,31 @@ function buildUpgradeNotes() {
     add(row.replacesName, { kind: "replaced", other: row.upgradeName, deletes });
   }
   return notes;
+}
+
+/**
+ * 직업별 자동화 창이 대신 관리하는 설정·메뉴 키(설정 화면에서 숨길 것).
+ * 기능 켜기 설정, 그 기능의 이름 목록·표, 표 편집 창, 액션 업그레이드, 번역 자동 채우기 창.
+ */
+export function getWindowManagedKeys() {
+  const keys = new Set(["translationImportMenu", "moveUpgradesMenu", SETTINGS.MOVE_UPGRADES, MOVE_UPGRADE_FEATURE]);
+  let current = null;
+  for (const setting of game.settings.settings.values()) {
+    if (setting.namespace !== MODULE_ID) continue;
+    if (setting.type === Boolean && /^enable[A-Z]/.test(setting.key)) {
+      current = setting.key;
+      continue;
+    }
+    if (!current) continue;
+    const isList = typeof setting.default === "string" && (setting.key.endsWith("Names") || setting.key.endsWith("Name"));
+    const isTable = Array.isArray(setting.default);
+    if (isList || isTable) {
+      keys.add(current);
+      keys.add(setting.key);
+      if (isTable) keys.add(setting.key === SETTINGS.SPECIAL_ATTACK_MOVES ? "attackMovesMenu" : `${setting.key}Menu`);
+    }
+  }
+  return keys;
 }
 
 function classKeyFromPack(pack) {
@@ -287,6 +317,28 @@ export async function buildAutomationCatalog() {
   for (const g of ordered) for (const m of g.moves) {
     const found = upgradeNotes.get(normalizeName(m.original)) ?? upgradeNotes.get(normalizeName(m.name)) ?? [];
     m.upgrades = found.map((n) => ({ ...n, otherName: translatedByOriginal.get(normalizeName(n.other)) ?? n.other, featureOn: upgradeOn }));
+  }
+
+  // 표 설정에서 이 액션의 행 찾기(세부 값을 줄 안에서 바로 고칠 때 쓴다)
+  for (const g of ordered) for (const m of g.moves) {
+    const keys = new Set([normalizeName(m.name), normalizeName(m.original)].filter(Boolean));
+    m.tableRows = [];
+    for (const f of m.own) {
+      for (const tableKey of f.tables) {
+        if (!TABLE_FIELDS[tableKey]) continue;
+        let rows = [];
+        try {
+          rows = game.settings.get(MODULE_ID, tableKey) ?? [];
+        } catch (err) {
+          continue;
+        }
+        rows.forEach((row, index) => {
+          if (keys.has(normalizeName(row?.name)) && !m.tableRows.some((r) => r.tableKey === tableKey && r.index === index)) {
+            m.tableRows.push({ featureKey: f.enableKey, tableKey, index });
+          }
+        });
+      }
+    }
   }
 
   // 같은 원문 이름이 여러 직업 팩에 있는 액션(다중직업 액션, 신의 가호 등)은 직업별로 따로 끈다

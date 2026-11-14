@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../constants.js";
 import { CATEGORY_ORDER, CATEGORY_LABELS, SETTING_CATEGORIES } from "../data/settings-categories.js";
+import { getWindowManagedKeys } from "./automation-catalog.js";
 
 // 이 모듈의 설정이 150개 넘게 쌓이면서 Foundry 기본 설정 화면(한 줄로 쭉
 // 나열)이 너무 난잡해졌다는 GM 피드백에 따라, 순수 화면단에서 직업별/
@@ -36,12 +37,25 @@ function buildSettingsTabs(html) {
   // 같은 행(.form-group) 안에 우리 이름을 가진 요소가 여러 개 있을 수 있어
   // (체크박스 + 숨은 필드 등) 행 단위로 한 번만 처리한다. Map의 삽입 순서를
   // 그대로 유지해서 원래 나열 순서를 보존한다.
+  // 직업별 자동화 창이 대신 관리하는 줄(기능 켜기·이름 목록·표 편집 창 등)은 숨긴다.
+  // "옛 설정 화면 보기"를 켜면 예전처럼 전부 보여준다(문제가 생겼을 때 되돌릴 길).
+  let managed = new Set();
+  try {
+    if (!game.settings.get(MODULE_ID, "legacySettingsScreen")) managed = getWindowManagedKeys();
+  } catch (err) {
+    managed = new Set();
+  }
+
   const rowCategories = new Map();
   $marked.each((_, el) => {
     const $row = $(el).closest(".form-group");
     if ($row.length === 0 || rowCategories.has($row[0])) return;
 
     const key = findSettingKey(el, prefix);
+    if (key && managed.has(key)) {
+      $row.remove();
+      return;
+    }
     rowCategories.set($row[0], key ? (SETTING_CATEGORIES[key] ?? null) : null);
   });
 
