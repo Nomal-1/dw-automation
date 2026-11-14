@@ -2151,7 +2151,8 @@
       "SharedWith": "Switches together with: {moves}",
       "Reacting": "Rolling this move triggers:",
       "RaceGroup": "Race moves",
-      "OtherGroup": "Other (homebrew and hand-made moves)"
+      "OtherGroup": "Other (homebrew and hand-made moves)",
+      "BasicGroup": "Basic moves"
     }
   }
 }

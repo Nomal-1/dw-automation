@@ -2151,7 +2151,8 @@
       "SharedWith": "함께 켜지고 꺼짐: {moves}",
       "Reacting": "이 액션을 굴리면 반응:",
       "RaceGroup": "종족 액션",
-      "OtherGroup": "기타(홈브루·직접 만든 액션)"
+      "OtherGroup": "기타(홈브루·직접 만든 액션)",
+      "BasicGroup": "기본 액션"
     }
   }
 }

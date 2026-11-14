@@ -62,13 +62,20 @@ export function getFeatureGroups() {
         label: game.i18n.localize(setting.name ?? setting.key),
         hint: game.i18n.localize(setting.hint ?? ""),
         category: SETTING_CATEGORIES[setting.key] ?? "general",
-        names: new Set()
+        names: new Set(),
+        // 켜기 설정 바로 뒤에 처음 등록된 이름 목록 = 그 기능 자신의 액션(대개).
+        // 뒤에 오는 목록은 그 기능이 반응하는 다른 액션(예: 위험 돌파)인 경우가 많다.
+        primary: null
       };
       groups.push(current);
       continue;
     }
     if (!current) continue;
-    for (const name of namesInSetting(setting)) current.names.add(normalizeName(name));
+    const names = namesInSetting(setting).map(normalizeName);
+    for (const name of names) current.names.add(name);
+    if (!current.primary && typeof setting.default === "string" && setting.key.endsWith("Names") && names.length) {
+      current.primary = new Set(names);
+    }
   }
   return groups.filter((g) => g.names.size > 0);
 }
@@ -104,7 +111,13 @@ export async function buildAutomationCatalog() {
     const reacting = [];
     for (const g of featureGroups) {
       if (![...keys].some((k) => g.names.has(k))) continue;
-      const isOwn = g.category === classKey || g.category === "general" || g.category === "shared" || classKey === "other";
+      const isOwn =
+        g.category === classKey ||
+        g.category === "general" ||
+        g.category === "shared" ||
+        classKey === "other" ||
+        classKey === "race" ||
+        [...keys].some((k) => g.primary?.has(k));
       (isOwn ? own : reacting).push(g);
     }
     const owners = characters
@@ -134,7 +147,8 @@ export async function buildAutomationCatalog() {
       console.warn(`${MODULE_ID} | automation-catalog: failed to load ${pack.collection}`, err);
       continue;
     }
-    const group = ensureGroup(classKey, pack.title ?? classKey);
+    const label = classKey === "basic" ? game.i18n.localize("DWAUTO.ClassAutomation.BasicGroup") : pack.title ?? classKey;
+    const group = ensureGroup(classKey, label);
     for (const doc of docs) {
       if (doc.type !== "move") continue;
       const original = doc.flags?.babele?.originalName ?? null;
