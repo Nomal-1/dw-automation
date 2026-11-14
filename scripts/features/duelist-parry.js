@@ -33,11 +33,18 @@ function isEnabled() {
 }
 
 function splitCommaList(settingKey) {
-  return game.settings
-    .get(MODULE_ID, settingKey)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const parse = (value) =>
+    String(value ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  const names = parse(game.settings.get(MODULE_ID, settingKey));
+  // 이름 목록이면 설정 기본값(원문 영어 이름)도 항상 포함한다. 번역 자동 채우기가
+  // 기본값을 한글로 바꿔 넣어도, 아이템의 원문 이름(flags.babele.originalName)으로
+  // 계속 알아볼 수 있게 하기 위해서다. 한글 카드 제목과는 겹치지 않아 해가 없다.
+  if (!settingKey.endsWith("Names")) return names;
+  const defaults = parse(game.settings.settings.get(`${MODULE_ID}.${settingKey}`)?.default);
+  return [...new Set([...names, ...defaults])];
 }
 
 // 결투사의 호신비결(Duelist’s Block)은 호신술을 대체하는 상위판으로 원문이
