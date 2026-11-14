@@ -5,6 +5,8 @@ import { promptActorTarget, promptActorMultiTarget, getCandidateActors } from ".
 import { getMoveNameMap, getClassNameMap } from "./translation-import.js";
 import { setPendingRollBonus, getPendingRollBonus, clearPendingRollBonus, rollBonusAppliesTo } from "./roll-bonus-state.js";
 import { getOrCreateTagsContainer } from "./sheet-badges.js";
+import { registerAutomationFeature } from "./automation-catalog.js";
+import { isMoveItemDisabled, isNameDisabled } from "./move-toggles.js";
 
 // 이 모듈에 의존하는 다른 모듈(예: Nomal's DW 홈브루 자동화)이 scripts/lib/*.js
 // 내부 파일을 직접 import하지 않고 이 API 하나로만 접근하게 하기 위한 공개
@@ -46,6 +48,13 @@ export function buildPublicApi() {
     rollBonusAppliesTo,
 
     // lib/sheet-badges.js — 캐릭터 시트 무브 항목에 배지 붙이기
-    getOrCreateTagsContainer
+    getOrCreateTagsContainer,
+
+    // lib/automation-catalog.js — 직업별 자동화 창에 다른 모듈의 자동화를 등록
+    registerAutomationFeature,
+
+    // lib/move-toggles.js — 창에서 "이 액션 자동화"를 끈 액션인지
+    isMoveItemDisabled,
+    isNameDisabled
   };
 }

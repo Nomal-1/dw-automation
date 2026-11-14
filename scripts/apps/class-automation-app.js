@@ -1,5 +1,5 @@
 import { MODULE_ID } from "../constants.js";
-import { buildAutomationCatalog, MOVE_UPGRADE_FEATURE } from "../lib/automation-catalog.js";
+import { buildAutomationCatalog, MOVE_UPGRADE_FEATURE, featureToggleId } from "../lib/automation-catalog.js";
 import { isEntryDisabled, setMoveDisabled } from "../lib/move-toggles.js";
 import { TABLE_FIELDS } from "../data/table-fields.js";
 
@@ -184,8 +184,10 @@ export class ClassAutomationApp extends ApplicationV2 {
     } else {
       features = m.own
         .map((f) => {
-          const on = !!game.settings.get(MODULE_ID, f.enableKey);
-          const others = (this.#catalog.ownersOfFeature.get(f.enableKey) ?? []).filter((n) => n !== m.name);
+          const ns = f.namespace ?? MODULE_ID;
+          const on = !!game.settings.get(ns, f.enableKey);
+          const others = (this.#catalog.ownersOfFeature.get(featureToggleId(f)) ?? []).filter((n) => n !== m.name);
+          const source = ns !== MODULE_ID ? `<span class="source">${esc(L("FromModule", { module: f.source ?? ns }))}</span>` : "";
           let shared = "";
           if (others.length > 8) shared = `<div class="shared">${esc(L("SharedCommon", { count: others.length + 1 }))}</div>`;
           else if (others.length) shared = `<div class="shared">${esc(L("SharedWith", { moves: others.join(", ") }))}</div>`;
@@ -196,8 +198,8 @@ export class ClassAutomationApp extends ApplicationV2 {
             .map((menu) => `<button type="button" class="dwauto-ca-details" data-action="openMenu" data-menu="${esc(menu)}"><i class="fas fa-sliders"></i> ${esc(L("Details"))}</button>`)
             .join("");
           return `<div class="dwauto-ca-feature${on ? "" : " off"}">
-              <label><input type="checkbox" data-feature="${esc(f.enableKey)}" ${on ? "checked" : ""}>
-              <span class="name">${esc(f.label)}</span></label>${scope}${details}${desc}${shared}
+              <label><input type="checkbox" data-feature="${esc(f.enableKey)}" data-namespace="${esc(ns)}" ${on ? "checked" : ""}>
+              <span class="name">${esc(f.label)}</span></label>${source}${scope}${details}${desc}${shared}
             </div>`;
         })
         .join("");
@@ -205,7 +207,7 @@ export class ClassAutomationApp extends ApplicationV2 {
 
     const reacting = m.reacting.length
       ? `<div class="dwauto-ca-reacting"><i class="fas fa-reply"></i> ${esc(L("Reacting"))} ${m.reacting
-          .map((f) => `<span class="${game.settings.get(MODULE_ID, f.enableKey) ? "" : "off"}" title="${esc(f.hint)}">${esc(f.label)}</span>`)
+          .map((f) => `<span class="${game.settings.get(f.namespace ?? MODULE_ID, f.enableKey) ? "" : "off"}" title="${esc(f.hint)}">${esc(f.label)}</span>`)
           .join(", ")}<div class="note">${esc(L(m.own.length ? "ReactingNote" : "ReactingNoteOnly"))}</div></div>`
       : "";
 
@@ -232,9 +234,10 @@ export class ClassAutomationApp extends ApplicationV2 {
 
   async #onToggleFeature(event) {
     const key = event.target.dataset.feature;
+    const ns = event.target.dataset.namespace || MODULE_ID;
     const value = event.target.checked;
     if (!game.user.isGM) return;
-    await game.settings.set(MODULE_ID, key, value);
+    await game.settings.set(ns, key, value);
     this.render({ keepScroll: true });
   }
 
@@ -295,18 +298,19 @@ export class ClassAutomationApp extends ApplicationV2 {
 
     const lists = [];
     for (const f of m.own) {
+      const ns = f.namespace ?? MODULE_ID;
       for (const key of f.lists ?? []) {
-        if (lists.some((l) => l.key === key)) continue;
-        const setting = game.settings.settings.get(`${MODULE_ID}.${key}`);
+        if (lists.some((l) => l.key === key && l.ns === ns)) continue;
+        const setting = game.settings.settings.get(`${ns}.${key}`);
         if (!setting) continue;
-        lists.push({ key, label: game.i18n.localize(setting.name ?? key), value: game.settings.get(MODULE_ID, key) ?? "", fallback: setting.default ?? "" });
+        lists.push({ ns, key, label: game.i18n.localize(setting.name ?? key), value: game.settings.get(ns, key) ?? "", fallback: setting.default ?? "" });
       }
     }
     if (lists.length) {
       const items = lists
         .map(
           (l) => `<label class="dwauto-ca-field wide"><span>${esc(l.label)}</span>
-            <input type="text" data-name-list="${esc(l.key)}" value="${esc(l.value)}" title="${esc(L("NameListDefault", { names: l.fallback }))}"></label>`
+            <input type="text" data-name-list="${esc(l.key)}" data-namespace="${esc(l.ns)}" value="${esc(l.value)}" title="${esc(L("NameListDefault", { names: l.fallback }))}"></label>`
         )
         .join("");
       parts.push(`<div class="dwauto-ca-table"><div class="dwauto-ca-subtitle">${esc(L("NameLists"))}</div>
@@ -335,7 +339,7 @@ export class ClassAutomationApp extends ApplicationV2 {
   async #onNameList(event) {
     if (!game.user.isGM) return;
     const el = event.target;
-    await game.settings.set(MODULE_ID, el.dataset.nameList, el.value.trim());
+    await game.settings.set(el.dataset.namespace || MODULE_ID, el.dataset.nameList, el.value.trim());
     // 이름 목록이 바뀌면 액션 ↔ 자동화 연결이 바뀔 수 있어 표를 다시 계산한다
     this.#catalog = null;
     this.render({ keepScroll: true });

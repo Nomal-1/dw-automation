@@ -2178,7 +2178,8 @@
       "ChatNoRoll": "Posts only the move text card to chat, with no roll.",
       "ChatNoAutomation": "Anything after that (picking options, applying numbers) is done by hand — this move has no automation of its own.",
       "ReactingNote": "Those automations are switched on and off in their own move rows.",
-      "ReactingNoteOnly": "Those automations are switched on and off in their own move rows. Turning off \"Automate this move\" on the left stops them from reacting to this move."
+      "ReactingNoteOnly": "Those automations are switched on and off in their own move rows. Turning off \"Automate this move\" on the left stops them from reacting to this move.",
+      "FromModule": "from {module}"
     }
   }
 }

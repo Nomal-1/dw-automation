@@ -45,7 +45,7 @@ function namesInSetting(setting) {
   };
   collect(setting.default);
   try {
-    collect(game.settings.get(MODULE_ID, setting.key));
+    collect(game.settings.get(setting.namespace ?? MODULE_ID, setting.key));
   } catch (err) {
     // 등록만 되고 아직 값을 읽을 수 없는 설정은 기본값만 쓴다
   }
@@ -91,7 +91,77 @@ const SETTING_OWNER_OVERRIDES = {
 // 줄에 "배우면 무엇이 지워지는지/남는지" 안내로 따로 보여준다(buildUpgradeNotes).
 export const MOVE_UPGRADE_FEATURE = SETTINGS.ENABLE_MOVE_UPGRADE_ASSISTANT;
 
-/** 등록 순서로 기능 묶음을 만든다. */
+// ---- 다른 모듈의 자동화(예: Nomal's DW 홈브루 자동화의 길티기어) ----
+// 창은 이 모듈의 설정 등록 순서로 기능을 찾기 때문에 다른 모듈의 자동화는 모른다.
+// 그 모듈이 공개 API registerAutomationFeature로 자기 기능을 알려주면 여기 모아 두었다가
+// 연결표에 함께 넣는다. 켜기 설정은 그 모듈의 것(namespace.enableKey)을 그대로 쓴다.
+const EXTERNAL_FEATURES = [];
+
+/**
+ * @param {object} def
+ * @param {string} def.namespace          설정을 가진 모듈 id
+ * @param {string} def.enableKey          그 모듈의 켜기 설정 키(Boolean)
+ * @param {string} def.label              기능 이름(번역 키 또는 글자)
+ * @param {string} [def.hint]             무엇을 자동화하는지(번역 키 또는 글자)
+ * @param {string[]} [def.names]          이 기능 자신의 액션 이름(원문·번역 모두 가능)
+ * @param {string[]} [def.nameKeys]       이름 목록 설정 키(그 모듈의 쉼표 목록 설정) — 창에서 편집 가능
+ * @param {string[]} [def.reactingNames]  이 기능이 반응하는 다른 액션(예: 기본 액션 "방어")
+ * @param {string[]} [def.reactingNameKeys]
+ */
+export function registerAutomationFeature(def) {
+  if (!def?.namespace || !def?.enableKey || !def?.label) {
+    console.warn(`${MODULE_ID} | registerAutomationFeature: namespace, enableKey, label are required`, def);
+    return false;
+  }
+  const id = `${def.namespace}.${def.enableKey}|${def.label}`;
+  const index = EXTERNAL_FEATURES.findIndex((d) => d.id === id);
+  const entry = { ...def, id };
+  if (index >= 0) EXTERNAL_FEATURES[index] = entry;
+  else EXTERNAL_FEATURES.push(entry);
+  return true;
+}
+
+function externalNames(namespace, names = [], keys = []) {
+  const out = names.map(normalizeName).filter(Boolean);
+  for (const key of keys) {
+    const setting = game.settings.settings.get(`${namespace}.${key}`);
+    if (!setting) continue;
+    out.push(...parse(setting.default).map(normalizeName));
+    try {
+      out.push(...parse(game.settings.get(namespace, key)).map(normalizeName));
+    } catch (err) {
+      // 기본값만 쓴다
+    }
+  }
+  return new Set(out);
+}
+
+function externalGroups() {
+  const groups = [];
+  for (const def of EXTERNAL_FEATURES) {
+    if (!game.modules.get(def.namespace)?.active) continue;
+    if (!game.settings.settings.has(`${def.namespace}.${def.enableKey}`)) continue;
+    const base = {
+      namespace: def.namespace,
+      enableKey: def.enableKey,
+      label: game.i18n.localize(def.label),
+      hint: game.i18n.localize(def.hint ?? ""),
+      source: game.modules.get(def.namespace)?.title ?? def.namespace,
+      tables: [],
+      numbers: []
+    };
+    const own = externalNames(def.namespace, def.names, def.nameKeys);
+    if (own.size) groups.push({ ...base, category: "external", names: own, primary: own, lists: [...(def.nameKeys ?? [])] });
+    const reacting = externalNames(def.namespace, def.reactingNames, def.reactingNameKeys);
+    if (reacting.size) groups.push({ ...base, category: "external-reacting", names: reacting, primary: null, lists: [] });
+  }
+  return groups;
+}
+
+/** 기능의 켜기 설정을 가리키는 고유 키(같은 키면 함께 켜지고 꺼진다) */
+export const featureToggleId = (f) => `${f.namespace ?? MODULE_ID}.${f.enableKey}`;
+
+/** 등록 순서로 기능 묶음을 만든다(다른 모듈이 등록한 기능은 맨 뒤에 붙는다). */
 export function getFeatureGroups() {
   const groups = [];
   const byKey = new Map();
@@ -106,6 +176,7 @@ export function getFeatureGroups() {
     }
     if (setting.type === Boolean && /^enable[A-Z]/.test(setting.key)) {
       current = {
+        namespace: MODULE_ID,
         enableKey: setting.key,
         label: game.i18n.localize(setting.name ?? setting.key),
         hint: game.i18n.localize(setting.hint ?? ""),
@@ -143,7 +214,7 @@ export function getFeatureGroups() {
     if (Array.isArray(setting.default)) group.tables.push(setting.key);
     else if (typeof setting.default === "string" && setting.key.endsWith("Names")) group.lists.push(setting.key);
   }
-  return groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE);
+  return [...groups.filter((g) => g.names.size > 0 && g.enableKey !== MOVE_UPGRADE_FEATURE), ...externalGroups()];
 }
 
 /**
@@ -244,6 +315,7 @@ export async function buildAutomationCatalog() {
         g.category === classKey ||
         g.category === "general" ||
         g.category === "shared" ||
+        g.category === "external" ||
         classKey === "other" ||
         classKey === "race" ||
         [...keys].some((k) => g.primary?.has(k));
@@ -372,8 +444,9 @@ export async function buildAutomationCatalog() {
   // 같은 기능이 걸린 다른 "자기 자동화" 액션(함께 켜지고 꺼지는 액션)
   const ownersOfFeature = new Map();
   for (const g of ordered) for (const m of g.moves) for (const f of m.own) {
-    if (!ownersOfFeature.has(f.enableKey)) ownersOfFeature.set(f.enableKey, []);
-    ownersOfFeature.get(f.enableKey).push(m.name);
+    const key = featureToggleId(f);
+    if (!ownersOfFeature.has(key)) ownersOfFeature.set(key, []);
+    if (!ownersOfFeature.get(key).includes(m.name)) ownersOfFeature.get(key).push(m.name);
   }
 
   return { groups: ordered, ownersOfFeature };

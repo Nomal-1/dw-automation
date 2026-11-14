@@ -218,6 +218,8 @@ lang/ko.json, en.json 전체 UI 문자열. 한국어가 사실상 1순위 언어
   - `setPendingRollBonus`, `getPendingRollBonus`, `clearPendingRollBonus`,
     `rollBonusAppliesTo` ("다음 판정 한 번" 대기 보정치)
   - `getOrCreateTagsContainer` (캐릭터 시트 무브 항목에 배지 붙이기)
+  - `registerAutomationFeature` (직업별 자동화 창에 자기 자동화를 등록: `{namespace, enableKey, label, hint, names, nameKeys, reactingNames, reactingNameKeys}`. 켜기 설정은 그 모듈의 것을 그대로 쓰고, 같은 켜기 설정으로 여러 번 등록하면 함께 켜지고 꺼지는 기능으로 보인다)
+  - `isMoveItemDisabled`, `isNameDisabled` (창에서 "이 액션 자동화"를 끈 액션인지 — 의존 모듈도 이걸 보고 그 액션의 자동화를 멈춘다)
 
   새 함수가 필요하면 `public-api.js`에 추가하고 이 목록도 같이 갱신할 것.
   내부 파일 경로가 바뀌어도 여기 이름·시그니처만 유지하면 의존 모듈이 조용히
