@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { RACE_CORE_MOVES } from "../data/race-core-moves.js";
 
 // 직업별 자동화 창에서 "이 액션 자동화"를 끈 액션 목록과 그 판별.
 //
@@ -25,11 +26,35 @@ export function getDisabledMoves() {
   }
 }
 
-/** 캐릭터의 본래 직업 키(fighter, wizard …). 직업 아이템의 원문 이름("The Fighter")에서 얻는다. */
+// 직업 아이템 없이 시트의 직업 글자(system.details.class)만 있는 캐릭터용 대응표.
+// 번역 이름과 원문 이름 모두 받는다(종족 액션 데이터와 같은 직업 이름).
+const CLASS_NAME_TO_KEY = (() => {
+  const map = new Map([
+    ["소각술사", "immolator"],
+    ["the immolator", "immolator"],
+    ["성기사", "paladin"]
+  ]);
+  for (const [key, cls] of Object.entries(RACE_CORE_MOVES)) {
+    if (cls.className) map.set(norm(cls.className).toLowerCase(), key);
+    if (cls.officialClassName) map.set(norm(cls.officialClassName).toLowerCase(), key);
+  }
+  return map;
+})();
+
+/**
+ * 캐릭터의 본래 직업 키(fighter, wizard …).
+ * 1) 직업 아이템의 원문 이름("The Fighter") 2) 시트의 직업 글자("도적")를 대응표로.
+ */
 export function actorClassKey(actor) {
   const cls = actor?.items?.find((i) => i.type === "class");
   const raw = cls?.flags?.babele?.originalName ?? cls?.name ?? "";
-  return norm(raw).toLowerCase().replace(/^the\s+/, "").replace(/\s+/g, "-") || null;
+  if (raw) {
+    const known = CLASS_NAME_TO_KEY.get(norm(raw).toLowerCase());
+    if (known) return known;
+    return norm(raw).toLowerCase().replace(/^the\s+/, "").replace(/\s+/g, "-");
+  }
+  const text = norm(actor?.system?.details?.class).toLowerCase();
+  return (text && CLASS_NAME_TO_KEY.get(text)) || null;
 }
 
 function entryMatchesName(entry, name) {
