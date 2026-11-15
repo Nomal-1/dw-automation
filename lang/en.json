@@ -2239,7 +2239,7 @@
       "ClearPendingConfirm": "Clears all of {name}'s one-shot pending effects (next-roll modifiers, pending bonuses). Hold and ongoing effects stay.",
       "NoScene": "No scene is being viewed.",
       "NoEnemies": "No NPC tokens on scene \"{scene}\".",
-      "CombatHint": "NPC tokens on scene \"{scene}\". Damage is reduced by armor (tick to ignore armor). Click a name to select the token and pan to it.",
+      "CombatHint": "NPC tokens on scene \"{scene}\" (defeated ones last). Damage is reduced by armor (tick to ignore armor). In the number box, Enter applies damage and Shift+Enter heals. Click a name to select the token and pan to it.",
       "FocusToken": "Select token and pan",
       "HiddenToken": "Hidden token",
       "IgnoreArmor": "Ignore armor",
@@ -2334,7 +2334,10 @@
       "DoomArrived": "All grim portents have come to pass — the impending doom arrives.",
       "Remove": "Remove",
       "RemoveFront": "Remove front",
-      "RemoveFrontConfirm": "Removes the front \"{name}\" with all its dangers and portents. This cannot be undone."
+      "RemoveFrontConfirm": "Removes the front \"{name}\" with all its dangers and portents. This cannot be undone.",
+      "ShowHints": "Show help",
+      "HideHints": "Hide help",
+      "FrontSummary": "{dangers} dangers · portents {done}/{total}"
     }
   }
 }

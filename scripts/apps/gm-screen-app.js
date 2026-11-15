@@ -26,6 +26,24 @@ const hpBar = (hp) => {
   return `<span class="dwauto-gs-hpbar ${level}"><span style="width:${pct}%"></span></span>`;
 };
 
+// 이 브라우저에만 남기는 화면 상태(마지막 탭, 창 위치·크기, 도움말 접기). 실패해도 기본값으로 동작한다.
+const UI_KEY = "dw-automation.gmScreen.ui";
+function loadUi() {
+  try {
+    return JSON.parse(localStorage.getItem(UI_KEY)) ?? {};
+  } catch (err) {
+    return {};
+  }
+}
+function saveUi(patch) {
+  try {
+    localStorage.setItem(UI_KEY, JSON.stringify({ ...loadUi(), ...patch }));
+  } catch (err) {
+    /* 저장소를 못 쓰면 그냥 넘어간다 */
+  }
+}
+const TABS = ["progress", "party", "combat", "session", "fronts", "tools", "reference", "log"];
+
 // 무작위 표: 던전월드 시스템의 표 컴펜디엄 + 월드에 있는 표
 const TABLE_PACKS = ["dungeonworld.tables", "dungeonworld.rollable-tables"];
 
@@ -42,7 +60,18 @@ const TABLE_PACKS = ["dungeonworld.tables", "dungeonworld.rollable-tables"];
  * - 기록: 자동화 기록과 오류(lib/automation-log.js), 복사 버튼
  */
 export class GmScreenApp extends ApplicationV2 {
-  #tab = "progress";
+  #tab = TABS.includes(loadUi().tab) ? loadUi().tab : "progress";
+  #openState = new Map(); // <details data-key> -> 열림 여부(다시 그려도 접은 상태 유지)
+  #focusHp = null; // 피해 입력 후 다시 그려도 같은 토큰 칸에 커서를 돌려 놓기 위해
+  #positionTimer = null;
+
+  constructor(options = {}) {
+    const saved = loadUi().position;
+    if (saved && Number(saved.width) > 300 && Number(saved.height) > 200) {
+      options = foundry.utils.mergeObject({ position: { left: saved.left, top: saved.top, width: saved.width, height: saved.height } }, options, { inplace: false });
+    }
+    super(options);
+  }
   #logFilter = "all";
   #suggestions = new Map(); // failure id -> 뽑은 무브
   #hookId = null;
@@ -55,6 +84,7 @@ export class GmScreenApp extends ApplicationV2 {
     actions: {
       // "tab"은 ApplicationV2가 원래 쓰는 탭 전환 동작 이름이라 겹치지 않게 다른 이름을 쓴다
       switchTab: GmScreenApp.#onTab,
+      toggleHints: GmScreenApp.#onToggleHints,
       suggest: GmScreenApp.#onSuggest,
       dismiss: GmScreenApp.#onDismiss,
       clearFailures: GmScreenApp.#onClearFailures,
@@ -98,7 +128,7 @@ export class GmScreenApp extends ApplicationV2 {
       ["party", "fa-users", L("TabParty"), 0],
       ["combat", "fa-skull", L("TabCombat"), 0],
       ["session", "fa-flag-checkered", L("TabSession"), 0],
-      ["fronts", "fa-chess-rook", L("TabFronts"), 0],
+      ["fronts", "fa-chess-rook", L("TabFronts"), this.#doomedCount()],
       ["tools", "fa-toolbox", L("TabTools"), 0],
       ["reference", "fa-book", L("TabReference"), 0],
       ["log", "fa-list", L("TabLog"), getAutomationLog().filter((e) => e.level === "error").length]
@@ -118,14 +148,37 @@ export class GmScreenApp extends ApplicationV2 {
     else if (this.#tab === "tools") body = await this.#renderTools();
     else if (this.#tab === "reference") body = this.#renderReference();
     else body = this.#renderLog();
-    return `<nav class="dwauto-gs-tabs">${tabs}</nav><section class="dwauto-gs-body">${body}</section>`;
+    const hintsOn = loadUi().hints !== false;
+    const hintsBtn = `<button type="button" class="dwauto-gs-hints-toggle${hintsOn ? " on" : ""}" data-action="toggleHints" title="${esc(L(hintsOn ? "HideHints" : "ShowHints"))}"><i class="fas fa-circle-question"></i></button>`;
+    return `<nav class="dwauto-gs-tabs">${tabs}${hintsBtn}</nav><section class="dwauto-gs-body${hintsOn ? "" : " no-hints"}">${body}</section>`;
   }
 
   _replaceHTML(result, content) {
     const scroll = content.querySelector(".dwauto-gs-body")?.scrollTop ?? 0;
+    for (const d of content.querySelectorAll("details[data-key]")) this.#openState.set(d.dataset.key, d.open);
     content.innerHTML = result;
+    for (const d of content.querySelectorAll("details[data-key]")) {
+      if (this.#openState.has(d.dataset.key)) d.open = this.#openState.get(d.dataset.key);
+    }
     const body = content.querySelector(".dwauto-gs-body");
     if (body) body.scrollTop = scroll;
+  }
+
+  // 창을 옮기거나 크기를 바꾸면 다음에 열 때 그대로 열리게 기억한다
+  _onPosition(position) {
+    super._onPosition?.(position);
+    clearTimeout(this.#positionTimer);
+    this.#positionTimer = setTimeout(() => {
+      const { left, top, width, height } = this.position;
+      saveUi({ position: { left, top, width, height } });
+    }, 400);
+  }
+
+  #doomedCount() {
+    return getFronts().reduce(
+      (n, f) => n + (f.dangers ?? []).filter((d) => (d.portents ?? []).length && d.portents.every((x) => x.done)).length,
+      0
+    );
   }
 
   // 프론트 탭의 글자 칸은 고칠 때마다 다시 그리지 않고(입력 중 커서가 튀지 않게) 바로 저장만 한다
@@ -133,6 +186,19 @@ export class GmScreenApp extends ApplicationV2 {
     super._onRender?.(context, options);
     for (const el of this.element.querySelectorAll("[data-front-field]")) {
       el.addEventListener("change", (event) => this.#onFrontField(event));
+    }
+    // 전투: 피해 칸에서 Enter = 피해, Shift+Enter = 회복
+    for (const el of this.element.querySelectorAll("input[data-hp-input]")) {
+      el.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        const mode = event.shiftKey ? "heal" : "damage";
+        this.element.querySelector(`button[data-action="applyHp"][data-token="${el.dataset.hpInput}"][data-mode="${mode}"]`)?.click();
+      });
+    }
+    if (this.#focusHp) {
+      this.element.querySelector(`input[data-hp-input="${this.#focusHp}"]`)?.focus();
+      this.#focusHp = null;
     }
   }
 
@@ -195,7 +261,7 @@ export class GmScreenApp extends ApplicationV2 {
     const bonds = actor.items.filter((i) => i.type === "bond");
     if (!bonds.length) return "";
     const text = (b) => (b.name || "").trim() || String(b.system?.description ?? "").replace(/<[^>]+>/g, " ").trim();
-    return `<details class="dwauto-gs-bonds"><summary><i class="fas fa-link"></i> ${esc(L("BondsCount", { count: bonds.length }))}</summary>
+    return `<details class="dwauto-gs-bonds" data-key="bonds.${actor.id}"><summary><i class="fas fa-link"></i> ${esc(L("BondsCount", { count: bonds.length }))}</summary>
       <ul>${bonds.map((b) => `<li>${esc(text(b))}</li>`).join("")}</ul></details>`;
   }
 
@@ -305,8 +371,12 @@ export class GmScreenApp extends ApplicationV2 {
             </div>`;
           })
           .join("");
-        return `<details class="dwauto-gs-front" open>
-          <summary>${esc(f.name || L("FrontUntitled"))}</summary>
+        const all = (f.dangers ?? []).flatMap((d) => d.portents ?? []);
+        const doomedHere = (f.dangers ?? []).filter((d) => (d.portents ?? []).length && d.portents.every((x) => x.done)).length;
+        return `<details class="dwauto-gs-front" data-key="front.${f.id}" open>
+          <summary><span class="name">${esc(f.name || L("FrontUntitled"))}</span>
+            <span class="meta">${esc(L("FrontSummary", { dangers: (f.dangers ?? []).length, done: all.filter((x) => x.done).length, total: all.length }))}</span>
+            ${doomedHere ? `<span class="doom-flag" title="${esc(L("DoomArrived"))}"><i class="fas fa-triangle-exclamation"></i> ${doomedHere}</span>` : ""}</summary>
           <div class="dwauto-gs-row">
             ${field(`${f.id}.name`, f.name, L("FrontName"))}
             ${del("front", `data-front="${f.id}"`, L("RemoveFront"))}
@@ -341,7 +411,7 @@ export class GmScreenApp extends ApplicationV2 {
     await saveFronts(fronts);
     // 프론트 이름은 접힌 제목에도 보이므로 그것만 고쳐 준다
     if (dangerId === "name") {
-      const summary = el.closest("details")?.querySelector("summary");
+      const summary = el.closest("details")?.querySelector("summary .name");
       if (summary) summary.textContent = value || L("FrontUntitled");
     }
   }
@@ -416,7 +486,10 @@ export class GmScreenApp extends ApplicationV2 {
   #renderCombat() {
     const scene = canvas?.scene;
     if (!scene) return `<p class="empty">${esc(L("NoScene"))}</p>`;
-    const tokens = scene.tokens.filter((t) => t.actor && t.actor.type === "npc");
+    const isDead = (t) => Number(t.actor.system?.attributes?.hp?.value) <= 0;
+    const tokens = scene.tokens
+      .filter((t) => t.actor && t.actor.type === "npc")
+      .sort((a, b) => isDead(a) - isDead(b) || a.hidden - b.hidden || a.name.localeCompare(b.name, "ko"));
     if (!tokens.length) return `<p class="empty">${esc(L("NoEnemies", { scene: scene.name }))}</p>`;
     const rows = tokens
       .map((t) => {
@@ -444,7 +517,7 @@ export class GmScreenApp extends ApplicationV2 {
   // ---- 참고 ----
   #renderReference() {
     const block = (title, items, open = false) =>
-      `<details class="dwauto-gs-moves"${open ? " open" : ""}><summary>${esc(title)}</summary><ol>${items.map((m) => `<li>${esc(m)}</li>`).join("")}</ol></details>`;
+      `<details class="dwauto-gs-moves" data-key="ref.${title}"${open ? " open" : ""}><summary>${esc(title)}</summary><ol>${items.map((m) => `<li>${esc(m)}</li>`).join("")}</ol></details>`;
     return `${block(L("AgendaTitle"), GM_AGENDA, true)}
       ${block(L("PrinciplesTitle"), GM_PRINCIPLES, true)}
       ${block(L("WhenToMoveTitle"), WHEN_TO_MOVE)}
@@ -474,7 +547,7 @@ export class GmScreenApp extends ApplicationV2 {
           .join("")
       : `<p class="empty">${esc(L("NoFailures"))}</p>`;
     const moveList = (title, moves) =>
-      `<details class="dwauto-gs-moves"><summary>${esc(title)}</summary><ol>${moves.map((m) => `<li>${esc(m)}</li>`).join("")}</ol></details>`;
+      `<details class="dwauto-gs-moves" data-key="progress.${title}"><summary>${esc(title)}</summary><ol>${moves.map((m) => `<li>${esc(m)}</li>`).join("")}</ol></details>`;
     return `${this.#renderInbox()}<div class="dwauto-gs-section">
         <div class="dwauto-gs-row"><h3>${esc(L("FailuresTitle"))}</h3>
           ${failures.length ? `<button type="button" data-action="clearFailures">${esc(L("ClearAll"))}</button>` : ""}</div>
@@ -564,6 +637,12 @@ export class GmScreenApp extends ApplicationV2 {
   // ---- 동작 ----
   static #onTab(event, target) {
     this.#tab = target.dataset.tab;
+    saveUi({ tab: this.#tab });
+    this.render();
+  }
+
+  static #onToggleHints() {
+    saveUi({ hints: loadUi().hints === false });
     this.render();
   }
 
@@ -742,6 +821,7 @@ export class GmScreenApp extends ApplicationV2 {
       const armor = ignoreArmor ? 0 : Number(actor.system?.attributes?.ac?.value) || 0;
       next = Math.max(0, current - Math.max(0, amount - armor));
     }
+    this.#focusHp = target.dataset.token;
     await actor.update({ "system.attributes.hp.value": next });
   }
 

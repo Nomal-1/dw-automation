@@ -1010,3 +1010,17 @@ button[data-action="awardXp"]:not(:disabled) { border-color: var(--gs-accent); c
 .dwauto-gs-portents li .num { flex: 0 0 auto; width: 1.5em; text-align: right; opacity: 0.6; font-variant-numeric: tabular-nums; }
 .dwauto-gs-portents li.done input[type="text"] { text-decoration: line-through; opacity: 0.55; }
 .dwauto-gs-danger .doom-alert { margin-top: 6px; padding: 4px 8px; border-radius: 4px; background: var(--gs-danger); color: #fff; font-weight: bold; }
+
+/* 기능 보강: 도움말 접기, 프론트 요약 */
+.dwauto-gs-hints-toggle { flex: 0 0 auto; width: 28px; min-height: 0; height: auto; margin: 0 0 0 2px; padding: 0; border: none; background: none; box-shadow: none; opacity: 0.45; }
+.dwauto-gs-hints-toggle.on { opacity: 0.85; color: var(--gs-accent); }
+.dwauto-gs-hints-toggle:hover { opacity: 1; }
+.dwauto-gs-body.no-hints .hint { display: none; }
+.dwauto-gs-front > summary { display: flex; align-items: center; gap: 8px; }
+.dwauto-gs-front > summary::before { content: "\25B8"; opacity: 0.6; }
+.dwauto-gs-front[open] > summary::before { content: "\25BE"; }
+.dwauto-gs-front > summary::-webkit-details-marker { display: none; }
+.dwauto-gs-front > summary { list-style: none; }
+.dwauto-gs-front > summary .name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dwauto-gs-front > summary .meta { flex: 0 0 auto; font-size: 0.78em; font-weight: normal; opacity: 0.7; font-variant-numeric: tabular-nums; }
+.dwauto-gs-front > summary .doom-flag { flex: 0 0 auto; font-size: 0.8em; padding: 0 6px; border-radius: 8px; background: var(--gs-danger); color: #fff; }
