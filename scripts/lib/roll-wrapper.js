@@ -51,6 +51,7 @@ import { promptThiefHumanPreRoll } from "../features/thief-human.js";
 import { promptFighterDwarfPreRoll } from "../features/fighter-dwarf.js";
 import { promptFighterHalflingPreRoll } from "../features/fighter-halfling.js";
 import { filterDisabledNames } from "./move-toggles.js";
+import { noteRolledItem, registerRolledItemTracking } from "./move-card.js";
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -328,6 +329,13 @@ async function wrappedRoll(wrapped, ...args) {
   }
 }
 
+// 굴린 아이템을 기억해 두었다가 무브 카드 메시지에 붙인다(lib/move-card.js)
+async function trackedRoll(wrapped, ...args) {
+  if (this.actor && this.type === "move") noteRolledItem(this);
+  return wrappedRoll.call(this, wrapped, ...args);
+}
+
 export function registerRollWrapper() {
-  libWrapper.register(MODULE_ID, "game.dungeonworld.ItemDw.prototype.roll", wrappedRoll, "MIXED");
+  libWrapper.register(MODULE_ID, "game.dungeonworld.ItemDw.prototype.roll", trackedRoll, "MIXED");
+  registerRolledItemTracking();
 }

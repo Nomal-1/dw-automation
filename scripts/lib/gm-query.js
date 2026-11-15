@@ -96,13 +96,29 @@ export function queryGM(name, data = {}, fallback = null) {
  * actor를 고칠 권한이 없으면(다른 플레이어의 캐릭터 등) 대표 GM에게 대신 고쳐 달라고 한다.
  * 성공하면 true. 권한이 있으면 바로 고친다. GM이 없거나 실패하면 false.
  */
+/**
+ * 업데이트에서 키 하나를 지울 때 쓰는 값(Foundry 14). 예전 "flags.모듈.-=키": null 문법은 14에서 경고가 나고
+ * 16에서 사라진다. 예: actor.update({ [`flags.${MODULE_ID}.someFlag`]: deleteValue() })
+ */
+export function deleteValue() {
+  return new foundry.data.operators.ForcedDeletion();
+}
+
+// 질의로 보낼 때는 JSON만 건너가므로 삭제 표시를 글자 표시로 바꿨다가 GM 쪽에서 되돌린다
+const DELETE_MARK = "__dwautoForcedDeletion__";
+const isDeletion = (v) => v instanceof foundry.data.operators.ForcedDeletion;
+const encodeChanges = (changes) =>
+  Object.fromEntries(Object.entries(changes ?? {}).map(([k, v]) => [k, isDeletion(v) ? DELETE_MARK : v]));
+const decodeChanges = (changes) =>
+  Object.fromEntries(Object.entries(changes ?? {}).map(([k, v]) => [k, v === DELETE_MARK ? deleteValue() : v]));
+
 export async function updateActorAsGM(actor, changes, options = {}) {
   if (!actor) return false;
   if (actor.isOwner) {
     await actor.update(changes, options);
     return true;
   }
-  return !!(await queryGM("updateActor", { actorId: actor.id, changes, options }, false));
+  return !!(await queryGM("updateActor", { actorId: actor.id, changes: encodeChanges(changes), options }, false));
 }
 
 /** 여러 기능이 같이 쓰는 질의(액터 대신 고치기)를 등록한다. main.js의 init에서 부른다. */
@@ -111,7 +127,7 @@ export function registerCoreQueries() {
     const actor = game.actors.get(actorId);
     if (!actor || !game.user.isGM) return false;
     try {
-      await actor.update(changes ?? {}, options ?? {});
+      await actor.update(decodeChanges(changes), options ?? {});
       return true;
     } catch (err) {
       console.warn(`${MODULE_ID} | updateActor query failed`, err);

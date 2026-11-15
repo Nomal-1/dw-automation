@@ -5,6 +5,7 @@ import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, MOVE_PACK_FILES, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "../data/class-grant-moves.js";
 import { isMoveItemDisabled } from "../lib/move-toggles.js";
+import { deleteValue } from "../lib/gm-query.js";
 
 // 팔라딘 Divine Favor/레인저 God Amidst The Wastes처럼 "발동하면 다른 직업의
 // 특정 무브(들)를 그대로 얻는다" 무브. features/note-moves.js와 별개의 독립된
@@ -73,7 +74,7 @@ async function onDeleteItem(item, options, userId) {
     await actor.deleteEmbeddedDocuments("Item", toDelete.map((i) => i.id));
   }
 
-  await actor.update({ [`flags.${MODULE_ID}.${GRANTED_FLAG}.-=${item.id}`]: null });
+  await actor.update({ [`flags.${MODULE_ID}.${GRANTED_FLAG}.${item.id}`]: deleteValue() });
 
   if (toDelete.length > 0) {
     announceInfo(

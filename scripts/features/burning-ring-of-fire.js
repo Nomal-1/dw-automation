@@ -1,6 +1,6 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { confirmDialog } from "../lib/dialogs.js";
-import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
+import { activeGM, deleteValue, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -210,7 +210,7 @@ function onRenderActorSheet(app, html) {
 
     await clearBurningRingBond(actor);
     const partner = game.actors.get(bond.partnerActorId);
-    if (partner) await updateActorSafely(partner, { [`flags.${MODULE_ID}.-=burningRingBond`]: null });
+    if (partner) await updateActorSafely(partner, { [`flags.${MODULE_ID}.burningRingBond`]: deleteValue() });
   });
 }
 

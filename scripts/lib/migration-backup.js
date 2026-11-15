@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { deleteValue } from "./gm-query.js";
 
 // 월드를 열 때마다 이 모듈의 여러 기능이 "설정표에 새 기본값 추가", "옛 필드 변환",
 // "중복 행 삭제", "액터 플래그 보정" 같은 마이그레이션을 자동으로 돌린다. 한 번
@@ -230,7 +231,7 @@ export async function restoreBackup(takenAt) {
     // 병합이 아니라 교체여야 한다 — 먼저 지금 있는 이 모듈 플래그 키를 지우고, 백업 값을 다시 쓴다.
     const current = actor.flags?.[MODULE_ID] ?? {};
     const removal = {};
-    for (const key of Object.keys(current)) removal[`flags.${MODULE_ID}.-=${key}`] = null;
+    for (const key of Object.keys(current)) removal[`flags.${MODULE_ID}.${key}`] = deleteValue();
     if (Object.keys(removal).length) await actor.update(removal);
     await actor.update({ [`flags.${MODULE_ID}`]: clone(flags) });
     actorsRestored++;

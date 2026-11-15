@@ -8,6 +8,7 @@ import { DEFAULT_NOTE_MOVE_NAMES } from "../data/note-moves.js";
 import { parseAnimalCompanionStats, parseAnimalCompanionChoiceLists } from "../lib/animal-companion-stats.js";
 import { isFerocitySpent } from "../lib/animal-companion-state.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
+import { deleteValue } from "../lib/gm-query.js";
 
 // Cleric Deity/Apotheosis, Ranger Animal Companion/God Amidst The Wastes,
 // Paladin Quest/Divine Favor, Druid Born of the Soil처럼 "이름/영역/사명/
@@ -713,7 +714,7 @@ async function onCreateChatMessage(message, options, userId) {
 // "중간 상태"로 렌더링됐다가 마지막 갱신이 끝나야 완전히 사라지는 경합이
 // 생길 수 있다(탭이 잠깐 사라졌다 다시 생기는 것처럼 보였던 원인). 네 플래그를
 // 한 번의 actor.update로 원자적으로 지워서 그런 중간 상태 자체가 생기지
-// 않게 한다. "flags.모듈.플래그.-=키" 문법은 그 키 하나만 지우는 Foundry의
+// 않게 한다. deleteValue()(Foundry 14의 ForcedDeletion)는 그 키 하나만 지우는 Foundry의
 // 표준 플래그 삭제 방식이다.
 // 동물 친구 탭을 초기화하는 경우, 무브별이 아니라 액터 하나당 값 하나로
 // 저장되는 능력치/강점/훈련/약점 플래그(다른 메모형 무브를 초기화할 때는
@@ -722,18 +723,18 @@ async function onCreateChatMessage(message, options, userId) {
 // 개수만큼 고르는 <h3>+<p> 목록이 있는지)로 판단한다.
 async function resetNoteMove(actor, moveItem) {
   const updates = {
-    [`flags.${MODULE_ID}.${ACTIVATED_FLAG}.-=${moveItem.id}`]: null,
-    [`flags.${MODULE_ID}.${ANSWER_FLAG}.-=${moveItem.id}`]: null,
-    [`flags.${MODULE_ID}.${GM_CHOICE_FLAG}.-=${moveItem.id}`]: null,
-    [`flags.${MODULE_ID}.${NOTES_FLAG}.-=${moveItem.id}`]: null
+    [`flags.${MODULE_ID}.${ACTIVATED_FLAG}.${moveItem.id}`]: deleteValue(),
+    [`flags.${MODULE_ID}.${ANSWER_FLAG}.${moveItem.id}`]: deleteValue(),
+    [`flags.${MODULE_ID}.${GM_CHOICE_FLAG}.${moveItem.id}`]: deleteValue(),
+    [`flags.${MODULE_ID}.${NOTES_FLAG}.${moveItem.id}`]: deleteValue()
   };
 
   const isAnimalCompanion = parseAnimalCompanionChoiceLists(moveItem.system?.description) !== null;
   if (isAnimalCompanion) {
-    updates[`flags.${MODULE_ID}.-=${ANIMAL_STATS_FLAG}`] = null;
-    updates[`flags.${MODULE_ID}.-=${ANIMAL_STRENGTHS_FLAG}`] = null;
-    updates[`flags.${MODULE_ID}.-=${ANIMAL_TRAININGS_FLAG}`] = null;
-    updates[`flags.${MODULE_ID}.-=${ANIMAL_WEAKNESSES_FLAG}`] = null;
+    updates[`flags.${MODULE_ID}.${ANIMAL_STATS_FLAG}`] = deleteValue();
+    updates[`flags.${MODULE_ID}.${ANIMAL_STRENGTHS_FLAG}`] = deleteValue();
+    updates[`flags.${MODULE_ID}.${ANIMAL_TRAININGS_FLAG}`] = deleteValue();
+    updates[`flags.${MODULE_ID}.${ANIMAL_WEAKNESSES_FLAG}`] = deleteValue();
   }
 
   await actor.update(updates);
