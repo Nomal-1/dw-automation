@@ -850,3 +850,39 @@
 .dwauto-table-editor .window-content { overflow: auto; }
 .dwauto-table-editor .dwauto-table-editor-buttons { display: flex; gap: 6px; margin: 6px 0; }
 .dwauto-table-editor .dwauto-table-editor-buttons button { flex: 0 0 auto; width: auto; }
+
+/* GM 스크린(apps/gm-screen-app.js) */
+.dwauto-gm-screen .window-content { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.dwauto-gs-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid rgba(128, 128, 128, 0.4); flex: 0 0 auto; }
+.dwauto-gs-tab { flex: 1 1 0; border-radius: 4px 4px 0 0; opacity: 0.7; }
+.dwauto-gs-tab.active { opacity: 1; font-weight: bold; }
+.dwauto-gs-tab .badge { display: inline-block; min-width: 1.4em; padding: 0 4px; border-radius: 8px; background: #b33; color: #fff; font-size: 0.8em; }
+.dwauto-gs-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 10px; }
+.dwauto-gs-section { margin-bottom: 12px; }
+.dwauto-gs-section h3 { margin: 4px 0; font-size: 1.05em; }
+.dwauto-gs-row { display: flex; align-items: center; gap: 6px; }
+.dwauto-gs-row h3 { flex: 1 1 auto; }
+.dwauto-gs-row button, .dwauto-gs-buttons button { flex: 0 0 auto; width: auto; }
+.dwauto-gs-row .spacer { flex: 1 1 auto; }
+.dwauto-gs-filters button.active { font-weight: bold; box-shadow: 0 0 0 1px currentColor inset; }
+.dwauto-gs-buttons { display: flex; flex-wrap: wrap; gap: 4px; }
+.dwauto-gm-screen .hint { margin: 2px 0 6px; font-size: 0.85em; opacity: 0.75; }
+.dwauto-gm-screen .empty { opacity: 0.6; font-style: italic; }
+.dwauto-gs-list { list-style: none; margin: 0; padding: 0; }
+.dwauto-gs-fail { border: 1px solid rgba(128, 128, 128, 0.35); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; }
+.dwauto-gs-fail .head { display: flex; align-items: center; gap: 6px; }
+.dwauto-gs-fail .head .time { margin-left: auto; font-size: 0.8em; opacity: 0.6; }
+.dwauto-gs-fail .head .total { opacity: 0.7; }
+.dwauto-gs-fail .head button.icon { flex: 0 0 auto; width: auto; line-height: 1; padding: 0 4px; }
+.dwauto-gs-fail .actions { display: flex; gap: 4px; margin-top: 3px; }
+.dwauto-gs-fail .actions button { flex: 0 0 auto; width: auto; font-size: 0.85em; }
+.dwauto-gs-fail .suggestion { margin-top: 3px; font-weight: bold; }
+.dwauto-gs-moves { margin: 4px 0; }
+.dwauto-gs-moves summary { cursor: pointer; }
+.dwauto-gs-moves ol { margin: 4px 0 4px 20px; padding: 0; }
+.dwauto-gs-log { display: flex; gap: 6px; align-items: baseline; padding: 2px 0; border-bottom: 1px dotted rgba(128, 128, 128, 0.3); font-size: 0.88em; }
+.dwauto-gs-log .time { flex: 0 0 auto; opacity: 0.6; font-variant-numeric: tabular-nums; }
+.dwauto-gs-log .text { flex: 1 1 auto; word-break: break-word; }
+.dwauto-gs-log.error { color: #c33; }
+.dwauto-gs-log.warn { color: #b80; }
+.dwauto-gs-log.fail i { color: #a55; }

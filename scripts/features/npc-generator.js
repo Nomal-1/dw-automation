@@ -20,6 +20,16 @@ async function rollNpc(actor) {
   ui.notifications.info(game.i18n.format("DWAUTO.Npc.Generated", { name }));
 }
 
+/** GM 스크린의 "인스턴트 NPC" 버튼: 새 NPC 액터를 만들고 이름·본능·특징을 굴린 뒤 시트를 연다. */
+export async function createInstantNpc() {
+  if (!game.user.isGM) return null;
+  const actor = await Actor.create({ name: game.i18n.localize("DWAUTO.GmScreen.NewNpcName"), type: "npc" });
+  if (!actor) return null;
+  await rollNpc(actor);
+  actor.sheet?.render(true);
+  return actor;
+}
+
 function onRenderActorSheet(app, html) {
   if (game.system.id !== "dungeonworld") return;
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_NPC_GENERATOR)) return;

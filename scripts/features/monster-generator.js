@@ -143,6 +143,15 @@ function renderResultPanel(actor) {
   `;
 }
 
+/** GM 스크린의 "괴물 만들기" 버튼: 새 NPC 액터를 만들고 괴물 만들기 창을 바로 연다. */
+export async function createMonsterAndBuild() {
+  if (!game.user.isGM) return null;
+  const actor = await Actor.create({ name: game.i18n.localize("DWAUTO.GmScreen.NewMonsterName"), type: "npc" });
+  if (!actor) return null;
+  new MonsterBuilderApp(actor).render(true);
+  return actor;
+}
+
 function onRenderActorSheet(app, html) {
   if (!isEnabled()) return;
   if (app.actor?.type !== "npc") return;

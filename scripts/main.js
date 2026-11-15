@@ -87,9 +87,15 @@ import { registerMigrationBackup } from "./lib/migration-backup.js";
 import { registerLegacyNameFixes } from "./lib/legacy-name-fixes.js";
 import { registerCoreQueries } from "./lib/gm-query.js";
 import { registerBondRollBonus } from "./lib/bond-roll-bonus.js";
+import { registerAutomationLog } from "./lib/automation-log.js";
+import { registerGmScreen, registerGmScreenSettings } from "./features/gm-screen.js";
+
+// 자동화 기록(GM 스크린의 기록 탭)은 다른 기능이 콘솔에 남기는 오류까지 받아야 하므로 가장 먼저 건다.
+registerAutomationLog();
 
 Hooks.once("init", () => {
   registerSettings();
+  registerGmScreenSettings();
   registerCoreQueries();
   registerSettingsTabs();
 });
@@ -97,6 +103,7 @@ Hooks.once("init", () => {
 // 다른 기능들의 마이그레이션(각 파일의 ready 훅)이 돌기 전에 설정값을 먼저
 // 백업해야 하므로, 반드시 아래 register*Assistant 호출들보다 먼저 등록한다.
 registerMigrationBackup();
+registerGmScreen();
 
 // game.dungeonworld.ItemDw(및 다른 시스템/모듈이 등록해두는 전역들)가 전부
 // 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.

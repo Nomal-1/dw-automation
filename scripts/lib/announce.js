@@ -1,3 +1,5 @@
+import { logAutomation } from "./automation-log.js";
+
 // 자동화가 실제로 적용됐을 때 채팅에 한 줄 알림을 남긴다.
 // 플레이어가 "이 액션이 발동했는지"를 다이얼로그를 다시 안 열어봐도 알 수 있게 하기 위함.
 export function announceActionApplied(actor, moveLabel, detail = "") {
@@ -12,6 +14,7 @@ export function announceActionApplied(actor, moveLabel, detail = "") {
     speaker: ChatMessage.getSpeaker({ actor }),
     content
   });
+  logAutomation("info", `${moveLabel}${detail ? ` — ${detail}` : ""}`, { actor, source: "applied" });
 }
 
 // "이번에 새로 뭔가 적용됐다"가 아니라, "예전에 이미 이렇게 정해졌다"를
@@ -23,4 +26,5 @@ export function announceInfo(actor, content) {
     speaker: ChatMessage.getSpeaker({ actor }),
     content: `<p class="dwauto-action-applied"><i class="fas fa-circle-info"></i> ${content}</p>`
   });
+  logAutomation("info", content, { actor, source: "info" });
 }

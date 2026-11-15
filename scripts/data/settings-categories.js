@@ -50,6 +50,8 @@ export const SETTING_CATEGORIES = {
   [SETTINGS.ENABLE_ATTACK_ASSISTANT]: "general",
   [SETTINGS.ENABLE_DICE_SOUND_FALLBACK]: "general",
   classAutomationMenu: "general",
+  enableGmScreen: "general",
+  gmScreenFailureToast: "general",
   legacySettingsScreen: "general",
   translationImportMenu: "general",
   migrationBackupMenu: "general",
