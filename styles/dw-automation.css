@@ -852,82 +852,161 @@
 .dwauto-table-editor .dwauto-table-editor-buttons button { flex: 0 0 auto; width: auto; }
 
 /* GM 스크린(apps/gm-screen-app.js) */
+.dwauto-gm-screen {
+  --gs-accent: #d9a441;
+  --gs-danger: #d9534f;
+  --gs-warn: #e0a030;
+  --gs-ok: #4caf72;
+  --gs-card: rgba(128, 128, 128, 0.09);
+  --gs-card-hover: rgba(128, 128, 128, 0.15);
+  --gs-border: rgba(128, 128, 128, 0.28);
+  --gs-dim: 0.7;
+}
 .dwauto-gm-screen .window-content { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-.dwauto-gs-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid rgba(128, 128, 128, 0.4); flex: 0 0 auto; }
-.dwauto-gs-tab { flex: 1 1 0; border-radius: 4px 4px 0 0; opacity: 0.7; }
-.dwauto-gs-tab.active { opacity: 1; font-weight: bold; }
-.dwauto-gs-tab .badge { display: inline-block; min-width: 1.4em; padding: 0 4px; border-radius: 8px; background: #b33; color: #fff; font-size: 0.8em; }
-.dwauto-gs-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 10px; }
-.dwauto-gs-section { margin-bottom: 12px; }
-.dwauto-gs-section h3 { margin: 4px 0; font-size: 1.05em; }
+.dwauto-gm-screen button { min-height: 26px; line-height: 1.2; }
+.dwauto-gm-screen button:disabled { opacity: 0.45; }
+
+/* 탭: 아이콘 위, 이름 아래 — 8개가 좁은 창에도 들어가게 */
+.dwauto-gs-tabs { display: flex; gap: 0; padding: 0 4px; border-bottom: 1px solid var(--gs-border); flex: 0 0 auto; }
+.dwauto-gs-tab {
+  position: relative; flex: 1 1 0; min-width: 0; height: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  padding: 6px 2px 5px; margin: 0; border: none; border-radius: 0; background: none; box-shadow: none;
+  border-bottom: 2px solid transparent; opacity: var(--gs-dim); font-size: 0.82em; cursor: pointer;
+}
+.dwauto-gs-tab i { font-size: 1.15em; margin: 0; }
+.dwauto-gs-tab .label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.dwauto-gs-tab:hover { opacity: 1; background: var(--gs-card); }
+.dwauto-gs-tab, .dwauto-gs-tab:focus, .dwauto-gs-tab.active { border-style: solid; border-width: 0 0 2px; border-color: transparent; outline: none; box-shadow: none; background: none; }
+.dwauto-gs-tab.active { opacity: 1; font-weight: bold; border-bottom-color: var(--gs-accent); background: rgba(217, 164, 65, 0.08); }
+.dwauto-gs-tab.active i { color: var(--gs-accent); }
+.dwauto-gs-tab .badge {
+  position: absolute; top: 2px; right: calc(50% - 20px); min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+  background: var(--gs-danger); color: #fff; font-size: 10px; line-height: 16px; font-weight: bold; text-align: center;
+}
+
+/* 본문 공통 */
+.dwauto-gs-body { flex: 1 1 auto; overflow-y: auto; padding: 10px 12px; }
+.dwauto-gs-section { margin-bottom: 14px; }
+.dwauto-gs-section h3, .dwauto-gs-row h3 {
+  margin: 0 0 6px; padding-bottom: 3px; font-size: 1em; font-weight: bold; border-bottom: 1px solid var(--gs-border);
+}
 .dwauto-gs-row { display: flex; align-items: center; gap: 6px; }
 .dwauto-gs-row h3 { flex: 1 1 auto; }
 .dwauto-gs-row button, .dwauto-gs-buttons button { flex: 0 0 auto; width: auto; }
 .dwauto-gs-row .spacer { flex: 1 1 auto; }
-.dwauto-gs-filters button.active { font-weight: bold; box-shadow: 0 0 0 1px currentColor inset; }
-.dwauto-gs-buttons { display: flex; flex-wrap: wrap; gap: 4px; }
-.dwauto-gm-screen .hint { margin: 2px 0 6px; font-size: 0.85em; opacity: 0.75; }
-.dwauto-gm-screen .empty { opacity: 0.6; font-style: italic; }
+.dwauto-gs-buttons { display: flex; flex-wrap: wrap; gap: 5px; }
+.dwauto-gs-filters { margin-bottom: 8px; }
+.dwauto-gs-filters button.active { font-weight: bold; box-shadow: 0 0 0 1px var(--gs-accent) inset; color: var(--gs-accent); }
+.dwauto-gm-screen .hint {
+  margin: 0 0 8px; padding: 3px 8px; font-size: 0.82em; line-height: 1.45; opacity: 0.8;
+  border-left: 2px solid var(--gs-border);
+}
+.dwauto-gm-screen .empty { margin: 8px 0; padding: 10px; text-align: center; opacity: 0.6; font-style: italic; border: 1px dashed var(--gs-border); border-radius: 6px; }
 .dwauto-gs-list { list-style: none; margin: 0; padding: 0; }
-.dwauto-gs-fail { border: 1px solid rgba(128, 128, 128, 0.35); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; }
+.dwauto-gm-screen button.icon { flex: 0 0 auto; width: auto; min-height: 0; line-height: 1; padding: 3px 6px; background: none; border-color: transparent; opacity: 0.6; }
+.dwauto-gm-screen button.icon:hover { opacity: 1; border-color: var(--gs-border); }
+
+/* 카드(6- 결과, 캐릭터, 적, 프론트) */
+.dwauto-gs-fail, .dwauto-gs-pc, .dwauto-gs-enemy, .dwauto-gs-front {
+  background: var(--gs-card); border: 1px solid var(--gs-border); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px;
+}
+
+/* 진행 */
+.dwauto-gs-fail { border-left: 3px solid var(--gs-danger); }
 .dwauto-gs-fail .head { display: flex; align-items: center; gap: 6px; }
-.dwauto-gs-fail .head .time { margin-left: auto; font-size: 0.8em; opacity: 0.6; }
-.dwauto-gs-fail .head .total { opacity: 0.7; }
-.dwauto-gs-fail .head button.icon { flex: 0 0 auto; width: auto; line-height: 1; padding: 0 4px; }
-.dwauto-gs-fail .actions { display: flex; gap: 4px; margin-top: 3px; }
+.dwauto-gs-fail .head .time { margin-left: auto; font-size: 0.8em; opacity: 0.6; font-variant-numeric: tabular-nums; }
+.dwauto-gs-fail .head .total { padding: 0 6px; border-radius: 8px; background: rgba(217, 83, 79, 0.18); color: var(--gs-danger); font-weight: bold; font-size: 0.85em; }
+.dwauto-gs-fail .actions { display: flex; gap: 5px; margin-top: 5px; }
 .dwauto-gs-fail .actions button { flex: 0 0 auto; width: auto; font-size: 0.85em; }
-.dwauto-gs-fail .suggestion { margin-top: 3px; font-weight: bold; }
-.dwauto-gs-moves { margin: 4px 0; }
-.dwauto-gs-moves summary { cursor: pointer; }
-.dwauto-gs-moves ol { margin: 4px 0 4px 20px; padding: 0; }
-.dwauto-gs-log { display: flex; gap: 6px; align-items: baseline; padding: 2px 0; border-bottom: 1px dotted rgba(128, 128, 128, 0.3); font-size: 0.88em; }
-.dwauto-gs-log .time { flex: 0 0 auto; opacity: 0.6; font-variant-numeric: tabular-nums; }
-.dwauto-gs-log .text { flex: 1 1 auto; word-break: break-word; }
-.dwauto-gs-log.error { color: #c33; }
-.dwauto-gs-log.warn { color: #b80; }
-.dwauto-gs-log.fail i { color: #a55; }
-.dwauto-gs-tab { font-size: 0.85em; padding: 2px 4px; }
-.dwauto-gs-pc, .dwauto-gs-enemy { border: 1px solid rgba(128, 128, 128, 0.35); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; }
-.dwauto-gs-pc .head, .dwauto-gs-enemy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.dwauto-gs-pc .head a, .dwauto-gs-enemy a { cursor: pointer; }
-.dwauto-gs-pc .head .low { color: #c33; font-weight: bold; }
-.dwauto-gs-pc .head .spot { margin-left: auto; font-size: 0.85em; opacity: 0.75; }
-.dwauto-gs-pc.quiet { border-color: #c90; }
-.dwauto-gs-pc .head .spot.quiet { color: #c90; opacity: 1; font-weight: bold; }
-.dwauto-gs-pc .debility { font-size: 0.85em; color: #a55; margin-top: 2px; }
-.dwauto-gs-pc .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; align-items: center; }
-.dwauto-gs-pc .chip { font-size: 0.8em; padding: 0 6px; border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.5); }
-.dwauto-gs-pc .chip.pending { background: rgba(230, 180, 40, 0.25); border-color: #c90; }
-.dwauto-gs-pc .chips button.icon { flex: 0 0 auto; width: auto; line-height: 1; padding: 1px 5px; }
-.dwauto-gs-enemy.dead { opacity: 0.5; text-decoration: line-through; }
-.dwauto-gs-enemy.hidden { font-style: italic; }
-.dwauto-gs-enemy .hp-controls { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-.dwauto-gs-enemy .hp-controls input[type="number"] { width: 4em; }
-.dwauto-gs-enemy .hp-controls label { font-size: 0.8em; display: flex; align-items: center; gap: 2px; }
-.dwauto-gs-enemy .hp-controls button { flex: 0 0 auto; width: auto; }
-.dwauto-gs-inbox { border: 1px solid #c90; border-radius: 4px; padding: 4px 6px; background: rgba(230, 180, 40, 0.12); }
-.dwauto-gs-request { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.dwauto-gs-fail .suggestion { margin-top: 6px; padding: 4px 8px; border-radius: 4px; background: rgba(217, 164, 65, 0.15); font-weight: bold; }
+.dwauto-gs-fail .suggestion i { color: var(--gs-accent); }
+.dwauto-gs-inbox { border: 1px solid var(--gs-warn); border-radius: 6px; padding: 6px 8px; background: rgba(224, 160, 48, 0.12); }
+.dwauto-gs-inbox h3 { border-bottom-color: rgba(224, 160, 48, 0.4); }
+.dwauto-gs-request { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.dwauto-gs-request > i { color: var(--gs-warn); }
 .dwauto-gs-request .time { font-size: 0.8em; opacity: 0.6; }
 .dwauto-gs-request button { margin-left: auto; flex: 0 0 auto; width: auto; }
-.dwauto-gs-bonds { font-size: 0.85em; margin-top: 2px; }
-.dwauto-gs-bonds summary { cursor: pointer; opacity: 0.85; }
-.dwauto-gs-bonds ul { margin: 2px 0 2px 18px; padding: 0; }
-.dwauto-gs-checks { display: flex; flex-direction: column; gap: 1px; margin-top: 3px; }
-.dwauto-gs-check { display: flex; align-items: flex-start; gap: 4px; font-size: 0.88em; }
-.dwauto-gs-check input { flex: 0 0 auto; margin-top: 2px; }
-.dwauto-gs-front { border: 1px solid rgba(128, 128, 128, 0.4); border-radius: 4px; padding: 4px 6px; margin-bottom: 8px; }
-.dwauto-gs-front > summary { cursor: pointer; font-weight: bold; }
-.dwauto-gs-front input[type="text"], .dwauto-gs-front textarea { flex: 1 1 auto; width: 100%; }
+
+/* 접는 목록(무브·참고) */
+.dwauto-gs-moves { margin: 0 0 6px; border: 1px solid var(--gs-border); border-radius: 6px; background: var(--gs-card); }
+.dwauto-gs-moves > summary { cursor: pointer; padding: 5px 8px; font-weight: bold; list-style-position: inside; }
+.dwauto-gs-moves > summary:hover { background: var(--gs-card-hover); }
+.dwauto-gs-moves[open] > summary { border-bottom: 1px solid var(--gs-border); }
+.dwauto-gs-moves ol { margin: 6px 10px 8px 30px; padding: 0; }
+.dwauto-gs-moves li { margin: 2px 0; line-height: 1.4; }
+
+/* 파티·전투 */
+.dwauto-gs-pc .head, .dwauto-gs-enemy { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.dwauto-gs-pc .head a, .dwauto-gs-enemy a { cursor: pointer; font-size: 1.05em; }
+.dwauto-gs-pc .head a:hover, .dwauto-gs-enemy a:hover { color: var(--gs-accent); text-shadow: none; }
+.dwauto-gm-screen .stat { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dwauto-gm-screen .stat i { opacity: 0.75; }
+.dwauto-gm-screen .stat.hp i { color: var(--gs-danger); opacity: 0.9; }
+.dwauto-gm-screen .stat.low { color: var(--gs-danger); font-weight: bold; }
+.dwauto-gs-hpbar { display: inline-block; width: 46px; height: 5px; border-radius: 3px; background: rgba(128, 128, 128, 0.3); overflow: hidden; margin-left: 2px; }
+.dwauto-gs-hpbar > span { display: block; height: 100%; border-radius: 3px; background: var(--gs-ok); }
+.dwauto-gs-hpbar.mid > span { background: var(--gs-warn); }
+.dwauto-gs-hpbar.low > span { background: var(--gs-danger); }
+.dwauto-gs-pc .head .spot { margin-left: auto; font-size: 0.82em; opacity: 0.7; }
+.dwauto-gs-pc.quiet { border-color: var(--gs-warn); box-shadow: 0 0 0 1px rgba(224, 160, 48, 0.35) inset; }
+.dwauto-gs-pc .head .spot.quiet { color: var(--gs-warn); opacity: 1; font-weight: bold; }
+.dwauto-gs-pc .debility { font-size: 0.85em; color: var(--gs-danger); margin-top: 4px; }
+.dwauto-gs-pc .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; align-items: center; }
+.dwauto-gs-pc .chip { font-size: 0.8em; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--gs-border); background: rgba(128, 128, 128, 0.1); }
+.dwauto-gs-pc .chip.pending { background: rgba(224, 160, 48, 0.2); border-color: var(--gs-warn); }
+.dwauto-gs-bonds { font-size: 0.85em; margin-top: 4px; }
+.dwauto-gs-bonds summary { cursor: pointer; opacity: 0.8; }
+.dwauto-gs-bonds ul { margin: 3px 0 2px 20px; padding: 0; }
+.dwauto-gs-bonds li { margin: 1px 0; }
+.dwauto-gs-enemy.dead { opacity: 0.45; }
+.dwauto-gs-enemy.dead a { text-decoration: line-through; }
+.dwauto-gs-enemy.hidden { border-style: dashed; }
+.dwauto-gs-enemy.hidden a { font-style: italic; }
+.dwauto-gs-enemy .hp-controls { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.dwauto-gs-enemy .hp-controls input[type="number"] { width: 3.5em; height: 26px; text-align: center; }
+.dwauto-gs-enemy .hp-controls label { font-size: 0.8em; display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.dwauto-gs-enemy .hp-controls button { flex: 0 0 auto; width: auto; padding: 0 8px; }
+.dwauto-gs-enemy .hp-controls button[data-mode="damage"] { color: var(--gs-danger); }
+.dwauto-gs-enemy .hp-controls button[data-mode="heal"] { color: var(--gs-ok); }
+
+/* 세션 */
+.dwauto-gs-checks { display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
+.dwauto-gs-check { display: flex; align-items: flex-start; gap: 5px; font-size: 0.88em; line-height: 1.4; cursor: pointer; }
+.dwauto-gs-check input { flex: 0 0 auto; margin: 2px 0 0; }
+.dwauto-gs-check:has(input:checked) { color: var(--gs-accent); }
+button[data-action="awardXp"]:not(:disabled) { border-color: var(--gs-accent); color: var(--gs-accent); font-weight: bold; }
+
+/* 기록 */
+.dwauto-gs-log { display: flex; gap: 6px; align-items: baseline; padding: 3px 4px; border-bottom: 1px solid rgba(128, 128, 128, 0.15); font-size: 0.86em; }
+.dwauto-gs-log:hover { background: var(--gs-card); }
+.dwauto-gs-log .time { flex: 0 0 auto; opacity: 0.55; font-variant-numeric: tabular-nums; }
+.dwauto-gs-log .text { flex: 1 1 auto; word-break: break-word; }
+.dwauto-gs-log.info > i { color: var(--gs-ok); }
+.dwauto-gs-log.error { color: var(--gs-danger); }
+.dwauto-gs-log.warn { color: var(--gs-warn); }
+.dwauto-gs-log.fail > i { color: var(--gs-danger); opacity: 0.8; }
+
+/* 프론트 */
+.dwauto-gs-front { padding: 0; }
+.dwauto-gs-front > summary { cursor: pointer; padding: 6px 10px; font-weight: bold; font-size: 1.05em; }
+.dwauto-gs-front > summary:hover { background: var(--gs-card-hover); }
+.dwauto-gs-front[open] > summary { border-bottom: 1px solid var(--gs-border); }
+.dwauto-gs-front > :not(summary) { margin-left: 10px; margin-right: 10px; }
+.dwauto-gs-front > .dwauto-gs-row:first-of-type { margin-top: 8px; }
+.dwauto-gs-front > button:last-child { margin-bottom: 8px; }
+.dwauto-gs-front input[type="text"], .dwauto-gs-front textarea { flex: 1 1 auto; width: 100%; min-width: 0; }
+.dwauto-gs-front textarea { resize: vertical; }
 .dwauto-gs-front button { flex: 0 0 auto; width: auto; }
-.dwauto-gs-front button.icon { line-height: 1; padding: 1px 5px; }
-.dwauto-gs-field { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 0.9em; }
-.dwauto-gs-field > span { flex: 0 0 6.5em; opacity: 0.8; }
-.dwauto-gs-danger { border-left: 3px solid rgba(128, 128, 128, 0.5); margin: 6px 0 6px 4px; padding-left: 6px; }
-.dwauto-gs-danger.doomed { border-left-color: #c33; }
-.dwauto-gs-danger .progress { flex: 0 0 auto; font-size: 0.85em; opacity: 0.75; }
-.dwauto-gs-subtitle { font-size: 0.85em; opacity: 0.8; margin-top: 3px; }
-.dwauto-gs-portents { list-style: none; margin: 2px 0; padding: 0; }
-.dwauto-gs-portents li { display: flex; align-items: center; gap: 4px; margin: 1px 0; }
-.dwauto-gs-portents li .num { flex: 0 0 auto; opacity: 0.6; }
-.dwauto-gs-portents li.done input[type="text"] { text-decoration: line-through; opacity: 0.6; }
-.dwauto-gs-danger .doom-alert { color: #c33; font-weight: bold; margin-top: 3px; }
+.dwauto-gs-field { display: flex; align-items: center; gap: 6px; margin: 4px 0; font-size: 0.9em; }
+.dwauto-gs-field > span { flex: 0 0 6.5em; opacity: 0.8; font-weight: bold; }
+.dwauto-gs-danger { background: rgba(128, 128, 128, 0.07); border-left: 3px solid var(--gs-border); border-radius: 0 6px 6px 0; margin: 8px 0; padding: 6px 8px; }
+.dwauto-gs-danger > .dwauto-gs-row > i { color: var(--gs-danger); opacity: 0.8; }
+.dwauto-gs-danger.doomed { border-left-color: var(--gs-danger); background: rgba(217, 83, 79, 0.1); }
+.dwauto-gs-danger .progress { flex: 0 0 auto; font-size: 0.8em; padding: 1px 7px; border-radius: 10px; background: rgba(128, 128, 128, 0.18); font-variant-numeric: tabular-nums; }
+.dwauto-gs-danger.doomed .progress { background: var(--gs-danger); color: #fff; }
+.dwauto-gs-subtitle { font-size: 0.85em; font-weight: bold; opacity: 0.8; margin-top: 6px; }
+.dwauto-gs-portents { list-style: none; margin: 3px 0 4px; padding: 0; }
+.dwauto-gs-portents li { display: flex; align-items: center; gap: 5px; margin: 2px 0; }
+.dwauto-gs-portents li .num { flex: 0 0 auto; width: 1.5em; text-align: right; opacity: 0.6; font-variant-numeric: tabular-nums; }
+.dwauto-gs-portents li.done input[type="text"] { text-decoration: line-through; opacity: 0.55; }
+.dwauto-gs-danger .doom-alert { margin-top: 6px; padding: 4px 8px; border-radius: 4px; background: var(--gs-danger); color: #fff; font-weight: bold; }

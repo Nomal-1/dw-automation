@@ -16,6 +16,15 @@ const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const timeOf = (t) => new Date(t).toLocaleTimeString(game.i18n.lang, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
+// HP 막대: 남은 비율에 따라 색이 바뀐다(1/3 이하 위험, 2/3 이하 주의)
+const hpBar = (hp) => {
+  const max = Number(hp?.max) || 0;
+  const value = Math.max(0, Number(hp?.value) || 0);
+  if (!max) return "";
+  const pct = Math.min(100, Math.round((value / max) * 100));
+  const level = value <= max / 3 ? "low" : value <= (max * 2) / 3 ? "mid" : "ok";
+  return `<span class="dwauto-gs-hpbar ${level}"><span style="width:${pct}%"></span></span>`;
+};
 
 // 무작위 표: 던전월드 시스템의 표 컴펜디엄 + 월드에 있는 표
 const TABLE_PACKS = ["dungeonworld.tables", "dungeonworld.rollable-tables"];
@@ -97,7 +106,7 @@ export class GmScreenApp extends ApplicationV2 {
       .map(
         ([key, icon, label, count]) =>
           `<button type="button" class="dwauto-gs-tab${this.#tab === key ? " active" : ""}" data-action="switchTab" data-tab="${key}">
-            <i class="fas ${icon}"></i> ${esc(label)}${count ? ` <span class="badge">${count}</span>` : ""}</button>`
+            <i class="fas ${icon}"></i><span class="label">${esc(label)}</span>${count ? `<span class="badge">${count}</span>` : ""}</button>`
       )
       .join("");
     let body = "";
@@ -178,7 +187,7 @@ export class GmScreenApp extends ApplicationV2 {
     if (!btn) return;
     const count = getFailures().length + getPendingRequests().length;
     btn.querySelector(".badge")?.remove();
-    if (count) btn.insertAdjacentHTML("beforeend", ` <span class="badge">${count}</span>`);
+    if (count) btn.insertAdjacentHTML("beforeend", `<span class="badge">${count}</span>`);
   }
 
   // ---- 인연 ----
@@ -384,9 +393,9 @@ export class GmScreenApp extends ApplicationV2 {
         return `<li class="dwauto-gs-pc${quiet ? " quiet" : ""}">
           <div class="head">
             <a data-action="openSheet" data-actor="${a.id}"><b>${esc(a.name)}</b></a>
-            <span class="${lowHp ? "low" : ""}"><i class="fas fa-heart"></i> ${esc(hp.value ?? "?")}/${esc(hp.max ?? "?")}</span>
-            <span><i class="fas fa-shield"></i> ${esc(sys.attributes?.ac?.value ?? 0)}</span>
-            <span><i class="fas fa-star"></i> ${esc(xp.value ?? 0)}/${esc(xp.max ?? "?")}</span>
+            <span class="stat hp${lowHp ? " low" : ""}"><i class="fas fa-heart"></i> ${esc(hp.value ?? "?")}/${esc(hp.max ?? "?")}${hpBar(hp)}</span>
+            <span class="stat"><i class="fas fa-shield"></i> ${esc(sys.attributes?.ac?.value ?? 0)}</span>
+            <span class="stat"><i class="fas fa-star"></i> ${esc(xp.value ?? 0)}/${esc(xp.max ?? "?")}</span>
             <span class="spot${quiet ? " quiet" : ""}" title="${esc(L("SpotlightHint"))}"><i class="fas fa-lightbulb"></i> ${esc(spotText)}</span>
           </div>
           ${debilities.length ? `<div class="debility"><i class="fas fa-user-injured"></i> ${esc(debilities.join(", "))}</div>` : ""}
@@ -418,8 +427,8 @@ export class GmScreenApp extends ApplicationV2 {
         return `<li class="dwauto-gs-enemy${dead ? " dead" : ""}${t.hidden ? " hidden" : ""}">
           <a data-action="focusToken" data-token="${t.id}" title="${esc(L("FocusToken"))}"><b>${esc(t.name)}</b></a>
           ${t.hidden ? `<i class="fas fa-eye-slash" title="${esc(L("HiddenToken"))}"></i>` : ""}
-          <span><i class="fas fa-heart"></i> ${esc(hp.value ?? "?")}/${esc(hp.max ?? "?")}</span>
-          <span><i class="fas fa-shield"></i> ${armor}</span>
+          <span class="stat hp"><i class="fas fa-heart"></i> ${esc(hp.value ?? "?")}/${esc(hp.max ?? "?")}${hpBar(hp)}</span>
+          <span class="stat"><i class="fas fa-shield"></i> ${armor}</span>
           <span class="hp-controls">
             <input type="number" min="0" value="" placeholder="0" data-hp-input="${t.id}">
             <label title="${esc(L("IgnoreArmorHint"))}"><input type="checkbox" data-ignore-armor="${t.id}"> ${esc(L("IgnoreArmor"))}</label>
