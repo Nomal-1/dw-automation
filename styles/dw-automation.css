@@ -905,3 +905,13 @@
 .dwauto-gs-enemy .hp-controls input[type="number"] { width: 4em; }
 .dwauto-gs-enemy .hp-controls label { font-size: 0.8em; display: flex; align-items: center; gap: 2px; }
 .dwauto-gs-enemy .hp-controls button { flex: 0 0 auto; width: auto; }
+.dwauto-gs-inbox { border: 1px solid #c90; border-radius: 4px; padding: 4px 6px; background: rgba(230, 180, 40, 0.12); }
+.dwauto-gs-request { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.dwauto-gs-request .time { font-size: 0.8em; opacity: 0.6; }
+.dwauto-gs-request button { margin-left: auto; flex: 0 0 auto; width: auto; }
+.dwauto-gs-bonds { font-size: 0.85em; margin-top: 2px; }
+.dwauto-gs-bonds summary { cursor: pointer; opacity: 0.85; }
+.dwauto-gs-bonds ul { margin: 2px 0 2px 18px; padding: 0; }
+.dwauto-gs-checks { display: flex; flex-direction: column; gap: 1px; margin-top: 3px; }
+.dwauto-gs-check { display: flex; align-items: flex-start; gap: 4px; font-size: 0.88em; }
+.dwauto-gs-check input { flex: 0 0 auto; margin-top: 2px; }

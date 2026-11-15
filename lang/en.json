@@ -2276,7 +2276,43 @@
         "underdogConditionActive": "Underdog",
         "indestructibleHungerPenalty": "Hunger penalty",
         "twiceAsBrightUsed": "Twice As Bright used"
-      }
+      },
+      "TabSession": "Session",
+      "InboxTitle": "Requests waiting for you",
+      "InboxHint": "A player's permission request is still open. If you lost the window, bring it back with 'Show'.",
+      "ShowRequest": "Show",
+      "UnknownUser": "Unknown",
+      "Query": {
+        "healPermission": "Healing permission",
+        "rollBonusPermission": "Aid/Interfere bonus permission",
+        "heistGrant": "Heist bonus permission",
+        "knowItAllGrant": "Know-It-All permission",
+        "knowItAllXp": "Know-It-All XP permission",
+        "defendVengeanceGrant": "Defend bonus permission",
+        "arcaneArtFlag": "Arcane Art effect permission",
+        "formcrafterGmChoice": "Formcrafter stat choice",
+        "allyHoldSpend": "Ally hold spend"
+      },
+      "BondsCount": "{count} bonds",
+      "SessionEndTitle": "End of Session",
+      "SessionEndHint": "End of Session: 1 XP for each 'yes' below, 1 if the alignment was fulfilled, and 1 per bond resolved this session. Tick, then 'Award XP' applies it all and posts to chat (players rewrite resolved bonds).",
+      "SessionQ1": "Did we learn something new and important about the world?",
+      "SessionQ2": "Did we overcome a notable monster or enemy?",
+      "SessionQ3": "Did we loot a memorable treasure?",
+      "SessionAlignment": "Fulfilled alignment: {text}",
+      "SessionAlignmentNone": "Fulfilled alignment (none on the sheet)",
+      "SessionBond": "Resolved bond: {text}",
+      "SessionXpPreview": "+{xp} XP",
+      "AwardXp": "Award XP (total +{xp})",
+      "AwardXpTitle": "End of session XP",
+      "AwardXpConfirm": "Award XP as follows: {summary}",
+      "AwardXpDone": "End of session XP +{xp} (now {total})",
+      "SessionLogTitle": "Session log (GM Session Log)",
+      "SessionLogStart": "Start recording",
+      "SessionLogStop": "Stop recording",
+      "SessionLogExport": "Export log",
+      "SessionLogRecording": "Recording now.",
+      "SessionLogIdle": "Not recording."
     }
   }
 }

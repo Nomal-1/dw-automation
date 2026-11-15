@@ -14,6 +14,8 @@
 // - render(html)는 처음 그려졌을 때 한 번 불린다.
 // - 다른 모듈은 renderDialogV2 훅으로 이 창에 끼어들 수 있다(예: 홈브루의 무기 선택 창 선택지).
 
+import { attachDialogToCurrentQuery } from "./gm-query.js";
+
 const { DialogV2 } = foundry.applications.api;
 
 export class CompatDialog extends DialogV2 {
@@ -54,6 +56,8 @@ export class CompatDialog extends DialogV2 {
     if (options.classes) config.classes = options.classes;
     super(config);
     this.#v1 = data;
+    // 다른 사용자의 요청(질의)을 처리하다 띄운 창이면 GM 요청함에 연결한다
+    attachDialogToCurrentQuery(this);
   }
 
   _onRender(context, options) {

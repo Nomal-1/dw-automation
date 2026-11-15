@@ -11,10 +11,53 @@ import { MODULE_ID } from "../constants.js";
 
 const QUERY_PREFIX = `${MODULE_ID}.`;
 
+// ---- GM 요청함(GM 스크린 "진행" 탭) ----
+// 받은 질의 중 아직 답하지 않은 것. 처리 함수가 그 자리에서 띄운 대화창(CompatDialog)을 함께
+// 기억해 두어, GM 스크린에서 "창 보기"로 앞으로 꺼낼 수 있게 한다(창을 놓쳐 플레이어가 기다리지 않게).
+const inbox = new Map(); // id -> { id, name, from, time, dialog }
+let currentQueryId = null;
+
+function notifyInbox() {
+  Hooks.callAll("dwAutomationLogChanged");
+}
+
+/** lib/dialogs.js의 CompatDialog가 만들어질 때 부른다 — 지금 처리 중인 질의의 창으로 기억한다. */
+export function attachDialogToCurrentQuery(dialog) {
+  if (!currentQueryId) return;
+  const entry = inbox.get(currentQueryId);
+  if (entry && !entry.dialog) {
+    entry.dialog = dialog;
+    notifyInbox();
+  }
+}
+
+/** 답을 기다리는 요청 중 창이 떠 있는 것(오래된 순) */
+export function getPendingRequests() {
+  return [...inbox.values()].filter((e) => e.dialog);
+}
+
 /** 받는 쪽 처리 함수를 등록한다. handler(data) → 돌려줄 값(Promise 가능, JSON으로 보낼 수 있는 값). */
 export function registerQuery(name, handler) {
   CONFIG.queries ??= {};
-  CONFIG.queries[QUERY_PREFIX + name] = async (data) => handler(data ?? {});
+  CONFIG.queries[QUERY_PREFIX + name] = async (data) => {
+    const { __from, ...rest } = data ?? {};
+    const id = foundry.utils.randomID();
+    inbox.set(id, { id, name, from: __from ?? null, time: Date.now(), dialog: null });
+    currentQueryId = id;
+    let pending;
+    try {
+      pending = handler(rest);
+    } finally {
+      currentQueryId = null;
+    }
+    try {
+      return await pending;
+    } finally {
+      const hadDialog = !!inbox.get(id)?.dialog;
+      inbox.delete(id);
+      if (hadDialog) notifyInbox();
+    }
+  };
 }
 
 /** 지금 접속 중인 대표 GM(없으면 null). Foundry가 정한 activeGM을 먼저 쓴다. */
@@ -29,6 +72,7 @@ export function activeGM() {
 export async function queryUser(user, name, data = {}, fallback = null) {
   if (!user) return fallback;
   const fullName = QUERY_PREFIX + name;
+  data = { ...(data ?? {}), __from: game.user.id }; // GM 요청함에 누가 보냈는지 보여주기 위해
   try {
     if (user.isSelf) {
       const handler = CONFIG.queries?.[fullName];

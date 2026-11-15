@@ -2276,7 +2276,43 @@
         "underdogConditionActive": "약자의 근성",
         "indestructibleHungerPenalty": "굶주림 페널티",
         "twiceAsBrightUsed": "곱절로 밝게 사용함"
-      }
+      },
+      "TabSession": "세션",
+      "InboxTitle": "답을 기다리는 요청",
+      "InboxHint": "플레이어가 허락을 구한 창이 아직 열려 있습니다. 창을 놓쳤다면 '창 보기'로 앞으로 꺼내세요.",
+      "ShowRequest": "창 보기",
+      "UnknownUser": "알 수 없음",
+      "Query": {
+        "healPermission": "치유 허락",
+        "rollBonusPermission": "협조·방해 보너스 허락",
+        "heistGrant": "대도적 보너스 허락",
+        "knowItAllGrant": "만물박사 허락",
+        "knowItAllXp": "만물박사 경험치 허락",
+        "defendVengeanceGrant": "방어 반격 보너스 허락",
+        "arcaneArtFlag": "마법 예술 효과 허락",
+        "formcrafterGmChoice": "형태 장인 능력치 선택",
+        "allyHoldSpend": "아군 예비 사용"
+      },
+      "BondsCount": "인연 {count}개",
+      "SessionEndTitle": "세션 종료",
+      "SessionEndHint": "세션 종료 무브: 아래 질문에 '예'인 만큼, 성향을 이뤘으면 1, 이번 세션에 해결한 인연마다 1씩 경험치를 받습니다. 체크한 뒤 '경험치 주기'를 누르면 한 번에 반영하고 채팅에 남깁니다(해결한 인연은 플레이어가 새로 씁니다).",
+      "SessionQ1": "파티가 세상에 대해 새롭고 중요한 사실을 알게 됐는가?",
+      "SessionQ2": "기억할 만한 괴물이나 적을 이겼는가?",
+      "SessionQ3": "기억할 만한 보물을 얻었는가?",
+      "SessionAlignment": "성향을 이뤘다: {text}",
+      "SessionAlignmentNone": "성향을 이뤘다(시트에 성향이 비어 있음)",
+      "SessionBond": "인연 해결: {text}",
+      "SessionXpPreview": "+{xp} 경험치",
+      "AwardXp": "경험치 주기 (모두 +{xp})",
+      "AwardXpTitle": "세션 종료 경험치",
+      "AwardXpConfirm": "다음과 같이 경험치를 줍니다: {summary}",
+      "AwardXpDone": "세션 종료 경험치 +{xp} (지금 {total})",
+      "SessionLogTitle": "세션 기록(GM Session Log)",
+      "SessionLogStart": "기록 시작",
+      "SessionLogStop": "기록 종료",
+      "SessionLogExport": "기록 내보내기",
+      "SessionLogRecording": "지금 기록 중입니다.",
+      "SessionLogIdle": "기록하고 있지 않습니다."
     }
   }
 }

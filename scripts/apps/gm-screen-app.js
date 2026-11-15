@@ -4,6 +4,8 @@ import { PARTY_STATUS_FLAGS } from "../data/party-status.js";
 import { getAutomationLog, getSavedErrors, clearAutomationLog, formatLog } from "../lib/automation-log.js";
 import { getFailures, clearFailures, dismissFailure, getSpotlight } from "../features/gm-screen.js";
 import { confirmDialog } from "../lib/dialogs.js";
+import { getPendingRequests } from "../lib/gm-query.js";
+import { announceActionApplied } from "../lib/announce.js";
 import { createInstantNpc } from "../features/npc-generator.js";
 import { createMonsterAndBuild } from "../features/monster-generator.js";
 
@@ -21,7 +23,9 @@ const TABLE_PACKS = ["dungeonworld.tables", "dungeonworld.rollable-tables"];
 /**
  * GM 스크린(ApplicationV2). 세션 중에 GM이 옆에 띄워 두는 창.
  * - 진행: 6- 결과 알림과 GM 무브·던전 무브 뽑기
- * - 파티: 캐릭터별 HP·장갑·XP·약화·대기 상태와 스포트라이트(마지막 판정 시각)
+ * - 진행 탭 위쪽에는 답을 기다리는 플레이어 요청(GM 요청함)도 보여준다
+ * - 파티: 캐릭터별 HP·장갑·XP·약화·대기 상태·인연과 스포트라이트(마지막 판정 시각)
+ * - 세션: 세션 종료 도우미(질문·성향·인연 체크 → 경험치 한 번에)와 세션 기록 시작·종료
  * - 전투: 지금 씬의 NPC 토큰 HP 판(피해·회복, 장갑 자동 반영)
  * - 도구: 인스턴트 NPC, 괴물 만들기, 무작위 표, 다른 창 바로 열기
  * - 참고: GM 강령·원칙·무브
@@ -53,6 +57,10 @@ export class GmScreenApp extends ApplicationV2 {
       clearPending: GmScreenApp.#onClearPending,
       applyHp: GmScreenApp.#onApplyHp,
       focusToken: GmScreenApp.#onFocusToken,
+      showRequest: GmScreenApp.#onShowRequest,
+      sessionCheck: GmScreenApp.#onSessionCheck,
+      awardXp: GmScreenApp.#onAwardXp,
+      sessionLog: GmScreenApp.#onSessionLog,
       logFilter: GmScreenApp.#onLogFilter,
       copyLog: GmScreenApp.#onCopyLog,
       clearLog: GmScreenApp.#onClearLog
@@ -73,9 +81,10 @@ export class GmScreenApp extends ApplicationV2 {
 
   async _renderHTML() {
     const tabs = [
-      ["progress", "fa-dice", L("TabProgress"), getFailures().length],
+      ["progress", "fa-dice", L("TabProgress"), getFailures().length + getPendingRequests().length],
       ["party", "fa-users", L("TabParty"), 0],
       ["combat", "fa-skull", L("TabCombat"), 0],
+      ["session", "fa-flag-checkered", L("TabSession"), 0],
       ["tools", "fa-toolbox", L("TabTools"), 0],
       ["reference", "fa-book", L("TabReference"), 0],
       ["log", "fa-list", L("TabLog"), getAutomationLog().filter((e) => e.level === "error").length]
@@ -90,6 +99,7 @@ export class GmScreenApp extends ApplicationV2 {
     if (this.#tab === "progress") body = this.#renderProgress();
     else if (this.#tab === "party") body = this.#renderParty();
     else if (this.#tab === "combat") body = this.#renderCombat();
+    else if (this.#tab === "session") body = this.#renderSession();
     else if (this.#tab === "tools") body = await this.#renderTools();
     else if (this.#tab === "reference") body = this.#renderReference();
     else body = this.#renderLog();
@@ -108,6 +118,7 @@ export class GmScreenApp extends ApplicationV2 {
     // 기록·6- 알림이 바뀌면 열린 창을 다시 그린다
     this.#hookId = Hooks.on("dwAutomationLogChanged", () => {
       if (this.rendered && ["progress", "party", "log"].includes(this.#tab)) this.render();
+      else if (this.rendered) this.#refreshBadges();
     });
     // 파티·전투 탭은 액터·토큰이 바뀌면 다시 그린다(잦은 갱신은 묶어서 한 번)
     const refresh = () => {
@@ -128,6 +139,106 @@ export class GmScreenApp extends ApplicationV2 {
 
   #docHooks = [];
   #refreshTimer = null;
+
+  // ---- GM 요청함 ----
+  #renderInbox() {
+    const requests = getPendingRequests();
+    if (!requests.length) return "";
+    const rows = requests
+      .map((r) => {
+        const from = game.users.get(r.from)?.name ?? L("UnknownUser");
+        const label = game.i18n.has(`DWAUTO.GmScreen.Query.${r.name}`) ? L(`Query.${r.name}`) : r.name;
+        return `<li class="dwauto-gs-request">
+          <i class="fas fa-hand"></i> <b>${esc(from)}</b> · ${esc(label)} <span class="time">${timeOf(r.time)}</span>
+          <button type="button" data-action="showRequest" data-id="${r.id}"><i class="fas fa-window-restore"></i> ${esc(L("ShowRequest"))}</button>
+        </li>`;
+      })
+      .join("");
+    return `<div class="dwauto-gs-section dwauto-gs-inbox"><h3>${esc(L("InboxTitle"))}</h3>
+      <p class="hint">${esc(L("InboxHint"))}</p><ul class="dwauto-gs-list">${rows}</ul></div>`;
+  }
+
+  // 다른 탭을 보고 있을 때는 탭 숫자만 고친다
+  #refreshBadges() {
+    const btn = this.element?.querySelector('.dwauto-gs-tab[data-tab="progress"]');
+    if (!btn) return;
+    const count = getFailures().length + getPendingRequests().length;
+    btn.querySelector(".badge")?.remove();
+    if (count) btn.insertAdjacentHTML("beforeend", ` <span class="badge">${count}</span>`);
+  }
+
+  // ---- 인연 ----
+  #renderBonds(actor) {
+    const bonds = actor.items.filter((i) => i.type === "bond");
+    if (!bonds.length) return "";
+    const text = (b) => (b.name || "").trim() || String(b.system?.description ?? "").replace(/<[^>]+>/g, " ").trim();
+    return `<details class="dwauto-gs-bonds"><summary><i class="fas fa-link"></i> ${esc(L("BondsCount", { count: bonds.length }))}</summary>
+      <ul>${bonds.map((b) => `<li>${esc(text(b))}</li>`).join("")}</ul></details>`;
+  }
+
+  // ---- 세션 ----
+  #session = new Map(); // actorId -> { q1, q2, q3, alignment, bonds: Set<itemId> }
+
+  #sessionState(actorId) {
+    if (!this.#session.has(actorId)) this.#session.set(actorId, { q1: false, q2: false, q3: false, alignment: false, bonds: new Set() });
+    return this.#session.get(actorId);
+  }
+
+  #sessionXp(actorId) {
+    const st = this.#sessionState(actorId);
+    return (st.q1 ? 1 : 0) + (st.q2 ? 1 : 0) + (st.q3 ? 1 : 0) + (st.alignment ? 1 : 0) + st.bonds.size;
+  }
+
+  #renderSession() {
+    const actors = this.#partyActors();
+    const check = (actorId, key, label, checked, extra = "") =>
+      `<label class="dwauto-gs-check"><input type="checkbox" data-action="sessionCheck" data-actor="${actorId}" data-key="${key}" ${extra} ${checked ? "checked" : ""}> ${esc(label)}</label>`;
+    const cards = actors
+      .map((a) => {
+        const st = this.#sessionState(a.id);
+        const align = a.system?.details?.alignment ?? {};
+        const alignText = [align.value, align.description].filter(Boolean).join(" — ");
+        const bonds = a.items.filter((i) => i.type === "bond");
+        const bondText = (b) => (b.name || "").trim() || String(b.system?.description ?? "").replace(/<[^>]+>/g, " ").trim();
+        const xp = this.#sessionXp(a.id);
+        return `<li class="dwauto-gs-pc">
+          <div class="head"><b>${esc(a.name)}</b><span class="spot">${esc(L("SessionXpPreview", { xp }))}</span></div>
+          <div class="dwauto-gs-checks">
+            ${check(a.id, "q1", L("SessionQ1"), st.q1)}
+            ${check(a.id, "q2", L("SessionQ2"), st.q2)}
+            ${check(a.id, "q3", L("SessionQ3"), st.q3)}
+            ${check(a.id, "alignment", alignText ? L("SessionAlignment", { text: alignText }) : L("SessionAlignmentNone"), st.alignment)}
+            ${bonds.map((b) => check(a.id, "bond", L("SessionBond", { text: bondText(b) }), st.bonds.has(b.id), `data-bond="${b.id}"`)).join("")}
+          </div>
+        </li>`;
+      })
+      .join("");
+    const total = actors.reduce((sum, a) => sum + this.#sessionXp(a.id), 0);
+    const sgl = game.modules.get("gm-session-log");
+    let logSection = "";
+    if (sgl?.active && sgl.api) {
+      let recording = false;
+      try {
+        recording = !!game.settings.get("gm-session-log", "recordingState")?.active;
+      } catch (err) {
+        recording = false;
+      }
+      logSection = `<div class="dwauto-gs-section"><h3>${esc(L("SessionLogTitle"))}</h3>
+        <div class="dwauto-gs-buttons">
+          ${recording
+            ? `<button type="button" data-action="sessionLog" data-op="stop"><i class="fas fa-stop"></i> ${esc(L("SessionLogStop"))}</button>`
+            : `<button type="button" data-action="sessionLog" data-op="start"><i class="fas fa-circle"></i> ${esc(L("SessionLogStart"))}</button>`}
+          <button type="button" data-action="sessionLog" data-op="export"><i class="fas fa-file-export"></i> ${esc(L("SessionLogExport"))}</button>
+        </div>
+        <p class="hint">${esc(L(recording ? "SessionLogRecording" : "SessionLogIdle"))}</p></div>`;
+    }
+    return `${logSection}<div class="dwauto-gs-section"><h3>${esc(L("SessionEndTitle"))}</h3>
+        <p class="hint">${esc(L("SessionEndHint"))}</p>
+        ${actors.length ? `<ul class="dwauto-gs-list">${cards}</ul>` : `<p class="empty">${esc(L("NoParty"))}</p>`}
+        <div class="dwauto-gs-row"><span class="spacer"></span>
+          <button type="button" data-action="awardXp" ${total ? "" : "disabled"}><i class="fas fa-star"></i> ${esc(L("AwardXp", { xp: total }))}</button></div>
+      </div>`;
+  }
 
   // ---- 파티 ----
   #partyActors() {
@@ -182,6 +293,7 @@ export class GmScreenApp extends ApplicationV2 {
             <span class="spot${quiet ? " quiet" : ""}" title="${esc(L("SpotlightHint"))}"><i class="fas fa-lightbulb"></i> ${esc(spotText)}</span>
           </div>
           ${debilities.length ? `<div class="debility"><i class="fas fa-user-injured"></i> ${esc(debilities.join(", "))}</div>` : ""}
+          ${this.#renderBonds(a)}
           ${
             chips.length
               ? `<div class="chips">${chips.map((c) => `<span class="chip${c.clear ? " pending" : ""}">${esc(c.text)}</span>`).join("")}
@@ -257,7 +369,7 @@ export class GmScreenApp extends ApplicationV2 {
       : `<p class="empty">${esc(L("NoFailures"))}</p>`;
     const moveList = (title, moves) =>
       `<details class="dwauto-gs-moves"><summary>${esc(title)}</summary><ol>${moves.map((m) => `<li>${esc(m)}</li>`).join("")}</ol></details>`;
-    return `<div class="dwauto-gs-section">
+    return `${this.#renderInbox()}<div class="dwauto-gs-section">
         <div class="dwauto-gs-row"><h3>${esc(L("FailuresTitle"))}</h3>
           ${failures.length ? `<button type="button" data-action="clearFailures">${esc(L("ClearAll"))}</button>` : ""}</div>
         <p class="hint">${esc(L("FailuresHint"))}</p>
@@ -392,6 +504,54 @@ export class GmScreenApp extends ApplicationV2 {
     if (!app) return;
     if (app.minimized) app.maximize();
     app.render({ force: true });
+  }
+
+  static #onShowRequest(event, target) {
+    const entry = getPendingRequests().find((r) => r.id === target.dataset.id);
+    const dialog = entry?.dialog;
+    if (!dialog) return;
+    if (dialog.minimized) dialog.maximize?.();
+    if (dialog.rendered) dialog.bringToFront?.();
+    else dialog.render({ force: true });
+  }
+
+  static #onSessionCheck(event, target) {
+    const st = this.#sessionState(target.dataset.actor);
+    const key = target.dataset.key;
+    if (key === "bond") {
+      if (target.checked) st.bonds.add(target.dataset.bond);
+      else st.bonds.delete(target.dataset.bond);
+    } else st[key] = target.checked;
+    this.render();
+  }
+
+  static async #onAwardXp() {
+    const actors = this.#partyActors().filter((a) => this.#sessionXp(a.id) > 0);
+    if (!actors.length) return;
+    const summary = actors.map((a) => `${a.name} +${this.#sessionXp(a.id)}`).join(", ");
+    const ok = await confirmDialog({ title: L("AwardXpTitle"), content: `<p>${esc(L("AwardXpConfirm", { summary }))}</p>`, defaultYes: true });
+    if (!ok) return;
+    for (const a of actors) {
+      const gain = this.#sessionXp(a.id);
+      const current = Number(a.system?.attributes?.xp?.value) || 0;
+      await a.update({ "system.attributes.xp.value": current + gain });
+      announceActionApplied(a, L("SessionEndTitle"), L("AwardXpDone", { xp: gain, total: current + gain }));
+      this.#session.delete(a.id);
+    }
+    this.render();
+  }
+
+  static async #onSessionLog(event, target) {
+    const api = game.modules.get("gm-session-log")?.api;
+    if (!api) return;
+    try {
+      if (target.dataset.op === "start") await api.startRecording();
+      else if (target.dataset.op === "stop") await api.stopRecording();
+      else await api.runExport();
+    } catch (err) {
+      console.error(`${MODULE_ID} | gm screen: session log ${target.dataset.op} failed`, err);
+    }
+    setTimeout(() => this.render(), 500);
   }
 
   static #onOpenSheet(event, target) {
