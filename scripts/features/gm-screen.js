@@ -44,12 +44,24 @@ async function openGmScreen(tab = null) {
   return GmScreenApp.open(tab);
 }
 
+// 스포트라이트: 캐릭터별로 마지막 무브 판정 시각과 이번 접속의 판정 횟수
+const spotlight = new Map(); // actorId -> { last, count }
+
+export function getSpotlight(actorId) {
+  return spotlight.get(actorId) ?? null;
+}
+
 function onCreateChatMessage(message) {
   if (!game.user.isGM || !isEnabled()) return;
   // 메시지는 모든 클라이언트에 오므로 GM 화면마다 따로 쌓는다(그 GM 화면에서만 보인다)
   const info = getMoveCardInfo(message);
-  if (!info || info.result !== "failure") return;
-  if (info.actor?.type !== "character") return;
+  if (!info || info.actor?.type !== "character") return;
+  const spot = spotlight.get(info.actor.id) ?? { last: 0, count: 0 };
+  spotlight.set(info.actor.id, { last: Date.now(), count: spot.count + 1 });
+  if (info.result !== "failure") {
+    Hooks.callAll("dwAutomationLogChanged");
+    return;
+  }
   const entry = {
     id: foundry.utils.randomID(),
     time: Date.now(),

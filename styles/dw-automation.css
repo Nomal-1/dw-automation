@@ -886,3 +886,22 @@
 .dwauto-gs-log.error { color: #c33; }
 .dwauto-gs-log.warn { color: #b80; }
 .dwauto-gs-log.fail i { color: #a55; }
+.dwauto-gs-tab { font-size: 0.85em; padding: 2px 4px; }
+.dwauto-gs-pc, .dwauto-gs-enemy { border: 1px solid rgba(128, 128, 128, 0.35); border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; }
+.dwauto-gs-pc .head, .dwauto-gs-enemy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dwauto-gs-pc .head a, .dwauto-gs-enemy a { cursor: pointer; }
+.dwauto-gs-pc .head .low { color: #c33; font-weight: bold; }
+.dwauto-gs-pc .head .spot { margin-left: auto; font-size: 0.85em; opacity: 0.75; }
+.dwauto-gs-pc.quiet { border-color: #c90; }
+.dwauto-gs-pc .head .spot.quiet { color: #c90; opacity: 1; font-weight: bold; }
+.dwauto-gs-pc .debility { font-size: 0.85em; color: #a55; margin-top: 2px; }
+.dwauto-gs-pc .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; align-items: center; }
+.dwauto-gs-pc .chip { font-size: 0.8em; padding: 0 6px; border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.5); }
+.dwauto-gs-pc .chip.pending { background: rgba(230, 180, 40, 0.25); border-color: #c90; }
+.dwauto-gs-pc .chips button.icon { flex: 0 0 auto; width: auto; line-height: 1; padding: 1px 5px; }
+.dwauto-gs-enemy.dead { opacity: 0.5; text-decoration: line-through; }
+.dwauto-gs-enemy.hidden { font-style: italic; }
+.dwauto-gs-enemy .hp-controls { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.dwauto-gs-enemy .hp-controls input[type="number"] { width: 4em; }
+.dwauto-gs-enemy .hp-controls label { font-size: 0.8em; display: flex; align-items: center; gap: 2px; }
+.dwauto-gs-enemy .hp-controls button { flex: 0 0 auto; width: auto; }
