@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
@@ -49,8 +50,6 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 경우에도 같은 권한 문제가 있어서, 아래에 자체 소켓 승인 절차를 둔다
 // (features/healing.js·aid-or-interfere.js와 같은 패턴 — 소켓 채널은
 // 공유하되 type으로 구분).
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const pendingFlagApprovals = new Map();
 const ENHANCED_AID_FLAG = "arcaneArtEnhancedAid"; // { source: string } | undefined
 
 function isEnabled() {
@@ -133,16 +132,18 @@ async function setEnhancedAidRaw(target, source) {
   await target.setFlag(MODULE_ID, ENHANCED_AID_FLAG, { source });
 }
 
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
-
 async function applyFlagByKind(kind, target, payload) {
   if (kind === "damageForward") await setPendingDamageForward(target, payload.amount, payload.source);
   else if (kind === "enhancedAid") await setEnhancedAidRaw(target, payload.source);
 }
 
-function promptFlagPermission(data, callback) {
+function promptFlagPermission(data, onAnswer) {
+  let answered = false;
+  const callback = (value) => {
+    if (answered) return;
+    answered = true;
+    onAnswer(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.ArcaneArt.FlagPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.ArcaneArt.FlagPermissionContent", {
@@ -154,7 +155,8 @@ function promptFlagPermission(data, callback) {
       yes: { label: game.i18n.localize("DWAUTO.Healing.PermissionAllow"), callback: () => callback(true) },
       no: { label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"), callback: () => callback(false) }
     },
-    default: "yes"
+    default: "yes",
+    close: () => callback(false)
   }).render(true);
 }
 
@@ -175,54 +177,25 @@ function requestFlagApproval({ target, granterName, description, kind, payload }
     });
   }
 
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.ArcaneArt.NoGmOnline", { name: target.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingFlagApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "arcaneArtFlagPermissionRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      granterName,
-      targetActorId: target.id,
-      targetName: target.name,
-      description,
-      kind,
-      payload
-    });
-  });
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.ArcaneArt.NoGmOnline", { name: target.name }));
+    return Promise.resolve(false);
+  }
+  return queryUser(gm, "arcaneArtFlag", { granterName, targetActorId: target.id, targetName: target.name, description, kind, payload }, false).then(
+    (approved) => !!approved
+  );
 }
 
-function onSocketEvent(data) {
-  if (data?.type === "arcaneArtFlagPermissionRequest") {
-    if (!game.user.isGM) return;
+// GM 쪽: 허락 창을 띄우고, 허락하면 GM이 직접 플래그를 건 뒤 결과(true/false)를 돌려준다.
+function receiveFlagPermission(data) {
+  return new Promise((resolve) => {
     const target = game.actors.get(data.targetActorId);
     promptFlagPermission(data, async (approved) => {
       if (approved && target) await applyFlagByKind(data.kind, target, data.payload);
-      game.socket.emit(SOCKET_NAME, {
-        type: "arcaneArtFlagPermissionResponse",
-        requestId: data.requestId,
-        targetUserId: data.requesterUserId,
-        approved
-      });
+      resolve(approved);
     });
-    return;
-  }
-  if (data?.type === "arcaneArtFlagPermissionResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingFlagApprovals.get(data.requestId);
-    if (resolve) {
-      pendingFlagApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-  }
+  });
 }
 
 async function applyHeal(actor, target, moveItem, optionHtml, multiplier = 1) {
@@ -443,7 +416,5 @@ async function onCreateChatMessage(message, options, userId) {
 
 export function registerArcaneArtAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("arcaneArtFlag", receiveFlagPermission);
 }

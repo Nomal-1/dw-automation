@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -38,12 +39,9 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 같은 방식으로 처리한다: "누가 공격당했는지"(피격자 이름)만 저장해두고
 // 지정한 아군의 다음 판정마다 "그 공격자에 대한 판정입니까?"를 직접
 // 물어서 사람이 확인한다.
-const SOCKET_NAME = `module.${MODULE_ID}`;
 const HIT_TRIGGER_SKIP_FLAG = "dwautoSkipHitTrigger"; // features/hit-trigger.js와 같은 값 — 서로의 후속 갱신을 다시 가로채지 않기 위함
 const SKIP_FLAG = "dwautoSkipDefend";
 
-const pendingVengeanceApprovals = new Map(); // requestId -> resolve
-const pendingUpdateApprovals = new Map(); // requestId -> resolve
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_DEFEND_ASSISTANT);
@@ -110,38 +108,16 @@ async function matchesConfiguredName(title, originalTitle = null) {
   return await matchesConfiguredNameByTitle(originalTitle);
 }
 
-function findGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
-
 // actor에 쓰기 권한이 없으면(방어자와 피격자가 서로 다른 플레이어의
 // 캐릭터인 경우가 흔하다) 접속 중인 GM에게 대신 적용해달라고 요청한다.
 // aid-or-interfere.js/know-it-all.js와 같은 이유의 같은 패턴을, 이 파일
 // 안에서 필요한 모든 갱신(피해 재적용/hold 소모/반격 등)에 공용으로 쓴다.
 async function updateActorSafely(actor, changes, options = {}) {
-  if (actor.isOwner) {
-    await actor.update(changes, options);
-    return true;
-  }
-
-  const gm = findGM();
-  if (!gm) {
+  if (!actor.isOwner && !activeGM()) {
     ui.notifications.warn(game.i18n.format("DWAUTO.Defend.NoGmOnlineUpdate", { name: actor.name }));
     return false;
   }
-
-  return new Promise((resolve) => {
-    const requestId = foundry.utils.randomID();
-    pendingUpdateApprovals.set(requestId, resolve);
-    game.socket.emit(SOCKET_NAME, {
-      type: "defendUpdateRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      actorId: actor.id,
-      changes,
-      options
-    });
-  });
+  return updateActorAsGM(actor, changes, options);
 }
 
 async function setReserveSafely(actor, value) {
@@ -156,32 +132,30 @@ async function clearDefendStateSafely(actor) {
   });
 }
 
-function requestVengeanceGrantApproval({ ally, victimName, defenderActorId, defenderName }) {
-  return new Promise((resolve) => {
-    const gm = findGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.Defend.NoGmOnline", { name: ally.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingVengeanceApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "defendVengeanceGrantRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      allyActorId: ally.id,
-      allyName: ally.name,
-      victimName,
-      defenderActorId,
-      defenderName
-    });
-  });
+async function requestVengeanceGrantApproval({ ally, victimName, defenderActorId, defenderName }) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.Defend.NoGmOnline", { name: ally.name }));
+    return false;
+  }
+  return !!(await queryUser(gm, "defendVengeanceGrant", {
+  allyActorId: ally.id,
+  allyName: ally.name,
+  victimName,
+  defenderActorId,
+  defenderName
+  }, false));
 }
 
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptVengeanceGrantPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.Defend.VengeanceGrantPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Defend.VengeanceGrantPermissionContent", {
@@ -195,28 +169,20 @@ function promptVengeanceGrantPermission(data) {
         callback: async () => {
           const ally = game.actors.get(data.allyActorId);
           if (ally) await setDefendVengeancePending(ally, data.victimName, data.defenderActorId, data.defenderName);
-          game.socket.emit(SOCKET_NAME, {
-            type: "defendVengeanceGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
         callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "defendVengeanceGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
+          respond(false);
         }
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
+  });
 }
 
 async function grantVengeancePending(ally, victimName, defenderActorId, defenderName) {
@@ -225,6 +191,15 @@ async function grantVengeancePending(ally, victimName, defenderActorId, defender
     return true;
   }
   return requestVengeanceGrantApproval({ ally, victimName, defenderActorId, defenderName });
+}
+
+// 받는 쪽: 방어 예비를 쓸지 묻는 창을 띄운다(기다리지 않고 바로 "받았다"고 답한다).
+function receiveDefendRelay({ defenderActorId, victimActorId, damage, changes, options }) {
+  const defender = game.actors.get(defenderActorId);
+  const victim = game.actors.get(victimActorId);
+  if (!defender || !victim) return false;
+  handleIncomingDefend({ defender, victim, damage, changes, options });
+  return true;
 }
 
 function promptProtectTarget(actor, moveItem) {
@@ -494,74 +469,16 @@ function onPreUpdateActor(victim, changes, options, userId) {
   // 권한이 있는 쪽(대개 GM)이 대신 적용한다.
   const decidingUser = findDecidingUser(defender);
   if (decidingUser && decidingUser.id !== game.user.id) {
-    game.socket.emit(SOCKET_NAME, {
-      type: "defendRequest",
-      targetUserId: decidingUser.id,
-      defenderActorId: defender.id,
-      victimActorId: victim.id,
-      damage,
-      changes,
-      options
-    });
+    // 그 플레이어에게 넘기고, 넘기지 못하면(그 사이 나갔다 등) 여기서 묻는다
+    queryUser(decidingUser, "defendRelay", { defenderActorId: defender.id, victimActorId: victim.id, damage, changes, options }, false).then(
+      (delivered) => {
+        if (!delivered) handleIncomingDefend({ defender, victim, damage, changes, options });
+      }
+    );
   } else {
     handleIncomingDefend({ defender, victim, damage, changes, options });
   }
   return false;
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "defendRequest") {
-    if (data.targetUserId !== game.user.id) return;
-    const defender = game.actors.get(data.defenderActorId);
-    const victim = game.actors.get(data.victimActorId);
-    if (!defender || !victim) return;
-    handleIncomingDefend({ defender, victim, damage: data.damage, changes: data.changes, options: data.options });
-    return;
-  }
-
-  if (data?.type === "defendUpdateRequest") {
-    if (!game.user.isGM) return;
-    const actor = game.actors.get(data.actorId);
-    const respond = (success) =>
-      game.socket.emit(SOCKET_NAME, {
-        type: "defendUpdateResponse",
-        requestId: data.requestId,
-        targetUserId: data.requesterUserId,
-        success
-      });
-    if (!actor) {
-      respond(false);
-      return;
-    }
-    actor
-      .update(data.changes, data.options)
-      .then(() => respond(true))
-      .catch(() => respond(false));
-    return;
-  }
-  if (data?.type === "defendUpdateResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingUpdateApprovals.get(data.requestId);
-    if (resolve) {
-      pendingUpdateApprovals.delete(data.requestId);
-      resolve(data.success);
-    }
-    return;
-  }
-
-  if (data?.type === "defendVengeanceGrantRequest") {
-    if (!game.user.isGM) return;
-    promptVengeanceGrantPermission(data);
-    return;
-  }
-  if (data?.type === "defendVengeanceGrantResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingVengeanceApprovals.get(data.requestId);
-    if (resolve) {
-      pendingVengeanceApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-  }
 }
 
 // lib/roll-wrapper.js가 액터가 굴리는 모든 판정 전에 호출한다. 대기 중인
@@ -692,7 +609,6 @@ export function registerDefendAssistant() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.on("updateActor", onUpdateActor);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("defendVengeanceGrant", promptVengeanceGrantPermission);
+  registerQuery("defendRelay", receiveDefendRelay);
 }

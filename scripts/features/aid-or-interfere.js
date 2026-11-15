@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -38,10 +39,7 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 권한(Owner)이 없으면(플레이어 서로 다른 캐릭터라 권한이 없는 게 보통이다)
 // 접속 중인 GM에게 승인을 구한다 — features/healing.js와 같은 방식(같은
 // 소켓 채널을 쓰지만 type 값으로 서로 구분한다).
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const pendingApprovals = new Map();
 const pendingDecisions = new Map(); // actor.id -> { targetId, targetName, amount }
-const pendingInstinctAcks = new Map(); // requestId -> resolve
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_AID_OR_INTERFERE_ASSISTANT);
@@ -95,40 +93,35 @@ function findLittleHelpMove(actor) {
   return actor.items.find((i) => i.type === "move" && ((names.includes(i.name) || names.includes(i.flags?.babele?.originalName)) && !isMoveItemDisabled(i))) ?? null;
 }
 
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
-
-function requestBonusApproval({ target, granterName, amount, source }) {
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.AidOrInterfere.NoGmOnline", { name: target.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "rollBonusPermissionRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      granterName,
-      targetActorId: target.id,
-      targetName: target.name,
-      amount,
-      source
-    });
-  });
+// 대상 액터를 고칠 권한이 없을 때 GM에게 보너스를 걸어도 되는지 묻는다(lib/gm-query.js).
+async function requestBonusApproval({ target, granterName, amount, source }) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.AidOrInterfere.NoGmOnline", { name: target.name }));
+    return false;
+  }
+  return !!(await queryUser(gm, "rollBonusPermission", {
+    granterName,
+    targetActorId: target.id,
+    targetName: target.name,
+    amount,
+    source
+  }, false));
 }
 
 function formatSigned(amount) {
   return amount >= 0 ? `+${amount}` : `${amount}`;
 }
 
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptBonusPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.AidOrInterfere.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.PermissionContent", {
@@ -142,28 +135,18 @@ function promptBonusPermission(data) {
         callback: async () => {
           const target = game.actors.get(data.targetActorId);
           if (target) await setPendingRollBonus(target, data.amount, data.source);
-          game.socket.emit(SOCKET_NAME, {
-            type: "rollBonusPermissionResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
-        callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "rollBonusPermissionResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
-        }
+        callback: () => respond(false)
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
+  });
 }
 
 // GM에게 보여줄 팝업 자체를 만드는 부분만 따로 뺐다. onAck은 "GM이 확인
@@ -201,15 +184,9 @@ function showInstinctReminderDialog({ interfererName, targetName, amount }, onAc
 // 자체(=시스템의 유대 입력창)가 뜨지 않는다 — 그래야 안내를 놓치고 먼저
 // 굴려버리는 일이 없다.
 //
-// 지금 이 클라이언트가 이미 GM이면(예: GM이 직접 방해 판정을 굴렸거나,
-// 방해 주체와 대상이 둘 다 GM 소유 캐릭터인 경우) 소켓으로 요청을 보내봐야
-// 소용없다 — Foundry의 모듈 소켓(game.socket.emit)은 서버가 "보낸 사람을
-// 제외한" 다른 클라이언트에게만 중계하므로, 받을 다른 GM 클라이언트가
-// 없으면 응답이 영영 안 와서 굴림 자체가 멈춰버린다(원조/방해 무브 옆에서
-// GM이 스스로 테스트할 때 흔히 걸리는 경우). 이 경우는 소켓을 거치지 않고
-// 지금 이 자리에서 바로 팝업을 띄운다. GM이 아니고 접속 중인 GM도 없으면
-// 막을 사람이 없으므로 방해하는 플레이어 본인에게라도 안내하고 바로
-// 진행한다.
+// 지금 이 클라이언트가 GM이면 바로 이 자리에서 팝업을 띄운다(GM이 직접 굴린 경우).
+// GM이 아니고 접속 중인 GM도 없으면 막을 사람이 없으므로 방해하는 플레이어 본인에게라도
+// 안내하고 바로 진행한다. GM에게 묻는 부분은 lib/gm-query.js의 질의 기능을 쓴다.
 function requestInstinctReminderAck({ interfererName, targetName, amount }) {
   if (game.user.isGM) {
     return new Promise((resolve) => {
@@ -217,68 +194,20 @@ function requestInstinctReminderAck({ interfererName, targetName, amount }) {
     });
   }
 
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(
-        game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderNoGm", { target: targetName, amount: formatSigned(amount) })
-      );
-      resolve();
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingInstinctAcks.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "instinctReminderRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      interfererName,
-      targetName,
-      amount
-    });
-  });
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(
+      game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderNoGm", { target: targetName, amount: formatSigned(amount) })
+    );
+    return Promise.resolve();
+  }
+  // GM이 확인을 누를 때까지 기다린다(GM이 나가 버리면 그냥 진행)
+  return queryUser(gm, "instinctReminder", { interfererName, targetName, amount }, null);
 }
 
+// GM 쪽: 안내 창을 띄우고 확인(또는 닫기)하면 끝난다.
 function promptInstinctReminder(data) {
-  showInstinctReminderDialog(data, () => {
-    game.socket.emit(SOCKET_NAME, {
-      type: "instinctReminderResponse",
-      requestId: data.requestId,
-      targetUserId: data.requesterUserId
-    });
-  });
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "rollBonusPermissionRequest") {
-    if (!game.user.isGM) return;
-    promptBonusPermission(data);
-    return;
-  }
-  if (data?.type === "rollBonusPermissionResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingApprovals.get(data.requestId);
-    if (resolve) {
-      pendingApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-    return;
-  }
-  if (data?.type === "instinctReminderRequest") {
-    if (!game.user.isGM) return;
-    promptInstinctReminder(data);
-    return;
-  }
-  if (data?.type === "instinctReminderResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingInstinctAcks.get(data.requestId);
-    if (resolve) {
-      pendingInstinctAcks.delete(data.requestId);
-      resolve();
-    }
-  }
+  return new Promise((resolve) => showInstinctReminderDialog(data, () => resolve(true)));
 }
 
 // target에 대한 수정 권한(Owner)이 있으면 바로 걸고, 없으면 접속 중인 GM에게
@@ -412,7 +341,6 @@ async function onCreateChatMessage(message, options, userId) {
 
 export function registerAidOrInterfereAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("rollBonusPermission", promptBonusPermission);
+  registerQuery("instinctReminder", promptInstinctReminder);
 }

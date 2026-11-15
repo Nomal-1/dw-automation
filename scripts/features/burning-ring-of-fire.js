@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -64,71 +65,16 @@ async function matchesConfiguredName(title, originalTitle = null) {
   return await matchesConfiguredNameByTitle(originalTitle);
 }
 
-function findGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
-
-const pendingUpdateApprovals = new Map();
-const SOCKET_NAME = `module.${MODULE_ID}`;
 
 // features/defend.js의 updateActorSafely와 같은 이유의 같은 패턴 — 결속
 // 대상이 다른 플레이어의 캐릭터일 수 있어서, 그쪽에 쓸 권한이 없으면
 // 접속 중인 GM에게 대신 적용해달라고 요청한다.
 async function updateActorSafely(actor, changes, options = {}) {
-  if (actor.isOwner) {
-    await actor.update(changes, options);
-    return true;
-  }
-
-  const gm = findGM();
-  if (!gm) {
+  if (!actor.isOwner && !activeGM()) {
     console.warn(`${MODULE_ID} | burning-ring-of-fire: no permission on ${actor.name} and no GM online`);
     return false;
   }
-
-  return new Promise((resolve) => {
-    const requestId = foundry.utils.randomID();
-    pendingUpdateApprovals.set(requestId, resolve);
-    game.socket.emit(SOCKET_NAME, {
-      type: "burningRingUpdateRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      actorId: actor.id,
-      changes,
-      options
-    });
-  });
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "burningRingUpdateRequest") {
-    if (!game.user.isGM) return;
-    const actor = game.actors.get(data.actorId);
-    const respond = (success) =>
-      game.socket.emit(SOCKET_NAME, {
-        type: "burningRingUpdateResponse",
-        requestId: data.requestId,
-        targetUserId: data.requesterUserId,
-        success
-      });
-    if (!actor) {
-      respond(false);
-      return;
-    }
-    actor
-      .update(data.changes, data.options)
-      .then(() => respond(true))
-      .catch(() => respond(false));
-    return;
-  }
-  if (data?.type === "burningRingUpdateResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingUpdateApprovals.get(data.requestId);
-    if (resolve) {
-      pendingUpdateApprovals.delete(data.requestId);
-      resolve(data.success);
-    }
-  }
+  return updateActorAsGM(actor, changes, options);
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -271,7 +217,4 @@ export function registerBurningRingOfFireAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("updateActor", onUpdateActor);
   Hooks.on("renderActorSheet", onRenderActorSheet);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
 }

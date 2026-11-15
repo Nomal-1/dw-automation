@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
 import { getShedCandidate, applyShed } from "./druid.js";
@@ -29,7 +30,6 @@ const SKIP_FLAG = "dwautoSkipHitTrigger";
 // 데미지를 적용하는 사람(GM 등)이 아니라, 그 피해를 받는 캐릭터의 소유
 // 플레이어가 무효화 여부를 결정해야 하므로 소켓으로 그 플레이어의 클라이언트에
 // 대화상자를 띄운다.
-const SOCKET_NAME = `module.${MODULE_ID}`;
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -315,11 +315,6 @@ async function applyHoldNegation(actor, row) {
 // GM에게 넘겨서 대신 소모해달라고 요청한다. 이미 그 캐릭터 자신의 판단으로
 // "쓰겠다"고 고른 뒤라 별도 승인 대화상자 없이(원조/방해의 보너스 부여와
 // 달리 임의의 수치를 정하는 것도 아니라서) 그대로 처리한다.
-const pendingHoldSpendResolvers = new Map();
-
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
 
 async function spendCasterHold(caster) {
   if (caster.isOwner) {
@@ -329,22 +324,35 @@ async function spendCasterHold(caster) {
     return true;
   }
 
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      resolve(false);
-      return;
-    }
+  return !!(await queryUser(activeGM(), "allyHoldSpend", { casterActorId: caster.id }, false));
+}
 
-    const requestId = foundry.utils.randomID();
-    pendingHoldSpendResolvers.set(requestId, resolve);
-    game.socket.emit(SOCKET_NAME, {
-      type: "allyHoldSpendRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      casterActorId: caster.id
-    });
+// GM 쪽: 시전자의 예비를 하나 쓴다. 예비가 없으면 false.
+async function receiveAllyHoldSpend({ casterActorId }) {
+  const caster = game.actors.get(casterActorId);
+  if (!caster) return false;
+  const current = getHold(caster);
+  if (current <= 0) return false;
+  await setHold(caster, current - 1);
+  return true;
+}
+
+// 받는 쪽: 피격 반응 창을 띄운다(기다리지 않고 바로 "받았다"고 답한다).
+function receiveHitTriggerRelay(data) {
+  const actor = game.actors.get(data.actorId);
+  if (!actor) {
+    console.warn(`${MODULE_ID} | hit-trigger: actor ${data.actorId} not found on this client`);
+    return false;
+  }
+  handleIncomingDamage({
+    actor,
+    damage: data.damage,
+    changes: data.changes,
+    options: data.options,
+    candidates: data.candidates,
+    outnumberedCandidates: data.outnumberedCandidates
   });
+  return true;
 }
 
 // 클레릭 신의 보우/신의 가호 전용: 아군을 지켜주는 시전자의 예비를 하나
@@ -718,77 +726,17 @@ function onPreUpdateActor(actor, changes, options, userId) {
   // 하므로, 그 플레이어가 따로 접속해 있다면 소켓으로 넘긴다.
   const decidingUser = findDecidingUser(actor);
   if (decidingUser && decidingUser.id !== game.user.id) {
-    console.log(
-      `${MODULE_ID} | hit-trigger: relaying prompt for ${actor.name} (damage ${damage}) to ${decidingUser.name} via socket`
+    // 그 플레이어에게 넘기고, 넘기지 못하면(그 사이 나갔다 등) 여기서 묻는다
+    queryUser(decidingUser, "hitTriggerRelay", { actorId: actor.id, candidates, outnumberedCandidates, damage, changes, options }, false).then(
+      (delivered) => {
+        if (!delivered) handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidates });
+      }
     );
-    game.socket.emit(SOCKET_NAME, {
-      type: "hitTriggerRequest",
-      targetUserId: decidingUser.id,
-      actorId: actor.id,
-      candidates,
-      outnumberedCandidates,
-      damage,
-      changes,
-      options
-    });
   } else {
     console.log(`${MODULE_ID} | hit-trigger: no other connected owner found for ${actor.name}, prompting locally`);
     handleIncomingDamage({ actor, damage, changes, options, candidates, outnumberedCandidates });
   }
   return false;
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "hitTriggerRequest") {
-    console.log(`${MODULE_ID} | hit-trigger: socket event received`, data);
-    if (data.targetUserId !== game.user.id) return;
-    const actor = game.actors.get(data.actorId);
-    if (!actor) {
-      console.warn(`${MODULE_ID} | hit-trigger: actor ${data.actorId} not found on this client`);
-      return;
-    }
-    console.log(`${MODULE_ID} | hit-trigger: showing prompt for ${actor.name}`);
-    handleIncomingDamage({
-      actor,
-      damage: data.damage,
-      changes: data.changes,
-      options: data.options,
-      candidates: data.candidates,
-      outnumberedCandidates: data.outnumberedCandidates
-    });
-    return;
-  }
-
-  if (data?.type === "allyHoldSpendRequest") {
-    if (!game.user.isGM) return;
-    (async () => {
-      const caster = game.actors.get(data.casterActorId);
-      let success = false;
-      if (caster) {
-        const current = getHold(caster);
-        if (current > 0) {
-          await setHold(caster, current - 1);
-          success = true;
-        }
-      }
-      game.socket.emit(SOCKET_NAME, {
-        type: "allyHoldSpendResponse",
-        requestId: data.requestId,
-        targetUserId: data.requesterUserId,
-        success
-      });
-    })();
-    return;
-  }
-
-  if (data?.type === "allyHoldSpendResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingHoldSpendResolvers.get(data.requestId);
-    if (resolve) {
-      pendingHoldSpendResolvers.delete(data.requestId);
-      resolve(data.success);
-    }
-  }
 }
 
 // 약화를 새로 얻으면(피의 보루로 얻은 경우 포함, 원인 불문) Indomitable을
@@ -949,8 +897,9 @@ export function registerHitTriggerAssistant() {
   Hooks.on("preUpdateActor", onPreUpdateActor);
   Hooks.on("updateActor", onUpdateActor);
   Hooks.on("renderActorSheet", onRenderActorSheet);
+  registerQuery("allyHoldSpend", receiveAllyHoldSpend);
+  registerQuery("hitTriggerRelay", receiveHitTriggerRelay);
   Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
     migrateFixMansBestFriendApostrophe().then(() => migrateAddSurveyedDefaults());
   });
 }

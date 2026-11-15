@@ -1,6 +1,6 @@
 # 던전월드 자동화 툴킷 (dw-automation)
 
-Foundry VTT의 던전월드(Dungeon World) 시스템용 GM 자동화 모듈입니다. Foundry V12.331 / Dungeon World 1.8.2 기준으로 작성되었습니다.
+Foundry VTT의 던전월드(Dungeon World) 시스템용 GM 자동화 모듈입니다. Foundry V14 / Dungeon World 1.10.0 전용입니다(V12용은 0.122.0 이하).
 
 기능은 모듈 설정에서 개별적으로 켜고 끌 수 있습니다.
 

@@ -85,9 +85,11 @@ import { registerCrossClassSpellAssistant } from "./features/cross-class-spell.j
 import { registerSettingsTabs } from "./lib/settings-tabs.js";
 import { registerMigrationBackup } from "./lib/migration-backup.js";
 import { registerLegacyNameFixes } from "./lib/legacy-name-fixes.js";
+import { registerCoreQueries } from "./lib/gm-query.js";
 
 Hooks.once("init", () => {
   registerSettings();
+  registerCoreQueries();
   registerSettingsTabs();
 });
 

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -20,8 +21,6 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 중인 GM에게 승인을 구한다 — features/aid-or-interfere.js의 requestBonusApproval과
 // 같은 소켓 패턴이지만, 보정치가 항상 고정(다음 판정에 한해 조건부 +1)이라
 // 금액(amount) 없이 대상/출처만 전달하도록 단순화했다.
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const pendingApprovals = new Map();
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_HEIST_ASSISTANT);
@@ -65,34 +64,28 @@ async function matchesConfiguredName(title, originalTitle = null) {
   return await matchesConfiguredNameByTitle(originalTitle);
 }
 
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
+async function requestGrantApproval(target, source) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.Heist.NoGmOnline", { name: target.name }));
+    return false;
+  }
+  return !!(await queryUser(gm, "heistGrant", {
+  targetActorId: target.id,
+  targetName: target.name,
+  source
+  }, false));
 }
 
-function requestGrantApproval(target, source) {
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.Heist.NoGmOnline", { name: target.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "heistGrantRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      targetActorId: target.id,
-      targetName: target.name,
-      source
-    });
-  });
-}
-
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptGrantPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.Heist.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Heist.PermissionContent", { target: data.targetName })}</p>`,
@@ -102,44 +95,20 @@ function promptGrantPermission(data) {
         callback: async () => {
           const target = game.actors.get(data.targetActorId);
           if (target) await setPendingHeistBonus(target, data.source);
-          game.socket.emit(SOCKET_NAME, {
-            type: "heistGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
         callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "heistGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
+          respond(false);
         }
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "heistGrantRequest") {
-    if (!game.user.isGM) return;
-    promptGrantPermission(data);
-    return;
-  }
-  if (data?.type === "heistGrantResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingApprovals.get(data.requestId);
-    if (resolve) {
-      pendingApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-  }
+  });
 }
 
 async function grantTo(target, source) {
@@ -222,7 +191,5 @@ export async function promptHeistPreRoll(item) {
 
 export function registerHeistAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("heistGrant", promptGrantPermission);
 }

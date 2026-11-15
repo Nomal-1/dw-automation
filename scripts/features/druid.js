@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { handleHoldMove } from "../lib/hold.js";
@@ -17,7 +18,6 @@ const ABILITY_KEYS = ["str", "dex", "con", "int", "wis", "cha"];
 
 // Formcrafter의 마스터 쪽 능력치 선택을 요청하는 소켓 채널. hit-trigger.js/
 // healing.js와 같은 채널을 쓰고 type 값으로만 구분한다.
-const SOCKET_NAME = `module.${MODULE_ID}`;
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -366,7 +366,7 @@ async function applyFormcrafterOnShapeshiftStart(actor) {
   if (game.user.isGM) {
     await promptFormcrafterGmChoice(actor, move.name);
   } else {
-    game.socket.emit(SOCKET_NAME, { type: "formcrafterGmChoiceRequest", actorId: actor.id, moveName: move.name });
+    queryUser(activeGM(), "formcrafterGmChoice", { actorId: actor.id, moveName: move.name }, false);
   }
 }
 
@@ -925,23 +925,16 @@ async function onCreateChatMessage(message, options, userId) {
   await startShapeshift(actor);
 }
 
-// 이 클라이언트가 GM이면 Formcrafter의 마스터 쪽 능력치 선택 요청을 받아
-// 대화상자를 띄운다(healing.js의 GM 승인 요청과 같은 방식 — 여러 GM이
-// 접속해 있으면 전부에게 뜬다).
-function onSocketEvent(data) {
-  if (data?.type !== "formcrafterGmChoiceRequest") return;
-  if (!game.user.isGM) return;
-
-  const actor = game.actors.get(data.actorId);
-  if (!actor) return;
-
-  promptFormcrafterGmChoice(actor, data.moveName);
+// GM 쪽: Formcrafter의 마스터 쪽 능력치 선택 창을 띄운다(대표 GM 한 명에게만 뜬다).
+function receiveFormcrafterGmChoice({ actorId, moveName }) {
+  const actor = game.actors.get(actorId);
+  if (!actor || !game.user.isGM) return false;
+  promptFormcrafterGmChoice(actor, moveName);
+  return true;
 }
 
 export function registerDruidAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("formcrafterGmChoice", receiveFormcrafterGmChoice);
 }

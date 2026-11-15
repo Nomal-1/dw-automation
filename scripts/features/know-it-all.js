@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -22,9 +23,6 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 다른 캐릭터), features/aid-or-interfere.js와 같은 방식으로 접속 중인
 // GM에게 승인을 구한다. 조언한 위저드의 XP 마크도 마찬가지로 그 위저드
 // 액터에 대한 쓰기 권한이 없을 수 있어 같은 방식을 한 번 더 쓴다.
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const pendingGrantApprovals = new Map(); // requestId -> resolve
-const pendingXpApprovals = new Map(); // requestId -> resolve
 
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_KNOW_IT_ALL_ASSISTANT);
@@ -73,35 +71,29 @@ async function matchesConfiguredName(title, originalTitle = null) {
   return await matchesConfiguredNameByTitle(originalTitle);
 }
 
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
+async function requestGrantApproval({ target, grantorActorId, grantorName }) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.KnowItAll.NoGmOnline", { name: target.name }));
+    return false;
+  }
+  return !!(await queryUser(gm, "knowItAllGrant", {
+  grantorActorId,
+  grantorName,
+  targetActorId: target.id,
+  targetName: target.name
+  }, false));
 }
 
-function requestGrantApproval({ target, grantorActorId, grantorName }) {
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.KnowItAll.NoGmOnline", { name: target.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingGrantApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "knowItAllGrantRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      grantorActorId,
-      grantorName,
-      targetActorId: target.id,
-      targetName: target.name
-    });
-  });
-}
-
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptGrantPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.KnowItAll.GrantPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.KnowItAll.GrantPermissionContent", {
@@ -114,28 +106,20 @@ function promptGrantPermission(data) {
         callback: async () => {
           const target = game.actors.get(data.targetActorId);
           if (target) await setKnowItAllPending(target, data.grantorActorId, data.grantorName);
-          game.socket.emit(SOCKET_NAME, {
-            type: "knowItAllGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
         callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "knowItAllGrantResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
+          respond(false);
         }
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
+  });
 }
 
 // target에 대한 수정 권한(Owner)이 있으면 바로 걸고, 없으면 접속 중인 GM에게
@@ -155,29 +139,27 @@ async function addXp(actor) {
   announceInfo(actor, game.i18n.localize("DWAUTO.KnowItAll.XpMarked"));
 }
 
-function requestXpApproval({ grantorActorId, grantorName }) {
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.KnowItAll.XpNoGm", { name: grantorName }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingXpApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "knowItAllXpRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      grantorActorId,
-      grantorName
-    });
-  });
+async function requestXpApproval({ grantorActorId, grantorName }) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.KnowItAll.XpNoGm", { name: grantorName }));
+    return false;
+  }
+  return !!(await queryUser(gm, "knowItAllXp", {
+  grantorActorId,
+  grantorName
+  }, false));
 }
 
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptXpPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.KnowItAll.XpPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.KnowItAll.XpPermissionContent", { name: data.grantorName })}</p>`,
@@ -187,28 +169,20 @@ function promptXpPermission(data) {
         callback: async () => {
           const grantor = game.actors.get(data.grantorActorId);
           if (grantor) await addXp(grantor);
-          game.socket.emit(SOCKET_NAME, {
-            type: "knowItAllXpResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
         callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "knowItAllXpResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
+          respond(false);
         }
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
+  });
 }
 
 async function markExperience(grantorActorId, grantorName) {
@@ -220,36 +194,6 @@ async function markExperience(grantorActorId, grantorName) {
     return;
   }
   await requestXpApproval({ grantorActorId, grantorName });
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "knowItAllGrantRequest") {
-    if (!game.user.isGM) return;
-    promptGrantPermission(data);
-    return;
-  }
-  if (data?.type === "knowItAllGrantResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingGrantApprovals.get(data.requestId);
-    if (resolve) {
-      pendingGrantApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-    return;
-  }
-  if (data?.type === "knowItAllXpRequest") {
-    if (!game.user.isGM) return;
-    promptXpPermission(data);
-    return;
-  }
-  if (data?.type === "knowItAllXpResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingXpApprovals.get(data.requestId);
-    if (resolve) {
-      pendingXpApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-  }
 }
 
 async function onCreateChatMessage(message, options, userId) {
@@ -405,7 +349,6 @@ export function registerKnowItAllAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   Hooks.on("renderActorSheet", onRenderActorSheet);
   Hooks.on("updateActor", onUpdateActor);
-  Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
-  });
+  registerQuery("knowItAllGrant", promptGrantPermission);
+  registerQuery("knowItAllXp", promptXpPermission);
 }

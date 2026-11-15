@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { extractInlineRoll } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -13,8 +14,6 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 대상으로 고를 수는 있게 하되, 실제로 HP를 쓸 권한(Owner)이 없으면 GM에게
 // 승인을 구한다 — hit-trigger.js와 같은 방식으로 소켓을 통해 GM의 화면에
 // 대화상자를 띄운다(같은 채널을 쓰지만 type 값으로 서로 구분한다).
-const SOCKET_NAME = `module.${MODULE_ID}`;
-const pendingHealApprovals = new Map();
 
 function splitCommaList(settingKey) {
   const parse = (value) =>
@@ -124,42 +123,36 @@ function promptMaxHealAmount(max) {
   });
 }
 
-function findApprovingGM() {
-  return game.users.find((u) => u.active && u.isGM) ?? null;
-}
-
 // 적인지 아군인지 애매한, 관찰(Observer) 권한만 있는 대상에게 치유를 주는
 // 것도 서사적으로 재미있는 연출일 수 있어서 막지 않는다 — 다만 실제로 HP를
 // 쓸 권한(Owner)이 없으니, 굴린 치유량을 들고 접속 중인 GM에게 승인을
 // 구한다. GM이 허락하면 GM의 클라이언트가 직접 적용한다(GM은 항상 모든
 // 액터에 대한 권한이 있으므로).
-function requestHealApproval({ target, healerName, itemName, amount, invigorate }) {
-  return new Promise((resolve) => {
-    const gm = findApprovingGM();
-    if (!gm) {
-      ui.notifications.warn(game.i18n.format("DWAUTO.Healing.NoGmOnline", { name: target.name }));
-      resolve(false);
-      return;
-    }
-
-    const requestId = foundry.utils.randomID();
-    pendingHealApprovals.set(requestId, resolve);
-
-    game.socket.emit(SOCKET_NAME, {
-      type: "healPermissionRequest",
-      requestId,
-      requesterUserId: game.user.id,
-      healerName,
-      targetActorId: target.id,
-      targetName: target.name,
-      itemName,
-      amount,
-      invigorate
-    });
-  });
+async function requestHealApproval({ target, healerName, itemName, amount, invigorate }) {
+  const gm = activeGM();
+  if (!gm) {
+    ui.notifications.warn(game.i18n.format("DWAUTO.Healing.NoGmOnline", { name: target.name }));
+    return false;
+  }
+  return !!(await queryUser(gm, "healPermission", {
+  healerName,
+  targetActorId: target.id,
+  targetName: target.name,
+  itemName,
+  amount,
+  invigorate
+  }, false));
 }
 
+// GM 쪽: 허락 창을 띄우고 고른 결과(true/false)를 돌려준다. 창을 그냥 닫으면 거절.
 function promptHealPermission(data) {
+  return new Promise((resolve) => {
+  let answered = false;
+  const respond = (value) => {
+    if (answered) return;
+    answered = true;
+    resolve(value);
+  };
   new Dialog({
     title: game.i18n.localize("DWAUTO.Healing.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Healing.PermissionContent", {
@@ -179,44 +172,20 @@ function promptHealPermission(data) {
             await target.update({ "system.attributes.hp.value": Math.min(targetHp + data.amount, targetMax) });
             if (data.invigorate) await setPendingDamageForward(target, data.invigorate.amount, data.invigorate.source);
           }
-          game.socket.emit(SOCKET_NAME, {
-            type: "healPermissionResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: true
-          });
+          respond(true);
         }
       },
       no: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionDeny"),
         callback: () => {
-          game.socket.emit(SOCKET_NAME, {
-            type: "healPermissionResponse",
-            requestId: data.requestId,
-            targetUserId: data.requesterUserId,
-            approved: false
-          });
+          respond(false);
         }
       }
     },
-    default: "yes"
+    default: "yes",
+    close: () => respond(false)
   }).render(true);
-}
-
-function onSocketEvent(data) {
-  if (data?.type === "healPermissionRequest") {
-    if (!game.user.isGM) return;
-    promptHealPermission(data);
-    return;
-  }
-  if (data?.type === "healPermissionResponse") {
-    if (data.targetUserId !== game.user.id) return;
-    const resolve = pendingHealApprovals.get(data.requestId);
-    if (resolve) {
-      pendingHealApprovals.delete(data.requestId);
-      resolve(data.approved);
-    }
-  }
+  });
 }
 
 // 실제로 target의 HP에 amount를 더한다. target에 대한 수정 권한(Owner)이
@@ -390,8 +359,8 @@ async function migrateAddSurveyedHospitallerDefaults() {
 
 export function registerHealingAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
+  registerQuery("healPermission", promptHealPermission);
   Hooks.once("ready", () => {
-    game.socket.on(SOCKET_NAME, onSocketEvent);
     migrateAddSurveyedHospitallerDefaults();
   });
 }
