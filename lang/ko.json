@@ -1676,7 +1676,8 @@
       "InstinctReminderAck": "공지했습니다 (계속 진행)",
       "InstinctReminderNoGm": "{target}의 동물 본능 {amount}을(를) 유대 입력창에 직접 더해서 입력해야 하는데, 승인해줄 GM이 지금 접속해 있지 않습니다. 직접 계산해서 입력해주세요.",
       "InstinctReminderLogged": "{target}의 동물 본능 {amount}을(를) 유대 입력에 직접 더해야 한다는 안내가 전달되었습니다",
-      "LittleHelpApplied": "협조에 성공해서 자신의 다음 판정에도 +1 forward 적용 예정"
+      "LittleHelpApplied": "협조에 성공해서 자신의 다음 판정에도 +1 forward 적용 예정",
+      "InstinctAutoApplied": "명령: {target}의 동물 본능 보너스 {amount} — 이번 방해 판정에 자동으로 더합니다(유대 값만 입력하면 됩니다)."
     },
     "ArcaneArt": {
       "TargetLabel": "어느 아군을 대상으로 하시겠습니까?",

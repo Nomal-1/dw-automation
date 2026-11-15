@@ -86,6 +86,7 @@ import { registerSettingsTabs } from "./lib/settings-tabs.js";
 import { registerMigrationBackup } from "./lib/migration-backup.js";
 import { registerLegacyNameFixes } from "./lib/legacy-name-fixes.js";
 import { registerCoreQueries } from "./lib/gm-query.js";
+import { registerBondRollBonus } from "./lib/bond-roll-bonus.js";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -100,6 +101,7 @@ registerMigrationBackup();
 // game.dungeonworld.ItemDw(및 다른 시스템/모듈이 등록해두는 전역들)가 전부
 // 준비된 뒤에 감싸야 안전하므로 ready에서 등록한다.
 Hooks.once("ready", () => {
+  registerBondRollBonus();
   registerRollWrapper();
 
   // 이 모듈에 의존하는 다른 모듈(예: Nomal's DW 홈브루 자동화)이

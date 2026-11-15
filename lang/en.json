@@ -1676,7 +1676,8 @@
       "InstinctReminderAck": "Notified (continue)",
       "InstinctReminderNoGm": "{target}'s animal Instinct {amount} needs to be added directly in the bond input field, but no GM is currently online to relay it. Please add it yourself.",
       "InstinctReminderLogged": "A reminder was sent to add {target}'s animal Instinct {amount} directly to the bond input",
-      "LittleHelpApplied": "Aid succeeded, so +1 forward is also queued for your own next roll"
+      "LittleHelpApplied": "Aid succeeded, so +1 forward is also queued for your own next roll",
+      "InstinctAutoApplied": "Command: {target}'s animal instinct {amount} is added to this interfere roll automatically (enter only the bond value)."
     },
     "ArcaneArt": {
       "TargetLabel": "Which ally is this for?",

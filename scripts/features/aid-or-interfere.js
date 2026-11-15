@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { CompatDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery } from "../lib/gm-query.js";
+import { setPendingBondBonus, clearPendingBondBonus } from "../lib/bond-roll-bonus.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -24,14 +25,11 @@ import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js"
 // 순간까지만 잠깐 살아있으면 되므로, 액터 플래그가 아니라 이 모듈 안의
 // Map에 액터 id로 잠깐 들고 있는다.
 //
-// 다만 Command의 본능 보너스는 rollMod로 자동 반영할 수 없다 — 던전월드
-// 시스템 자체의 결함으로, "유대(Bond)" 판정(원조/방해 전용 rollType)은
-// item.system.rollMod를 아예 읽지 않는다(features/command.js의
-// getCommandInstinctAmount 주석 참고, v1.8.2 rolls.js에서 직접 확인).
-// 그래서 이 값은 GM에게 팝업으로 안내하고, GM이 "공지했다"고 확인을 눌러야
-// (그래야 GM이 실제로 플레이어에게 알려줄 시간을 확보한다) 비로소 원조/
-// 방해 판정(시스템 자체의 유대 입력창)이 진행되도록 막아둔다 — 플레이어가
-// 안내를 못 보고 먼저 굴려버리는 걸 방지한다.
+// Command의 본능 보너스는 rollMod로는 반영할 수 없다 — 던전월드 시스템은
+// "유대(Bond)" 판정(원조/방해 전용 rollType)에서 item.system.rollMod를 읽지 않는다
+// (1.10.0 rolls.js에서도 확인). 예전에는 GM에게 "더해서 입력하라고 알려 달라"는
+// 창만 띄웠는데, 0.126.0부터는 lib/bond-roll-bonus.js가 시스템의 판정 실행 함수에
+// 끼어들어 이번 유대 판정 공식에 직접 더한다.
 //
 // 원조/방해 자체의 +1/-2는 "그 사람이 다음에 무슨 판정을 하든" 한 번 적용되고
 // 사라지는 보너스라 lib/roll-bonus-state.js(다음 판정 자동 적용 + roll-wrapper.js가
@@ -155,67 +153,6 @@ function promptBonusPermission(data) {
   });
 }
 
-// GM에게 보여줄 팝업 자체를 만드는 부분만 따로 뺐다. onAck은 "GM이 확인
-// 눌렀다"는 신호만 전달하면 된다 — 로컬에서 바로 resolve할지, 소켓으로
-// 응답을 돌려보낼지는 호출부가 정한다.
-function showInstinctReminderDialog({ interfererName, targetName, amount }, onAck) {
-  let acked = false;
-  const ack = () => {
-    if (acked) return;
-    acked = true;
-    onAck();
-  };
-
-  new CompatDialog({
-    title: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderTitle"),
-    content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderContent", {
-      interferer: interfererName,
-      target: targetName,
-      amount: formatSigned(amount)
-    })}</p>`,
-    buttons: {
-      ok: {
-        label: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderAck"),
-        callback: ack
-      }
-    },
-    default: "ok",
-    close: ack
-  }).render(true);
-}
-
-// Command의 본능 보너스는 rollMod로 반영이 안 되므로(파일 상단 주석 참고),
-// GM에게 팝업으로 "플레이어의 유대 입력창에 직접 더해서 입력하도록
-// 공지해달라"고 요청한다. GM이 확인을 누르기 전까지는 원조/방해 판정
-// 자체(=시스템의 유대 입력창)가 뜨지 않는다 — 그래야 안내를 놓치고 먼저
-// 굴려버리는 일이 없다.
-//
-// 지금 이 클라이언트가 GM이면 바로 이 자리에서 팝업을 띄운다(GM이 직접 굴린 경우).
-// GM이 아니고 접속 중인 GM도 없으면 막을 사람이 없으므로 방해하는 플레이어 본인에게라도
-// 안내하고 바로 진행한다. GM에게 묻는 부분은 lib/gm-query.js의 질의 기능을 쓴다.
-function requestInstinctReminderAck({ interfererName, targetName, amount }) {
-  if (game.user.isGM) {
-    return new Promise((resolve) => {
-      showInstinctReminderDialog({ interfererName, targetName, amount }, resolve);
-    });
-  }
-
-  const gm = activeGM();
-  if (!gm) {
-    ui.notifications.warn(
-      game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderNoGm", { target: targetName, amount: formatSigned(amount) })
-    );
-    return Promise.resolve();
-  }
-  // GM이 확인을 누를 때까지 기다린다(GM이 나가 버리면 그냥 진행)
-  return queryUser(gm, "instinctReminder", { interfererName, targetName, amount }, null);
-}
-
-// GM 쪽: 안내 창을 띄우고 확인(또는 닫기)하면 끝난다.
-function promptInstinctReminder(data) {
-  return new Promise((resolve) => showInstinctReminderDialog(data, () => resolve(true)));
-}
-
 // target에 대한 수정 권한(Owner)이 있으면 바로 걸고, 없으면 접속 중인 GM에게
 // 승인을 구한 뒤 건다. features/healing.js의 applyHealAmount와 같은 구조.
 async function applyBonus(granter, target, amount) {
@@ -244,9 +181,8 @@ function promptAidOrInterfereChoice(moveItem) {
 // lib/roll-wrapper.js가 이 무브를 실제로 굴리기 "직전에" 호출한다. 대상과
 // 원조/방해 여부를 먼저 확정해서 pendingDecisions에 담아두고(onCreateChatMessage가
 // 굴린 뒤 결과를 보고 이어받는다), "방해"를 선택했고 대상이 Command 조건을
-// 만족하면 GM에게 안내 팝업을 띄우고 확인을 받을 때까지 기다린다(그 뒤에야
-// 이 함수가 끝나서 실제 판정이 진행된다 — rollMod로는 반영이 안 되므로
-// 수동 입력을 GM이 챙기게 하는 것). 취소해도 굴림 자체는 막지 않는다 —
+// 만족하면 동물의 본능을 이번 유대 판정에 자동으로 더하도록 걸어 둔다
+// (lib/bond-roll-bonus.js). 취소해도 굴림 자체는 막지 않는다 —
 // 그냥 이번 굴림에는 아무 자동화도 적용되지 않을 뿐이다.
 export async function promptAidOrInterferePreRoll(item) {
   if (!isEnabled()) return;
@@ -273,10 +209,11 @@ export async function promptAidOrInterferePreRoll(item) {
   const instinctAmount = getCommandInstinctAmount(target);
   if (!instinctAmount) return;
 
-  await requestInstinctReminderAck({ interfererName: actor.name, targetName: target.name, amount: instinctAmount });
+  // 이번 유대 판정(지금 바로 뜨는 시스템의 유대 입력창) 공식에 자동으로 더한다
+  setPendingBondBonus(actor, instinctAmount);
   announceInfo(
     actor,
-    game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderLogged", {
+    game.i18n.format("DWAUTO.AidOrInterfere.InstinctAutoApplied", {
       target: target.name,
       amount: formatSigned(instinctAmount)
     })
@@ -296,6 +233,8 @@ async function onCreateChatMessage(message, options, userId) {
 
     if (!(await matchesConfiguredName(title, originalTitle))) return;
 
+    // 유대 판정이 아니어서 본능 보너스가 쓰이지 않았다면 여기서 버린다(다음 판정에 새지 않게)
+    clearPendingBondBonus(actor);
     const decision = pendingDecisions.get(actor.id);
     if (!decision) return; // 굴리기 전에 취소했거나, 애초에 이 무브가 아니었다.
     pendingDecisions.delete(actor.id);
@@ -348,5 +287,4 @@ async function onCreateChatMessage(message, options, userId) {
 export function registerAidOrInterfereAssistant() {
   Hooks.on("createChatMessage", onCreateChatMessage);
   registerQuery("rollBonusPermission", promptBonusPermission);
-  registerQuery("instinctReminder", promptInstinctReminder);
 }

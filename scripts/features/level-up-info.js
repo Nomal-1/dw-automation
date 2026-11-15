@@ -65,8 +65,8 @@ function getUpgradeRowFor(moveName) {
 // 무브 업그레이드 표에 등록되어 있으면 그 표의 번역된 replacesName을 그대로
 // 쓴다(있으면 항상 우선 — GM이 직접 관리하는 데이터라 컴펜디엄의
 // requiresMove 필드 유무와 무관하게 신뢰할 수 있다). 표에 없을 때만
-// system.requiresMove(항상 영문 원본)를 보고, 번역 데이터에서 찾은 이름
-// 또는 영문 원본을 대신 보여준다. 둘 다 없으면(선행조건 자체가 없는 무브)
+// system.requiresMove를 보고, 번역 데이터에서 찾은 이름 또는 그 값을 그대로 보여준다
+// (한글화 2.0.9부터 requiresMove도 한글로 번역돼 있어 그대로 쓰면 된다). 둘 다 없으면(선행조건 자체가 없는 무브)
 // null을 반환해서 아무것도 덧붙이지 않는다.
 //
 // 표에 등록된 쌍이라도 deletesPrevious가 false("필요" 관계)면 배워도 이전
