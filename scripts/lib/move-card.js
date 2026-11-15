@@ -10,7 +10,11 @@ import { isNameDisabled } from "./move-toggles.js";
 // 판단한다. isExtreme은 isSuccess와 배타적이지 않다 — 12+는 성공이면서 동시에
 // 극단적 성공이다.
 export function getMoveCardInfo(message) {
-  const card = $(message.content).find(".chat-card.move-card").first();
+  // $(문자열)은 "<"로 시작하지 않는 글(예: 그냥 채팅, 앞에 글자가 붙은 안내 메시지)을 CSS 선택자로
+  // 해석해서 오류를 던진다. 무브 카드가 아닌 메시지는 많으므로 빈 div 안에 넣어서 읽는다.
+  const content = message?.content;
+  if (!content || !content.includes("move-card")) return null;
+  const card = $("<div>").html(content).find(".chat-card.move-card").first();
   if (!card.length) return null;
 
   // 시스템 자체 버그: rolls.js가 주사위를 굴리는 분기에서만 templateData.actor를

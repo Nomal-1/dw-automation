@@ -125,9 +125,21 @@ export class TableEditorApp extends ApplicationV2 {
   /** 지금 화면에 입력된 값을 this.rows로 옮긴다(줄 추가·삭제 전에 입력한 내용을 잃지 않게). */
   #readRows() {
     const data = new foundry.applications.ux.FormDataExtended(this.element).object;
-    const expanded = foundry.utils.expandObject(data);
+    return this.#rowsFromForm(data);
+  }
+
+  // 폼 값 → 줄 목록. 화면에 칸이 없는 값(예: 클래스 부여 표의 noLevelCap — 기본값·마이그레이션이
+  // 넣어 두는 숨은 값)은 같은 위치의 원래 줄에서 그대로 가져온다. 예전 창들은 저장할 때 이런 값을
+  // 버려서 기능이 바뀌는 문제가 있었다.
+  #rowsFromForm(data) {
+    const expanded = foundry.utils.expandObject(data ?? {});
     const raw = expanded.rows ? Object.values(expanded.rows) : [];
-    return raw.map((r) => normalizeRow(this.tableKey, r));
+    return raw.map((r, i) => {
+      const row = normalizeRow(this.tableKey, r);
+      const original = this.rows[i] ?? {};
+      const hidden = Object.fromEntries(Object.entries(original).filter(([k]) => !(k in row) && k !== "classLabel"));
+      return { ...hidden, ...row };
+    });
   }
 
   static #onAddRow() {
@@ -155,8 +167,7 @@ export class TableEditorApp extends ApplicationV2 {
   }
 
   static async #onSubmit(event, form, formData) {
-    const expanded = foundry.utils.expandObject(formData.object);
-    const rows = expanded.rows ? Object.values(expanded.rows).map((r) => normalizeRow(this.tableKey, r)) : [];
+    const rows = this.#rowsFromForm(formData.object);
     const meta = TABLE_MENUS[this.tableKey];
     const nameField = nameFieldOf(this.tableKey);
     const kept = rows.filter((r) => (meta.keep ? meta.keep(r) : !!r[nameField]));
