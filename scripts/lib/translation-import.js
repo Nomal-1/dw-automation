@@ -119,7 +119,8 @@ function mergeNameMaps(packMaps) {
         // 같은 이름의 경고를 월드 로드 한 번에 수십 번 찍지 않도록 세션당 한 번만.
         if (!warnedAmbiguousNames.has(id)) {
           warnedAmbiguousNames.add(id);
-          console.warn(
+          // 오류가 아니라 참고용 안내라 경고(warn)가 아닌 info로 남긴다(GM 스크린의 오류 기록에 섞이지 않게)
+          console.info(
             `${MODULE_ID} | translation-import: "${id}" has different translations across classes ("${existing}" vs "${name}") — skipping auto-translate for this name, enter it manually.`
           );
         }

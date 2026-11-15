@@ -34,7 +34,8 @@ export class GmScreenApp extends ApplicationV2 {
     window: { title: "DWAUTO.GmScreen.Title", icon: "fas fa-book-open", resizable: true },
     position: { width: 520, height: 620 },
     actions: {
-      tab: GmScreenApp.#onTab,
+      // "tab"은 ApplicationV2가 원래 쓰는 탭 전환 동작 이름이라 겹치지 않게 다른 이름을 쓴다
+      switchTab: GmScreenApp.#onTab,
       suggest: GmScreenApp.#onSuggest,
       dismiss: GmScreenApp.#onDismiss,
       clearFailures: GmScreenApp.#onClearFailures,
@@ -69,7 +70,7 @@ export class GmScreenApp extends ApplicationV2 {
     ]
       .map(
         ([key, icon, label, count]) =>
-          `<button type="button" class="dwauto-gs-tab${this.#tab === key ? " active" : ""}" data-action="tab" data-tab="${key}">
+          `<button type="button" class="dwauto-gs-tab${this.#tab === key ? " active" : ""}" data-action="switchTab" data-tab="${key}">
             <i class="fas ${icon}"></i> ${esc(label)}${count ? ` <span class="badge">${count}</span>` : ""}</button>`
       )
       .join("");
