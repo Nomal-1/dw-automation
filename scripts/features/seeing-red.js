@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -94,7 +95,7 @@ async function onCreateChatMessage(message, options, userId) {
     if (!moveItem) return;
     if (isSeeingRedActive(actor)) return; // 이미 적용중이면 다시 안 물어본다
 
-    const inCombat = await Dialog.confirm({
+    const inCombat = await confirmDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.localize("DWAUTO.SeeingRed.Prompt")}</p>`,
       defaultYes: false

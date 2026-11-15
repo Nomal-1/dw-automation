@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -158,7 +159,7 @@ function promptSpellPreparation(actor, moveItem, row) {
       : "";
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>

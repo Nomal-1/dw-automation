@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { extractInlineRoll } from "../lib/move-choices.js";
@@ -94,7 +95,7 @@ function promptMaxHealAmount(max) {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Healing.MaxAmountTitle"),
       content: `
         <form>
@@ -155,7 +156,7 @@ function promptHealPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.Healing.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Healing.PermissionContent", {
       healer: data.healerName,

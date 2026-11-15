@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection } from "../lib/move-choices.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -65,7 +66,7 @@ function getEmpowerRow(actor) {
 async function promptEmpowerFlow(actor, castMoveItem, spell, empower, isExtreme) {
   const { row, moveItem: empowerMoveItem } = empower;
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: empowerMoveItem.name,
     content: `<p>${game.i18n.format("DWAUTO.Empower.ConfirmContent", { move: empowerMoveItem.name })}</p>`,
     defaultYes: false
@@ -175,7 +176,7 @@ function promptSpellChoice(actor, result, moveItem, isExtreme) {
 
   const options = prepared.map((s) => `<option value="${s.id}">${s.name}</option>`).join("");
 
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.Spell.ChooseTitle"),
     content: `
       <form>
@@ -262,7 +263,7 @@ function onRenderActorSheet(app, html) {
     $badge.on("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const confirmed = await Dialog.confirm({
+      const confirmed = await confirmDialog({
         title: game.i18n.localize("DWAUTO.Spell.EndTitle"),
         content: `<p>${game.i18n.format("DWAUTO.Spell.EndContent", { name: spell.name })}</p>`,
         defaultYes: false
@@ -282,7 +283,7 @@ function onRenderActorSheet(app, html) {
     $spellsCell.prepend($banner);
 
     $banner.on("click", async () => {
-      const confirmed = await Dialog.confirm({
+      const confirmed = await confirmDialog({
         title: game.i18n.localize("DWAUTO.Spell.ClearCommunePenaltyTitle"),
         content: `<p>${game.i18n.localize("DWAUTO.Spell.ClearCommunePenaltyContent")}</p>`,
         defaultYes: false

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 
 // 던전월드 기본 무브 짐(Encumbrance) 원문: "자기 하중 이하의 무게를 짊어진
 // 상태에서는 아무 지장도 없다. 하중 +1~+2의 무게를 진 상태에서는 짐을 덜
@@ -60,7 +61,7 @@ function promptDropItem(items) {
     .join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Encumbrance.DropTitle"),
       content: `
         <form>
@@ -127,7 +128,7 @@ export async function promptEncumbrancePreRoll(item) {
   const droppable = getDroppableItems(actor);
   const willDrop =
     droppable.length > 0 &&
-    (await Dialog.confirm({
+    (await confirmDialog({
       title: game.i18n.localize("DWAUTO.Encumbrance.GateTitle"),
       content: `<p>${game.i18n.format("DWAUTO.Encumbrance.GatePrompt", { over })}</p>`,
       defaultYes: true

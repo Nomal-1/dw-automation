@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { clearPendingRollBonus } from "../lib/roll-bonus-state.js";
@@ -181,7 +182,7 @@ export async function maybeRollHerculeanAppetites(
 
   let apply;
   if (isHeraclesAskMode(actor)) {
-    apply = await Dialog.confirm({
+    apply = await confirmDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.localize("DWAUTO.HerculeanAppetites.Prompt")}</p>`,
       defaultYes: false

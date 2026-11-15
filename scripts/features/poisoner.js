@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -67,7 +68,7 @@ function promptPoisonChoice(moveItem) {
   ).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `<form><p>${game.i18n.localize("DWAUTO.Poisoner.ChoosePrompt")}</p>${options}</form>`,
       buttons: {
@@ -119,7 +120,7 @@ async function onCreateChatMessage(message, options, userId) {
       return;
     }
 
-    const confirmed = await Dialog.confirm({
+    const confirmed = await confirmDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.format("DWAUTO.Poisoner.BrewPrompt", { name: existingChoice })}</p>`,
       defaultYes: false

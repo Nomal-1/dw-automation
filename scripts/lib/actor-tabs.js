@@ -1,4 +1,5 @@
 import { MODULE_ID } from "../constants.js";
+import { confirmDialog } from "./dialogs.js";
 
 // NPC 시트에 기능별 탭(랜덤생성/몬스터 스탯/...)을 여러 개 주입할 때 공용으로 쓰는 헬퍼.
 //
@@ -42,7 +43,7 @@ export function injectActorTab({ html, actor, tabKey, navLabel, onReset }) {
 
     $resetButton.on("click", async (event) => {
       event.preventDefault();
-      const confirmed = await Dialog.confirm({
+      const confirmed = await confirmDialog({
         title: game.i18n.localize("DWAUTO.ActorTab.ResetConfirmTitle"),
         content: `<p>${game.i18n.localize("DWAUTO.ActorTab.ResetConfirmContent")}</p>`,
         defaultYes: false

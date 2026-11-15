@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { injectActorTab } from "../lib/actor-tabs.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
@@ -428,7 +429,7 @@ function promptListAnswers(moveItem, groups) {
   const fieldsHtml = groups.map((group, index) => buildGroupFieldHtml(group, index)).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `<form>${fieldsHtml}</form>`,
       buttons: {
@@ -538,7 +539,7 @@ function promptCountedMultiSelect(moveItem, label, options, requiredCount) {
     .join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>

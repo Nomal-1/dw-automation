@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -129,7 +130,7 @@ export async function promptStrongArmThrow(actor, moveTitle) {
 
   if (getStrongArmMode(actor) === "off") return { throwing: false };
 
-  const throwing = await Dialog.confirm({
+  const throwing = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.StrongArm.Prompt")}</p>`,
     defaultYes: false

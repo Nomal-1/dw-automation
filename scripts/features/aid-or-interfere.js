@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
@@ -124,7 +125,7 @@ function promptBonusPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.AidOrInterfere.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.PermissionContent", {
       granter: data.granterName,
@@ -165,7 +166,7 @@ function showInstinctReminderDialog({ interfererName, targetName, amount }, onAc
     onAck();
   };
 
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.AidOrInterfere.InstinctReminderTitle"),
     content: `<p>${game.i18n.format("DWAUTO.AidOrInterfere.InstinctReminderContent", {
       interferer: interfererName,
@@ -227,7 +228,7 @@ async function applyBonus(granter, target, amount) {
 
 function promptAidOrInterfereChoice(moveItem) {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.localize("DWAUTO.AidOrInterfere.ChoicePrompt")}</p>`,
       buttons: {

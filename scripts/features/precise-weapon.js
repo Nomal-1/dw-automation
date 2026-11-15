@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
@@ -76,7 +77,7 @@ export async function promptPrecisePreRoll(item) {
 
   let isPrecise = mode === "always";
   if (mode === "ask") {
-    isPrecise = await Dialog.confirm({
+    isPrecise = await confirmDialog({
       title: item.name,
       content: `<p>${game.i18n.localize("DWAUTO.PreciseWeapon.Prompt")}</p>`,
       defaultYes: false

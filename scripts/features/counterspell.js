@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { promptRevokeSpell } from "./spellcasting.js";
@@ -77,7 +78,7 @@ function promptStakeChoice(moveItem, preparedSpells) {
   const options = preparedSpells.map((s) => `<option value="${s.id}">${s.name}</option>`).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>

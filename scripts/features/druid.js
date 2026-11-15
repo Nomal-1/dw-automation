@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -130,7 +131,7 @@ async function promptDamageDieToggleOnShapeshiftStart(actor) {
   const best = getBestDamageDieRow(actor);
   if (!best) return;
 
-  const apply = await Dialog.confirm({
+  const apply = await confirmDialog({
     title: best.move.name,
     content: `<p>${game.i18n.format("DWAUTO.Druid.DamageDiePrompt", { name: best.move.name })}</p>`,
     defaultYes: false
@@ -204,7 +205,7 @@ async function promptDopplegangersDanceToggleOnShapeshiftStart(actor) {
   const move = getDopplegangersDanceMove(actor);
   if (!move) return;
 
-  const hide = await Dialog.confirm({
+  const hide = await confirmDialog({
     title: move.name,
     content: `<p>${game.i18n.localize("DWAUTO.Druid.DopplegangerPrompt")}</p>`,
     defaultYes: false
@@ -217,7 +218,7 @@ async function promptDopplegangersDanceToggleOnShapeshiftStart(actor) {
 // attack-assistant.js의 데미지 굴림에서 소비한다.
 function promptFormshaperChoice() {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Druid.FormshaperPromptTitle"),
       content: `<p>${game.i18n.localize("DWAUTO.Druid.FormshaperPromptContent")}</p>`,
       buttons: {
@@ -305,7 +306,7 @@ function promptAbilityChoice(title, content) {
   return new Promise((resolve) => {
     const options = ABILITY_KEYS.map((key) => `<option value="${key}">${abilityLabel(key)}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title,
       content: `
         <form>
@@ -418,7 +419,7 @@ export function promptAskRollAbility(moveName) {
       buttons[key] = { label: abilityLabel(key), callback: () => resolve(key) };
     }
 
-    new Dialog({
+    new CompatDialog({
       title: moveName,
       content: `<p>${game.i18n.format("DWAUTO.Druid.FormcrafterAskContent", { name: moveName })}</p>`,
       buttons,
@@ -458,7 +459,7 @@ function promptSpendAmount(max) {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Druid.SpendTitle"),
       content: `
         <form>
@@ -520,7 +521,7 @@ function promptAnimalName() {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Druid.ShapeshiftPromptTitle"),
       content: `
         <form>
@@ -645,7 +646,7 @@ function renderBalanceBadge(actor, html) {
 
 function promptSetHold(current) {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Druid.HoldAdjustTitle"),
       content: `
         <form>

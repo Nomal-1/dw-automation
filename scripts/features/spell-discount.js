@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
@@ -62,7 +63,7 @@ function promptDiscountChoice(moveItem, candidates) {
   const options = candidates.map((s) => `<option value="${s.id}">${s.name} (Lv.${s.system.spellLevel})</option>`).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>

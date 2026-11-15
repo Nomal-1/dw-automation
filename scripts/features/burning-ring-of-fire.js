@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -164,7 +165,7 @@ async function onUpdateActor(actor, changes, options) {
 function promptSetBondPrompt() {
   // 배지 클릭 시 결속을 지울지 확인만 받는다 — 새로 맺는 건 무브를 다시
   // 발동해야 한다.
-  return Dialog.confirm({
+  return confirmDialog({
     title: game.i18n.localize("DWAUTO.BurningRingOfFire.ClearTitle"),
     content: `<p>${game.i18n.localize("DWAUTO.BurningRingOfFire.ClearContent")}</p>`,
     defaultYes: false

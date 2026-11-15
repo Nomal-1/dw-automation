@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
 import { isFountOfKnowledgeAskMode, setFountOfKnowledgeAskMode } from "../lib/fount-of-knowledge-state.js";
@@ -65,7 +66,7 @@ export async function promptFountOfKnowledgePreRoll(item) {
   if (!moveItem) return { bonus: 0 };
   if (!isFountOfKnowledgeAskMode(actor)) return { bonus: 0 };
 
-  const apply = await Dialog.confirm({
+  const apply = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.FountOfKnowledge.Prompt")}</p>`,
     defaultYes: false

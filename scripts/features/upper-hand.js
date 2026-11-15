@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { promptDialog } from "../lib/dialogs.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
@@ -67,7 +68,7 @@ export async function promptUpperHandPreRoll(item) {
   if (!hasUpperHand(actor)) return;
   if (!(await matchesLastBreath(item.name, item.flags?.babele?.originalName))) return;
 
-  await Dialog.prompt({
+  await promptDialog({
     title: item.name,
     content: `<p>${game.i18n.localize("DWAUTO.UpperHand.ReminderContent")}</p>`,
     label: game.i18n.localize("DWAUTO.UpperHand.ReminderAck"),

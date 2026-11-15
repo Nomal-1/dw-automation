@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getOpenDebilities, getDebilityLabel, hasAllDebilities } from "../lib/debilities.js";
@@ -103,7 +104,7 @@ function promptArmorItemChoice(items) {
   return new Promise((resolve) => {
     const options = items.map((item) => `<option value="${item.id}">${item.name}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.HitTrigger.ArmorItemPromptTitle"),
       content: `
         <form>
@@ -183,7 +184,7 @@ function promptDebilityChoice(actor, row) {
     const open = getOpenDebilities(actor);
     const options = open.map((key) => `<option value="${key}">${getDebilityLabel(key)}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title: row.name,
       content: `
         <form>
@@ -235,7 +236,7 @@ function promptSpellDefenseChoice(actor, row, active) {
     .join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: row.name,
       content: `
         <form>
@@ -418,7 +419,7 @@ function promptFireAidChoice(row, amount, hasBurningBrand) {
       callback: () => resolve("reduceDamage")
     };
 
-    new Dialog({
+    new CompatDialog({
       title: row.name,
       content: `<p>${game.i18n.format("DWAUTO.HitTrigger.FireAidInstruction", { amount })}</p>`,
       buttons,
@@ -545,7 +546,7 @@ async function promptHitTrigger(actor, candidates, damage, originalChanges, orig
 
   const optionsHtml = usable.map((row, index) => `<option value="${index}">${row.name}</option>`).join("");
 
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.HitTrigger.PromptTitle"),
     content: `
       <form>
@@ -652,7 +653,7 @@ async function handleIncomingDamage({ actor, damage, changes, options, candidate
   let finalDamage = damage;
 
   for (const candidate of outnumberedCandidates ?? []) {
-    const nowActive = await Dialog.confirm({
+    const nowActive = await confirmDialog({
       title: candidate.moveName,
       content: `<p>${game.i18n.format("DWAUTO.Underdog.AskPrompt", { name: candidate.moveName })}</p>`,
       defaultYes: isConditionActive(actor, candidate.moveId)

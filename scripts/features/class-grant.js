@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap, MOVE_PACK_FILES, shouldDeferForMissingTranslations } from "../lib/translation-import.js";
@@ -245,7 +246,7 @@ function promptChoiceGrant(moveItem, eligibleGroups) {
   const classOptionsHtml = packIds.map((packId) => `<option value="${packId}">${eligibleGroups.get(packId).label}</option>`).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>

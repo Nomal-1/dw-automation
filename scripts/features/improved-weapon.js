@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -93,7 +94,7 @@ function promptEnhancementChoice(remainingOptions) {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.ImprovedWeapon.Title"),
       content: `
         <form class="dwauto-wizard-form">

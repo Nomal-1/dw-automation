@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
@@ -60,7 +61,7 @@ function promptSelectBond(bonds) {
 
     const optionsHtml = bonds.map((b) => `<option value="${b.id}">${b.name}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.BurningBridges.SelectBondTitle"),
       content: `
         <form>
@@ -102,7 +103,7 @@ export async function promptBurningBridgesPreRoll(item) {
 
   if (!(await hasBurningBridges(actor))) return { cancel: false };
 
-  const wantsToUse = await Dialog.confirm({
+  const wantsToUse = await confirmDialog({
     title: game.i18n.localize("DWAUTO.BurningBridges.PromptTitle"),
     content: `<p>${game.i18n.localize("DWAUTO.BurningBridges.PromptContent")}</p>`,
     defaultYes: false

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -88,7 +89,7 @@ function promptGrantPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.Heist.PermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Heist.PermissionContent", { target: data.targetName })}</p>`,
     buttons: {
@@ -183,7 +184,7 @@ export async function promptHeistPreRoll(item) {
   if (!pending) return { bonus: 0 };
   await clearPendingHeistBonus(actor);
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: pending.source,
     content: `<p>${game.i18n.localize("DWAUTO.Heist.ConfirmPrompt")}</p>`,
     defaultYes: false

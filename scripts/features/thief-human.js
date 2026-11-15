@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
@@ -59,7 +60,7 @@ export async function promptThiefHumanPreRoll(item) {
   const moveItem = findThiefHumanMove(actor);
   if (!moveItem) return { bonus: 0 };
 
-  const apply = await Dialog.confirm({
+  const apply = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.ThiefHuman.Prompt")}</p>`,
     defaultYes: false

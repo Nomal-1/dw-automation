@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -158,7 +159,7 @@ function promptVengeanceGrantPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.Defend.VengeanceGrantPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.Defend.VengeanceGrantPermissionContent", {
       defender: data.defenderName,
@@ -289,7 +290,7 @@ function promptDefendChoice(defender, victim, damage, reserve, isSelfHit, moveLa
 
     const optionsHtml = choices.map((c) => `<option value="${c.value}">${c.label}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title: moveLabel,
       content: `
         <form>
@@ -500,7 +501,7 @@ export async function promptDefendVengeancePreRoll(item) {
   const pending = getDefendVengeancePending(actor);
   if (!pending) return { bonus: 0 };
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: pending.defenderName,
     content: `<p>${game.i18n.format("DWAUTO.Defend.VengeancePrompt", { victim: pending.victimName })}</p>`,
     defaultYes: false
@@ -514,7 +515,7 @@ export async function promptDefendVengeancePreRoll(item) {
 
 function promptSetReserve(current) {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Defend.AdjustTitle"),
       content: `
         <form>

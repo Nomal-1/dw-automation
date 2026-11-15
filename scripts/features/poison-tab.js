@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { injectActorTab } from "../lib/actor-tabs.js";
 import { getUsedPoisons, addUsedPoison } from "../lib/poison-state.js";
 import { createOrIncrementPoisonItem } from "../lib/poison-item.js";
@@ -66,7 +67,7 @@ function promptAddPoison() {
   ).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Poison.AddTitle"),
       content: `
         <form>
@@ -123,7 +124,7 @@ function promptBrewChoice(poisons, allowInvent) {
     : "";
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Poison.BrewTitle"),
       content: `
         <form>
@@ -172,7 +173,7 @@ function promptInventPoison() {
   ).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Poison.InventTitle"),
       content: `
         <form>

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
 import { getOrCreateTagsContainer } from "../lib/sheet-badges.js";
@@ -82,7 +83,7 @@ export async function promptLogicalPreRoll(item) {
 
   let apply = true;
   if (mode === "ask") {
-    apply = await Dialog.confirm({
+    apply = await confirmDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.localize("DWAUTO.Logical.Prompt")}</p>`,
       defaultYes: false

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { getMoveChoiceData, promptChoiceSelection, extractInlineRoll } from "../lib/move-choices.js";
@@ -144,7 +145,7 @@ function promptFlagPermission(data, onAnswer) {
     answered = true;
     onAnswer(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.ArcaneArt.FlagPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.ArcaneArt.FlagPermissionContent", {
       granter: data.granterName,
@@ -336,7 +337,7 @@ function promptDoubleChoice(moveName, selectedOptions) {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: moveName,
       content: `<p>${game.i18n.localize("DWAUTO.ArcaneArt.DoublePrompt")}</p><form>${optionsHtml}</form>`,
       buttons: {

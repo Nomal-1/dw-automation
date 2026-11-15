@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
@@ -56,7 +57,7 @@ export async function promptFighterDwarfPreRoll(item) {
   const moveItem = findFighterDwarfMove(actor);
   if (!moveItem) return { statOverride: null };
 
-  const apply = await Dialog.confirm({
+  const apply = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.FighterDwarf.Prompt")}</p>`,
     defaultYes: false

@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -72,7 +73,7 @@ async function matchesConfiguredName(title, originalTitle = null) {
 
 function promptGainAmount(moveItem) {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>
@@ -100,7 +101,7 @@ function promptGainAmount(moveItem) {
 
 function promptSetReserve(current) {
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Bolster.AdjustTitle"),
       content: `
         <form>
@@ -168,7 +169,7 @@ export async function promptBolsterPreRoll(item) {
   if (!isBolsterAskEnabled(actor)) return { bonus: 0 };
 
   const moveItem = findMoveByConfiguredNames(actor);
-  const useIt = await Dialog.confirm({
+  const useIt = await confirmDialog({
     title: moveItem?.name ?? item.name,
     content: `<p>${game.i18n.format("DWAUTO.Bolster.UsePrompt", { reserve })}</p>`,
     defaultYes: false

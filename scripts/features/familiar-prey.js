@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveCardInfo } from "../lib/move-card.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
@@ -70,7 +71,7 @@ export async function promptFamiliarPreyPreRoll(item) {
   const moveItem = findFamiliarPreyMove(actor);
   if (!moveItem) return { statOverride: null };
 
-  const apply = await Dialog.confirm({
+  const apply = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.FamiliarPrey.Prompt")}</p>`,
     defaultYes: false

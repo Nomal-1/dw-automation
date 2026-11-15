@@ -1,3 +1,4 @@
+import { CompatDialog } from "./dialogs.js";
 // 치유(healing.js), 원조/방해(aid-or-interfere.js)처럼 "이 씬에 있는 다른
 // 액터 중 하나를 대상으로 고르는" 공용 드롭다운. 캔버스에서 타겟팅해둔
 // 토큰이 있으면 그걸 기본 선택값으로 띄운다(던전월드 데미지 버튼과는 무관한
@@ -54,7 +55,7 @@ export function promptActorTarget(self, { title, label, excludeSelf = false, sel
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title,
       content: `
         <form>
@@ -109,7 +110,7 @@ export function promptActorMultiTarget(self, { title, label, excludeSelf = false
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title,
       content: `<form><p>${label}</p>${optionsHtml}</form>`,
       buttons: {

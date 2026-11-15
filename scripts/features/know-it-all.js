@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { activeGM, queryUser, registerQuery, updateActorAsGM } from "../lib/gm-query.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
@@ -96,7 +97,7 @@ function promptGrantPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.KnowItAll.GrantPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.KnowItAll.GrantPermissionContent", {
       grantor: data.grantorName,
@@ -167,7 +168,7 @@ function promptXpPermission(data) {
     answered = true;
     resolve(value);
   };
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.KnowItAll.XpPermissionTitle"),
     content: `<p>${game.i18n.format("DWAUTO.KnowItAll.XpPermissionContent", { name: data.grantorName })}</p>`,
     buttons: {
@@ -258,7 +259,7 @@ export async function promptKnowItAllPreRoll(item) {
   const pending = getKnowItAllPending(actor);
   if (!pending) return { bonus: 0 };
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: pending.grantorName,
     content: `<p>${game.i18n.format("DWAUTO.KnowItAll.TargetPrompt", { name: pending.grantorName })}</p>`,
     defaultYes: false

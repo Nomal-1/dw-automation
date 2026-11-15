@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getClericLevelOverride } from "./note-moves.js";
 import { isMoveItemDisabled } from "../lib/move-toggles.js";
@@ -51,7 +52,7 @@ function promptConfirmGrant(moveLabel, level, docs) {
     .map((d) => `<li>${d.name} (Lv.${d.system?.spellLevel ?? "?"})</li>`)
     .join("");
 
-  return Dialog.confirm({
+  return confirmDialog({
     title: moveLabel,
     content: `
       <p>${game.i18n.format("DWAUTO.ClericSpellGrant.ConfirmContent", { level, count: docs.length })}</p>

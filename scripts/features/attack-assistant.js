@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog, confirmDialog } from "../lib/dialogs.js";
 import { TAG_CATALOG } from "../data/tag-catalog.js";
 import { DEFAULT_ATTACK_BEHAVIOR } from "../data/attack-moves.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "../data/conditional-damage-moves.js";
@@ -188,7 +189,7 @@ function promptAmmo(ammoItems) {
     .join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Attack.AmmoDialogTitle"),
       content: `
         <form>
@@ -239,7 +240,7 @@ async function promptSpellAugmentation(actor) {
   return new Promise((resolve) => {
     const options = active.map((s) => `<option value="${s.itemId}">${s.name}</option>`).join("");
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.SpellAugmentation.Title"),
       content: `
         <p>${game.i18n.localize("DWAUTO.SpellAugmentation.Content")}</p>
@@ -328,7 +329,7 @@ async function promptConditionalDamageBonuses(actor) {
 
     const confirmed = locks.includes(row.name)
       ? false
-      : await Dialog.confirm({
+      : await confirmDialog({
           title: row.name,
           content: `<p>${game.i18n.format("DWAUTO.ConditionalDamage.Prompt", { name: row.name })}</p>`,
           defaultYes: false
@@ -364,7 +365,7 @@ async function promptConditionalTagMoves(actor) {
   for (const row of owned) {
     const confirmed = locks.includes(row.name)
       ? false
-      : await Dialog.confirm({
+      : await confirmDialog({
           title: row.name,
           content: `<p>${game.i18n.format("DWAUTO.ConditionalTagMoves.Prompt", { name: row.name })}</p>`,
           defaultYes: false
@@ -521,7 +522,7 @@ function promptWeaponChoice(actor, ranged, extraDice, moveTitle) {
     .map((w) => `<option value="${w.id}">${w.name}${w.system.tagsString ? ` (${w.system.tagsString})` : ""}</option>`)
     .join("");
 
-  new Dialog({
+  new CompatDialog({
     title: game.i18n.localize("DWAUTO.Attack.WeaponDialogTitle"),
     content: `
       <form>
@@ -555,7 +556,7 @@ async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "", moveTi
     ? `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContentExtreme", { name: actor.name })}</p>`
     : `<p>${game.i18n.format("DWAUTO.Attack.ConfirmContent", { name: actor.name })}</p>`;
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: game.i18n.localize("DWAUTO.Attack.ConfirmTitle"),
     content,
     defaultYes: true
@@ -573,7 +574,7 @@ async function promptDamageRoll(actor, ranged, isExtreme, extraDice = "", moveTi
 // 별도로 물어본다. "빈틈"에 노출된 뒤 실제로 적의 반격을 받는지는 서사적
 // 판단(GM 재량)이라 안내만 남기고 자동으로 피해를 적용하지는 않는다.
 async function promptHackAndSlashBonus(actor, moveItem) {
-  const wantsBonus = await Dialog.confirm({
+  const wantsBonus = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.Attack.HackAndSlashBonusPrompt")}</p>`,
     defaultYes: false

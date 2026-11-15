@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { injectActorTab, setActiveTab } from "../lib/actor-tabs.js";
 import { MonsterBuilderApp } from "../apps/monster-builder-app.js";
 import { formatDamageFormula, rollTreasure } from "../lib/monster-builder.js";
@@ -23,7 +24,7 @@ function promptTreasureConditions() {
       resolve(value);
     };
 
-    new Dialog({
+    new CompatDialog({
       title: game.i18n.localize("DWAUTO.Monster.TreasureConditionsTitle"),
       content: `
         <form>

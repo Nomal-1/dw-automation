@@ -1,3 +1,4 @@
+import { CompatDialog } from "./dialogs.js";
 // [A] 선택지 프롬프트 범용 처리.
 //
 // 던전월드 무브 아이템은 대부분 아래 둘 중 하나의 구조로 "고를 수 있는 목록"을
@@ -73,7 +74,7 @@ export function promptChoiceSelection({ title, instruction, options, count, minC
     `)
     .join("");
 
-  new Dialog({
+  new CompatDialog({
     title,
     content: `
       <p>${instruction ?? game.i18n.format("DWAUTO.Choice.Instruction", { count })}</p>

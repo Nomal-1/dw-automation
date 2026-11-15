@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
@@ -47,7 +48,7 @@ export async function promptInterrogatorPreRoll(item) {
   const moveItem = findInterrogatorMove(actor);
   if (!moveItem) return { statOverride: null };
 
-  const wantsToUse = await Dialog.confirm({
+  const wantsToUse = await confirmDialog({
     title: moveItem.name,
     content: `<p>${game.i18n.localize("DWAUTO.Interrogator.Prompt")}</p>`,
     defaultYes: false

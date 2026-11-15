@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog, promptDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
@@ -78,7 +79,7 @@ async function onCreateChatMessage(message, options, userId) {
     const moveItem = findMoveItem(actor, title);
     if (!moveItem) return;
 
-    const turnedAway = await Dialog.confirm({
+    const turnedAway = await confirmDialog({
       title: moveItem.name,
       content: `<p>${game.i18n.localize("DWAUTO.Recruit.TurnAwayPrompt")}</p>`,
       defaultYes: false
@@ -104,7 +105,7 @@ export async function promptRecruitPreRoll(item) {
   if (!isRecruitPenaltyPending(actor)) return;
   if (!(await matchesConfiguredName(item.name))) return;
 
-  await Dialog.prompt({
+  await promptDialog({
     title: item.name,
     content: `<p>${game.i18n.localize("DWAUTO.Recruit.ReminderContent")}</p>`,
     label: game.i18n.localize("DWAUTO.Recruit.ReminderAck"),

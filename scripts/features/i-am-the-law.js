@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getIAmTheLawPending, setIAmTheLawPending, clearIAmTheLawPending } from "../lib/i-am-the-law-state.js";
@@ -98,7 +99,7 @@ export async function promptIAmTheLawPreRoll(item) {
     return { cancel: true, bonus: 0 };
   }
 
-  const confirmed = await Dialog.confirm({
+  const confirmed = await confirmDialog({
     title: pending.source,
     content: `<p>${game.i18n.format("DWAUTO.IAmTheLaw.TargetPrompt", { name: pending.source })}</p>`,
     defaultYes: false

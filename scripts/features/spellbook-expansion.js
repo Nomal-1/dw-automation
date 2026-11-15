@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
+import { CompatDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
 import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { SPELL_PACK_FILES } from "../lib/translation-import.js";
@@ -96,7 +97,7 @@ function promptSpellChoice(moveItem, spellGroups, actor) {
   const classOptionsHtml = packIds.map((packId) => `<option value="${packId}">${spellGroups.get(packId).label}</option>`).join("");
 
   return new Promise((resolve) => {
-    new Dialog({
+    new CompatDialog({
       title: moveItem.name,
       content: `
         <form>
