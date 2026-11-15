@@ -1,42 +1,44 @@
 import { MODULE_ID, SETTINGS } from "./constants.js";
+import {
+  AttackMovesMenu,
+  ClassGrantMovesMenu,
+  ConditionalDamageMovesMenu,
+  ConditionalTagMovesMenu,
+  DamageReductionMovesMenu,
+  DruidDamageDieMovesMenu,
+  EmpowerMovesMenu,
+  HealingMovesMenu,
+  HitTriggerMovesMenu,
+  HoldGrantMovesMenu,
+  HospitallerMovesMenu,
+  OngoingPenaltyReductionMovesMenu,
+  OngoingSpellsMenu,
+  PrepareSpellsMovesMenu,
+  SelfForwardMovesMenu,
+  SpellDamageMovesMenu
+} from "./apps/table-editor-app.js";
 import { TagSettingsMenu } from "./apps/tag-settings-menu.js";
-import { AttackMovesMenu } from "./apps/attack-moves-menu.js";
 import { DEFAULT_SPECIAL_ATTACK_MOVES } from "./data/attack-moves.js";
-import { OngoingSpellsMenu } from "./apps/ongoing-spells-menu.js";
 import { DEFAULT_ONGOING_SPELLS } from "./data/ongoing-spells.js";
 import { TranslationImportMenu } from "./apps/translation-import-menu.js";
 import { MigrationBackupMenu } from "./apps/migration-backup-menu.js";
 import { RaceCoreCompendiumMenu } from "./apps/race-core-compendium-menu.js";
-import { HitTriggerMovesMenu } from "./apps/hit-trigger-moves-menu.js";
-import { HealingMovesMenu } from "./apps/healing-moves-menu.js";
-import { HospitallerMovesMenu } from "./apps/hospitaller-moves-menu.js";
 import { DEFAULT_HEALING_MOVES, DEFAULT_HOSPITALLER_MOVES } from "./data/healing-moves.js";
-import { SpellDamageMovesMenu } from "./apps/spell-damage-moves-menu.js";
 import { DEFAULT_SPELL_DAMAGE_MOVES } from "./data/spell-damage-moves.js";
 import { MoveUpgradesMenu } from "./apps/move-upgrades-menu.js";
 import { DEFAULT_MOVE_UPGRADES } from "./data/move-upgrades.js";
-import { DamageReductionMovesMenu } from "./apps/damage-reduction-moves-menu.js";
 import { DEFAULT_DAMAGE_REDUCTION_MOVES } from "./data/hit-trigger-moves.js";
-import { DruidDamageDieMovesMenu } from "./apps/druid-damage-die-moves-menu.js";
 import { DEFAULT_DRUID_DAMAGE_DIE_MOVES } from "./data/druid-damage-die-moves.js";
-import { ConditionalDamageMovesMenu } from "./apps/conditional-damage-moves-menu.js";
 import { DEFAULT_CONDITIONAL_DAMAGE_MOVES } from "./data/conditional-damage-moves.js";
-import { ConditionalTagMovesMenu } from "./apps/conditional-tag-moves-menu.js";
 import { DEFAULT_CONDITIONAL_TAG_MOVES } from "./data/conditional-tag-moves.js";
 import { DEFAULT_HIT_TRIGGER_MOVES } from "./data/hit-trigger-moves.js";
 import { NoteMovesMenu } from "./apps/note-moves-menu.js";
 import { DEFAULT_NOTE_MOVE_NAMES } from "./data/note-moves.js";
-import { ClassGrantMovesMenu } from "./apps/class-grant-moves-menu.js";
 import { DEFAULT_CLASS_GRANT_MOVES } from "./data/class-grant-moves.js";
-import { PrepareSpellsMovesMenu } from "./apps/prepare-spells-moves-menu.js";
 import { DEFAULT_PREPARE_SPELLS_MOVES } from "./data/prepare-spells-moves.js";
-import { OngoingPenaltyReductionMovesMenu } from "./apps/ongoing-penalty-reduction-moves-menu.js";
 import { DEFAULT_ONGOING_PENALTY_REDUCTION_MOVES } from "./data/ongoing-penalty-reduction-moves.js";
-import { EmpowerMovesMenu } from "./apps/empower-moves-menu.js";
 import { DEFAULT_EMPOWER_MOVES } from "./data/empower-moves.js";
-import { HoldGrantMovesMenu } from "./apps/hold-grant-moves-menu.js";
 import { DEFAULT_HOLD_GRANT_MOVES } from "./data/hold-grant-moves.js";
-import { SelfForwardMovesMenu } from "./apps/self-forward-moves-menu.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "./data/self-forward-moves.js";
 import { VersionInfoMenu } from "./apps/version-info-menu.js";
 import { ClassAutomationApp } from "./apps/class-automation-app.js";

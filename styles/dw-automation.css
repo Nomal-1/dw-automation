@@ -845,3 +845,8 @@
 .dwauto-ca-field.wide { grid-template-columns: minmax(140px, 1fr) 3fr; }
 .dwauto-ca-reacting .note { opacity: 0.75; margin-top: 1px; }
 .dwauto-ca-feature .source { font-size: 0.8em; opacity: 0.75; margin-left: 4px; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 3px; padding: 0 3px; }
+
+/* 표 설정 편집 창(apps/table-editor-app.js) */
+.dwauto-table-editor .window-content { overflow: auto; }
+.dwauto-table-editor .dwauto-table-editor-buttons { display: flex; gap: 6px; margin: 6px 0; }
+.dwauto-table-editor .dwauto-table-editor-buttons button { flex: 0 0 auto; width: auto; }

@@ -1,8 +1,8 @@
 // 직업별 자동화 창에서 표 설정(세부 값)을 액션 줄 안에서 바로 고칠 때 쓰는 칸 정보.
-// 각 표의 기존 편집 창 템플릿(templates/*-settings.html)의 열 제목·입력 종류와,
+// 각 표의 편집 창(예전 templates/*-settings.html, 지금은 apps/table-editor-app.js)의 열 제목·입력 종류와,
 // 그 창 코드(apps/*-menu.js)의 선택지 목록을 2026-11-14에 그대로 옮겼다.
 // 키는 표 설정 키(SETTINGS 값), 행의 "name"(어느 액션의 행인지)은 편집하지 않는다.
-// 기존 편집 창에 칸을 더하면 여기에도 같이 더한다.
+// 표 편집 창(apps/table-editor-app.js)도 이 정보로 그린다 — 칸을 더하면 여기에만 더하면 된다.
 export const TABLE_FIELDS = {
   specialAttackMoves: [
       { key: "ranged", label: "DWAUTO.AttackMoves.Ranged", type: "checkbox" },

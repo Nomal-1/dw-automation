@@ -4,7 +4,7 @@
 // 인식하려 했으나, 실제로는 캐릭터를 만들 때마다 무브 아이템이 새로 생성되고
 // (flags.core.sourceId도 안 남음) _id가 캐릭터마다 전부 달라서 이 방식이 성립하지
 // 않았다. 그래서 이름 기반 설정 테이블(SETTINGS.SPECIAL_ATTACK_MOVES,
-// apps/attack-moves-menu.js)로 관리한다 — 근접/사격 무브 이름 설정과 같은 원리다.
+// apps/table-editor-app.js — 표 설정 편집 창)로 관리한다 — 근접/사격 무브 이름 설정과 같은 원리다.
 //
 // - ranged: 사격 무기 취급 여부 (화살 소모 확인 트리거)
 // - damageOnPartial / damageOnSuccess: 그 결과 등급에서 무기 데미지를 굴리는지
