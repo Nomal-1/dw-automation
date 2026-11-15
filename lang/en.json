@@ -2312,7 +2312,29 @@
       "SessionLogStop": "Stop recording",
       "SessionLogExport": "Export log",
       "SessionLogRecording": "Recording now.",
-      "SessionLogIdle": "Not recording."
+      "SessionLogIdle": "Not recording.",
+      "TabFronts": "Fronts",
+      "FrontsHint": "Track the threats that will unfold if the players do nothing. Tick a grim portent each time a danger advances; when all are ticked, the impending doom arrives. Text saves as you edit and is shared between GMs.",
+      "NoFronts": "No fronts yet.",
+      "AddFront": "Add front",
+      "AddDanger": "Add danger",
+      "AddPortent": "Add portent",
+      "FrontName": "Front name (e.g. The Orc Alliance of the North Woods)",
+      "FrontUntitled": "(Untitled front)",
+      "Stakes": "Stakes",
+      "StakesPlaceholder": "A question play will answer (e.g. Will Grum survive?)",
+      "DangerName": "Danger name (e.g. Chieftain Grum)",
+      "Impulse": "Impulse",
+      "ImpulsePlaceholder": "What this danger wants (e.g. to burn everything)",
+      "Portents": "Grim portents",
+      "PortentPlaceholder": "What happens as it advances",
+      "PortentProgress": "Portents {done}/{total}",
+      "Doom": "Impending doom",
+      "DoomPlaceholder": "What happens when the portents run out",
+      "DoomArrived": "All grim portents have come to pass — the impending doom arrives.",
+      "Remove": "Remove",
+      "RemoveFront": "Remove front",
+      "RemoveFrontConfirm": "Removes the front \"{name}\" with all its dangers and portents. This cannot be undone."
     }
   }
 }

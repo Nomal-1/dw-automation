@@ -10,8 +10,26 @@ import { logAutomation } from "../lib/automation-log.js";
 
 export const GM_SCREEN_SETTINGS = {
   ENABLED: "enableGmScreen",
-  FAILURE_TOAST: "gmScreenFailureToast"
+  FAILURE_TOAST: "gmScreenFailureToast",
+  FRONTS: "gmScreenFronts"
 };
+
+// ---- 전선(Front)·위험 ----
+// 월드 설정에 저장한다(GM끼리 공유, 세션이 바뀌어도 남음). 형식:
+//   [{ id, name, stakes, dangers: [{ id, name, impulse, doom, portents: [{ id, text, done }] }] }]
+export function getFronts() {
+  try {
+    const value = game.settings.get(MODULE_ID, GM_SCREEN_SETTINGS.FRONTS);
+    return Array.isArray(value) ? foundry.utils.deepClone(value) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function saveFronts(fronts) {
+  if (!game.user.isGM) return;
+  await game.settings.set(MODULE_ID, GM_SCREEN_SETTINGS.FRONTS, fronts);
+}
 
 const MAX_FAILURES = 20;
 const failures = [];
@@ -111,6 +129,12 @@ export function registerGmScreenSettings() {
     config: true,
     type: Boolean,
     default: false
+  });
+  game.settings.register(MODULE_ID, GM_SCREEN_SETTINGS.FRONTS, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
   });
   game.keybindings.register(MODULE_ID, "openGmScreen", {
     name: "DWAUTO.GmScreen.KeybindName",

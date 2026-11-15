@@ -2312,7 +2312,29 @@
       "SessionLogStop": "기록 종료",
       "SessionLogExport": "기록 내보내기",
       "SessionLogRecording": "지금 기록 중입니다.",
-      "SessionLogIdle": "기록하고 있지 않습니다."
+      "SessionLogIdle": "기록하고 있지 않습니다.",
+      "TabFronts": "프론트",
+      "FrontsHint": "플레이어가 아무것도 하지 않으면 세상에서 벌어질 위협을 정리합니다. 위험이 한 단계 진행될 때마다 불길한 징조를 체크하고, 끝까지 가면 다가오는 파멸이 닥칩니다. 글자는 고치는 즉시 저장되고, GM끼리 공유됩니다.",
+      "NoFronts": "아직 프론트가 없습니다.",
+      "AddFront": "프론트 추가",
+      "AddDanger": "위험 추가",
+      "AddPortent": "징조 추가",
+      "FrontName": "프론트 이름(예: 북쪽 숲의 오크 연합)",
+      "FrontUntitled": "(이름 없는 프론트)",
+      "Stakes": "판돈 질문",
+      "StakesPlaceholder": "플레이로 답을 알아낼 질문(예: 그룸은 살아남을까?)",
+      "DangerName": "위험 이름(예: 족장 그룸)",
+      "Impulse": "충동",
+      "ImpulsePlaceholder": "이 위험이 원하는 것(예: 모든 것을 불태우려 한다)",
+      "Portents": "불길한 징조",
+      "PortentPlaceholder": "진행되면 일어날 일",
+      "PortentProgress": "징조 {done}/{total}",
+      "Doom": "다가오는 파멸",
+      "DoomPlaceholder": "징조가 끝까지 가면 벌어지는 일",
+      "DoomArrived": "불길한 징조가 모두 일어났습니다 — 다가오는 파멸이 닥칩니다.",
+      "Remove": "지우기",
+      "RemoveFront": "프론트 지우기",
+      "RemoveFrontConfirm": "프론트 \"{name}\"과 그 안의 위험·징조를 모두 지웁니다. 되돌릴 수 없습니다."
     }
   }
 }

@@ -2,7 +2,7 @@ import { MODULE_ID } from "../constants.js";
 import { GM_MOVES, DUNGEON_MOVES, GM_AGENDA, GM_PRINCIPLES, WHEN_TO_MOVE } from "../data/gm-moves.js";
 import { PARTY_STATUS_FLAGS } from "../data/party-status.js";
 import { getAutomationLog, getSavedErrors, clearAutomationLog, formatLog } from "../lib/automation-log.js";
-import { getFailures, clearFailures, dismissFailure, getSpotlight } from "../features/gm-screen.js";
+import { getFailures, clearFailures, dismissFailure, getSpotlight, getFronts, saveFronts } from "../features/gm-screen.js";
 import { confirmDialog } from "../lib/dialogs.js";
 import { getPendingRequests } from "../lib/gm-query.js";
 import { announceActionApplied } from "../lib/announce.js";
@@ -26,6 +26,7 @@ const TABLE_PACKS = ["dungeonworld.tables", "dungeonworld.rollable-tables"];
  * - 진행 탭 위쪽에는 답을 기다리는 플레이어 요청(GM 요청함)도 보여준다
  * - 파티: 캐릭터별 HP·장갑·XP·약화·대기 상태·인연과 스포트라이트(마지막 판정 시각)
  * - 세션: 세션 종료 도우미(질문·성향·인연 체크 → 경험치 한 번에)와 세션 기록 시작·종료
+ * - 프론트: 던전월드 프론트(위험·충동·불길한 징조·다가오는 파멸·판돈 질문) 추적
  * - 전투: 지금 씬의 NPC 토큰 HP 판(피해·회복, 장갑 자동 반영)
  * - 도구: 인스턴트 NPC, 괴물 만들기, 무작위 표, 다른 창 바로 열기
  * - 참고: GM 강령·원칙·무브
@@ -61,6 +62,9 @@ export class GmScreenApp extends ApplicationV2 {
       sessionCheck: GmScreenApp.#onSessionCheck,
       awardXp: GmScreenApp.#onAwardXp,
       sessionLog: GmScreenApp.#onSessionLog,
+      frontAdd: GmScreenApp.#onFrontAdd,
+      frontRemove: GmScreenApp.#onFrontRemove,
+      portentToggle: GmScreenApp.#onPortentToggle,
       logFilter: GmScreenApp.#onLogFilter,
       copyLog: GmScreenApp.#onCopyLog,
       clearLog: GmScreenApp.#onClearLog
@@ -85,6 +89,7 @@ export class GmScreenApp extends ApplicationV2 {
       ["party", "fa-users", L("TabParty"), 0],
       ["combat", "fa-skull", L("TabCombat"), 0],
       ["session", "fa-flag-checkered", L("TabSession"), 0],
+      ["fronts", "fa-chess-rook", L("TabFronts"), 0],
       ["tools", "fa-toolbox", L("TabTools"), 0],
       ["reference", "fa-book", L("TabReference"), 0],
       ["log", "fa-list", L("TabLog"), getAutomationLog().filter((e) => e.level === "error").length]
@@ -100,6 +105,7 @@ export class GmScreenApp extends ApplicationV2 {
     else if (this.#tab === "party") body = this.#renderParty();
     else if (this.#tab === "combat") body = this.#renderCombat();
     else if (this.#tab === "session") body = this.#renderSession();
+    else if (this.#tab === "fronts") body = this.#renderFronts();
     else if (this.#tab === "tools") body = await this.#renderTools();
     else if (this.#tab === "reference") body = this.#renderReference();
     else body = this.#renderLog();
@@ -111,6 +117,14 @@ export class GmScreenApp extends ApplicationV2 {
     content.innerHTML = result;
     const body = content.querySelector(".dwauto-gs-body");
     if (body) body.scrollTop = scroll;
+  }
+
+  // 프론트 탭의 글자 칸은 고칠 때마다 다시 그리지 않고(입력 중 커서가 튀지 않게) 바로 저장만 한다
+  _onRender(context, options) {
+    super._onRender?.(context, options);
+    for (const el of this.element.querySelectorAll("[data-front-field]")) {
+      el.addEventListener("change", (event) => this.#onFrontField(event));
+    }
   }
 
   _onFirstRender(context, options) {
@@ -238,6 +252,89 @@ export class GmScreenApp extends ApplicationV2 {
         <div class="dwauto-gs-row"><span class="spacer"></span>
           <button type="button" data-action="awardXp" ${total ? "" : "disabled"}><i class="fas fa-star"></i> ${esc(L("AwardXp", { xp: total }))}</button></div>
       </div>`;
+  }
+
+  // ---- 프론트 ----
+  #renderFronts() {
+    const fronts = getFronts();
+    const field = (path, value, placeholder, tag = "input") =>
+      tag === "textarea"
+        ? `<textarea data-front-field="${path}" rows="2" placeholder="${esc(placeholder)}">${esc(value ?? "")}</textarea>`
+        : `<input type="text" data-front-field="${path}" value="${esc(value ?? "")}" placeholder="${esc(placeholder)}">`;
+    const del = (kind, ids, title) =>
+      `<button type="button" class="icon" data-action="frontRemove" data-kind="${kind}" ${ids} title="${esc(title)}"><i class="fas fa-trash"></i></button>`;
+    const body = fronts
+      .map((f) => {
+        const dangers = (f.dangers ?? [])
+          .map((d) => {
+            const portents = d.portents ?? [];
+            const done = portents.filter((x) => x.done).length;
+            const doomed = portents.length > 0 && done === portents.length;
+            const items = portents
+              .map(
+                (x, i) => `<li class="${x.done ? "done" : ""}">
+                  <input type="checkbox" data-action="portentToggle" data-front="${f.id}" data-danger="${d.id}" data-portent="${x.id}" ${x.done ? "checked" : ""}>
+                  <span class="num">${i + 1}.</span>
+                  ${field(`${f.id}.${d.id}.p.${x.id}`, x.text, L("PortentPlaceholder"))}
+                  ${del("portent", `data-front="${f.id}" data-danger="${d.id}" data-portent="${x.id}"`, L("Remove"))}
+                </li>`
+              )
+              .join("");
+            return `<div class="dwauto-gs-danger${doomed ? " doomed" : ""}">
+              <div class="dwauto-gs-row">
+                <i class="fas fa-skull-crossbones"></i>
+                ${field(`${f.id}.${d.id}.name`, d.name, L("DangerName"))}
+                <span class="progress">${esc(L("PortentProgress", { done, total: portents.length }))}</span>
+                ${del("danger", `data-front="${f.id}" data-danger="${d.id}"`, L("Remove"))}
+              </div>
+              <label class="dwauto-gs-field"><span>${esc(L("Impulse"))}</span>${field(`${f.id}.${d.id}.impulse`, d.impulse, L("ImpulsePlaceholder"))}</label>
+              <div class="dwauto-gs-subtitle">${esc(L("Portents"))}</div>
+              <ol class="dwauto-gs-portents">${items}</ol>
+              <button type="button" data-action="frontAdd" data-kind="portent" data-front="${f.id}" data-danger="${d.id}"><i class="fas fa-plus"></i> ${esc(L("AddPortent"))}</button>
+              <label class="dwauto-gs-field doom"><span>${esc(L("Doom"))}</span>${field(`${f.id}.${d.id}.doom`, d.doom, L("DoomPlaceholder"))}</label>
+              ${doomed ? `<div class="doom-alert"><i class="fas fa-triangle-exclamation"></i> ${esc(L("DoomArrived"))}</div>` : ""}
+            </div>`;
+          })
+          .join("");
+        return `<details class="dwauto-gs-front" open>
+          <summary>${esc(f.name || L("FrontUntitled"))}</summary>
+          <div class="dwauto-gs-row">
+            ${field(`${f.id}.name`, f.name, L("FrontName"))}
+            ${del("front", `data-front="${f.id}"`, L("RemoveFront"))}
+          </div>
+          <label class="dwauto-gs-field"><span>${esc(L("Stakes"))}</span>${field(`${f.id}.stakes`, f.stakes, L("StakesPlaceholder"), "textarea")}</label>
+          ${dangers}
+          <button type="button" data-action="frontAdd" data-kind="danger" data-front="${f.id}"><i class="fas fa-plus"></i> ${esc(L("AddDanger"))}</button>
+        </details>`;
+      })
+      .join("");
+    return `<p class="hint">${esc(L("FrontsHint"))}</p>
+      ${fronts.length ? body : `<p class="empty">${esc(L("NoFronts"))}</p>`}
+      <div class="dwauto-gs-buttons"><button type="button" data-action="frontAdd" data-kind="front"><i class="fas fa-plus"></i> ${esc(L("AddFront"))}</button></div>`;
+  }
+
+  async #onFrontField(event) {
+    const el = event.currentTarget;
+    const [frontId, dangerId, third, fourth] = el.dataset.frontField.split(".");
+    const fronts = getFronts();
+    const front = fronts.find((f) => f.id === frontId);
+    if (!front) return;
+    const value = el.value.trim();
+    if (dangerId === "name" || dangerId === "stakes") front[dangerId] = value;
+    else {
+      const danger = front.dangers?.find((d) => d.id === dangerId);
+      if (!danger) return;
+      if (third === "p") {
+        const portent = danger.portents?.find((x) => x.id === fourth);
+        if (portent) portent.text = value;
+      } else danger[third] = value;
+    }
+    await saveFronts(fronts);
+    // 프론트 이름은 접힌 제목에도 보이므로 그것만 고쳐 준다
+    if (dangerId === "name") {
+      const summary = el.closest("details")?.querySelector("summary");
+      if (summary) summary.textContent = value || L("FrontUntitled");
+    }
   }
 
   // ---- 파티 ----
@@ -504,6 +601,57 @@ export class GmScreenApp extends ApplicationV2 {
     if (!app) return;
     if (app.minimized) app.maximize();
     app.render({ force: true });
+  }
+
+  static async #onFrontAdd(event, target) {
+    const { kind, front: frontId, danger: dangerId } = target.dataset;
+    const fronts = getFronts();
+    const newId = () => foundry.utils.randomID();
+    if (kind === "front") fronts.push({ id: newId(), name: "", stakes: "", dangers: [] });
+    else {
+      const front = fronts.find((f) => f.id === frontId);
+      if (!front) return;
+      front.dangers ??= [];
+      if (kind === "danger") front.dangers.push({ id: newId(), name: "", impulse: "", doom: "", portents: [] });
+      else {
+        const danger = front.dangers.find((d) => d.id === dangerId);
+        if (!danger) return;
+        (danger.portents ??= []).push({ id: newId(), text: "", done: false });
+      }
+    }
+    await saveFronts(fronts);
+    this.render();
+  }
+
+  static async #onFrontRemove(event, target) {
+    const { kind, front: frontId, danger: dangerId, portent: portentId } = target.dataset;
+    let fronts = getFronts();
+    if (kind === "front") {
+      const front = fronts.find((f) => f.id === frontId);
+      const ok = await confirmDialog({ title: L("RemoveFront"), content: `<p>${esc(L("RemoveFrontConfirm", { name: front?.name || L("FrontUntitled") }))}</p>`, defaultYes: false });
+      if (!ok) return;
+      fronts = fronts.filter((f) => f.id !== frontId);
+    } else {
+      const front = fronts.find((f) => f.id === frontId);
+      if (!front) return;
+      if (kind === "danger") front.dangers = (front.dangers ?? []).filter((d) => d.id !== dangerId);
+      else {
+        const danger = front.dangers?.find((d) => d.id === dangerId);
+        if (danger) danger.portents = (danger.portents ?? []).filter((x) => x.id !== portentId);
+      }
+    }
+    await saveFronts(fronts);
+    this.render();
+  }
+
+  static async #onPortentToggle(event, target) {
+    const fronts = getFronts();
+    const danger = fronts.find((f) => f.id === target.dataset.front)?.dangers?.find((d) => d.id === target.dataset.danger);
+    const portent = danger?.portents?.find((x) => x.id === target.dataset.portent);
+    if (!portent) return;
+    portent.done = target.checked;
+    await saveFronts(fronts);
+    this.render();
   }
 
   static #onShowRequest(event, target) {

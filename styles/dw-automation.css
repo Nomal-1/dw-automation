@@ -915,3 +915,19 @@
 .dwauto-gs-checks { display: flex; flex-direction: column; gap: 1px; margin-top: 3px; }
 .dwauto-gs-check { display: flex; align-items: flex-start; gap: 4px; font-size: 0.88em; }
 .dwauto-gs-check input { flex: 0 0 auto; margin-top: 2px; }
+.dwauto-gs-front { border: 1px solid rgba(128, 128, 128, 0.4); border-radius: 4px; padding: 4px 6px; margin-bottom: 8px; }
+.dwauto-gs-front > summary { cursor: pointer; font-weight: bold; }
+.dwauto-gs-front input[type="text"], .dwauto-gs-front textarea { flex: 1 1 auto; width: 100%; }
+.dwauto-gs-front button { flex: 0 0 auto; width: auto; }
+.dwauto-gs-front button.icon { line-height: 1; padding: 1px 5px; }
+.dwauto-gs-field { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 0.9em; }
+.dwauto-gs-field > span { flex: 0 0 6.5em; opacity: 0.8; }
+.dwauto-gs-danger { border-left: 3px solid rgba(128, 128, 128, 0.5); margin: 6px 0 6px 4px; padding-left: 6px; }
+.dwauto-gs-danger.doomed { border-left-color: #c33; }
+.dwauto-gs-danger .progress { flex: 0 0 auto; font-size: 0.85em; opacity: 0.75; }
+.dwauto-gs-subtitle { font-size: 0.85em; opacity: 0.8; margin-top: 3px; }
+.dwauto-gs-portents { list-style: none; margin: 2px 0; padding: 0; }
+.dwauto-gs-portents li { display: flex; align-items: center; gap: 4px; margin: 1px 0; }
+.dwauto-gs-portents li .num { flex: 0 0 auto; opacity: 0.6; }
+.dwauto-gs-portents li.done input[type="text"] { text-decoration: line-through; opacity: 0.6; }
+.dwauto-gs-danger .doom-alert { color: #c33; font-weight: bold; margin-top: 3px; }
