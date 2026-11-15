@@ -10,6 +10,8 @@ import {
 } from "../data/monster-tables.js";
 import { computeMonsterBuild, formatDamageFormula } from "../lib/monster-builder.js";
 
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
 const ANSWERS_FLAG = "monsterBuildAnswers";
 
 function mapRadioOptions(options, current) {
@@ -24,32 +26,32 @@ function mapCheckOptions(options, currentMap) {
 // 1번(액션)/2번(본능) 질문은 순수 서술형이라 자동화하지 않는다 — 본능은 이미
 // features/npc-generator.js의 "랜덤생성" 탭이 별도로 다룬다. 제출하면
 // lib/monster-builder.js의 computeMonsterBuild가 전부 계산하고, 이 파일의
-// _updateObject가 그 결과를 액터에 적용한다.
-export class MonsterBuilderApp extends FormApplication {
+// 폼 처리 함수(#onSubmit)가 그 결과를 액터에 적용한다. ApplicationV2 폼 창이다.
+export class MonsterBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
   constructor(actor, options = {}) {
-    super(actor, options);
+    super(options);
+    this._actor = actor;
   }
 
   get actor() {
-    return this.object;
+    return this._actor;
   }
 
   get title() {
     return game.i18n.format("DWAUTO.MonsterBuilder.Title", { name: this.actor.name });
   }
 
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "dwauto-monster-builder",
-      template: `modules/${MODULE_ID}/templates/monster-builder.html`,
-      width: 640,
-      height: "auto",
-      closeOnSubmit: true,
-      resizable: true
-    });
-  }
+  static DEFAULT_OPTIONS = {
+    id: "dwauto-monster-builder",
+    tag: "form",
+    window: { resizable: true },
+    position: { width: 640, height: "auto" },
+    form: { handler: MonsterBuilderApp.#onSubmit, closeOnSubmit: true }
+  };
 
-  getData() {
+  static PARTS = { body: { template: `modules/${MODULE_ID}/templates/monster-builder.html` } };
+
+  async _prepareContext() {
     const saved = this.actor.getFlag(MODULE_ID, ANSWERS_FLAG) ?? {};
 
     return {
@@ -65,8 +67,8 @@ export class MonsterBuilderApp extends FormApplication {
     };
   }
 
-  async _updateObject(event, formData) {
-    const data = foundry.utils.expandObject(formData);
+  static async #onSubmit(event, form, formData) {
+    const data = foundry.utils.expandObject(formData.object);
     const result = computeMonsterBuild(data);
 
     // 시트의 "태그" 칸(system.tags)은 아이템 태그와 완전히 같은 형식이다

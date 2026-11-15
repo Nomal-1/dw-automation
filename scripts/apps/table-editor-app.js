@@ -5,7 +5,7 @@ import { annotateRowsWithClass, sortRowsByClass } from "../lib/move-class-lookup
 
 const { ApplicationV2, DialogV2 } = foundry.applications.api;
 
-// 표 설정(특수 공격, 피격 반응, 치유 …) 16개를 편집하는 공통 창(ApplicationV2).
+// 표 설정(특수 공격, 피격 반응, 치유 … 액션 업그레이드, 기록 액션) 18개를 편집하는 공통 창(ApplicationV2).
 // 표마다의 차이(칸, 제목, 기본값, 새 줄 초기값)는 data/table-fields.js와 data/table-menus.js에 있다.
 // 예전에는 표마다 FormApplication 창과 템플릿이 따로 있었는데(16개, 약 1,400줄) 모양이 거의
 // 같아서 하나로 합쳤다. 저장하면 이름이 빈 줄은 버린다.
@@ -14,10 +14,14 @@ const esc = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
 /** 한 줄을 칸 정보에 맞게 정리한다(숫자는 정수·최솟값, 선택지는 목록 안의 값, 글자는 앞뒤 공백 제거). */
+const fieldsOf = (tableKey) => TABLE_MENUS[tableKey]?.fields ?? TABLE_FIELDS[tableKey] ?? [];
+const nameFieldOf = (tableKey) => TABLE_MENUS[tableKey]?.nameField ?? "name";
+
 function normalizeRow(tableKey, raw) {
   const meta = TABLE_MENUS[tableKey];
-  const row = { name: String(raw?.name ?? "").trim() };
-  for (const field of TABLE_FIELDS[tableKey] ?? []) {
+  const nameField = nameFieldOf(tableKey);
+  const row = { [nameField]: String(raw?.[nameField] ?? "").trim() };
+  for (const field of fieldsOf(tableKey)) {
     const value = raw?.[field.key];
     if (field.type === "checkbox") row[field.key] = value === true || value === "true" || value === "on";
     else if (field.type === "number") row[field.key] = Math.max(meta.mins?.[field.key] ?? 0, parseInt(value, 10) || 0);
@@ -44,7 +48,8 @@ export class TableEditorApp extends ApplicationV2 {
     );
     this.tableKey = tableKey;
     this.meta = meta;
-    this.rows = foundry.utils.deepClone(game.settings.get(MODULE_ID, tableKey) ?? []);
+    const stored = game.settings.get(MODULE_ID, tableKey);
+    this.rows = meta.load ? meta.load(stored) : foundry.utils.deepClone(stored ?? []);
   }
 
   static DEFAULT_OPTIONS = {
@@ -63,10 +68,11 @@ export class TableEditorApp extends ApplicationV2 {
   async _renderHTML() {
     const L = (key) => game.i18n.localize(key);
     const labelPrefix = this.meta.labelPrefix ?? this.meta.prefix;
-    const fields = TABLE_FIELDS[this.tableKey] ?? [];
+    const fields = fieldsOf(this.tableKey);
+    const nameField = nameFieldOf(this.tableKey);
     if (this.meta.classColumn) {
       try {
-        this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows));
+        this.rows = sortRowsByClass(await annotateRowsWithClass(this.rows, { nameField }));
       } catch (err) {
         console.warn(`${MODULE_ID} | table editor: class annotation failed`, err);
       }
@@ -74,7 +80,7 @@ export class TableEditorApp extends ApplicationV2 {
 
     const head = [
       this.meta.classColumn ? `<th>${esc(L("DWAUTO.ClassLabel.Column"))}</th>` : "",
-      `<th>${esc(L(`${labelPrefix}.Name`))}</th>`,
+      `<th>${esc(L(this.meta.nameLabel ?? `${labelPrefix}.Name`))}</th>`,
       ...fields.map((f) => `<th>${esc(L(f.label))}</th>`),
       "<th></th>"
     ].join("");
@@ -96,14 +102,14 @@ export class TableEditorApp extends ApplicationV2 {
         });
         return `<tr>
           ${this.meta.classColumn ? `<td>${row.classLabel ? `<span class="dwauto-class-badge">${esc(row.classLabel)}</span>` : ""}</td>` : ""}
-          <td><input type="text" name="rows.${i}.name" value="${esc(row.name)}"></td>
+          <td><input type="text" name="rows.${i}.${nameField}" value="${esc(row[nameField])}"></td>
           ${cells.join("")}
           <td><button type="button" class="dwauto-remove-row" data-action="removeRow" data-index="${i}"><i class="fas fa-trash"></i></button></td>
         </tr>`;
       })
       .join("");
 
-    return `<p class="notes">${esc(L(`${this.meta.prefix}.Hint`))}</p>
+    return `<p class="notes">${esc(L(this.meta.hintKey ?? `${this.meta.prefix}.Hint`))}</p>
       <table class="dwauto-attack-moves-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
       <div class="dwauto-table-editor-buttons">
         <button type="button" data-action="addRow"><i class="fas fa-plus"></i> ${esc(L("DWAUTO.AttackMoves.AddRow"))}</button>
@@ -151,7 +157,10 @@ export class TableEditorApp extends ApplicationV2 {
   static async #onSubmit(event, form, formData) {
     const expanded = foundry.utils.expandObject(formData.object);
     const rows = expanded.rows ? Object.values(expanded.rows).map((r) => normalizeRow(this.tableKey, r)) : [];
-    await game.settings.set(MODULE_ID, this.tableKey, rows.filter((r) => r.name));
+    const meta = TABLE_MENUS[this.tableKey];
+    const nameField = nameFieldOf(this.tableKey);
+    const kept = rows.filter((r) => (meta.keep ? meta.keep(r) : !!r[nameField]));
+    await game.settings.set(MODULE_ID, this.tableKey, meta.save ? meta.save(kept) : kept);
   }
 }
 
@@ -180,3 +189,5 @@ export const OngoingSpellsMenu = makeMenu("ongoingSpells");
 export const PrepareSpellsMovesMenu = makeMenu("prepareSpellsMoves");
 export const SelfForwardMovesMenu = makeMenu("selfForwardMoves");
 export const SpellDamageMovesMenu = makeMenu("spellDamageMoves");
+export const MoveUpgradesMenu = makeMenu("moveUpgrades");
+export const NoteMovesMenu = makeMenu("noteMoveNames");

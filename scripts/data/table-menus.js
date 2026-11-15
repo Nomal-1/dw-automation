@@ -12,6 +12,8 @@ import { DEFAULT_PREPARE_SPELLS_MOVES } from "./prepare-spells-moves.js";
 import { DEFAULT_SELF_FORWARD_MOVES } from "./self-forward-moves.js";
 import { DEFAULT_SPELL_DAMAGE_MOVES } from "./spell-damage-moves.js";
 import { DEFAULT_ONGOING_SPELLS } from "./ongoing-spells.js";
+import { DEFAULT_MOVE_UPGRADES } from "./move-upgrades.js";
+import { DEFAULT_NOTE_MOVE_NAMES } from "./note-moves.js";
 
 // 표 설정 편집 창(apps/table-editor-app.js) 하나가 16개 표를 모두 그리기 위한 정보.
 // 칸(열) 정보는 data/table-fields.js의 TABLE_FIELDS에 있고, 여기에는 창 제목·안내 문구의
@@ -21,6 +23,13 @@ import { DEFAULT_ONGOING_SPELLS } from "./ongoing-spells.js";
 //
 // 키는 표 설정 키(TABLE_FIELDS와 같다). menuKey는 game.settings.registerMenu에 쓴 메뉴 키.
 // prefix 아래에 Title, Hint, ResetConfirmTitle, ResetConfirmContent 번역이 있다.
+//
+// 선택 항목(맨 아래 두 표가 쓴다):
+// - fields: TABLE_FIELDS에 없는 표의 칸 정보
+// - nameField / nameLabel: 이름 열의 키와 제목(기본 "name", `${labelPrefix}.Name`)
+// - hintKey: 안내 문구 번역 키(기본 `${prefix}.Hint`)
+// - keep(row): 저장할 줄인지(기본: 이름이 있는 줄)
+// - load(value) / save(rows): 설정값 ↔ 줄 목록 변환(기본: 배열 그대로)
 export const TABLE_MENUS = {
   specialAttackMoves: {
     menuKey: "attackMovesMenu", prefix: "DWAUTO.AttackMoves", defaults: DEFAULT_SPECIAL_ATTACK_MOVES, width: 640,
@@ -86,5 +95,26 @@ export const TABLE_MENUS = {
     // 예전 창도 이름 열·초기화 버튼은 치유 표의 문구를 같이 썼다
     menuKey: "spellDamageMovesMenu", prefix: "DWAUTO.SpellDamageMoves", labelPrefix: "DWAUTO.HealingMoves", defaults: DEFAULT_SPELL_DAMAGE_MOVES, width: 720,
     blank: { name: "", formulaMode: "auto", customFormula: "", ignoresArmor: false, selfDamageFormula: "" }
+  },
+  // 액션 업그레이드: 상급 액션을 배우면 이전 단계 액션을 지우거나 남긴다. 이름 칸이 두 개다.
+  moveUpgrades: {
+    menuKey: "moveUpgradesMenu", prefix: "DWAUTO.MoveUpgrades", defaults: DEFAULT_MOVE_UPGRADES, width: 680, classColumn: true,
+    nameField: "upgradeName", nameLabel: "DWAUTO.MoveUpgrades.UpgradeName",
+    fields: [
+      { key: "replacesName", label: "DWAUTO.MoveUpgrades.ReplacesName", type: "text" },
+      { key: "deletesPrevious", label: "DWAUTO.MoveUpgrades.DeletesPrevious", type: "checkbox" }
+    ],
+    blank: { upgradeName: "", replacesName: "", deletesPrevious: true },
+    keep: (row) => !!(row.upgradeName && row.replacesName)
+  },
+  // 기록 액션(시트에 메모 칸을 붙이는 액션): 설정은 쉼표로 구분한 문자열 하나로 저장한다
+  // (features/note-moves.js와 번역 자동 채우기가 그 형태를 읽고 쓴다).
+  noteMoveNames: {
+    menuKey: "noteMovesMenu", prefix: "DWAUTO.NoteMovesSettings", hintKey: "DWAUTO.Settings.NoteMoveNames.Hint", width: 480, classColumn: true,
+    defaults: DEFAULT_NOTE_MOVE_NAMES.map((name) => ({ name })),
+    fields: [],
+    blank: { name: "" },
+    load: (value) => String(value ?? "").split(",").map((s) => s.trim()).filter(Boolean).map((name) => ({ name })),
+    save: (rows) => rows.map((r) => r.name).join(", ")
   }
 };

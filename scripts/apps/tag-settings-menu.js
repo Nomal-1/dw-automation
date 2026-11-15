@@ -1,18 +1,25 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { TAG_CATALOG } from "../data/tag-catalog.js";
 
-export class TagSettingsMenu extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "dwauto-tag-settings",
-      title: game.i18n.localize("DWAUTO.TagSettings.Title"),
-      template: `modules/${MODULE_ID}/templates/tag-settings.html`,
-      width: 420,
-      closeOnSubmit: true
-    });
-  }
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-  getData() {
+// 데미지 태그 자동화에서 어떤 태그를 쓸지 고르는 창(ApplicationV2 폼).
+export class TagSettingsMenu extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "dwauto-tag-settings",
+    tag: "form",
+    window: { title: "DWAUTO.TagSettings.Title" },
+    position: { width: 420 },
+    form: { handler: TagSettingsMenu.#onSubmit, closeOnSubmit: true },
+    actions: {
+      "select-all": TagSettingsMenu.#onSelectAll,
+      "select-none": TagSettingsMenu.#onSelectNone
+    }
+  };
+
+  static PARTS = { body: { template: `modules/${MODULE_ID}/templates/tag-settings.html` } };
+
+  async _prepareContext() {
     const enabled = game.settings.get(MODULE_ID, SETTINGS.ENABLED_DAMAGE_TAGS);
     return {
       hint: game.i18n.localize("DWAUTO.TagSettings.Hint"),
@@ -24,18 +31,17 @@ export class TagSettingsMenu extends FormApplication {
     };
   }
 
-  activateListeners(html) {
-    super.activateListeners(html);
-    html.find('[data-action="select-all"]').on("click", () => {
-      html.find('input[type="checkbox"]').prop("checked", true);
-    });
-    html.find('[data-action="select-none"]').on("click", () => {
-      html.find('input[type="checkbox"]').prop("checked", false);
-    });
+  static #onSelectAll() {
+    for (const box of this.element.querySelectorAll('input[type="checkbox"]')) box.checked = true;
   }
 
-  async _updateObject(event, formData) {
-    const enabled = TAG_CATALOG.filter((tag) => formData[tag.key]).map((tag) => tag.key);
+  static #onSelectNone() {
+    for (const box of this.element.querySelectorAll('input[type="checkbox"]')) box.checked = false;
+  }
+
+  static async #onSubmit(event, form, formData) {
+    const data = formData.object;
+    const enabled = TAG_CATALOG.filter((tag) => data[tag.key]).map((tag) => tag.key);
     await game.settings.set(MODULE_ID, SETTINGS.ENABLED_DAMAGE_TAGS, enabled);
   }
 }

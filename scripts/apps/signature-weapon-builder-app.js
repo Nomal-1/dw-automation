@@ -3,6 +3,8 @@ import { BASE_OPTIONS, RANGE_OPTIONS, ENHANCEMENT_OPTIONS, LOOK_OPTIONS } from "
 import { computeSignatureWeapon } from "../lib/signature-weapon-builder.js";
 import { announceActionApplied } from "../lib/announce.js";
 
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
 const ITEM_ID_FLAG = "signatureWeaponItemId";
 // features/improved-weapon.js가 재사용한다 — 무기 강화를 발동했을 때
 // "이미 고른 강화가 뭔지"를 알아야 나머지 중에서만 다시 고르게 할 수
@@ -23,32 +25,32 @@ function mapCheckOptions(options, currentMap) {
 // lib/signature-weapon-builder.js가 계산하고, 이 파일이 무기 아이템을
 // 만들어서 액터에게 준다. features/signature-weapon.js가 "이미 고유병기가
 // 있는지" 확인한 뒤에만 이 창을 연다 — 여기서는 항상 새로 만든다.
-export class SignatureWeaponBuilderApp extends FormApplication {
+export class SignatureWeaponBuilderApp extends HandlebarsApplicationMixin(ApplicationV2) {
   constructor(actor, moveItem, options = {}) {
-    super(actor, options);
+    super(options);
+    this._actor = actor;
     this.moveItem = moveItem;
   }
 
   get actor() {
-    return this.object;
+    return this._actor;
   }
 
   get title() {
     return game.i18n.format("DWAUTO.SignatureWeapon.Title", { name: this.actor.name });
   }
 
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "dwauto-signature-weapon-builder",
-      template: `modules/${MODULE_ID}/templates/signature-weapon-builder.html`,
-      width: 560,
-      height: "auto",
-      closeOnSubmit: true,
-      resizable: true
-    });
-  }
+  static DEFAULT_OPTIONS = {
+    id: "dwauto-signature-weapon-builder",
+    tag: "form",
+    window: { resizable: true },
+    position: { width: 560, height: "auto" },
+    form: { handler: SignatureWeaponBuilderApp.#onSubmit, closeOnSubmit: true }
+  };
 
-  getData() {
+  static PARTS = { body: { template: `modules/${MODULE_ID}/templates/signature-weapon-builder.html` } };
+
+  async _prepareContext() {
     return {
       baseOptions: mapRadioOptions(BASE_OPTIONS, "Sword"),
       rangeOptions: mapRadioOptions(RANGE_OPTIONS, "hand"),
@@ -58,8 +60,8 @@ export class SignatureWeaponBuilderApp extends FormApplication {
     };
   }
 
-  async _updateObject(event, formData) {
-    const data = foundry.utils.expandObject(formData);
+  static async #onSubmit(event, form, formData) {
+    const data = foundry.utils.expandObject(formData.object);
     const result = computeSignatureWeapon(data);
 
     const name = result.name || game.i18n.localize("DWAUTO.SignatureWeapon.DefaultName");
