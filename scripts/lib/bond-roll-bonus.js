@@ -8,6 +8,9 @@ import { MODULE_ID } from "../constants.js";
 // 그래서 예전에는 레인저 명령(Command)의 "방해할 때 동물의 본능을 더한다"를 자동으로 못 하고,
 // GM에게 "플레이어에게 더해서 입력하라고 알려 달라"는 창만 띄웠다.
 //
+// 이 장치를 쓰는 곳: lib/roll-wrapper.js(판정 직전에 모은 보정치 합계 — 다음 판정 +1/-2, 지속 주문,
+// 죽음의 예감, 구인 -1, 주도권 +1 등)와 features/aid-or-interfere.js(명령의 동물 본능).
+//
 // 시스템의 판정 실행 함수(DwRolls.rollMoveExecute, static)를 감싸서, 유대 판정이고 이 액터에게
 // 걸어 둔 보너스가 있으면 dataset.value에 더해 넘긴다. 시스템이 원래 쓰는 칸이라 엔터로 굴려도
 // 버튼으로 굴려도 똑같이 공식에 들어간다(예: 2d6+2+1). 보너스는 한 번 쓰면 사라진다.
@@ -15,10 +18,12 @@ import { MODULE_ID } from "../constants.js";
 const pending = new Map(); // actorId -> { amount, at }
 const EXPIRE_MS = 5 * 60 * 1000;
 
-/** 이 액터의 다음 유대 판정 한 번에 amount를 더한다. */
+/** 이 액터의 다음 유대 판정 한 번에 amount를 더한다(여러 자동화가 더하면 합쳐진다). */
 export function setPendingBondBonus(actor, amount) {
   if (!actor || !amount) return;
-  pending.set(actor.id, { amount: Number(amount) || 0, at: Date.now() });
+  const prev = pending.get(actor.id);
+  const base = prev && Date.now() - prev.at <= EXPIRE_MS ? prev.amount : 0;
+  pending.set(actor.id, { amount: base + (Number(amount) || 0), at: Date.now() });
 }
 
 export function clearPendingBondBonus(actor) {

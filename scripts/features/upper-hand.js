@@ -1,16 +1,15 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { promptDialog } from "../lib/dialogs.js";
+import { announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { filterDisabledNames, isMoveItemDisabled } from "../lib/move-toggles.js";
 
 // 야만전사 고급액션 주도권(The Upper Hand) 원문: "황천길 판정에 +1 상시
 // 보너스를 받습니다." 황천길(Last Breath)의 rollType은 BOND(유대)라 원조/
 // 방해·구인과 같은 시스템 결함으로 item.system.rollMod를 아예 읽지 않는다
-// (features/aid-or-interfere.js 상단 주석 참고). 그래서 이 +1을 자동으로
-// 반영할 수 없고, 판정 직전에 "유대 입력창에 직접 +1을 입력하라"는 안내를
-// 매번 띄우는 수밖에 없다(features/recruit.js와 같은 방식이지만, 구인의
-// -1은 한 번 쓰고 사라지는 대기 페널티인 반면 이건 상시 보너스라 별도
-// 상태 없이 무브를 가지고 있으면 매번 안내한다).
+// (features/aid-or-interfere.js 상단 주석 참고). 예전에는 판정 직전에 "유대 입력창에
+// 직접 +1을 입력하라"는 안내만 띄웠다. 0.127.0부터는 promptUpperHandPreRoll이 +1을
+// 돌려주고 lib/roll-wrapper.js가 lib/bond-roll-bonus.js로 공식에 직접 넣는다(상시 보너스라
+// 별도 상태 없이 무브를 가지고 있으면 매번).
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_UPPER_HAND_ASSISTANT);
 }
@@ -60,21 +59,17 @@ async function matchesLastBreath(title, originalTitle = null) {
 
 // lib/roll-wrapper.js가 판정 "직전"에 호출한다. 지금 굴리려는 게 황천길이
 // 아니거나 주도권이 없으면 조용히 통과한다.
+// 주도권을 가진 캐릭터의 황천길이면 이번 판정에 넣을 값(+1)을 돌려준다. 아니면 0.
 export async function promptUpperHandPreRoll(item) {
-  if (!isEnabled()) return;
+  if (!isEnabled()) return 0;
 
   const actor = item.actor;
-  if (!actor || actor.type !== "character") return;
-  if (!hasUpperHand(actor)) return;
-  if (!(await matchesLastBreath(item.name, item.flags?.babele?.originalName))) return;
+  if (!actor || actor.type !== "character") return 0;
+  if (!hasUpperHand(actor)) return 0;
+  if (!(await matchesLastBreath(item.name, item.flags?.babele?.originalName))) return 0;
 
-  await promptDialog({
-    title: item.name,
-    content: `<p>${game.i18n.localize("DWAUTO.UpperHand.ReminderContent")}</p>`,
-    label: game.i18n.localize("DWAUTO.UpperHand.ReminderAck"),
-    callback: () => {},
-    rejectClose: false
-  });
+  announceInfo(actor, game.i18n.localize("DWAUTO.UpperHand.AutoApplied"));
+  return 1;
 }
 
 export function registerUpperHandAssistant() {

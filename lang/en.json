@@ -1741,11 +1741,13 @@
       "TurnAwayPrompt": "Do you turn away everyone the GM offered?",
       "PenaltyPending": "-1 is queued for your next Recruit roll.",
       "ReminderContent": "You turned away last batch of applicants, so this Recruit roll takes -1. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add -1 directly in the bond input that's about to appear!",
-      "ReminderAck": "Got it (continue)"
+      "ReminderAck": "Got it (continue)",
+      "AutoApplied": "Recruit: the -1 for sending everyone away last time is added to this roll automatically."
     },
     "UpperHand": {
       "ReminderContent": "The Upper Hand gives you a permanent +1 to Last Breath. The dungeonworld system can't automatically apply an external bonus to a Bond roll, so please add +1 directly in the bond input that's about to appear!",
-      "ReminderAck": "Got it (continue)"
+      "ReminderAck": "Got it (continue)",
+      "AutoApplied": "The Upper Hand: +1 is added to this Last Breath roll automatically."
     },
     "WaitingFor": {
       "Activated": "What Are You Waiting For? triggers — enemies ignore your allies and rush you. From now on this character's damage rolls all get +2 automatically (until the GM turns it off)",

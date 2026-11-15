@@ -29,6 +29,7 @@ import { promptIAmTheLawPreRoll } from "../features/i-am-the-law.js";
 import { promptKnowItAllPreRoll } from "../features/know-it-all.js";
 import { getEncumbranceMalus, promptEncumbrancePreRoll } from "../features/encumbrance.js";
 import { promptRecruitPreRoll } from "../features/recruit.js";
+import { setPendingBondBonus, clearPendingBondBonus } from "./bond-roll-bonus.js";
 import { promptBolsterPreRoll } from "../features/bolster.js";
 import { promptHeistPreRoll } from "../features/heist.js";
 import { promptDefendVengeancePreRoll } from "../features/defend.js";
@@ -127,6 +128,9 @@ async function consumePendingRollBonus(item, pendingBonus) {
 async function wrappedRoll(wrapped, ...args) {
   if (!this.actor || this.type !== "move") return wrapped(...args);
 
+  // 새 판정을 시작하면, 앞서 걸어 두고 쓰지 못한(유대 입력창을 닫는 등) 유대 판정 보너스는 버린다
+  clearPendingBondBonus(this.actor);
+
   // 드루이드 변신: 이미 변신 중이고 Hold가 남아있으면 이 클릭은 "다시
   // 변신을 시도"가 아니라 "그 형태의 능력을 쓰려고 Hold를 쓰는" 것이라
   // 판정 자체가 없어야 한다(features/druid.js 참고) — 다른 사전 처리보다
@@ -142,7 +146,7 @@ async function wrappedRoll(wrapped, ...args) {
   // 야만전사 주도권(The Upper Hand)의 "황천길 +1 상시"도 사그라지는 인연과
   // 같은 황천길(BOND) 판정이라 여기서 먼저 처리한다(features/upper-hand.js
   // 참고) — 사그라지는 인연으로 판정 자체가 취소됐다면 이미 위에서 빠져나갔다.
-  await promptUpperHandPreRoll(this);
+  const upperHandBonus = await promptUpperHandPreRoll(this);
 
   // 하중 초과(+3 이상)로 짐을 버리지 않으면(bonus로 거대한 음수를 돌려줘)
   // 판정 자체는 취소하지 않고 그대로 진행시킨다 — 그래야 시스템 자신의
@@ -262,7 +266,7 @@ async function wrappedRoll(wrapped, ...args) {
   // -1을 반영할 수 없다 — 대기 중인 페널티가 있으면 유대 입력창이 뜨기
   // 전에 "직접 -1을 입력하라"는 안내를 먼저 띄우고 확인을 받는다
   // (features/recruit.js 참고).
-  await promptRecruitPreRoll(this);
+  const recruitBonus = await promptRecruitPreRoll(this);
 
   const formcrafterMod = getFormcrafterRollModifier(this.actor, rollType);
   const commandMod = getCommandCunningBonus(this);
@@ -294,6 +298,20 @@ async function wrappedRoll(wrapped, ...args) {
     pendingBonusApplies
   });
   if (heracles.handled) return undefined;
+
+  // 유대(Bond) 판정(축하연·구인·황천길·협조 또는 방해)은 시스템이 rollMod를 읽지 않는다.
+  // 그래서 모은 보정치 합계(+ 구인 -1, 주도권 +1)를 lib/bond-roll-bonus.js로 넘겨 시스템의 유대
+  // 판정 공식에 직접 넣는다. 예전에는 이 네 판정에서 보정치가 조용히 빠졌고, "다음 판정 +1" 같은
+  // 대기 보너스는 적용되지 않은 채 소모됐다.
+  if (rollType === "bond") {
+    const bondTotal = totalMod + (upperHandBonus || 0) + (recruitBonus || 0);
+    if (bondTotal) setPendingBondBonus(this.actor, bondTotal);
+    try {
+      return await wrapped(...args);
+    } finally {
+      if (pendingBonusApplies) await consumePendingRollBonus(this, pendingBonus);
+    }
+  }
 
   if (!totalMod && !pendingBonusApplies && !statOverride) return wrapped(...args);
 

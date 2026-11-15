@@ -1,7 +1,7 @@
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { confirmDialog, promptDialog } from "../lib/dialogs.js";
+import { confirmDialog } from "../lib/dialogs.js";
 import { getMoveCardInfo, findMoveItem } from "../lib/move-card.js";
-import { announceActionApplied } from "../lib/announce.js";
+import { announceActionApplied, announceInfo } from "../lib/announce.js";
 import { getMoveNameMap } from "../lib/translation-import.js";
 import { isRecruitPenaltyPending, setRecruitPenaltyPending } from "../lib/recruit-penalty-state.js";
 import { filterDisabledNames } from "../lib/move-toggles.js";
@@ -15,11 +15,9 @@ import { filterDisabledNames } from "../lib/move-toggles.js";
 // 구인의 rollType은 BOND(유대)다 — 원조/방해와 같은 시스템 결함으로,
 // 유대 판정은 item.system.rollMod를 아예 읽지 않고 판정 시 뜨는 별도
 // 입력창(dataset.value)만 본다(features/aid-or-interfere.js 상단 주석
-// 참고). 그래서 -1을 rollMod로 자동 반영할 수 없고, 다음 구인 판정 직전에
-// "유대 입력창에 직접 -1을 입력하라"는 안내를 띄우는 수밖에 없다. 다만
-// 원조/방해의 본능 보너스와 달리 이 정보는 판정하는 사람 자신만 알면
-// 되므로(다른 사람에게 전달할 필요가 없다) GM 중계 없이 그 자리에서 바로
-// 안내한다.
+// 참고). 예전에는 다음 구인 판정 직전에 "유대 입력창에 직접 -1을 입력하라"는
+// 안내만 띄웠다. 0.127.0부터는 promptRecruitPreRoll이 -1을 돌려주고 lib/roll-wrapper.js가
+// lib/bond-roll-bonus.js로 시스템의 유대 판정 공식에 직접 넣는다.
 function isEnabled() {
   return game.system.id === "dungeonworld" && game.settings.get(MODULE_ID, SETTINGS.ENABLE_RECRUIT_ASSISTANT);
 }
@@ -97,23 +95,18 @@ async function onCreateChatMessage(message, options, userId) {
 // 지금 굴리는 무브가 구인이면, 유대 입력창이 뜨기 전에 "직접 -1을
 // 입력하라"는 안내를 먼저 띄우고 확인을 받아야만 그 다음(시스템의 유대
 // 입력창)으로 넘어간다. 확인과 동시에 대기 플래그를 소모한다.
+// 대기 중인 -1이 있으면 이번 구인 판정에 넣을 값(-1)을 돌려주고 대기를 지운다. 없으면 0.
 export async function promptRecruitPreRoll(item) {
-  if (!isEnabled()) return;
+  if (!isEnabled()) return 0;
 
   const actor = item.actor;
-  if (!actor || actor.type !== "character") return;
-  if (!isRecruitPenaltyPending(actor)) return;
-  if (!(await matchesConfiguredName(item.name))) return;
-
-  await promptDialog({
-    title: item.name,
-    content: `<p>${game.i18n.localize("DWAUTO.Recruit.ReminderContent")}</p>`,
-    label: game.i18n.localize("DWAUTO.Recruit.ReminderAck"),
-    callback: () => {},
-    rejectClose: false
-  });
+  if (!actor || actor.type !== "character") return 0;
+  if (!isRecruitPenaltyPending(actor)) return 0;
+  if (!(await matchesConfiguredName(item.name, item.flags?.babele?.originalName))) return 0;
 
   await setRecruitPenaltyPending(actor, false);
+  announceInfo(actor, game.i18n.localize("DWAUTO.Recruit.AutoApplied"));
+  return -1;
 }
 
 export function registerRecruitAssistant() {

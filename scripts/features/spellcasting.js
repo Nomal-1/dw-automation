@@ -238,8 +238,8 @@ function onCreateChatMessage(message, options, userId) {
 
 // 캐릭터 시트의 주문 목록에 "지속중" 배지를 붙이고, 클릭하면 종료 여부를 묻는다.
 // 서약 페널티(다음 기원까지 -1)가 있으면 주문 탭 상단에 배너로 보여주고,
-// 클릭하면 수동으로 초기화할 수 있게 한다 (기원/주문 준비 자동화가 아직 없어서
-// 지금은 자동으로 사라지지 않는다).
+// 클릭하면 수동으로 초기화할 수 있게 한다(주문 준비 자동화가 다시 준비·기원할 때
+// 자동으로 지운다 — features/spell-preparation.js의 applySelection).
 function onRenderActorSheet(app, html) {
   if (game.system.id !== "dungeonworld") return;
   if (!game.settings.get(MODULE_ID, SETTINGS.ENABLE_SPELLCASTING_ASSISTANT)) return;
