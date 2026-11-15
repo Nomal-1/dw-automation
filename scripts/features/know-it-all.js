@@ -89,6 +89,8 @@ async function requestGrantApproval({ target, grantorActorId, grantorName }) {
 function promptGrantPermission(data) {
   return new Promise((resolve) => {
   let answered = false;
+  // 허락 버튼으로 처리 중이면 창이 닫혀도 거절로 치지 않는다(옛 Dialog는 버튼을 눌러도 close가 불린다)
+  let decided = false;
   const respond = (value) => {
     if (answered) return;
     answered = true;
@@ -104,6 +106,7 @@ function promptGrantPermission(data) {
       yes: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionAllow"),
         callback: async () => {
+          decided = true;
           const target = game.actors.get(data.targetActorId);
           if (target) await setKnowItAllPending(target, data.grantorActorId, data.grantorName);
           respond(true);
@@ -117,7 +120,9 @@ function promptGrantPermission(data) {
       }
     },
     default: "yes",
-    close: () => respond(false)
+    close: () => {
+      if (!decided) respond(false);
+    }
   }).render(true);
   });
 }
@@ -155,6 +160,8 @@ async function requestXpApproval({ grantorActorId, grantorName }) {
 function promptXpPermission(data) {
   return new Promise((resolve) => {
   let answered = false;
+  // 허락 버튼으로 처리 중이면 창이 닫혀도 거절로 치지 않는다(옛 Dialog는 버튼을 눌러도 close가 불린다)
+  let decided = false;
   const respond = (value) => {
     if (answered) return;
     answered = true;
@@ -167,6 +174,7 @@ function promptXpPermission(data) {
       yes: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionAllow"),
         callback: async () => {
+          decided = true;
           const grantor = game.actors.get(data.grantorActorId);
           if (grantor) await addXp(grantor);
           respond(true);
@@ -180,7 +188,9 @@ function promptXpPermission(data) {
       }
     },
     default: "yes",
-    close: () => respond(false)
+    close: () => {
+      if (!decided) respond(false);
+    }
   }).render(true);
   });
 }

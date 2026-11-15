@@ -148,6 +148,8 @@ async function requestHealApproval({ target, healerName, itemName, amount, invig
 function promptHealPermission(data) {
   return new Promise((resolve) => {
   let answered = false;
+  // 허락 버튼으로 처리 중이면 창이 닫혀도 거절로 치지 않는다(옛 Dialog는 버튼을 눌러도 close가 불린다)
+  let decided = false;
   const respond = (value) => {
     if (answered) return;
     answered = true;
@@ -165,6 +167,7 @@ function promptHealPermission(data) {
       yes: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionAllow"),
         callback: async () => {
+          decided = true;
           const target = game.actors.get(data.targetActorId);
           if (target) {
             const targetHp = Number(target.system.attributes?.hp?.value) || 0;
@@ -183,7 +186,9 @@ function promptHealPermission(data) {
       }
     },
     default: "yes",
-    close: () => respond(false)
+    close: () => {
+      if (!decided) respond(false);
+    }
   }).render(true);
   });
 }

@@ -151,6 +151,8 @@ async function requestVengeanceGrantApproval({ ally, victimName, defenderActorId
 function promptVengeanceGrantPermission(data) {
   return new Promise((resolve) => {
   let answered = false;
+  // 허락 버튼으로 처리 중이면 창이 닫혀도 거절로 치지 않는다(옛 Dialog는 버튼을 눌러도 close가 불린다)
+  let decided = false;
   const respond = (value) => {
     if (answered) return;
     answered = true;
@@ -167,6 +169,7 @@ function promptVengeanceGrantPermission(data) {
       yes: {
         label: game.i18n.localize("DWAUTO.Healing.PermissionAllow"),
         callback: async () => {
+          decided = true;
           const ally = game.actors.get(data.allyActorId);
           if (ally) await setDefendVengeancePending(ally, data.victimName, data.defenderActorId, data.defenderName);
           respond(true);
@@ -180,7 +183,9 @@ function promptVengeanceGrantPermission(data) {
       }
     },
     default: "yes",
-    close: () => respond(false)
+    close: () => {
+      if (!decided) respond(false);
+    }
   }).render(true);
   });
 }
