@@ -52,6 +52,7 @@ export const SETTING_CATEGORIES = {
   classAutomationMenu: "general",
   enableGmScreen: "general",
   gmScreenFailureToast: "general",
+  statusEffectIcons: "general",
   legacySettingsScreen: "general",
   translationImportMenu: "general",
   migrationBackupMenu: "general",

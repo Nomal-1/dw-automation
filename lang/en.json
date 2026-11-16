@@ -2338,6 +2338,11 @@
       "ShowHints": "Show help",
       "HideHints": "Hide help",
       "FrontSummary": "{dangers} dangers · portents {done}/{total}"
+    },
+    "StatusIcons": {
+      "SettingName": "Show status icons",
+      "SettingHint": "Shows character states the automation keeps track of (next roll +1, Seeing Red, shapeshifted, Divine Protection hold, etc.) as token status icons and sheet effects. Display only: they change no numbers, and deleting an icon does not end the state (clear it from the GM screen's Party tab).",
+      "EffectDescription": "Status shown by Dungeon World Automation Toolkit. It changes no numbers, and deleting it does not end the state. It disappears on its own when the state ends."
     }
   }
 }
