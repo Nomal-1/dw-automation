@@ -117,6 +117,7 @@ export async function syncStatusIcons(actor) {
 }
 
 const timers = new Map();
+const chains = new Map(); // actorId -> Promise: syncs for one actor run one after another (no duplicate creates)
 function queueSync(actor) {
   if (!actor) return;
   clearTimeout(timers.get(actor.id));
@@ -124,7 +125,11 @@ function queueSync(actor) {
     actor.id,
     setTimeout(() => {
       timers.delete(actor.id);
-      syncStatusIcons(game.actors.get(actor.id) ?? actor);
+      const run = (chains.get(actor.id) ?? Promise.resolve()).then(() => syncStatusIcons(game.actors.get(actor.id) ?? actor));
+      chains.set(actor.id, run);
+      run.finally(() => {
+        if (chains.get(actor.id) === run) chains.delete(actor.id);
+      });
     }, 150)
   );
 }
